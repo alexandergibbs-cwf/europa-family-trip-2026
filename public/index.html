@@ -869,7 +869,7 @@ function _oldRenderWeek() {
   document.getElementById("week").innerHTML = WEEKS.map(w => `<div class="wpage">${w.map(d => `<div class="wl${["Sat", "Sun"].includes(wk(d)) ? " we" : ""}">${wk(d).replace("Mon", "M").replace("Tue", "Tu").replace("Wed", "W").replace("Thu", "Th").replace("Fri", "F").replace("Sat", "Sa").replace("Sun", "Su")}</div>`).join("")}${w.map(d => `<button class="wd${["Sat", "Sun"].includes(wk(d)) ? " we" : ""}${d === today ? " today" : ""}${d === view ? " on" : ""}${d > END ? " out" : ""}" data-d="${d}" aria-label="${dLong(d)}"${d > END ? " disabled" : ""}><span class="n">${+d.slice(8)}</span></button>`).join("")}</div>`).join("");
 }
 const weekEl = document.getElementById("week"), WDW = 52;
-let wTw = null, wTrack = null, wPos = 0, wVel = 0, wRaf = 0, wDrag = null, wCentre = -1, wTarget = null, curWeek = -1;
+let wSelTop = null, wTw = null, wTrack = null, wPos = 0, wVel = 0, wRaf = 0, wDrag = null, wCentre = -1, wTarget = null, curWeek = -1;
 const wN = () => ALLDAYS.length - 1;
 function padWheel() { wRender(); }
 function wRender() {
@@ -877,19 +877,23 @@ function wRender() {
   const centre = weekEl.clientWidth / 2 - WDW / 2;
   wTrack.style.left = (centre - wPos * WDW).toFixed(2) + "px";
   const els = wTrack.children, i = Math.round(Math.max(0, Math.min(wN(), wPos)));
-  for (let k = 0; k < els.length; k++) { const off = k - wPos, d = Math.min(3.5, Math.abs(off)); const n = els[k].lastElementChild; n.style.opacity = ""; n.style.transform = ""; }
-  const ws = document.getElementById("wsel"); if (ws && els[0]) { ws.style.top = (els[0].lastElementChild.offsetTop - 1) + "px"; ws.classList.toggle("today", ALLDAYS[i] === today); }
+  if (i !== wCentre) { const ws = document.getElementById("wsel"); if (ws && els[0]) { if (wSelTop == null) wSelTop = els[0].lastElementChild.offsetTop - 1; ws.style.top = wSelTop + "px"; ws.classList.toggle("today", ALLDAYS[i] === today); } }
   if (i !== wCentre) { if (wCentre >= 0 && wDrag) haptic("light"); wCentre = i; for (let k = 0; k < els.length; k++) els[k].classList.toggle("on", k === i); }
   wDriveContent();
 }
 /* while the date wheel moves, the real neighbouring days ride alongside as pages, lined up at the same height */
-let wDrive = false, ghosts = null; const gCache = new Map();
+let pdRaf = 0, wDrive = false, ghosts = null; const gCache = new Map();
 /* render a neighbouring day without disturbing the one on screen (its taps, its time scale) */
 function dayHTML(d) { if (!gCache.has(d)) { const k = [shownD, CUR, ITEMS, YFN]; gCache.set(d, renderContent(d)); [shownD, CUR, ITEMS, YFN] = k; } return gCache.get(d); }
 /* each day hides a different amount above its first hour; pages are nudged so the same time of day sits at the same height */
 const hideOf = el => { const g = el && el.querySelector(".grid"); return g ? -parseFloat(g.style.marginTop || 0) : 0; };
 let gRef = 0, gBase = 0;
-function warmAround(d) { const i = ALLDAYS.indexOf(d), go = () => [1, -1, 2, -2].forEach(k => ALLDAYS[i + k] && dayHTML(ALLDAYS[i + k])); (window.requestIdleCallback || (f => setTimeout(f, 200)))(go); }
+/* get the days either side ready while nothing is happening, one at a time so a new swipe never waits on it */
+function warmAround(d) {
+  const i = ALLDAYS.indexOf(d), q = [1, -1, 2, -2].map(k => ALLDAYS[i + k]).filter(Boolean), idle = window.requestIdleCallback || (f => setTimeout(f, 120));
+  const step = () => { if (pd || wDrag || ghosts) return; const n = q.shift(); if (!n) return; dayHTML(n); if (q.length) idle(step); };
+  idle(step);
+}
 function mColW() { const v = content.querySelector(".mgv"); return v ? v.clientWidth / 2 : (innerWidth - 46) / 2; }
 function wDriveContent() {
   if (!wDrive) return;
@@ -966,7 +970,7 @@ weekEl.addEventListener("pointermove", e => {
   if (!wDrag) return; const dx = e.clientX - wDrag.x; if (Math.abs(dx) > 4) wDrag.moved = true;
   let p = wDrag.pos - dx / WDW; if (p < 0) p = p * 0.4; if (p > wN()) p = wN() + (p - wN()) * 0.4;
   const now = performance.now(); const dt = Math.max(1, now - wDrag.lt); wVel = -((e.clientX - wDrag.lx) / WDW) / dt * 16; wDrag.lx = e.clientX; wDrag.lt = now;
-  wPos = p; wRender();
+  wPos = p; if (!pdRaf) pdRaf = requestAnimationFrame(() => { pdRaf = 0; wRender(); });
 });
 function wEnd(e) {
   if (!wDrag) return; const d = wDrag; wDrag = null;
@@ -1174,6 +1178,7 @@ let pd = null;
 let scI = -1, pT = 0;
 function promptTick() {
   clearTimeout(pT);
+  if (content.classList.contains("driving")) { pT = setTimeout(promptTick, 400); return; }
   const all = [...content.querySelectorAll(".ev.prompt")];
   all.forEach(el => el.classList.remove("idea"));
   if (!all.length) { pT = setTimeout(promptTick, 2000); return; }
@@ -1238,7 +1243,7 @@ pager.addEventListener("pointermove", e => {
   const ddx = e.clientX - pd.x, w = pageW(); let p = pd.pos0 - ddx / w;
   if (p < 0) p *= 0.3; if (p > wN()) p = wN() + (p - wN()) * 0.3;
   const now = performance.now(), dt = Math.max(1, now - pd.lt); pd.v = -((e.clientX - pd.lx) / w) / dt * 16; pd.lx = e.clientX; pd.lt = now; pd.dx = ddx;
-  wPos = p; wRender();
+  wPos = p; if (!pdRaf) pdRaf = requestAnimationFrame(() => { pdRaf = 0; wRender(); });
 });
 function endDrag() {
   if (!pd) return; const p = pd; pd = null; if (p.mode !== "h") return;
@@ -1938,7 +1943,7 @@ renderWeek(); renderHeader(false); measureTop(); content.innerHTML = renderConte
 document.getElementById("modePill").classList.toggle("on", MODE === "multi"); document.getElementById("wsel").classList.toggle("span2", MODE === "multi");
 refreshLive();
 requestAnimationFrame(() => { measureTop(); padWheel(); centreDay(view, false); scrollToDay(); warmAround(view); });
-addEventListener("resize", () => { measureTop(); padWheel(); centreDay(view, false); });
+addEventListener("resize", () => { wSelTop = null; measureTop(); padWheel(); centreDay(view, false); });
 setInterval(tick, 60000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { tick(); refreshLive(); checkBuild(); } });
 /* first open in a browser (not from the Home Screen): a small card shows how to add it. Android gets a real Install button. */
