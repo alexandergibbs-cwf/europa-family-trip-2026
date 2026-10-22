@@ -51,7 +51,9 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .glass { background: var(--glass); backdrop-filter: saturate(1.8) blur(22px); -webkit-backdrop-filter: saturate(1.8) blur(22px); box-shadow: var(--glass-shadow), inset 0 0 0 0.5px var(--glass-edge); }
 
 /* Header (sticky) */
-.top { position: sticky; top: 0; z-index: 20; background: var(--bg); padding-top: env(safe-area-inset-top, 0px); max-width: 520px; margin: 0 auto; }
+.top { position: fixed; left: 0; right: 0; top: 0; z-index: 20; background: var(--bg); padding-top: env(safe-area-inset-top, 0px); }
+.top > * { max-width: 520px; margin-left: auto; margin-right: auto; }
+.pager { padding-top: var(--top-h, 180px); }
 .pills { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-block: 10px 6px; }
 .pill { height: 44px; border: 0; border-radius: 22px; display: inline-flex; align-items: center; gap: 6px; padding: 0 16px 0 12px; font-size: 18px; font-weight: 500; cursor: pointer; color: var(--ink); min-width: 0; }
 .pill .ch { width: 11px; height: 11px; border-left: 2.6px solid currentColor; border-bottom: 2.6px solid currentColor; transform: rotate(45deg); margin: 0 4px 0 6px; flex: none; border-radius: 1px; }
@@ -557,6 +559,7 @@ function renderHeader(pop) {
   document.getElementById("cityName").innerHTML = s ? `${esc(cityName(iso))}<small>${esc(s.hotel)}</small>` : esc(cityName(iso));
   const open = headsFor(iso).filter(h => !h.k || !done(h.k)).length;
   document.getElementById("cityPill").classList.toggle("has-badge", open > 0);
+  measureTop();
 }
 
 /* ---------- day grid ---------- */
@@ -590,17 +593,13 @@ function renderDayContent(iso) {
   busy.sort((a, b) => a[0] - b[0]);
   const merged = []; busy.forEach(([a, b]) => { a = Math.max(LO, a); b = Math.min(HI, b); if (b <= a) return; const l = merged[merged.length - 1]; if (l && a <= l[1]) l[1] = Math.max(l[1], b); else merged.push([a, b]); });
   const busyMin = merged.reduce((s, [a, b]) => s + (b - a), 0);
-  const avail = Math.max(360, innerHeight - document.getElementById("top").offsetHeight - 40);
-  let full = Math.min(PXM, 1.2); const emptyMin = (HI - LO) - busyMin;
-  const minEmpty = 0.16;
-  if (busyMin * full + emptyMin * minEmpty > avail) full = Math.max(0.55, (avail - emptyMin * minEmpty) / Math.max(busyMin, 1));
-  let ePX = emptyMin > 0 ? Math.max(minEmpty, (avail - busyMin * full) / emptyMin) : 0; ePX = Math.min(ePX, full);
+  const full = PXM, emptyMin = (HI - LO) - busyMin; let ePX = PXM;
   const anchors = []; let yy = 12, cur = LO;
   merged.forEach(([a, b]) => { anchors.push([cur, yy, ePX]); yy += (a - cur) * ePX; anchors.push([a, yy, full]); yy += (b - a) * full; cur = b; });
   anchors.push([cur, yy, ePX]); const H = yy + (HI - cur) * ePX;
   const y = t => { t = Math.max(LO, Math.min(HI, t)); let i = anchors.length - 1; while (i > 0 && anchors[i][0] > t) i--; const [t0, y0, k] = anchors[i]; return y0 + (t - t0) * k; };
   YFN = y;
-  let html = `<div class="grid" style="height:${H + 16}px">`;
+  let html = `<div class="grid" style="height:${H + 24}px">`;
   let lastLabelY = -99;
   for (let h = LO / 60; h <= 24; h++) {
     const t = h * 60, near = showNow && Math.abs(nm - t) < 12, yv = y(t), tight = yv - lastLabelY < 18;
@@ -636,7 +635,15 @@ function renderDayContent(iso) {
 function countdown(ms) { const m = Math.floor(ms / 6e4), d = Math.floor(m / 1440), h = Math.floor((m % 1440) / 60), mm = m % 60; return d >= 1 ? `in ${d}d ${h}h` : h ? `in ${h}h ${mm}m` : `in ${mm}m`; }
 const content = document.getElementById("daycontent");
 let YFN = t => t;
-function scrollToDay() { window.scrollTo(0, 0); }
+function scrollToDay() {
+  const topH = document.getElementById("top").offsetHeight;
+  const evs = ITEMS.filter(e => e.k !== "free");
+  let t = view === today ? nowMin() - 45 : (evs.length ? Math.min(...evs.map(e => e.s)) - 30 : 480);
+  const gridEl = content.querySelector(".grid"); if (!gridEl) return;
+  const gridTop = gridEl.getBoundingClientRect().top + scrollY;
+  window.scrollTo(0, Math.max(0, gridTop + YFN(Math.max(0, t)) - topH - 8));
+}
+function measureTop() { document.documentElement.style.setProperty("--top-h", document.getElementById("top").offsetHeight + "px"); }
 
 /* ---------- day changes: follow the finger, settle on a spring ---------- */
 function selectDay(iso, dir, syncWeek = true) {
@@ -905,10 +912,10 @@ function tick() {
   if (t !== today) { const f = view === today; today = t; renderWeek(); if (f) view = t; showWeek(weekOf(view), false); }
   if (sheet.hidden && show.hidden && !pd) { const y = scrollY; renderHeader(false); content.innerHTML = renderDayContent(view); window.scrollTo(0, y); }
 }
-renderWeek(); renderHeader(false); content.innerHTML = renderDayContent(view);
+renderWeek(); renderHeader(false); measureTop(); content.innerHTML = renderDayContent(view);
 refreshLive();
-requestAnimationFrame(() => { showWeek(weekOf(view), false); scrollToDay(false); });
-let rsT = 0; addEventListener("resize", () => { showWeek(curWeek < 0 ? weekOf(view) : curWeek, false); clearTimeout(rsT); rsT = setTimeout(() => { if (sheet.hidden && show.hidden && !pd) content.innerHTML = renderDayContent(view); }, 150); });
+requestAnimationFrame(() => { measureTop(); showWeek(weekOf(view), false); scrollToDay(); });
+addEventListener("resize", () => { measureTop(); showWeek(curWeek < 0 ? weekOf(view) : curWeek, false); });
 setInterval(tick, 60000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { tick(); refreshLive(); } });
 })();
