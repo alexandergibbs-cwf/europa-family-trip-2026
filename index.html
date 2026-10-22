@@ -492,8 +492,27 @@ let view = today < START ? START : today > END ? END : today, CUR = null, ITEMS 
 const WEEKS = []; { let d = START; while (d <= END) { const w = []; for (let i = 0; i < 7; i++) w.push(addDays(d, i)); WEEKS.push(w); d = addDays(d, 7); } }
 const weekOf = iso => WEEKS.findIndex(w => w.includes(iso));
 const lab = n => { const a = ap(n); return a.m ? `${a.h12}:${pad(a.m)} ${a.p}` : `${a.h12} ${a.p}`; };
+/* Live forecast from Open-Meteo (no key). Cached per city in localStorage for 3h; falls back to the saved forecast. */
+const LIVE = {}, WMO = c => c === 0 ? "Sunny" : c <= 2 ? "Sunny spells" : c === 3 ? "Cloudy" : c <= 48 ? "Cloudy" : c <= 57 ? "Light rain" : c <= 67 ? "Showers" : c <= 77 ? "Snow" : c <= 82 ? "Showers" : "Storms";
+const WXE2 = c => c === "Snow" ? "🌨️" : c === "Storms" ? "⛈️" : WXE(c);
+async function fetchLive(city) {
+  const g = GEO[city]; if (!g || LIVE[city]) return;
+  const key = "wx:" + city; try { const c = JSON.parse(localStorage.getItem(key) || "null"); if (c && Date.now() - c.at < 3 * 36e5) { LIVE[city] = c.d; return; } } catch (e) {}
+  try {
+    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${g[0]}&longitude=${g[1]}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max&timezone=${encodeURIComponent(g[2])}&forecast_days=16`);
+    const j = await r.json(), d = {};
+    j.daily.time.forEach((day, i) => { d[day] = [WMO(j.daily.weather_code[i]), Math.round(j.daily.temperature_2m_max[i]), Math.round(j.daily.temperature_2m_min[i]), j.daily.precipitation_sum[i], j.daily.precipitation_probability_max[i]]; });
+    LIVE[city] = d; try { localStorage.setItem(key, JSON.stringify({ at: Date.now(), d })); } catch (e) {}
+  } catch (e) { LIVE[city] = null; }
+}
+async function refreshLive() {
+  const cities = [...new Set([0, 1, 2, 3, 4].map(n => addDays(view, n)).map(cityOn))];
+  await Promise.all(cities.map(fetchLive));
+  if (sheet.hidden && show.hidden && !pd) { renderHeader(false); }
+}
 function wxFor(iso) {
-  const c = cityOn(iso), f = WX[c] && WX[c][iso], ty = TYPICAL[c]; if (!ty && !f) return null;
+  const c = cityOn(iso), lv = LIVE[c] && LIVE[c][iso], ty = TYPICAL[c], f = WX[c] && WX[c][iso]; if (!ty && !f && !lv) return null;
+  if (lv) return { c, cond: lv[0], e: WXE2(lv[0]), hi: lv[1], lo: lv[2], rain: lv[3], prob: lv[4], live: true };
   return f ? { c, cond: f[0], e: WXE(f[0]), hi: f[1], lo: f[2] != null ? f[2] : ty[1], loEst: f[2] == null, rain: f[3] } : { c, cond: "Typical for the season", e: "🌡️", hi: ty[0], lo: ty[1], typical: true };
 }
 function cityName(iso) { const s = stayOn(iso); return iso === START ? "Perth" : iso === "2026-11-19" ? "London" : iso === END ? "Perth" : s ? s.city : cityOn(iso); }
@@ -602,7 +621,7 @@ function selectDay(iso, dir, syncWeek = true) {
   if (!iso || iso < START || iso > END) return;
   if (iso === view) { if (syncWeek) showWeek(weekOf(iso), true); return; }
   dir = dir || (iso > view ? 1 : -1);
-  const old = view; view = iso; haptic();
+  const old = view; view = iso; haptic(); refreshLive();
   if (syncWeek) showWeek(weekOf(iso), true);
   renderHeader(true);
   const W = content.offsetWidth;
@@ -789,9 +808,9 @@ function wxSheet() {
   const days = [0, 1, 2, 3, 4].map(n => addDays(view, n)).filter(d => d <= "2026-11-19").map(d => { const x = wxFor(d); return x ? `<div><span>${d === view ? "Today" : wk(d)}</span><span class="e">${x.e}</span><span class="h">${x.hi}°</span><span class="c">${esc(x.c)}</span></div>` : ""; }).join("");
   if (!w) return head("Weather", "No forecast while flying.");
   return head(`${w.e} ${w.hi}° in ${esc(c)}`, esc(w.cond))
-    + `<div class="ig">${r("High", `${w.hi}°`)}${r("Low", `${w.loEst || w.typical ? "~" : ""}${w.lo}°`)}${r("Rain", w.rain == null ? "Not forecast yet" : w.rain >= 5 ? `Likely, ${w.rain} mm` : w.rain > 0 ? "A little" : "Dry")}${ss ? r("Sunset", t12(ss)) : ""}</div>
+    + `<div class="ig">${r("High", `${w.hi}°`)}${r("Low", `${w.loEst || w.typical ? "~" : ""}${w.lo}°`)}${r("Rain", w.rain == null ? "Not forecast yet" : w.prob != null ? `${w.prob}% chance${w.rain >= 1 ? `, ${Math.round(w.rain)} mm` : ""}` : w.rain >= 5 ? `Likely, ${w.rain} mm` : w.rain > 0 ? "A little" : "Dry")}${ss ? r("Sunset", t12(ss)) : ""}</div>
     <div class="sec">NEXT FEW DAYS</div><div class="wk5">${days}</div>
-    <p class="nt">${w.loEst || w.typical ? "~ is a seasonal average. " : ""}Forecast checked 21 October. <a href="${wxLink(c)}" target="_blank" rel="noopener">Live forecast</a></p>`;
+    <p class="nt">${w.live ? "Live forecast from Open-Meteo, refreshed every few hours." : (w.loEst || w.typical ? "~ is a seasonal average. " : "") + "Saved forecast from 21 October; live forecast unavailable right now."} <a href="${wxLink(c)}" target="_blank" rel="noopener">Open in Google</a></p>`;
 }
 function bindChecks(root) { root.querySelectorAll("[data-k]").forEach(cb => { cb.checked = done(cb.dataset.k); cb.onchange = () => { haptic(); try { localStorage.setItem(cb.dataset.k, cb.checked ? "1" : "0"); } catch (e) {} root.querySelectorAll(`[data-k="${cb.dataset.k}"]`).forEach(o => (o.checked = cb.checked)); }; }); }
 
@@ -853,10 +872,11 @@ function tick() {
   if (sheet.hidden && show.hidden && !pd) { const y = scrollY; renderHeader(false); content.innerHTML = renderDayContent(view); window.scrollTo(0, y); }
 }
 renderWeek(); renderHeader(false); content.innerHTML = renderDayContent(view);
+refreshLive();
 requestAnimationFrame(() => { showWeek(weekOf(view), false); scrollToDay(false); });
 addEventListener("resize", () => showWeek(curWeek < 0 ? weekOf(view) : curWeek, false));
 setInterval(tick, 60000);
-document.addEventListener("visibilitychange", () => { if (!document.hidden) tick(); });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { tick(); refreshLive(); } });
 })();
 </script>
 </body></html>
