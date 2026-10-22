@@ -341,14 +341,21 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .pv .pvb b { display: block; font-size: 15px; color: color-mix(in srgb, var(--c) 62%, var(--ink)); }
 .pv .pvb span { display: block; font-size: 13.5px; color: var(--ink); line-height: 1.3; margin-top: 2px; }
 .pv .pvb span.h { font-size: 12.5px; color: var(--sub); }
-.a2hs { position: fixed; left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); z-index: 60; max-width: 496px; margin: 0 auto; display: grid; grid-template-columns: 52px 1fr 30px; gap: 4px 12px; align-items: center; padding: 14px 14px 14px 14px; background: var(--panel); border-radius: 22px; box-shadow: 0 10px 40px rgba(0,0,0,.18), 0 0 0 .5px var(--hair); }
-.a2hs img { width: 52px; height: 52px; border-radius: 12px; }
-.a2hs .a2t b { display: block; font-size: 15px; line-height: 1.25; color: var(--ink); }
-.a2hs .a2t span { display: block; font-size: 13.5px; line-height: 1.35; color: var(--sub); margin-top: 3px; }
-.a2hs .a2t span .sh { display: inline-block; width: 14px; height: 14px; vertical-align: -2px; background: var(--blue); -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; --m: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l4 4-1.4 1.4L13 5.8V15h-2V5.8L9.4 7.4 8 6l4-4zM5 10h3v2H6v8h12v-8h-2v-2h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V11a1 1 0 0 1 1-1z'/%3E%3C/svg%3E"); }
-.a2hs .a2t span b { display: inline; font-size: inherit; color: var(--ink); font-weight: 600; }
-.a2x { align-self: start; border: 0; width: 30px; height: 30px; border-radius: 50%; background: var(--card); color: var(--sub); font-size: 20px; line-height: 1; cursor: pointer; }
-.a2go { grid-column: 1 / -1; height: 44px; margin-top: 6px; }
+.a2bg { position: fixed; inset: 0; z-index: 59; background: rgba(0,0,0,.18); -webkit-backdrop-filter: blur(16px) saturate(1.2); backdrop-filter: blur(16px) saturate(1.2); }
+.a2hs { position: fixed; left: 50%; top: 50%; z-index: 60; width: min(320px, calc(100vw - 48px)); transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; text-align: center; padding: 28px 22px 14px; background: var(--panel); border-radius: 28px; box-shadow: 0 20px 60px rgba(0,0,0,.22), 0 0 0 .5px var(--hair); }
+.a2hs img { width: 76px; height: 76px; border-radius: 18px; box-shadow: 0 4px 14px rgba(0,0,0,.15); }
+.a2hs > b { font-size: 19px; line-height: 1.25; color: var(--ink); margin-top: 16px; letter-spacing: -0.01em; }
+.a2hs .a2sub { font-size: 14px; line-height: 1.35; color: var(--sub); margin-top: 6px; }
+#a2how { display: block; width: 100%; margin-top: 18px; text-align: left; }
+#a2how:empty { display: none; }
+.a2step { display: grid; grid-template-columns: 30px 1fr; gap: 10px; align-items: center; padding: 10px 12px; background: var(--card); font-size: 15px; color: var(--ink); }
+.a2step:first-child { border-radius: 12px 12px 0 0; } .a2step:last-child { border-radius: 0 0 12px 12px; } .a2step + .a2step { box-shadow: inset 0 .5px 0 var(--hair); }
+.a2step i { width: 30px; height: 30px; border-radius: 8px; background: color-mix(in srgb, var(--blue) 12%, var(--bg)); display: grid; place-items: center; font-style: normal; font-weight: 700; color: var(--blue); font-size: 17px; }
+.a2step i .sh, .a2step i .pl { width: 16px; height: 16px; background: var(--blue); -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; }
+.a2step i .sh { --m: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l4 4-1.4 1.4L13 5.8V15h-2V5.8L9.4 7.4 8 6l4-4zM5 10h3v2H6v8h12v-8h-2v-2h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V11a1 1 0 0 1 1-1z'/%3E%3C/svg%3E"); }
+.a2step i .pl { --m: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h14V5H5zm6 3h2v3h3v2h-3v3h-2v-3H8v-2h3V8z'/%3E%3C/svg%3E"); }
+.a2go { width: 100%; height: 48px; margin-top: 18px; }
+.a2x { border: 0; background: none; color: var(--blue); font-size: 16px; font-weight: 500; height: 44px; margin-top: 6px; padding: 0 16px; cursor: pointer; }
 .restore { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 4px 0; }
 .restore button { border: 0; height: 34px; padding: 0 14px; border-radius: 980px; background: var(--card); color: var(--blue); font-size: 14px; font-weight: 600; cursor: pointer; }
 
@@ -546,7 +553,8 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 <div class="pager" id="pager"><div id="daycontent"></div></div>
 </div>
 <div class="scrim" id="scrim" hidden></div>
-<div class="a2hs" id="a2hs" role="dialog" aria-label="Add to Home Screen" hidden><img src="/apple-touch-icon.png" alt="" width="52" height="52"><div class="a2t"><b>Add Europe Trip to your Home Screen</b><span id="a2how"></span></div><button class="a2x press" data-a2x aria-label="Close">×</button><button class="btn blue press a2go" id="a2go" hidden>Install</button></div>
+<div class="a2bg" id="a2bg" data-a2x hidden></div>
+<div class="a2hs" id="a2hs" role="dialog" aria-modal="true" aria-label="Add to Home Screen" hidden><img src="/apple-touch-icon.png" alt="" width="76" height="76"><b>Add Europe Trip to your Home Screen</b><span class="a2sub">Opens full screen, like an app, and stays up to date.</span><span id="a2how"></span><button class="btn blue press a2go" id="a2go" hidden>Install</button><button class="a2x press" data-a2x>Not now</button></div>
 <aside class="side" id="side" aria-label="Cities" hidden>
   <div class="side-h"><span>Cities</span></div>
   <div class="side-body" id="side-body"></div>
@@ -1935,16 +1943,19 @@ setInterval(tick, 60000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { tick(); refreshLive(); checkBuild(); } });
 /* first open in a browser (not from the Home Screen): a small card shows how to add it. Android gets a real Install button. */
 {
-  const a2 = document.getElementById("a2hs"), installed = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const a2 = document.getElementById("a2hs"), a2bg = document.getElementById("a2bg"), installed = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
   const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const snoozed = () => { try { return Date.now() - (+localStorage.getItem("a2hs") || 0) < 3 * 864e5; } catch (e) { return false; } };
   let deferred = null;
-  const show = () => { if (installed || snoozed() || !a2.hidden) return; a2.hidden = false; if (!reduce()) a2.animate([{ transform: "translateY(130%)" }, { transform: "none" }], { duration: 620, easing: EASE }); };
-  const hide = () => { try { localStorage.setItem("a2hs", String(Date.now())); } catch (e) {} if (reduce()) { a2.hidden = true; return; } const an = a2.animate([{ transform: "none", opacity: 1 }, { transform: "translateY(130%)", opacity: 0 }], { duration: 300, easing: "cubic-bezier(0.55, 0, 0.5, 1)", fill: "forwards" }); an.onfinish = () => { a2.hidden = true; an.cancel(); }; };
+  const C = "translate(-50%, -50%)";
+  const show = () => { if (installed || snoozed() || !a2.hidden || !sheet.hidden) return; a2.hidden = false; a2bg.hidden = false; if (!reduce()) { a2bg.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, easing: "ease-out" }); a2.animate([{ transform: `${C} scale(.92)`, opacity: 0 }, { transform: `${C} scale(1)`, opacity: 1 }], { duration: 520, easing: EASE }); } };
+  const hide = () => { try { localStorage.setItem("a2hs", String(Date.now())); } catch (e) {} if (reduce()) { a2.hidden = a2bg.hidden = true; return; }
+    a2bg.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 260, easing: "ease-in", fill: "forwards" }).onfinish = function () { a2bg.hidden = true; this.cancel(); };
+    a2.animate([{ transform: `${C} scale(1)`, opacity: 1 }, { transform: `${C} scale(.94)`, opacity: 0 }], { duration: 240, easing: "cubic-bezier(0.55, 0, 0.5, 1)", fill: "forwards" }).onfinish = function () { a2.hidden = true; this.cancel(); }; };
   if (!installed) {
-    if (ios) { document.getElementById("a2how").innerHTML = `Tap <i class="sh"></i> <b>Share</b> (under <b>⋯</b>), then <b>Add to Home Screen</b>.`; setTimeout(show, 1500); }
-    addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferred = e; document.getElementById("a2how").textContent = "Opens full screen, like an app."; document.getElementById("a2go").hidden = false; setTimeout(show, 1200); });
-    a2.querySelector("[data-a2x]").onclick = e => { e.stopPropagation(); haptic(); hide(); };
+    if (ios) { document.getElementById("a2how").innerHTML = `<div class="a2step"><i>⋯</i><span>Tap <b>⋯</b> in Safari’s bar</span></div><div class="a2step"><i><span class="sh"></span></i><span>Tap <b>Share</b></span></div><div class="a2step"><i><span class="pl"></span></i><span>Tap <b>Add to Home Screen</b></span></div>`; setTimeout(show, 1200); }
+    addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferred = e; document.getElementById("a2how").innerHTML = ""; document.getElementById("a2go").hidden = false; setTimeout(show, 1000); });
+    [a2bg, a2.querySelector(".a2x")].forEach(el => el.onclick = e => { e.stopPropagation(); haptic(); hide(); });
     document.getElementById("a2go").onclick = async e => { e.stopPropagation(); haptic("heavy"); if (!deferred) return; deferred.prompt(); try { await deferred.userChoice; } catch (er) {} deferred = null; hide(); };
     addEventListener("appinstalled", () => { a2.hidden = true; });
   }
