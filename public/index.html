@@ -105,6 +105,9 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .pager { touch-action: pan-y; }
 #daycontent { max-width: 520px; margin: 0 auto; padding-top: var(--top-h, 180px); padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }
 #daycontent { }
+#daycontent .lane, #daycontent .mk, #daycontent .now, #daycontent .mev, #daycontent .mmk, #daycontent .mnow { transition: opacity 280ms cubic-bezier(0.16, 1, 0.3, 1); }
+#daycontent.ph .lane, #daycontent.ph .mk, #daycontent.ph .now, #daycontent.ph .mev, #daycontent.ph .mmk, #daycontent.ph .mnow { opacity: 0; transition: none; }
+#daycontent.ph { pointer-events: none; }
 .grid { position: relative; height: calc(var(--hour) * 24 + 24px); margin-top: 8px; }
 .hl { position: absolute; left: 0; right: 0; height: 0; }
 .hl::after { content: ""; position: absolute; left: 64px; right: 0; border-top: 0.5px solid var(--grid); }
@@ -400,7 +403,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 </div>
 <div class="pager" id="pager"><div id="daycontent"></div></div>
 </div>
-<div class="scrim" id="scrim"></div>
+<div class="scrim" id="scrim" hidden></div>
 <aside class="side" id="side" aria-label="Cities" hidden>
   <div class="side-h"><span>Cities</span></div>
   <div class="side-body" id="side-body"></div>
@@ -696,8 +699,26 @@ function wRender() {
   for (let k = 0; k < els.length; k++) { const off = k - wPos, d = Math.min(3.5, Math.abs(off)); const n = els[k].lastElementChild; n.style.opacity = ""; n.style.transform = ""; }
   const ws = document.getElementById("wsel"); if (ws && els[0]) { ws.style.top = (els[0].lastElementChild.offsetTop - 1) + "px"; ws.classList.toggle("today", ALLDAYS[i] === today); }
   if (i !== wCentre) { if (wCentre >= 0) haptic("light"); wCentre = i; for (let k = 0; k < els.length; k++) els[k].classList.toggle("on", k === i); }
+  wDriveContent();
 }
-function wSettle() { const i = Math.round(Math.max(0, Math.min(wN(), wPos))); const d = ALLDAYS[i]; if (d !== view) { curWeek = i; selectDay(d, 0, false); } }
+/* while the date wheel moves, the timetable rides along as a blank page; the day's plans fade in once it lands */
+let wDrive = false;
+function wDriveContent() {
+  if (!wDrive) return;
+  const i = Math.round(Math.max(0, Math.min(wN(), wPos))), d = ALLDAYS[i], f = wPos - i, W = content.offsetWidth || innerWidth;
+  if (d !== shownD) { content.classList.add("ph"); content.innerHTML = renderContent(d); scrollToDay(false, d); }
+  content.style.transform = `translateX(${(-f * W * 0.7).toFixed(1)}px)`; content.style.opacity = Math.max(0, 1 - Math.abs(f) * 1.7).toFixed(3);
+}
+function land(d) {
+  content.classList.add("ph"); content.innerHTML = renderContent(d); scrollToDay(false);
+  void content.offsetHeight; requestAnimationFrame(() => content.classList.remove("ph"));
+}
+function wSettle() {
+  const i = Math.round(Math.max(0, Math.min(wN(), wPos))), d = ALLDAYS[i], drove = wDrive; wDrive = false;
+  if (drove) { content.style.transform = ""; content.style.opacity = ""; }
+  if (d !== view) { curWeek = i; view = d; refreshLive(); renderHeader(true); land(d); }
+  else if (drove && (shownD !== view || content.classList.contains("ph"))) land(view);
+}
 function wStep() {
   wRaf = 0;
   if (wDrag) return;
@@ -724,7 +745,7 @@ function showWeek(i, smooth) { centreDay(view, smooth); }
 function styleWheel() { wRender(); }
 weekEl.addEventListener("pointerdown", e => {
   if (e.pointerType === "mouse" && e.button) return;
-  cancelAnimationFrame(wRaf); wRaf = 0; wTarget = null;
+  cancelAnimationFrame(wRaf); wRaf = 0; wTarget = null; if (!reduce()) wDrive = true;
   wDrag = { x: e.clientX, pos: wPos, t: performance.now(), lx: e.clientX, lt: performance.now(), moved: false, id: e.pointerId };
   try { weekEl.setPointerCapture(e.pointerId); } catch (er) {}
 });
@@ -858,7 +879,8 @@ function renderMultiContent(iso) {
   html += `</div></div>`;
   return html;
 }
-function renderContent(iso) { return MODE === "multi" ? renderMultiContent(iso) : renderDayContent(iso); }
+let shownD = null;
+function renderContent(iso) { shownD = iso; return MODE === "multi" ? renderMultiContent(iso) : renderDayContent(iso); }
 function setMode(m) {
   if (m === MODE) return; MODE = m; try { localStorage.setItem("mode", m); } catch (e) {}
   const mp = document.getElementById("modePill"); mp.classList.toggle("on", m === "multi"); haptic();
@@ -872,11 +894,11 @@ const content = document.getElementById("daycontent");
 let YFN = t => t;
 const SC = () => document.scrollingElement || document.documentElement;
 const atBottom = () => scrollY >= SC().scrollHeight - innerHeight - 1;
-function scrollToDay() {
+function scrollToDay(_, iso = view) {
   const topH = document.getElementById("top").offsetHeight;
   const evs = ITEMS.filter(e => e.k !== "free");
   let t = Math.min(420, evs.length ? Math.min(...evs.map(e => e.s)) - 30 : 420);
-  if (view === today && nowMin() - 45 > t + 300) t = nowMin() - 45;
+  if (iso === today && nowMin() - 45 > t + 300) t = nowMin() - 45;
   if (MODE === "multi") { const mg = content.querySelector(".mg"); if (!mg) return; const top0 = mg.getBoundingClientRect().top + scrollY; let m = 420; const ds = Object.keys(MITEMS); if (ds.includes(today) && nowMin() - 45 > m + 300) m = nowMin() - 45; scrollTo(0, Math.max(0, top0 + MY(m) - topH - 44)); return; }
   const gridEl = content.querySelector(".grid"); if (!gridEl) return;
   const gridTop = gridEl.getBoundingClientRect().top + scrollY;
@@ -888,6 +910,7 @@ function measureTop() { document.documentElement.style.setProperty("--top-h", do
 function selectDay(iso, dir, syncWeek = true) {
   if (!iso || iso < START || iso > END) return;
   if (iso === view) { if (syncWeek) showWeek(weekOf(iso), true); return; }
+  if (syncWeek && !reduce() && !pd) { wDrive = true; centreDay(iso, true); return; }
   dir = dir || (iso > view ? 1 : -1);
   const old = view; view = iso; haptic(); refreshLive();
   if (syncWeek) showWeek(weekOf(iso), true);
@@ -907,8 +930,8 @@ let vpull = null;
 pager.addEventListener("touchstart", e => { vpull = { y: e.touches[0].clientY, top: scrollY <= 0, bottom: atBottom(), fired: false }; }, { passive: true });
 pager.addEventListener("touchmove", e => {
   if (!vpull || vpull.fired || !sheet.hidden || !side.hidden) return; const dy = e.touches[0].clientY - vpull.y;
-  if (vpull.top && dy > 110 && scrollY <= 0 && view > START) { vpull.fired = true; haptic("heavy"); selectDay(addDays(view, -1), -1); content.animate([{ transform: "translateY(-40px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 480, easing: EASE }); }
-  else if (vpull.bottom && dy < -110 && atBottom() && view < END) { vpull.fired = true; haptic("heavy"); selectDay(addDays(view, 1), 1); content.animate([{ transform: "translateY(40px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 480, easing: EASE }); }
+  if (vpull.top && dy > 110 && scrollY <= 0 && view > START) { vpull.fired = true; haptic("heavy"); selectDay(addDays(view, -1), -1); }
+  else if (vpull.bottom && dy < -110 && atBottom() && view < END) { vpull.fired = true; haptic("heavy"); selectDay(addDays(view, 1), 1); }
 }, { passive: true });
 pager.addEventListener("touchend", () => { vpull = null; }, { passive: true });
 pager.addEventListener("pointerdown", e => { if (e.pointerType === "mouse" && e.button) return; if (e.clientX < 24) { pd = null; openSide(); return; } pd = { x: e.clientX, y: e.clientY, t: performance.now(), mode: null, dx: 0 }; });
@@ -938,15 +961,15 @@ function endDrag() {
 pager.addEventListener("pointerup", endDrag); pager.addEventListener("pointercancel", () => { if (pd && pd.mode === "h") endDrag(); else pd = null; });
 
 /* ---------- sheets ---------- */
-const sheet = document.getElementById("sheet"), scrim = document.getElementById("scrim"); let sAnim = null, lastFocus = null;
+const sheet = document.getElementById("sheet"), scrim = document.getElementById("scrim"); let sAnim = null, lastFocus = null, scrimT = 0;
 const head = (title, sub) => `<div class="sh-h"><h3 id="sheet-title">${title}</h3><button class="xbtn press" data-close aria-label="Close">×</button></div>${sub ? `<div class="st">${sub}</div>` : `<div style="height:16px"></div>`}`;
 function openSheet(html) {
   document.getElementById("sheet-body").innerHTML = html; bindChecks(sheet); lastFocus = document.activeElement;
-  sheet.hidden = false; sheet.scrollTop = 0; scrim.classList.add("open"); sAnim?.cancel();
+  sheet.hidden = false; sheet.scrollTop = 0; clearTimeout(scrimT); scrim.hidden = false; void scrim.offsetWidth; scrim.classList.add("open"); sAnim?.cancel();
   sAnim = sheet.animate([{ transform: "translateY(105%)" }, { transform: "translateY(0)" }], { duration: reduce() ? 1 : 620, easing: EASE, fill: "forwards" });
 }
 function closeSheet(from = 0) {
-  if (sheet.hidden) return; scrim.classList.remove("open"); sAnim?.cancel();
+  if (sheet.hidden) return; scrim.classList.remove("open"); clearTimeout(scrimT); scrimT = setTimeout(() => { if (!scrim.classList.contains("open")) scrim.hidden = true; }, 340); sAnim?.cancel();
   sAnim = sheet.animate([{ transform: `translateY(${from}px)` }, { transform: "translateY(105%)" }], { duration: reduce() ? 1 : 300, easing: "cubic-bezier(0.55, 0, 0.5, 1)", fill: "forwards" });
   const fin = () => { if (!scrim.classList.contains("open")) sheet.hidden = true; }; sAnim.onfinish = fin; setTimeout(fin, 360); lastFocus?.focus?.({ preventScroll: true }); renderHeader(false); clearInterval(cycT);
 }
