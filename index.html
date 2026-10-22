@@ -145,7 +145,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 /* Sheets */
 .scrim { position: fixed; inset: 0; z-index: 40; background: rgba(0, 0, 0, 0.32); opacity: 0; pointer-events: none; transition: opacity 300ms var(--ease-out); }
 .scrim.open { opacity: 1; pointer-events: auto; }
-.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 41; max-width: 520px; margin: 0 auto; background: var(--panel); border-radius: 26px 26px 0 0; padding: 8px max(16px, env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); transform: translateY(105%); max-height: 90vh; overflow-y: auto; overscroll-behavior: contain; }
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 41; max-width: 520px; margin: 0 auto; background: var(--panel); border-radius: 26px 26px 0 0; padding: 8px max(16px, env(safe-area-inset-right, 0px)) calc(88px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); transform: translateY(105%); max-height: 90vh; overflow-y: auto; overscroll-behavior: contain; }
 .grab { width: 36px; height: 5px; border-radius: 3px; background: var(--hair); margin: 0 auto 14px; }
 .sh-h { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin: 0 4px; }
 .sheet h3 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin: 0; line-height: 1.15; text-wrap: balance; }
@@ -560,7 +560,6 @@ function renderHeader(pop) {
   const n = s ? Math.round((Date.parse(iso) - Date.parse(s.in)) / 864e5) + 1 : 0;
   document.getElementById("cityName").innerHTML = s ? `${esc(cityName(iso))}<small>${esc(s.hotel)}</small>` : esc(cityName(iso));
   const open = headsFor(iso).filter(h => !h.k || !done(h.k)).length;
-  document.getElementById("cityPill").classList.toggle("has-badge", open > 0);
   measureTop();
 }
 
@@ -601,7 +600,7 @@ function renderDayContent(iso) {
   anchors.push([cur, yy, ePX]); const H = yy + (HI - cur) * ePX;
   const y = t => { t = Math.max(LO, Math.min(HI, t)); let i = anchors.length - 1; while (i > 0 && anchors[i][0] > t) i--; const [t0, y0, k] = anchors[i]; return y0 + (t - t0) * k; };
   YFN = y;
-  let html = `<div class="grid" style="height:${H + 24}px">`;
+  let html = `<div class="grid" style="height:${H + 96}px">`;
   let lastLabelY = -99;
   for (let h = LO / 60; h <= 24; h++) {
     const t = h * 60, near = showNow && Math.abs(nm - t) < 12, yv = y(t), tight = yv - lastLabelY < 18;
@@ -832,8 +831,7 @@ function menuSheet() {
       ${row("wx", w ? w.e : "🌡", w ? `${w.hi}° / ${w.loEst || w.typical ? "~" : ""}${w.lo}°, ${esc(w.typical ? "typical for the season" : w.cond.toLowerCase())}` : "Weather", ss ? `Sunset ${t12(ss)}` : "")}
       ${row("ideas", "📍", "Things to do", hasSaves(iso) ? `Eat, wine, coffee, sightsee, shop, day trips` : `Search near the hotel`)}
       ${row("tasks", "☑", open ? `${open} thing${open > 1 ? "s" : ""} to sort` : "Tasks", open ? headsFor(iso).find(h => !h.k || !done(h.k)).t : "Nothing outstanding today")}
-    </div>
-    <div class="restore"><button data-menu="trip">Whole trip and booking refs ›</button></div>`;
+    </div>`;
 }
 function tasksSheet() {
   const hs = headsFor(view);
