@@ -100,8 +100,11 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev.travel { --c: var(--e-travel); background: var(--e-travel-bg); color: var(--e-travel-ink); }
 .ev.change { --c: var(--e-travel); background: var(--e-travel-bg); color: var(--e-travel-ink); opacity: .75; }
 .ev.get { --c: var(--e-get); background: var(--e-get-bg); color: var(--e-get-ink); }
-.ev.free { --c: var(--e-free); background: var(--e-free-bg); color: var(--e-free-ink); }
-.ev.wait { --c: var(--e-wait); background: var(--e-wait-bg); color: var(--e-wait-ink); }
+.ev.free { background: transparent; color: transparent; box-shadow: none; }
+.ev.free::before, .ev.free .tt, .ev.free .tm, .ev.free .hint { display: none; }
+.ev.wait { --c: var(--e-wait); background: transparent; color: var(--e-wait-ink); border: 1.5px dashed color-mix(in srgb, var(--e-wait) 55%, transparent); }
+.ev.wait::before, .ev.wait .hint { display: none; }
+.ev.wait .tt { font-size: 14px; }
 .ev.mark { --c: var(--e-mark); background: var(--e-mark-bg); color: var(--e-mark-ink); left: 42%; z-index: 2; box-shadow: 0 0 0 1.5px var(--bg); }
 .ev.done { opacity: .45; }
 .ev .cd { align-self: flex-start; font-size: 11px; font-weight: 700; background: #ffd60a; color: #000; border-radius: 980px; padding: 1px 7px; margin-top: 3px; }
@@ -589,8 +592,8 @@ function renderDayContent(iso) {
       return;
     }
     if (ev.k === "free" || ev.k === "wait") {
-      const hint = ev.k === "wait" ? (ev.x.stay && ev.x.stay.store ? "Hotel can hold your bags" : ev.x.stay && ev.x.stay.store === false ? "No luggage storage listed" : "") : hasSaves(iso) && h >= 60 ? "Sightsee or shop nearby ›" : h >= 60 ? "Ideas nearby ›" : "";
-      html += `<div class="ev ${ev.k}${short ? " short" : ""}${ev.done ? " done" : ""}" role="button" tabindex="0" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${esc(ev.tt)} · ${dur(ev.e - ev.s)}</span><span class="tm">${t12(ev.s)} – ${t12(ev.e)}</span>${hint && !short ? `<span class="hint">${hint}</span>` : ""}</div>`;
+      const hint = ""; const _unused = ev.k === "wait" ? (ev.x.stay && ev.x.stay.store ? "Hotel can hold your bags" : ev.x.stay && ev.x.stay.store === false ? "No luggage storage listed" : "") : hasSaves(iso) && h >= 60 ? "Sightsee or shop nearby ›" : h >= 60 ? "Ideas nearby ›" : "";
+      html += `<div class="ev ${ev.k}${short ? " short" : ""}${ev.done ? " done" : ""}" role="button" tabindex="0" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${ev.k === "wait" ? `Bags with you · ${dur(ev.e - ev.s)}` : ""}</span><span class="tm">${ev.k === "wait" ? (ev.x.stay && ev.x.stay.store ? "Hotel can hold them" : ev.x.stay && ev.x.stay.store === false ? "No luggage storage listed" : "Ask about leaving bags") : ""}</span></div>`;
       return;
     }
     const time = ev.k === "mark" ? t12(ev.s) : ev.x && ev.x.overnight ? `until ${t12(ev.e)}` : `${t12(ev.s)} – ${t12(ev.e)}`;
@@ -719,7 +722,7 @@ function slotsFor(iso, D, all) {
     const t2 = t + 105;
     if (t2 + 60 <= 1440 && (placesFor(iso, "drinks").length)) out.push({ k: "drinks", s: t2, e: Math.min(t2 + 75, 1439), seg: dw });
   }
-  return all ? out : out.filter(o => getPick(iso, o.k) !== "skip");
+  return [];
 }
 function pickFor(iso, k) {
   const a = anchorFor(iso), p = getPick(iso, k);
@@ -784,9 +787,10 @@ let FR = null;
 function freeSheet2() {
   const ev = FR, iso = view, plan = getPlan(iso);
   const sec = (title, ck, n) => { const l = placesFor(iso, ck); if (!l.length) return ""; return `<div class="fsec"><b>${title}</b>${l.length > n ? `<button data-seeall="${ck}">See all ${l.length}</button>` : ""}</div><div class="ig">${l.slice(0, n).map(x => { const on = plan.find(q => q.id === x.s.id); return placeRow(x, `<button class="addb${on ? " on" : ""}" data-add="${x.s.id}" data-addcat="${ck}">${on ? `✓ ${t12(on.t)}` : "Add"}</button>`); }).join("")}</div>`; };
-  const skipped = ["coffee", "dinner", "drinks"].filter(k => getPick(iso, k) === "skip");
-  const content = hasSaves(iso) ? sec("If you want to sightsee", "see", 4) + sec("If you want to shop", "shop", 3) + sec("Day trip ideas", "trip", 3) : mapsFallback("things to do", iso);
-  return head(`${esc(ev.tt)} · ${dur(ev.e - ev.s)}`, `${t12(ev.s)} – ${t12(ev.e)}${ev.k === "wait" ? " · you’ll have your bags" : ""}`) + content
+  const skipped = [];
+  const content = hasSaves(iso) ? sec("Coffee", "coffee", 3) + sec("Food", "dinner", 3) + sec("Drinks", "drinks", 3) + sec("Sights", "see", 4) + sec("Shopping", "shop", 3) + sec("Day trip ideas", "trip", 3) : mapsFallback("things to do", iso);
+  const a = anchorFor(iso);
+  return head(`Free · ${dur(ev.e - ev.s)}`, `${t12(ev.s)} – ${t12(ev.e)}${ev.k === "wait" ? ", with your bags" : ""}${a ? `. Distances from ${esc(a.hotel)}` : ""}`) + content
     + (skipped.length ? `<div class="restore">${skipped.map(k => `<button data-unpick="${k}">Bring back ${k}</button>`).join("")}</div>` : "")
     + `<p class="nt">Added stops show as dotted blocks and are saved on this phone.</p>`;
 }
