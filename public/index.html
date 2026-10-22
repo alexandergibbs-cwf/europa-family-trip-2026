@@ -554,7 +554,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 </div>
 <div class="scrim" id="scrim" hidden></div>
 <div class="a2bg" id="a2bg" data-a2x hidden></div>
-<div class="a2hs" id="a2hs" role="dialog" aria-modal="true" aria-label="Add to Home Screen" hidden><img src="/apple-touch-icon.png" alt="" width="76" height="76"><b>Add Europe Trip to your Home Screen</b><span class="a2sub">Opens full screen, like an app, and stays up to date.</span><span id="a2how"></span><button class="btn blue press a2go" id="a2go" hidden>Install</button><button class="a2x press" data-a2x>Not now</button></div>
+<div class="a2hs" id="a2hs" role="dialog" aria-modal="true" aria-label="Add to Home Screen" hidden><img src="/apple-touch-icon.png" alt="" width="76" height="76"><b>Add Europe Trip to your Home Screen</b><span id="a2how"></span><button class="btn blue press a2go" id="a2go" hidden>Install</button><button class="a2x press" data-a2x>Not now</button></div>
 <aside class="side" id="side" aria-label="Cities" hidden>
   <div class="side-h"><span>Cities</span></div>
   <div class="side-body" id="side-body"></div>
@@ -1958,7 +1958,7 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) { ti
     a2bg.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 260, easing: "ease-in", fill: "forwards" }).onfinish = function () { a2bg.hidden = true; this.cancel(); };
     a2.animate([{ transform: `${C} scale(1)`, opacity: 1 }, { transform: `${C} scale(.94)`, opacity: 0 }], { duration: 240, easing: "cubic-bezier(0.55, 0, 0.5, 1)", fill: "forwards" }).onfinish = function () { a2.hidden = true; this.cancel(); }; };
   if (!installed) {
-    if (ios) { document.getElementById("a2how").innerHTML = `<div class="a2step"><i>⋯</i><span>Tap <b>⋯</b> in Safari’s bar</span></div><div class="a2step"><i><span class="sh"></span></i><span>Tap <b>Share</b></span></div><div class="a2step"><i><span class="pl"></span></i><span>Tap <b>Add to Home Screen</b></span></div>`; setTimeout(show, 1200); }
+    if (ios) { document.getElementById("a2how").innerHTML = `<div class="a2step"><i>⋯</i><span>Tap <b>⋯</b></span></div><div class="a2step"><i><span class="sh"></span></i><span>Tap <b>Share</b></span></div><div class="a2step"><i><span class="pl"></span></i><span>Tap <b>Add to Home Screen</b></span></div>`; setTimeout(show, 1200); }
     addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferred = e; document.getElementById("a2how").innerHTML = ""; document.getElementById("a2go").hidden = false; setTimeout(show, 1000); });
     [a2bg, a2.querySelector(".a2x")].forEach(el => el.onclick = e => { e.stopPropagation(); haptic(); hide(); });
     document.getElementById("a2go").onclick = async e => { e.stopPropagation(); haptic("heavy"); if (!deferred) return; deferred.prompt(); try { await deferred.userChoice; } catch (er) {} deferred = null; hide(); };
