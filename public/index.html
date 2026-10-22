@@ -1037,7 +1037,7 @@ function pullFlip(dir, from) {
   view = iso; refreshLive(); centreDay(iso, true); renderHeader(true);
   const swap = () => {
     content.innerHTML = renderContent(iso); a?.cancel();
-    if (dir < 0) scrollTo(0, SC().scrollHeight); else scrollTo(0, 0);
+    scrollToDay(false);
     if (!reduce()) pullTarget().animate([{ transform: `translateY(${dir < 0 ? -H * 0.35 : H * 0.35}px)`, opacity: 0 }, { transform: "translateY(0)", opacity: 1 }], { duration: 620, easing: "cubic-bezier(0.22, 1.2, 0.36, 1)" });
   };
   const a = reduce() ? null : tg.animate([{ transform: `translateY(${from}px)`, opacity: 1 }, { transform: `translateY(${dir < 0 ? H * 0.55 : -H * 0.55}px)`, opacity: 0 }], { duration: 240, easing: "cubic-bezier(0.4, 0, 1, 1)", fill: "forwards" });
