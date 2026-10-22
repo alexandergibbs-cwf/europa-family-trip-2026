@@ -880,6 +880,7 @@ function wRender() {
   wTrack.style.left = (centre - wPos * WDW).toFixed(2) + "px";
   const els = wTrack.children, i = Math.round(Math.max(0, Math.min(wN(), wPos)));
   if (i !== wCentre) { const ws = document.getElementById("wsel"); if (ws && els[0]) { if (wSelTop == null) wSelTop = els[0].lastElementChild.offsetTop - 1; ws.style.top = wSelTop + "px"; ws.classList.toggle("today", ALLDAYS[i] === today); } }
+  if (i !== wCentre && wCentre >= 0 && MODE === "day") { const cn = document.getElementById("cityName"), nm = cityName(ALLDAYS[i]); if (cn && cn.textContent !== nm) cn.textContent = nm; }
   if (i !== wCentre) { if (wCentre >= 0 && wDrag) haptic("light"); wCentre = i; for (let k = 0; k < els.length; k++) els[k].classList.toggle("on", k === i); }
   wDriveContent();
 }
@@ -1065,6 +1066,7 @@ function renderDayContent(iso) {
     html += `<div class="hl${h === 12 ? " mid" : ""}${near || tight ? " hide" : ""}" style="top:${yv}px"><span>${h === 12 ? "Midday" : `${(h % 12) || 12}<small>${h < 12 || h >= 24 ? "am" : "pm"}</small>`}</span></div>`;
   }
   html += `<div class="lane">`;
+  const firstSc = Math.min(Infinity, ...evs.filter(e => e.k === "prompt").map(e => e.sc));
   /* every block gets room for its two lines; a very short one nudges the next one down a touch rather than hiding its text */
   const LAY = {};
   { let floor = -1e9;
@@ -1085,7 +1087,8 @@ function renderDayContent(iso) {
       return;
     }
     if (ev.k === "prompt") {
-      html += `<button class="ev prompt c-${ev.pr.k}${short ? " short" : ""}${h < 66 ? " tight" : ""} press" data-prompt="${ev.pr.cat}" data-sc="${ev.sc}" data-step="${ev.step}"${ev.pr.of ? ` data-sub="${ev.pr.part}"` : ""} data-i="${i}" data-alts="${esc(sceneAlts(iso, ev.sc, ev.step).join("|"))}" style="top:${top + 12}px;height:${h}px"><span class="tt">${esc(ev.tt)}</span><span class="pk"></span><span class="hk"></span></button>`;
+      const alts = sceneAlts(iso, ev.sc, ev.step), first = ev.sc === firstSc, [f1, f2] = first ? (alts[0] || "").split("\x1f") : ["", ""], on = first && (ev.pr.of == null || f1);
+      html += `<button class="ev prompt c-${ev.pr.k}${short ? " short" : ""}${h < 66 ? " tight" : ""}${on ? " idea" : ""} press" data-prompt="${ev.pr.cat}" data-sc="${ev.sc}" data-step="${ev.step}"${ev.pr.of ? ` data-sub="${ev.pr.part}"` : ""}${first ? ` data-n="1"` : ""} data-i="${i}" data-alts="${esc(alts.join("|"))}" style="top:${top + 12}px;height:${h}px"><span class="tt">${esc(ev.tt)}</span><span class="pk">${esc(f1 || "")}</span><span class="hk">${esc(f2 || "")}</span></button>`;
       return;
     }
     if (ev.k === "free" || ev.k === "wait") {
@@ -1205,7 +1208,8 @@ function promptTick() {
   };
   pT = setTimeout(next, 500);
 }
-new MutationObserver(() => { clearTimeout(pT); pT = setTimeout(promptTick, 500); }).observe(content, { childList: true });
+/* a new page already shows its first idea: hold it, then carry on with the next */
+new MutationObserver(() => { clearTimeout(pT); const shown = content.querySelectorAll(".ev.prompt.idea"); if (!shown.length) { pT = setTimeout(promptTick, 500); return; } scI = 0; pT = setTimeout(() => { shown.forEach(el => el.classList.remove("idea")); pT = setTimeout(promptTick, 1500); }, 4200); }).observe(content, { childList: true });
 promptTick();
 /* elastic past the top and bottom of the day (our own, so Safari's pull-to-refresh never fires).
    Pull far enough and let go: the previous / next day drops in vertically. */
