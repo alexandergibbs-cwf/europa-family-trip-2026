@@ -405,6 +405,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev.c-lunch { --c: #ff9500; }
 .ev.c-day { --c: #34c759; }
 .ev.c-shop { --c: #30b0c7; }
+.ev.c-trip { --c: #af52de; }
 .ev.c-dinner, .ev.slot.dinner { --c: #ff2d55; }
 .ev.slot.drinks { --c: #5856d6; }
 /* suggestions stay lighter than anything booked */
@@ -803,8 +804,8 @@ function wStep() {
   if (wTarget != null) {
     /* glide to target: timed, no overshoot. Eases out of any carried speed, eases in and out from rest */
     const now = performance.now();
-    if (!wTw || wTw.to !== wTarget) { const dist = Math.abs(wTarget - wPos); wTw = { from: wPos, to: wTarget, t0: now, dur: Math.min(1100, 560 + 260 * Math.sqrt(dist)), moving: Math.abs(wVel) > 0.02 }; wVel = 0; }
-    const u = Math.min(1, (now - wTw.t0) / wTw.dur), e = wTw.moving ? 1 - Math.pow(1 - u, 4) : (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
+    if (!wTw || wTw.to !== wTarget) { const dist = Math.abs(wTarget - wPos); wTw = { from: wPos, to: wTarget, t0: now, dur: Math.min(1500, 760 + 380 * Math.sqrt(dist)), moving: Math.abs(wVel) > 0.02 }; wVel = 0; }
+    const u = Math.min(1, (now - wTw.t0) / wTw.dur), e = wTw.moving ? 1 - Math.pow(1 - u, 3) : (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
     wPos = wTw.from + (wTw.to - wTw.from) * e;
     if (u >= 1) { wPos = wTarget; wTarget = null; wTw = null; wRender(); wSettle(); return; }
     wRender(); wRaf = requestAnimationFrame(wStep); return;
@@ -918,7 +919,7 @@ function renderDayContent(iso) {
       return;
     }
     if (ev.k === "prompt") {
-      html += `<button class="ev prompt c-${ev.pr.k}${short ? " short" : ""} press" data-prompt="${ev.pr.cat}" data-i="${i}" data-alts="${esc(ideaAlts(iso, ev.pr).join("|"))}" style="top:${top + 12}px;height:${h}px"><span class="tt">${esc(ev.tt)}</span><span class="pk"></span></button>`;
+      html += `<button class="ev prompt c-${ev.pr.k}${short ? " short" : ""} press" data-prompt="${ev.pr.cat}" data-sc="${ev.sc}" data-step="${ev.step}" data-i="${i}" data-alts="${esc(ideaAlts(iso, ev.pr).join("|"))}" style="top:${top + 12}px;height:${h}px"><span class="tt">${esc(ev.tt)}</span><span class="pk"></span></button>`;
       return;
     }
     if (ev.k === "free" || ev.k === "wait") {
@@ -1017,21 +1018,25 @@ function selectDay(iso, dir, syncWeek = true) {
 const pager = document.getElementById("pager");
 let pd = null;
 /* pull past the top or bottom of a day to move to the previous / next day */
-/* suggestion cycler: shows one idea at a time from those on screen, a few seconds each */
-let pIdx = -1, pT = 0;
+/* suggestion scenes: one plan for the day builds up a block at a time, holds, fades, and the next plan takes over */
+let scI = -1, pT = 0;
 function promptTick() {
   clearTimeout(pT);
   const all = [...content.querySelectorAll(".ev.prompt")];
-  if (all.length) {
-    const vis = all.filter(el => { const r = el.getBoundingClientRect(); return r.bottom > 140 && r.top < innerHeight - 60; });
-    const pool = vis.length ? vis : all; const cur = all.find(el => el.classList.contains("idea"));
-    const next = pool.length === 1 ? (cur ? null : pool[0]) : pool[(Math.max(-1, pool.indexOf(cur)) + 1) % pool.length];
-    if (next && next.dataset.alts) { const alts = next.dataset.alts.split("|"), n = +(next.dataset.n || 0); next.querySelector(".pk").textContent = alts[n % alts.length]; next.dataset.n = n + 1; }
-    all.forEach(el => el.classList.toggle("idea", el === next));
-  }
-  pT = setTimeout(promptTick, 3600);
+  all.forEach(el => el.classList.remove("idea"));
+  if (!all.length) { pT = setTimeout(promptTick, 2000); return; }
+  const scs = [...new Set(all.map(el => +el.dataset.sc))].sort((x, y) => x - y);
+  scI = (scI + 1) % scs.length;
+  const els = all.filter(el => +el.dataset.sc === scs[scI]).sort((x, y) => x.dataset.step - y.dataset.step);
+  els.forEach(el => { const alts = (el.dataset.alts || "").split("|").filter(Boolean), n = +(el.dataset.n || el.dataset.sc || 0); el.querySelector(".pk").textContent = alts.length ? alts[n % alts.length] : ""; el.dataset.n = n + 1; });
+  let k = 0;
+  const next = () => {
+    if (k < els.length) { els[k++].classList.add("idea"); pT = setTimeout(next, 1300); return; }
+    pT = setTimeout(() => { els.forEach(el => el.classList.remove("idea")); pT = setTimeout(promptTick, 1500); }, 4200);
+  };
+  pT = setTimeout(next, 500);
 }
-new MutationObserver(() => { clearTimeout(pT); pT = setTimeout(promptTick, 700); }).observe(content, { childList: true });
+new MutationObserver(() => { clearTimeout(pT); pT = setTimeout(promptTick, 500); }).observe(content, { childList: true });
 promptTick();
 /* elastic past the top and bottom of the day (our own, so Safari's pull-to-refresh never fires).
    Pull far enough and let go: the previous / next day drops in vertically. */
@@ -1246,13 +1251,23 @@ const PROMPTS = [
   { k: "shop", l: "Shop", s: 1020, e: 1140, cat: "shop" },
   { k: "dinner", l: "Dinner", s: 1140, e: 1260, cat: "dinner" },
 ];
+/* ways the day could go; each builds up block by block, then gives way to the next */
+const SCENES = [
+  [{ k: "coffee", l: "Coffee", s: 540, e: 600, cat: "coffee" }, { k: "day", l: "Sightsee", s: 780, e: 1020, cat: "see" }, { k: "dinner", l: "Dinner", s: 1140, e: 1260, cat: "dinner" }],
+  [{ k: "coffee", l: "Coffee", s: 540, e: 600, cat: "coffee" }, { k: "shop", l: "Shop", s: 780, e: 1020, cat: "shop" }, { k: "dinner", l: "Dinner", s: 1140, e: 1260, cat: "dinner" }],
+  [{ k: "trip", l: "Day trip", s: 540, e: 1080, cat: "trip", min: 360 }],
+];
 function promptsFor(iso, free) {
   const out = [], pl = getPlan(iso);
-  free.forEach(f => PROMPTS.forEach(pr => {
-    const s = Math.max(Math.ceil(f.s / 60) * 60, pr.s), e = Math.min(Math.floor(f.e / 60) * 60, pr.e); if (e - s < 60) return;
-    if (pl.some(p => p.t < e && p.t + catOf(p.c).dur > s)) return; /* already planned here */
-    out.push({ k: "prompt", s, e, pr, tt: pr.l });
-  }));
+  SCENES.forEach((sc, si) => {
+    const got = [];
+    sc.forEach((pr, step) => free.forEach(f => {
+      const s = Math.max(Math.ceil(f.s / 60) * 60, pr.s), e = Math.min(Math.floor(f.e / 60) * 60, pr.e); if (e - s < (pr.min || 60)) return;
+      if (pl.some(p => p.t < e && p.t + catOf(p.c).dur > s)) return;
+      got.push({ k: "prompt", s, e, pr, tt: pr.l, sc: si, step });
+    }));
+    if (got.length) out.push(...got);
+  });
   return out;
 }
 let PL = { iso: null, cat: "coffee", block: null, n: 12 };
