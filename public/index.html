@@ -467,12 +467,6 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .mev { --c: #8e8e93; left: 2px; right: 3px; padding: 3px 5px 3px 9px; background: color-mix(in srgb, var(--c) 15%, var(--bg)); color: color-mix(in srgb, var(--c) 62%, var(--ink)); border-radius: 5px; box-shadow: none; }
 .mev::before { content: ""; position: absolute; left: 2.5px; top: 2.5px; bottom: 2.5px; width: 2.5px; border-radius: 2px; background: var(--c); }
 .mev.travel, .mev.change { --c: #007aff; } .mev.change { background: color-mix(in srgb, var(--c) 9%, var(--bg)); }
-.ev.travel.rail, .ev.change.rail, .mev.travel.rail, .mev.change.rail { --c: #e4572e; }
-/* families: hotel (amber) · flight (blue) · train (vermilion). The journey is the strongest, time at the terminal lighter, the ride to or from it lightest */
-.ev.get, .mev.get { --c: #007aff; background: color-mix(in srgb, var(--c) 6%, var(--bg)); color: color-mix(in srgb, var(--c) 50%, var(--ink)); }
-.ev.get.rail, .mev.get.rail { --c: #e4572e; }
-.ev.get.ride::before, .mev.get.ride::before { opacity: .45; }
-.ev.get.co, .mev.get.co, .ev.pack, .mev.pack { --c: #d4a300; background: color-mix(in srgb, var(--c) 14%, var(--bg)); color: color-mix(in srgb, var(--c) 55%, var(--ink)); }
 /* short blocks: title, then what you do there underneath */
 .ev.short.stack { flex-direction: column; align-items: stretch; justify-content: center; gap: 0; padding-block: 1px; }
 .ev.short.stack .tt { font-size: 12.5px; line-height: 1.15; }
@@ -480,9 +474,15 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev.short.stack .tm { font-size: 11px; line-height: 1.15; }
 .ev.mine.wrap .tt { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.25; }
 .ev.get.wrap .tt { white-space: normal; line-height: 1.25; align-items: flex-start; } .ev.get.wrap .tt .ic { margin-top: 2px; }
-.ev.travel.rail, .mev.travel.rail { background: color-mix(in srgb, var(--c) 15%, var(--bg)); color: color-mix(in srgb, var(--c) 62%, var(--ink)); }
-.ev.change.rail, .mev.change.rail { background: color-mix(in srgb, var(--c) 9%, var(--bg)); color: color-mix(in srgb, var(--c) 62%, var(--ink)); }
 .mev.get { --c: #8e8e93; } .mev.plan { --c: var(--sub); background: var(--card); color: var(--ink); box-shadow: 0 0 0 1px var(--hair); }
+/* a travel day is one chain in one colour, so it reads as a unit next to the day's plans.
+   Strength follows how fixed the time is: the flight or train is strongest, the places you wait in
+   (hotel, airport, station) sit in the middle, the rides between them are palest. Icons tell them apart. */
+.ev.travel, .ev.change, .ev.get, .ev.pack, .mev.travel, .mev.change, .mev.get, .mev.pack { --c: #007aff; }
+.ev.travel, .mev.travel { background: color-mix(in srgb, var(--c) 20%, var(--bg)); color: color-mix(in srgb, var(--c) 72%, var(--ink)); }
+.ev.change, .ev.get.co, .ev.pack, .mev.change, .mev.get.co, .mev.pack { background: color-mix(in srgb, var(--c) 10%, var(--bg)); color: color-mix(in srgb, var(--c) 60%, var(--ink)); opacity: 1; }
+.ev.get.ride, .mev.get.ride { background: color-mix(in srgb, var(--c) 4%, var(--bg)); color: color-mix(in srgb, var(--c) 42%, var(--ink)); }
+.ev.get.ride::before, .mev.get.ride::before { opacity: .35; }
 .mev.slot.coffee { --c: #a2845e; } .mev.slot.dinner { --c: #ff2d55; } .mev.slot.drinks { --c: #5856d6; }
 
 /* suggestions drift in and out one at a time, like ideas, not plans */
