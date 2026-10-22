@@ -432,8 +432,8 @@ const STAYS = [
 const MOVES = [
   { id:"f1", mode:"Flight", from:"Perth", to:"Doha", code:"VA6129", carrier:"Qatar Airways", dep:["2026-10-19","22:45",TZ.per], arr:["2026-10-20","04:55",TZ.doh], ref:"KJCTJU", leave:"19:45", fromQ:"Perth Airport" },
   { id:"f2", mode:"Flight", from:"Doha", to:"Athens", code:"VA6036", carrier:"Qatar Airways", dep:["2026-10-20","07:25",TZ.doh], arr:["2026-10-20","12:25",TZ.ath], ref:"KJCTJU", xfer:60 },
-  { id:"f3", mode:"Flight", from:"Athens", to:"Santorini", code:"GQ344", carrier:"Sky Express", dep:["2026-10-22","10:30",TZ.ath], arr:["2026-10-22","11:25",TZ.ath], ref:"K41BQD", bags:"15kg checked, 8kg cabin, personal item", fromQ:"Athens International Airport", leave:"08:15", xfer:45, note:"Only 15kg checked plus an 8kg cabin bag. Pack a small bag for 3 nights; big suitcases stay in Athens." },
-  { id:"f4", mode:"Flight", from:"Santorini", to:"Athens", code:"GQ349", carrier:"Sky Express", dep:["2026-10-25","14:55",TZ.ath], arr:["2026-10-25","15:50",TZ.ath], ref:"K41BQD", bags:"15kg checked, 8kg cabin, personal item", fromQ:"Santorini Airport", leave:"13:15", xfer:90, note:"Collect the big suitcases on the way to 11 Enteka." },
+  { id:"f3", mode:"Flight", from:"Athens", to:"Santorini", code:"GQ344", carrier:"Sky Express", dep:["2026-10-22","10:30",TZ.ath], arr:["2026-10-22","11:25",TZ.ath], ref:"K41BQD", bags:"15kg checked, 8kg cabin, personal item", fromQ:"Athens International Airport", leave:"08:15", xfer:45, note:"Only 15kg checked plus an 8kg cabin bag. The big suitcases are already at 11 Enteka." },
+  { id:"f4", mode:"Flight", from:"Santorini", to:"Athens", code:"GQ349", carrier:"Sky Express", dep:["2026-10-25","14:55",TZ.ath], arr:["2026-10-25","15:50",TZ.ath], ref:"K41BQD", bags:"15kg checked, 8kg cabin, personal item", fromQ:"Santorini Airport", leave:"13:15", xfer:90, },
   { id:"f5", mode:"Flight", from:"Athens", to:"Rome", code:"GQ820", carrier:"Sky Express", dep:["2026-10-27","10:55",TZ.ath], arr:["2026-10-27","12:00",TZ.it], ref:"2JCREI", bags:"32kg checked, cabin bag, small bag", fromQ:"Athens International Airport", toQ:"Rome Fiumicino", leave:"08:40", xfer:70 },
   { id:"t1", mode:"Train", from:"Rome", to:"Florence", fromSt:"Roma Termini", toSt:"Firenze S.M.N.", code:"Frecciarossa 9420", carrier:"ItaliaRail, 1st class", dep:["2026-10-30","12:30",TZ.it], arr:["2026-10-30","14:11",TZ.it], ref:"XG55EN", pnr:true, fromQ:"Roma Termini", leave:"11:45", xfer:20, note:"The ticket says 12:36 PM, but the train now leaves at 12:30 PM. Be on the platform early. Show the PNR to the conductor." },
   { id:"t2", mode:"Train", from:"Florence", to:"Venice", fromSt:"Firenze S.M.N.", toSt:"Venezia S. Lucia", code:"Frecciarossa 9416", carrier:"ItaliaRail, 1st class", dep:["2026-11-01","12:20",TZ.it], arr:["2026-11-01","14:34",TZ.it], ref:"XHFDSN", pnr:true, fromQ:"Firenze Santa Maria Novella station", leave:"11:40", xfer:30, note:"Show the PNR to the conductor." },
@@ -449,11 +449,9 @@ const MOVES = [
 ];
 
 const HEADS = [
-  { on:["2026-10-21","2026-10-22"], w:1, t:"Santorini bags are 15kg checked plus 8kg cabin.", d:"Pack a small bag for 3 nights. The big suitcases stay in Athens." },
+  { on:["2026-10-21","2026-10-22"], w:1, t:"Santorini bags are 15kg checked plus 8kg cabin.", d:"Small bag for 3 nights. The big suitcases are already at 11 Enteka." },
   { on:["2026-10-20","2026-10-21"], t:"Message The Museum Project Oia.", d:"They ask for contact 48 hours before arrival.", k:"oia-msg" },
   { on:["2026-10-21","2026-10-22"], t:"Message 11 Enteka today.", d:"They ask for 72 hours’ notice before you arrive on the 25th.", k:"enteka-msg" },
-  { on:["2026-10-24","2026-10-25"], t:"Clocks go back an hour overnight Saturday.", d:"Phones change on their own. Check any alarm on a watch or clock." },
-  { on:["2026-10-25"], w:1, t:"Collect the big suitcases today.", d:"On the way to 11 Enteka." },
   { on:["2026-10-27","2026-10-28","2026-10-29"], t:"Register for the Florence apartment.", d:"Online registration and a passport copy before the 30th. There’s no reception.", k:"flo-reg" },
   { on:["2026-10-29","2026-10-30"], w:1, t:"The Florence train leaves at 12:30 PM.", d:"The ticket still says 12:36 PM. Be on the platform early." },
   { on:["2026-10-30"], t:"Message Ca’ de la Fonte today.", d:"48 hours’ notice with a passport copy. Ask for the Venice access-fee exemption voucher.", k:"ven-msg" },
@@ -766,7 +764,7 @@ function events(iso, D) {
   D.segs.forEach((x, i) => {
     const m = x.m; let tt, sub = "", ref = "";
     if (x.k === "travel") { tt = `${m.from} → ${m.to}`;  sub = `${m.code}${m.guess ? ", time is a guess" : ""}`; ref = m.ref || ""; }
-    else if (x.k === "get") { const pickup = x.stay && iso === "2026-10-25"; tt = pickup ? "Collect suitcases from Bellén, then to 11 Enteka" : x.checkin ? "To the hotel, check in" : x.bags ? "To the hotel, drop off suitcases" : x.stay ? "To the hotel" : `To ${m.mode === "Flight" ? "the airport" : "the station"}`; sub = pickup ? "Taxi via Bellén Athens Hotel" : x.checkin ? `${x.stay.hotel} · check in from ${s12(x.stay.ci)}` : x.stay ? x.stay.hotel : (m.fromQ || m.from); }
+    else if (x.k === "get") { tt = x.checkin ? "To the hotel, check in" : x.bags ? "To the hotel, drop off suitcases" : x.stay ? "To the hotel" : `To ${m.mode === "Flight" ? "the airport" : "the station"}`; sub = x.checkin ? `${x.stay.hotel} · check in from ${s12(x.stay.ci)}` : x.stay ? x.stay.hotel : (m.fromQ || m.from); }
     else if (x.k === "change") { tt = x.title; }
     else if (x.k === "wait") { tt = "Free, with bags"; sub = x.stay && x.stay.store ? "Hotel can hold bags" : x.stay && x.stay.store === false ? "No luggage storage listed" : ""; }
     else { tt = x.title === "Free day" ? "Free all day" : x.title; sub = x.sub || ""; }
@@ -820,7 +818,7 @@ function renderDayContent(iso) {
     }
     if (ev.k === "free" || ev.k === "wait") {
       const hint = ""; const _unused = ev.k === "wait" ? (ev.x.stay && ev.x.stay.store ? "Hotel can hold your bags" : ev.x.stay && ev.x.stay.store === false ? "No luggage storage listed" : "") : hasSaves(iso) && h >= 60 ? "Sightsee or shop nearby ›" : h >= 60 ? "Ideas nearby ›" : "";
-      html += `<div class="ev ${ev.k}${short ? " short" : ""}${ev.done ? " done" : ""}" role="button" tabindex="0" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${ev.k === "wait" ? (ev.x.morning ? "Leave bags at hotel after check-out" : ev.x.pickup ? "Collect suitcases from Bellén, drop at 11 Enteka" : ev.x.stay && ev.x.stay.store === false ? "Drop off suitcases (ask host, no storage listed)" : "Drop off suitcases at the hotel") : ""}</span><span class="tm"></span></div>`;
+      html += `<div class="ev ${ev.k}${short ? " short" : ""}${ev.done ? " done" : ""}" role="button" tabindex="0" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${ev.k === "wait" ? (ev.x.morning ? "Leave bags at hotel after check-out" : ev.x.stay && ev.x.stay.store === false ? "Drop off suitcases (ask host, no storage listed)" : "Drop off suitcases at the hotel") : ""}</span><span class="tm"></span></div>`;
       return;
     }
     const time = ev.k === "mark" ? t12(ev.s) : ev.x && ev.x.overnight ? `until ${t12(ev.e)}` : `${t12(ev.s)} – ${t12(ev.e)}`;
