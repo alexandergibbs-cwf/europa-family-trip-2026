@@ -190,7 +190,9 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .side .crow.cur { background: var(--card); }
 .side .crow.cur .a::after { content: "Now"; font-size: 11px; font-weight: 700; color: #fff; background: var(--red); border-radius: 980px; padding: 2px 7px; margin-left: 8px; vertical-align: 2px; }
 .side .crow.past { opacity: .45; }
-.side .crow.on { outline: 2px solid var(--blue); outline-offset: -2px; }
+.side-body { position: relative; }
+.sring { position: absolute; left: 12px; right: 12px; border: 2px solid var(--blue); border-radius: 12px; pointer-events: none; z-index: 1; transition: top 480ms var(--spring), height 480ms var(--spring); }
+@media (prefers-reduced-motion: reduce) { .sring { transition: none; } }
 .scrim { position: fixed; inset: 0; z-index: 40; background: rgba(0, 0, 0, 0.32); opacity: 0; pointer-events: none; transition: opacity 320ms cubic-bezier(0.65, 0, 0.35, 1); }
 .scrim.open { opacity: 1; pointer-events: auto; }
 .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 41; touch-action: pan-y; max-width: 520px; margin: 0 auto; background: var(--panel); border-radius: 26px 26px 0 0; padding: 8px max(16px, env(safe-area-inset-right, 0px)) calc(28px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); transform: translateY(105%); max-height: 90vh; overflow-y: auto; overscroll-behavior: contain; }
@@ -881,8 +883,15 @@ function openSide() {
   document.getElementById("side-body").innerHTML = STAYS.filter(s => s.out > today).map(s => `<button class="crow press${s.out <= today ? " past" : ""}${s.in <= today && today < s.out ? " cur" : ""}${s === cur ? " on" : ""}" data-goto="${s.in}"><span><div class="a">${esc(s.city)}</div><div class="b">${esc(s.hotel)}</div></span><span class="r">${dRange(s.in, s.out)}<br>${nights(s)} nights</span></button>`).join("");
   side.hidden = false; scrim.classList.add("open"); sideAnim?.cancel();
   const sb = document.getElementById("side-body"); sb.scrollTop = 0; side.classList.remove("scrolled");
+  sb.insertAdjacentHTML("beforeend", `<div class="sring" id="sring" hidden></div>`); ringTo(sb.querySelector(".crow.on"), false);
   const on = sb.querySelector(".crow.on"); if (on) { const top = on.offsetTop - sb.clientHeight / 2 + on.offsetHeight / 2; if (top > 0) sb.scrollTop = top; }
   sideAnim = side.animate([{ transform: "translateX(-104%)" }, { transform: "translateX(0)" }], { duration: reduce() ? 1 : 520, easing: EASE, fill: "forwards" });
+}
+function ringTo(row, animate) {
+  const r = document.getElementById("sring"); if (!r || !row) return;
+  if (!animate) r.style.transition = "none";
+  r.hidden = false; r.style.top = row.offsetTop + "px"; r.style.height = row.offsetHeight + "px";
+  if (!animate) { void r.offsetHeight; r.style.transition = ""; }
 }
 function closeSide(from = 0) {
   if (side.hidden) return; scrim.classList.remove("open"); sideAnim?.cancel();
@@ -1146,7 +1155,10 @@ document.addEventListener("click", e => {
       if (i.k === "slot") { SL = i; REFRESH = () => { const st = sheet.scrollTop; document.getElementById("sheet-body").innerHTML = slotSheet(); sheet.scrollTop = st; }; return openSheet(slotSheet()); }
       if (i.k === "free" || i.k === "wait") { return openPlanner(view, PL.cat && PL.cat !== "trip" ? PL.cat : "dinner", i.x); } return openSheet(i.m ? moveSheet(i.m) : staySheet(i.stay)); }
   const st = t.closest("[data-stay]"); if (st) { haptic(); return openSheet(staySheet(STAYS[+st.dataset.stay])); }
-  const gt = t.closest("[data-goto]"); if (gt) { closeSheet(); closeSide(); return selectDay(gt.dataset.goto); }
+  const gt = t.closest("[data-goto]"); if (gt) {
+    const d = gt.dataset.goto; closeSheet();
+    if (gt.classList.contains("crow") && !side.hidden) { haptic(); ringTo(gt, true); side.querySelectorAll(".crow").forEach(b => b.classList.toggle("on", b === gt)); setTimeout(() => { closeSide(); selectDay(d); }, reduce() ? 0 : 380); return; }
+    closeSide(); return selectDay(d); }
   const wd = t.closest(".wd"); if (wd) { const d = wd.dataset.d; if (d === view) return; centreDay(d, true); return selectDay(d, 0, false); }
   if (t.closest("#backPill")) { haptic(); return openSide(); }
   if (t.closest("#infoPill")) { haptic(); openSheet(menuSheet()); startCycle(view); return; }
