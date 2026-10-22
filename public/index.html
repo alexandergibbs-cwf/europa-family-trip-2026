@@ -1053,7 +1053,7 @@ function renderDayContent(iso) {
       return;
     }
     if (ev.k === "prompt") {
-      html += `<button class="ev prompt c-${ev.pr.k}${short ? " short" : ""}${h < 66 ? " tight" : ""} press" data-prompt="${ev.pr.cat}" data-sc="${ev.sc}" data-step="${ev.step}" data-i="${i}" data-alts="${esc(sceneAlts(iso, ev.sc, ev.step).join("|"))}" style="top:${top + 12}px;height:${h}px"><span class="tt">${esc(ev.tt)}</span><span class="pk"></span><span class="hk"></span></button>`;
+      html += `<button class="ev prompt c-${ev.pr.k}${short ? " short" : ""}${h < 66 ? " tight" : ""} press" data-prompt="${ev.pr.cat}" data-sc="${ev.sc}" data-step="${ev.step}"${ev.pr.of ? ` data-sub="${ev.pr.part}"` : ""} data-i="${i}" data-alts="${esc(sceneAlts(iso, ev.sc, ev.step).join("|"))}" style="top:${top + 12}px;height:${h}px"><span class="tt">${esc(ev.tt)}</span><span class="pk"></span><span class="hk"></span></button>`;
       return;
     }
     if (ev.k === "free" || ev.k === "wait") {
@@ -1164,10 +1164,11 @@ function promptTick() {
   scI = (scI + 1) % scs.length;
   const els = all.filter(el => +el.dataset.sc === scs[scI]).sort((x, y) => x.dataset.step - y.dataset.step);
   els.forEach(el => { const alts = (el.dataset.alts || "").split("|"), n = +(el.dataset.n || el.dataset.sc || 0); const [a1, a2] = (alts.length ? alts[n % alts.length] : "").split("\x1f"); el.querySelector(".pk").textContent = a1 || ""; const hk = el.querySelector(".hk"); if (hk) hk.textContent = a2 || ""; el.dataset.n = n + 1; });
+  const show = els.filter(el => el.dataset.sub == null || el.querySelector(".pk").textContent);
   let k = 0;
   const next = () => {
-    if (k < els.length) { els[k++].classList.add("idea"); pT = setTimeout(next, 1300); return; }
-    pT = setTimeout(() => { els.forEach(el => el.classList.remove("idea")); pT = setTimeout(promptTick, 1500); }, 4200);
+    if (k < show.length) { show[k++].classList.add("idea"); pT = setTimeout(next, 1300); return; }
+    pT = setTimeout(() => { show.forEach(el => el.classList.remove("idea")); pT = setTimeout(promptTick, 1500); }, 4200);
   };
   pT = setTimeout(next, 500);
 }
@@ -1394,7 +1395,7 @@ function planGroup(iso, steps, home, opts = {}) {
   /* "stay close" keeps to places near the hotel, unless that leaves nothing */
   const pool = c => { const all = placesFor(iso, c, home), n = opts.near && c !== "trip" ? all.filter(x => x.k <= opts.near) : all; return (n.length ? n : all).map(x => x.s); };
   const night = Math.max(0, Math.round((Date.parse(iso) - Date.parse(home.in)) / 864e5));
-  const mainStep = steps.find(p => p.area && !p.dest);
+  const mainStep = steps.find(p => p.area && !p.dest), key = p => p && (p.grp || p);
   const seeds = mainStep ? pool(mainStep.cat).slice(0, 8) : [];
   const V = Math.max(1, Math.min(4, seeds.length));
   for (let v = 0; v < V; v++) {
@@ -1408,10 +1409,10 @@ function planGroup(iso, steps, home, opts = {}) {
     const main = {};
     /* each area block is a small walkable cluster; the first is the day's anchor, later ones stay close to it */
     const areas = new Map();
-    const cluster = (pr, s0) => { used.add(s0.id); const list = [s0]; if (pr.cat !== "trip") for (let j = 0; j < (pr.cat === "culture" ? 0 : 2); j++) { const nx = take(pool(pr.cat), s => dk(s, list[list.length - 1]), 2.5, R + j); if (nx) list.push(nx); } return list; };
-    if (mainStep && seed) areas.set(mainStep, cluster(mainStep, seed));
-    steps.filter(p => p.area && p !== mainStep).forEach(pr => { const s0 = take(pool(pr.cat), s => dk(s, centre), 99, R); if (s0) { used.delete(s0.id); areas.set(pr, cluster(pr, s0)); } });
-    main.list = mainStep ? areas.get(mainStep) : null;
+    const cluster = (pr, s0) => { used.add(s0.id); const list = [s0]; if (pr.cat !== "trip") for (let j = 0; j < (pr.cat === "culture" ? 0 : pr.of ? pr.of - 1 : 2); j++) { const nx = take(pool(pr.cat), s => dk(s, list[list.length - 1]), 2.5, R + j); if (nx) list.push(nx); } return list; };
+    if (mainStep && seed) areas.set(key(mainStep), cluster(mainStep, seed));
+    steps.filter(p => p.area && key(p) !== key(mainStep) && !(p.part > 0)).forEach(pr => { const s0 = take(pool(pr.cat), s => dk(s, centre), 99, R); if (s0) { used.delete(s0.id); areas.set(key(pr), cluster(pr, s0)); } });
+    main.list = mainStep ? areas.get(key(mainStep)) : null;
     let prev = home;
     steps.forEach((pr, ix) => {
       let names = [], from = prev, to = null;
@@ -1421,7 +1422,9 @@ function planGroup(iso, steps, home, opts = {}) {
         if (pr.k === "tripback") { txt.push(`${dur(pr.T)} back to the hotel\x1f`); prev = home; return; }
         ID[ix] = [pr.dest.id]; txt.push(`Day trip${pr.dest.city && pr.dest.city !== "Other" ? " · " + pr.dest.city : ""}\x1f${hookOf(pr.dest)}`); prev = home; return;
       }
-      if (pr.area) { const L = areas.get(pr); if (!L) { txt.push(""); return; } ID[ix] = L.map(s => s.id); if (pr.cat === "trip") { txt.push(`${L[0].city !== "Other" ? L[0].city + " · " : ""}${L[0].name}\x1f${hookOf(L[0])}`); prev = home; return; } names = L.map(s => s.name); to = L[L.length - 1]; txt.push(`${names.join(" → ")} · ${walk(dk(prev, L[0]))}${prev === home ? " from the hotel" : ""}\x1f${L.map(hookOf).filter(Boolean).slice(0, 2).join(". ")}`); prev = to; return; }
+      if (pr.area) { const L = areas.get(key(pr)); if (!L) { txt.push(""); return; }
+        if (pr.of) { const st = L[pr.part]; if (!st) { txt.push(""); return; } ID[ix] = [st.id]; txt.push(`${st.name} · ${walk(dk(prev, st))}${prev === home ? " from the hotel" : ""}\x1f${hookOf(st)}`); prev = st; return; }
+        ID[ix] = L.map(s => s.id); if (pr.cat === "trip") { txt.push(`${L[0].city !== "Other" ? L[0].city + " · " : ""}${L[0].name}\x1f${hookOf(L[0])}`); prev = home; return; } names = L.map(s => s.name); to = L[L.length - 1]; txt.push(`${names.join(" → ")} · ${walk(dk(prev, L[0]))}${prev === home ? " from the hotel" : ""}\x1f${L.map(hookOf).filter(Boolean).slice(0, 2).join(". ")}`); prev = to; return; }
       else if (pr.k === "coffee" || pr.k === "cafes") {
         /* on the way from the hotel to the day's area: small detour, else close to home, else close to the area */
         const cafes = pool("coffee"), detour = s => dk(home, s) + dk(s, centre) - dk(home, centre);
@@ -1537,7 +1540,20 @@ function sceneFor(iso, si) {
     out.push({ ...p, s, e });
   });
   out.sort((a, b) => a.s - b.s);
-  SCF.set(key, out); return out;
+  const res = splitArea(out);
+  SCF.set(key, res); return res;
+}
+/* a sights or shopping block becomes one block per stop, stacked: an hour or so each, rounded to the half hour */
+function splitArea(steps) {
+  const out = [];
+  steps.forEach(p => {
+    if (!p.area || p.dest || p.cat === "culture" || p.cat === "trip") { out.push(p); return; }
+    const D = p.e - p.s, n = Math.max(1, Math.min(3, Math.floor(D / 60)));
+    if (n === 1) { out.push(p); return; }
+    const g = {}; let t = p.s;
+    for (let j = 0; j < n; j++) { const len = j === n - 1 ? p.e - t : Math.floor(D / n / 30) * 30; out.push({ ...p, s: t, e: t + len, grp: g, part: j, of: n }); t += len; }
+  });
+  return out;
 }
 function promptsFor(iso, free) {
   const out = [], pl = getPlan(iso);
@@ -1652,10 +1668,17 @@ function askFit(iso, steps, A) {
   return out.sort((a, b) => a.s - b.s);
 }
 function askPlan(iso, A, v) {
-  const steps = askFit(iso, askSteps(iso, A, v), A);
+  const steps = splitArea(askFit(iso, askSteps(iso, A, v), A));
   const P = planSteps(iso, steps, { near: A.range === "near" ? 1.6 : 0 }), vv = v % P.txt.length;
   const n = A.want.includes("trip") && steps.some(p => p.dest) ? Math.min(4, tripList(iso).length) : P.txt.length;
-  return { n, steps: steps.map((p, i) => ({ k: p.k, l: p.l, cat: p.cat, s: p.s, e: p.e, txt: P.txt[vv][i] || "", ids: P.ids[vv][i] || [] })) };
+  const res = [];
+  steps.forEach((p, i) => {
+    const it = { k: p.k, l: p.l, cat: p.cat, s: p.s, e: p.e, txt: P.txt[vv][i] || "", ids: P.ids[vv][i] || [] }, prev = res[res.length - 1];
+    /* fewer stops nearby than slots: the stop before simply gets the extra time */
+    if (p.part > 0 && !it.txt && prev && prev.grp === p.grp) { prev.e = it.e; return; }
+    res.push(Object.assign(it, { grp: p.grp }));
+  });
+  return { n, steps: res.map(({ grp, ...x }) => x) };
 }
 let ASK = null;
 function askSheet() {
