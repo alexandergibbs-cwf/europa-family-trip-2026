@@ -628,7 +628,7 @@ function renderDayContent(iso) {
   html += `</div>`;
   D.marks.forEach((mk, mi) => { html += `<div class="mk" style="top:${y(mk.t)}px"><button class="press" data-mark="${mi}">${mk.kind === "in" ? "Check in" : "Check out"} ${t12(mk.t)}</button></div>`; });
   const ss = D.s || iso === "2026-11-19" ? sunset(iso, cityOn(iso)) : null;
-  if (ss) html += `<div class="sun" style="top:${y(ss)}px"><span>Sunset ${t12(ss)}</span></div>`;
+
   if (showNow) html += `<div class="now" style="top:${y(nm)}px"><span>${t12(nm).replace(" ", "")}</span></div>`;
   html += `</div>`;
   return html;
