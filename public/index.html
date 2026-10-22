@@ -159,6 +159,17 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .grid .hl.hide span { visibility: hidden; }
 .grid .hl.hide::after { opacity: .5; }
 .note { font-size: 12px; color: var(--sub); text-align: center; padding: 6px 24px 16px; line-height: 1.4; }
+.land { position: relative; margin: 2px 4px 14px; }
+.land-h { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding-right: 40px; }
+.land h3 { font-size: 30px; font-weight: 700; letter-spacing: -0.03em; margin: 0; line-height: 1.1; }
+.land-sub { font-size: 15px; color: var(--ink); font-weight: 500; margin-top: 4px; }
+.land-sub2 { font-size: 14px; color: var(--sub); margin-top: 2px; }
+.land .jump { color: var(--blue); text-decoration: none; font-weight: 600; }
+.land-x { position: absolute; right: 0; top: 0; }
+.wxb { border: 0; background: none; text-align: right; cursor: pointer; display: flex; flex-direction: column; align-items: flex-end; line-height: 1.1; padding: 0; margin-top: 4px; color: var(--ink); flex: none; }
+.wxb b { font-size: 30px; font-weight: 500; letter-spacing: -0.03em; }
+.wxb span { font-size: 13px; color: var(--sub); margin-top: 3px; text-transform: capitalize; }
+.wxb small { font-size: 12px; color: var(--sub); margin-top: 1px; }
 .mrow { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; width: 100%; border: 0; background: var(--card); text-align: left; padding: 14px 16px; cursor: pointer; }
 .mrow + .mrow { box-shadow: inset 16px 0.5px 0 var(--card), inset 0 0.5px 0 var(--hair); }
 .mrow .mi { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--sub); }
@@ -369,6 +380,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .mnow { position: absolute; left: 0; right: 0; height: 0; border-top: 1.5px solid var(--red); z-index: 3; pointer-events: none; }
 .mnow::before { content: ""; position: absolute; left: -4px; top: -4.5px; width: 8px; height: 8px; border-radius: 50%; background: var(--red); }
 #modePill.on { color: var(--blue); }
+#daycontent { transform-origin: 50% 20%; }
 </style>
 
 <div class="page" id="page">
@@ -849,9 +861,11 @@ function renderMultiContent(iso) {
 function renderContent(iso) { return MODE === "multi" ? renderMultiContent(iso) : renderDayContent(iso); }
 function setMode(m) {
   if (m === MODE) return; MODE = m; try { localStorage.setItem("mode", m); } catch (e) {}
-  document.getElementById("modePill").classList.toggle("on", m === "multi"); haptic();
-  const a = reduce() ? null : content.animate([{ opacity: 1, transform: "scale(1)" }, { opacity: 0, transform: "scale(0.985)" }], { duration: 140, easing: "cubic-bezier(0.65, 0, 0.35, 1)", fill: "forwards" });
-  const swap = () => { content.innerHTML = renderContent(view); a?.cancel(); scrollToDay(false); if (!reduce()) content.animate([{ opacity: 0, transform: "scale(0.985)" }, { opacity: 1, transform: "scale(1)" }], { duration: 320, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }); };
+  const mp = document.getElementById("modePill"); mp.classList.toggle("on", m === "multi"); haptic();
+  if (!reduce()) mp.animate([{ transform: "scale(1) rotate(0deg)" }, { transform: "scale(0.7) rotate(-90deg)", offset: 0.4 }, { transform: "scale(1) rotate(0deg)" }], { duration: 520, easing: EASE });
+  const toMulti = m === "multi";
+  const a = reduce() ? null : content.animate([{ opacity: 1, transform: `scaleX(1)` }, { opacity: 0, transform: toMulti ? "scaleX(0.6)" : "scaleX(1.25)" }], { duration: 200, easing: "cubic-bezier(0.65, 0, 0.35, 1)", fill: "forwards" });
+  const swap = () => { content.innerHTML = renderContent(view); a?.cancel(); scrollToDay(false); if (!reduce()) content.animate([{ opacity: 0, transform: toMulti ? "scaleX(1.25)" : "scaleX(0.6)" }, { opacity: 1, transform: "scaleX(1)" }], { duration: 520, easing: EASE }); };
   a ? (a.onfinish = swap) : swap();
 }
 function countdown(ms) { const m = Math.floor(ms / 6e4), d = Math.floor(m / 1440), h = Math.floor((m % 1440) / 60), mm = m % 60; return d >= 1 ? `in ${d}d ${h}h` : h ? `in ${h}h ${mm}m` : `in ${mm}m`; }
@@ -1126,14 +1140,19 @@ function freeSheet2() {
 
 function menuSheet() {
   const iso = view, s = stayOn(iso), w = wxFor(iso), c = cityOn(iso), open = headsFor(iso).filter(h => !h.k || !done(h.k)).length, ss = sunset(iso, c);
-  const row = (k, icon, a, b) => `<button class="mrow press" data-menu="${k}"><span><span class="a">${a}</span>${b ? `<span class="b">${b}</span>` : ""}</span><i class="chev"></i></button>`;
-  return head(esc(cityName(iso)), dDay(iso) + (iso !== today && today >= START && today <= END ? ` · <a href="#" data-today style="color:var(--blue);text-decoration:none;font-weight:600">Today</a>` : ""))
-    + `<div class="ig">
-      ${row("stay", "Stay", s ? esc(s.hotel) : "No hotel tonight", s ? `Check in ${s12(s.ci)} · out ${s12(s.co)}${s.est ? " (usual)" : ""}` : (iso === END ? "Landing in Perth" : "Overnight flight"))}
-      ${row("wx", "Weather", w ? `${w.hi}° / ${w.loEst || w.typical ? "~" : ""}${w.lo}°, ${esc(w.typical ? "typical for the season" : w.cond.toLowerCase())}` : "Weather", ss ? `Sunset ${t12(ss)}` : "")}
-      ${row("ideas", "", "Things to do", hasSaves(iso) ? `<span class="cyc" id="cyc"></span>` : `Search near the hotel`)}
-      ${row("tasks", "", open ? `${open} thing${open > 1 ? "s" : ""} to sort` : "Nothing to sort", open ? headsFor(iso).find(h => !h.k || !done(h.k)).t : "No reminders for this day")}
-    </div>`;
+  const n = s ? Math.round((Date.parse(iso) - Date.parse(s.in)) / 864e5) + 1 : 0;
+  const jump = iso !== today && today >= START && today <= END ? `<a href="#" class="jump" data-today>Jump to today</a>` : "";
+  const wx = w ? `<button class="wxb press" data-menu="wx"><b>${w.hi}°</b><span>${esc(w.typical ? "typical" : w.cond.toLowerCase())}</span>${ss ? `<small>Sunset ${t12(ss)}</small>` : ""}</button>` : "";
+  const row = (k, a, b) => `<button class="mrow press" data-menu="${k}"><span><span class="a">${a}</span>${b ? `<span class="b">${b}</span>` : ""}</span><i class="chev"></i></button>`;
+  return `<div class="land">
+    <div class="land-h"><div><h3 id="sheet-title">${esc(cityName(iso))}</h3><div class="land-sub">${s ? `${dRange(s.in, s.out)} · night ${n} of ${nights(s)}` : dDay(iso)}</div><div class="land-sub2">${dDay(iso)}${jump ? ` · ${jump}` : ""}</div></div>${wx}</div>
+    <button class="xbtn press land-x" data-close aria-label="Close">×</button>
+  </div>
+  <div class="ig">
+      ${row("stay", s ? esc(s.hotel) : "No hotel tonight", s ? `Check in ${s12(s.ci)} · out ${s12(s.co)}${s.est ? " (usual)" : ""}${s.addr && !/booking/i.test(s.addr) ? " · " + esc(s.addr) : ""}` : (iso === END ? "Landing in Perth" : "Overnight flight"))}
+      ${row("ideas", "Things to do", hasSaves(iso) ? `<span class="cyc" id="cyc"></span>` : `Search near the hotel`)}
+      ${row("tasks", open ? `${open} thing${open > 1 ? "s" : ""} to sort` : "Nothing to sort", open ? headsFor(iso).find(h => !h.k || !done(h.k)).t : "No reminders for this day")}
+  </div>`;
 }
 const CATICON = { cafe: "cup", restaurant: "fork", bar: "glass", shop: "bag", attraction: "pin", activity: "pin", other: "pin" };
 let cycT = 0;
