@@ -1277,7 +1277,7 @@ pager.addEventListener("pointerup", endDrag); pager.addEventListener("pointercan
 
 /* ---------- sheets ---------- */
 const sheet = document.getElementById("sheet"), scrim = document.getElementById("scrim"); let sAnim = null, lastFocus = null, scrimT = 0;
-const head = (title, sub) => `<div class="sh-h"><h3 id="sheet-title">${title}</h3><button class="xbtn press" data-close aria-label="Close">×</button></div>${sub ? `<div class="st">${sub}</div>` : `<div style="height:16px"></div>`}`;
+const head = (title, sub) => `<div class="sh-h"><h3 id="sheet-title">${title}</h3></div>${sub ? `<div class="st">${sub}</div>` : `<div style="height:16px"></div>`}`;
 function openSheet(html) {
   document.getElementById("sheet-body").innerHTML = html; bindChecks(sheet); lastFocus = document.activeElement;
   sheet.hidden = false; sheet.scrollTop = 0; clearTimeout(scrimT); scrim.hidden = false; void scrim.offsetWidth; scrim.classList.add("open"); sAnim?.cancel();
