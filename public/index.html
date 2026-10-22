@@ -871,7 +871,7 @@ function events(iso, D) {
 function renderDayContent(iso) {
   const D = buildDay(iso); CUR = D; const evs = events(iso, D); ITEMS = evs;
   const nm = nowMin(), showNow = iso === today;
-  const LO = Math.min(300, Math.floor(Math.min(...D.segs.map(x => x.s), 1440) / 60) * 60), HI = 1440;
+  const LO = 0, HI = 1440 + 180;
   /* busy ranges: anything that isn't blank free time, padded a little, plus marks and now */
   const busy = [];
   evs.forEach(e => { if (e.k !== "free" && e.k !== "prompt") busy.push([e.s - 5, e.e + 5]); });
@@ -888,10 +888,10 @@ function renderDayContent(iso) {
   YFN = y;
   let html = `<div class="grid" style="height:${H + 32}px">`;
   let lastLabelY = -99;
-  for (let h = LO / 60; h <= 24; h++) {
+  for (let h = LO / 60; h <= HI / 60; h++) {
     const t = h * 60, near = showNow && Math.abs(nm - t) < 16, yv = y(t), tight = yv - lastLabelY < 18;
     if (!tight) lastLabelY = yv;
-    html += `<div class="hl${h === 12 ? " mid" : ""}${near || tight ? " hide" : ""}" style="top:${yv}px"><span>${h === 12 ? "Midday" : `${(h % 12) || 12}<small>${h < 12 || h === 24 ? "am" : "pm"}</small>`}</span></div>`;
+    html += `<div class="hl${h === 12 ? " mid" : ""}${near || tight ? " hide" : ""}" style="top:${yv}px"><span>${h === 12 ? "Midday" : `${(h % 12) || 12}<small>${h < 12 || h >= 24 ? "am" : "pm"}</small>`}</span></div>`;
   }
   html += `<div class="lane">`;
   evs.forEach((ev, i) => {
@@ -924,7 +924,7 @@ function renderDayContent(iso) {
   return html;
 }
 let MODE = (() => { try { return localStorage.getItem("mode") === "multi" ? "multi" : "day"; } catch (e) { return "day"; } })();
-const MSTART = 300, MEND = 1440, MPX = 0.72, MY = t => 10 + (Math.max(MSTART, Math.min(MEND, t)) - MSTART) * MPX;
+const MSTART = 0, MEND = 1440 + 180, MPX = 0.72, MY = t => 10 + (Math.max(MSTART, Math.min(MEND, t)) - MSTART) * MPX;
 let MITEMS = {};
 function multiStart(iso) { let s = iso; while (addDays(s, 2) > END) s = addDays(s, -1); return s < START ? START : s; }
 function renderMultiContent(iso) {
@@ -934,7 +934,7 @@ function renderMultiContent(iso) {
   let html = `<div class="multi"><div class="mh"><div class="mhg"></div><div class="mhv"><div class="mtr">`;
   win.forEach(k => { const d = dayAt(k); if (!d) return; html += `<button class="press${d === today ? " today" : ""}" data-open-day="${d}" style="left:${k * 50}%"><b>${fmt(d, { weekday: "short" })} – ${+d.slice(8)} ${fmt(d, { month: "short" })}</b><small>${esc(cityName(d))}</small></button>`; });
   html += `</div></div></div><div class="mg" style="height:${MY(MEND) + 24}px">`;
-  for (let h = MSTART / 60; h <= 24; h++) html += `<div class="hl${h === 12 ? " mid" : ""}" style="top:${MY(h * 60)}px"><span>${h === 12 ? "Midday" : `${(h % 12) || 12}<small>${h < 12 || h === 24 ? "am" : "pm"}</small>`}</span></div>`;
+  for (let h = MSTART / 60; h <= MEND / 60; h++) html += `<div class="hl${h === 12 ? " mid" : ""}" style="top:${MY(h * 60)}px"><span>${h === 12 ? "Midday" : `${(h % 12) || 12}<small>${h < 12 || h >= 24 ? "am" : "pm"}</small>`}</span></div>`;
   html += `<div class="mgut"></div><div class="mgv"><div class="mtr">`;
   win.forEach(k => {
     const d = dayAt(k); if (!d) return;
@@ -999,14 +999,24 @@ function selectDay(iso, dir, syncWeek = true) {
 const pager = document.getElementById("pager");
 let pd = null;
 /* pull past the top or bottom of a day to move to the previous / next day */
+/* elastic past the top and bottom of the day (our own, so Safari's pull-to-refresh never fires); nothing changes day */
 let vpull = null;
-pager.addEventListener("touchstart", e => { vpull = { y: e.touches[0].clientY, top: scrollY <= 0, bottom: atBottom(), fired: false }; }, { passive: true });
-pager.addEventListener("touchmove", e => {
-  if (!vpull || vpull.fired || !sheet.hidden || !side.hidden) return; const dy = e.touches[0].clientY - vpull.y;
-  if (vpull.top && dy > 110 && scrollY <= 0 && view > START) { vpull.fired = true; haptic("heavy"); selectDay(addDays(view, -1), -1); }
-  else if (vpull.bottom && dy < -110 && atBottom() && view < END) { vpull.fired = true; haptic("heavy"); selectDay(addDays(view, 1), 1); }
+const rubber = d => { const c = innerHeight * 0.55, s = Math.sign(d), a = Math.abs(d); return s * c * (1 - 1 / (a * 0.55 / c + 1)); };
+document.addEventListener("touchstart", e => {
+  if (e.touches.length !== 1 || !sheet.hidden || !side.hidden || !show.hidden || e.target.closest("#top, .sheet, .side")) { vpull = null; return; }
+  vpull = { y: e.touches[0].clientY, top: scrollY <= 0, bottom: atBottom(), d: 0, on: false };
 }, { passive: true });
-pager.addEventListener("touchend", () => { vpull = null; }, { passive: true });
+document.addEventListener("touchmove", e => {
+  if (!vpull || pd?.mode === "h") return; const dy = e.touches[0].clientY - vpull.y;
+  const pull = (vpull.top && dy > 0 && scrollY <= 0) || (vpull.bottom && dy < 0 && atBottom());
+  if (!pull) { if (vpull.on) { vpull.on = false; content.style.transform = ""; } return; }
+  if (e.cancelable) e.preventDefault(); vpull.on = true; vpull.d = rubber(dy);
+  content.style.transform = `translateY(${vpull.d.toFixed(1)}px)`;
+}, { passive: false });
+document.addEventListener("touchend", () => {
+  if (vpull && vpull.on) { const from = vpull.d; content.style.transform = ""; if (!reduce()) content.animate([{ transform: `translateY(${from}px)` }, { transform: "translateY(0)" }], { duration: 520, easing: "cubic-bezier(0.16, 1, 0.3, 1)" }); }
+  vpull = null;
+}, { passive: true });
 pager.addEventListener("pointerdown", e => { if (e.pointerType === "mouse" && e.button) return; if (e.clientX < 24) { pd = null; openSide(); return; } pd = { x: e.clientX, y: e.clientY, t: performance.now(), mode: null, dx: 0 }; });
 const pageW = () => MODE === "multi" ? mColW() : (pager.clientWidth || innerWidth);
 pager.addEventListener("pointermove", e => {
