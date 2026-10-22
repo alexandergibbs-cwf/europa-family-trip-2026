@@ -64,14 +64,14 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .pill .nm small { font-size: 12px; font-weight: 400; color: var(--sub); letter-spacing: -0.01em; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; }
 .pill.wx { padding: 0 16px; font-variant-numeric: tabular-nums; gap: 8px; }
 .pill.wx .e { font-size: 20px; }
-.week { position: relative; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; padding: 0 calc(50% - 26px); -webkit-overflow-scrolling: touch; }
+.week { position: relative; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; padding: 0 calc(50% - 26px); -webkit-overflow-scrolling: touch; scroll-padding: 0; }
 .week::-webkit-scrollbar { display: none; }
 .week::before { content: ""; position: absolute; }
 .wwrap { position: relative; }
 .wk { position: relative; z-index: 1; }
 .wd { width: 52px; flex: none; scroll-snap-align: center; scroll-snap-stop: normal; padding: 2px 0 8px; }
 .wd .l { font-size: 12px; font-weight: 600; color: var(--sub); letter-spacing: 0; margin-bottom: 1px; }
-.wd .n { width: 44px; height: 44px; transition: color 160ms ease, background-color 160ms ease, transform 160ms ease, opacity 160ms ease; }
+.wd .n { width: 44px; height: 44px; transition: none; }
 .wd.on .n { background: var(--ink); color: var(--bg); font-weight: 600; }
 .wd.today.on .n { background: var(--red); color: #fff; }
 .wd.today.on .l { color: var(--red); }
@@ -364,7 +364,6 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 <div class="top" id="top">
   <div class="pills pad">
     <button class="pill glass press" id="backPill" aria-label="Cities"><i class="ch"></i><span class="nm" id="cityName"></span></button>
-    <button class="pill glass press" id="todayCap" data-today hidden style="font-size:15px;padding:0 14px">Today</button>
     <div class="pill glass pgroup"><button class="ib press" id="modePill" aria-label="Switch between day and 3-day view"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16M15 4v16"/></svg></button><i class="sep"></i><button class="ib press" id="infoPill" aria-label="Details for this day"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r="0.6" fill="currentColor"/></svg></button></div>
   </div>
   <div class="wwrap"><div class="week" id="week" aria-label="Days"></div></div>
@@ -664,9 +663,12 @@ function _oldRenderWeek() {
 }
 const weekEl = document.getElementById("week"), WDW = 52;
 let progWeek = false, weekT = 0, curWeek = -1, wCentre = -1;
+function padWheel() { const pad = Math.round(weekEl.clientWidth / 2 - WDW / 2); weekEl.style.paddingLeft = weekEl.style.paddingRight = pad + "px"; }
 function styleWheel() {
-  const c = weekEl.scrollLeft / WDW, els = weekEl.querySelectorAll(".wd");
-  els.forEach((b, i) => { const d = Math.min(3, Math.abs(i - c)); const n = b.firstElementChild.nextElementSibling; n.style.opacity = (1 - d * 0.22).toFixed(2); n.style.transform = `scale(${(1 - d * 0.07).toFixed(3)})`; });
+  const r = weekEl.getBoundingClientRect(), mid = r.left + r.width / 2, els = weekEl.querySelectorAll(".wd");
+  let c = 0, best = 1e9;
+  els.forEach((b, i) => { const bb = b.getBoundingClientRect(); const off = (bb.left + bb.width / 2 - mid) / WDW; if (Math.abs(off) < best) { best = Math.abs(off); c = i - off; } });
+  els.forEach((b, i) => { const d = Math.min(3, Math.abs(i - c)); const n = b.lastElementChild; n.style.opacity = (1 - d * 0.22).toFixed(2); n.style.transform = `scale(${(1 - d * 0.07).toFixed(3)})`; });
   const i = Math.round(c);
   if (i !== wCentre) { if (wCentre >= 0) haptic("light"); wCentre = i; els.forEach((b, k) => b.classList.toggle("on", k === i)); }
 }
@@ -681,7 +683,7 @@ weekEl.addEventListener("scroll", () => {
   if (!wRaf) wRaf = requestAnimationFrame(() => { wRaf = 0; styleWheel(); });
   if (progWeek) return;
   clearTimeout(weekT); weekT = setTimeout(() => {
-    const i = Math.max(0, Math.min(ALLDAYS.length - 1, Math.round(weekEl.scrollLeft / WDW))); const d = ALLDAYS[i];
+    const i = Math.max(0, Math.min(ALLDAYS.length - 1, wCentre)); const d = ALLDAYS[i];
     if (d === view) return; curWeek = i;
     selectDay(d, 0, false);
   }, 110);
@@ -690,7 +692,7 @@ function renderHeader(pop) {
   const iso = view, w = wxFor(iso), s = stayOn(iso);
 
   const w2 = wxFor(iso), showToday = iso !== today && today >= START && today <= END;
-  document.getElementById("todayCap").hidden = !showToday;
+  
   
   const n = s ? Math.round((Date.parse(iso) - Date.parse(s.in)) / 864e5) + 1 : 0;
   document.getElementById("cityName").innerHTML = esc(cityName(iso));
@@ -883,7 +885,7 @@ function closeSheet(from = 0) {
 const side = document.getElementById("side"); let sideAnim = null;
 function openSide() {
   const cur = STAYS.find(s => s.in <= view && view < s.out);
-  document.getElementById("side-body").innerHTML = STAYS.filter(s => s.out > today).map(s => `<button class="crow press${s.out <= today ? " past" : ""}${s.in <= today && today < s.out ? " cur" : ""}${s === cur ? " on" : ""}" data-goto="${s.in}"><span><div class="a">${esc(s.city)}</div><div class="b">${esc(s.hotel)}</div></span><span class="r">${dRange(s.in, s.out)}<br>${nights(s)} nights</span></button>`).join("");
+  document.getElementById("side-body").innerHTML = STAYS.filter(s => s.out > today).map(s => `<button class="crow press${s.out <= today ? " past" : ""}${s.in <= today && today < s.out ? " cur" : ""}${s === cur ? " on" : ""}" data-goto="${s.in <= today && today < s.out ? today : s.in}"><span><div class="a">${esc(s.city)}</div><div class="b">${esc(s.hotel)}</div></span><span class="r">${dRange(s.in, s.out)}<br>${nights(s)} nights</span></button>`).join("");
   side.hidden = false; scrim.classList.add("open"); sideAnim?.cancel();
   const sb = document.getElementById("side-body"); sb.scrollTop = 0; side.classList.remove("scrolled");
   sb.insertAdjacentHTML("beforeend", `<div class="sring" id="sring" hidden></div>`); ringTo(sb.querySelector(".crow.on"), false);
@@ -1063,7 +1065,7 @@ function freeSheet2() {
 function menuSheet() {
   const iso = view, s = stayOn(iso), w = wxFor(iso), c = cityOn(iso), open = headsFor(iso).filter(h => !h.k || !done(h.k)).length, ss = sunset(iso, c);
   const row = (k, icon, a, b) => `<button class="mrow press" data-menu="${k}"><span><span class="a">${a}</span>${b ? `<span class="b">${b}</span>` : ""}</span><i class="chev"></i></button>`;
-  return head(esc(cityName(iso)), dDay(iso))
+  return head(esc(cityName(iso)), dDay(iso) + (iso !== today && today >= START && today <= END ? ` · <a href="#" data-today style="color:var(--blue);text-decoration:none;font-weight:600">Today</a>` : ""))
     + `<div class="ig">
       ${row("stay", "Stay", s ? esc(s.hotel) : "No hotel tonight", s ? `Check in ${s12(s.ci)} · out ${s12(s.co)}${s.est ? " (usual)" : ""}` : (iso === END ? "Landing in Perth" : "Overnight flight"))}
       ${row("wx", "Weather", w ? `${w.hi}° / ${w.loEst || w.typical ? "~" : ""}${w.lo}°, ${esc(w.typical ? "typical for the season" : w.cond.toLowerCase())}` : "Weather", ss ? `Sunset ${t12(ss)}` : "")}
@@ -1165,7 +1167,7 @@ document.addEventListener("click", e => {
   const wd = t.closest(".wd"); if (wd) { const d = wd.dataset.d; if (d === view) return; centreDay(d, true); return selectDay(d, 0, false); }
   if (t.closest("#backPill")) { haptic(); return openSide(); }
   if (t.closest("#infoPill")) { haptic(); openSheet(menuSheet()); startCycle(view); return; }
-  if (t.closest("[data-today]")) { haptic(); return selectDay(today); }
+  if (t.closest("[data-today]")) { e.preventDefault(); haptic(); closeSheet(); return selectDay(today); }
   const mi = t.closest("[data-menu]"); if (mi) { haptic(); const k = mi.dataset.menu; if (k === "stay") { const s = stayOn(view); return openSheet(s ? staySheet(s) : tripSheet()); } if (k === "wx") return openSheet(wxSheet()); if (k === "ideas") { const h = view === today ? new Date().getHours() : 10; return openPlanner(view, h < 11 ? "coffee" : h < 14 ? "dinner" : h < 17 ? "see" : h < 21 ? "dinner" : "drinks", null); } if (k === "tasks") return openSheet(tasksSheet()); if (k === "trip") return openSheet(tripSheet()); }
   if (t.closest("[data-open-trip]")) { haptic(); return openSheet(tripSheet()); }
 });
@@ -1183,8 +1185,8 @@ function tick() {
 renderWeek(); renderHeader(false); measureTop(); content.innerHTML = renderContent(view);
 document.getElementById("modePill").classList.toggle("on", MODE === "multi");
 refreshLive();
-requestAnimationFrame(() => { measureTop(); centreDay(view, false); scrollToDay(); });
-addEventListener("resize", () => { measureTop(); centreDay(view, false); });
+requestAnimationFrame(() => { measureTop(); padWheel(); centreDay(view, false); scrollToDay(); });
+addEventListener("resize", () => { measureTop(); padWheel(); centreDay(view, false); });
 setInterval(tick, 60000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { tick(); refreshLive(); } });
 })();
