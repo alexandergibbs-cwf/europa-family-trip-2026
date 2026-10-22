@@ -103,18 +103,21 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 
 /* Day pager + grid */
 .pager { touch-action: pan-y; }
-#daycontent { max-width: 520px; margin: 0 auto; padding-top: var(--top-h, 180px); padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }
+.pager { position: relative; }
+.dghost { position: absolute; top: 0; left: 0; right: 0; pointer-events: none; }
+#daycontent.driving { pointer-events: none; }
+#daycontent, .dghost { max-width: 520px; margin: 0 auto; padding-top: var(--top-h, 180px); padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }
 #daycontent { }
 #daycontent .lane, #daycontent .mk, #daycontent .now, #daycontent .mev, #daycontent .mmk, #daycontent .mnow { transition: opacity 280ms cubic-bezier(0.16, 1, 0.3, 1); }
 #daycontent.ph .lane, #daycontent.ph .mk, #daycontent.ph .now, #daycontent.ph .mev, #daycontent.ph .mmk, #daycontent.ph .mnow { opacity: 0; transition: none; }
 #daycontent.ph { pointer-events: none; }
 .grid { position: relative; height: calc(var(--hour) * 24 + 24px); margin-top: 8px; }
 .hl { position: absolute; left: 0; right: 0; height: 0; }
-.hl::after { content: ""; position: absolute; left: 64px; right: 0; border-top: 0.5px solid var(--grid); }
-.hl span { position: absolute; right: calc(100% - 56px); top: -8px; font-size: 12px; color: var(--sub); white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: 0; }
+.hl::after { content: ""; position: absolute; left: 56px; right: 0; border-top: 0.5px solid var(--grid); }
+.hl span { position: absolute; right: calc(100% - 48px); top: -8px; font-size: 12px; color: var(--sub); white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: 0; }
 .hl span small { font-size: 12px; color: var(--sub); margin-left: 2px; }
 .hl.mid span { font-size: 12px; color: var(--sub); font-weight: 600; top: -8px; }
-.lane { position: absolute; left: 68px; right: 6px; top: 0; bottom: 0; }
+.lane { position: absolute; left: 60px; right: 6px; top: 0; bottom: 0; }
 .ev { position: absolute; left: 0; right: 0; border: 0; text-align: left; border-radius: 6px; padding: 4px 8px 4px 10px; overflow: hidden; cursor: pointer; display: flex; flex-direction: column; letter-spacing: -0.01em; }
 .ev::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3.5px; background: var(--c); border-radius: 6px 0 0 6px; }
 .ev .tt { font-size: 14px; font-weight: 600; line-height: 1.22; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px; }
@@ -154,9 +157,9 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev.done { opacity: .45; }
 .ev .cd { align-self: flex-start; font-size: 11px; font-weight: 700; background: #ffd60a; color: #000; border-radius: 980px; padding: 1px 7px; margin-top: 3px; }
 .ev.press:active { transform: scale(0.98); }
-.sun { position: absolute; left: 68px; right: 6px; height: 0; border-top: 1px dashed var(--e-wait); z-index: 1; pointer-events: none; }
+.sun { position: absolute; left: 60px; right: 6px; height: 0; border-top: 1px dashed var(--e-wait); z-index: 1; pointer-events: none; }
 .sun span { position: absolute; right: 4px; top: -9px; font-size: 11px; font-weight: 600; color: var(--e-wait-ink); background: var(--bg); padding: 0 4px; border-radius: 4px; }
-.now { position: absolute; left: 60px; right: 0; height: 0; border-top: 2px solid var(--red); z-index: 4; pointer-events: none; }
+.now { position: absolute; left: 52px; right: 0; height: 0; border-top: 2px solid var(--red); z-index: 4; pointer-events: none; }
 .now::before { content: ""; position: absolute; left: -5px; top: -6px; width: 10px; height: 10px; border-radius: 50%; background: var(--red); }
 .now span { position: absolute; right: calc(100% + 8px); top: -9px; font-size: 12px; font-weight: 700; color: var(--red); background: var(--bg); padding-left: 4px; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .grid .hl.hide span { visibility: hidden; }
@@ -278,7 +281,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .dline .ans .g { color: var(--e-free-ink); }
 .ev.get { background: transparent; border: 1.5px dashed color-mix(in srgb, var(--e-get) 65%, transparent); }
 .ev.get::before { display: none; }
-.mk { position: absolute; left: 68px; right: 6px; height: 0; border-top: 2px solid var(--e-mark); z-index: 3; pointer-events: none; }
+.mk { position: absolute; left: 60px; right: 6px; height: 0; border-top: 2px solid var(--e-mark); z-index: 3; pointer-events: none; }
 .mk::before { content: ""; position: absolute; left: -4px; top: -5px; width: 8px; height: 8px; border-radius: 50%; background: var(--e-mark); }
 .mk button { pointer-events: auto; position: absolute; right: 0; top: -12px; height: 24px; border: 0; border-radius: 980px; background: var(--e-mark); color: #fff; font-size: 12px; padding: 0 11px; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; max-width: 86%; }
 .mk button b { font-weight: 700; flex: none; }
@@ -343,7 +346,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev .tm b { opacity: 1; }
 .ev .ref { opacity: .8; }
 .ev.short { padding-block: 0; }
-.mk { border-top: 1.5px solid var(--e-mark); left: 68px; }
+.mk { border-top: 1.5px solid var(--e-mark); left: 60px; }
 .mk::before { width: 7px; height: 7px; top: -4.5px; left: -3.5px; }
 .mk button { background: var(--bg); color: var(--e-mark); height: 20px; top: -10px; padding: 0 7px; border-radius: 6px; font-size: 12px; gap: 5px; }
 .mk button b { font-weight: 700; } .mk button span { opacity: .8; font-weight: 500; }
@@ -701,23 +704,28 @@ function wRender() {
   if (i !== wCentre) { if (wCentre >= 0) haptic("light"); wCentre = i; for (let k = 0; k < els.length; k++) els[k].classList.toggle("on", k === i); }
   wDriveContent();
 }
-/* while the date wheel moves, the timetable rides along as a blank page; the day's plans fade in once it lands */
-let wDrive = false;
+/* while the date wheel moves, the real neighbouring days ride alongside as pages, lined up at the same height */
+let wDrive = false, ghosts = null; const gCache = new Map();
+function dayHTML(d) { if (!gCache.has(d)) { const keep = shownD; gCache.set(d, renderContent(d)); shownD = keep; } return gCache.get(d); }
 function wDriveContent() {
   if (!wDrive) return;
-  const i = Math.round(Math.max(0, Math.min(wN(), wPos))), d = ALLDAYS[i], f = wPos - i, W = content.offsetWidth || innerWidth;
-  if (d !== shownD) { content.classList.add("ph"); content.innerHTML = renderContent(d); scrollToDay(false, d); }
-  content.style.transform = `translateX(${(-f * W * 0.7).toFixed(1)}px)`; content.style.opacity = Math.max(0, 1 - Math.abs(f) * 1.7).toFixed(3);
+  const i = Math.round(Math.max(0, Math.min(wN(), wPos))), d = ALLDAYS[i], f = wPos - i, pg = document.getElementById("pager"), W = pg.clientWidth || innerWidth;
+  if (!ghosts) { ghosts = [0, 1].map(() => { const g = document.createElement("div"); g.className = "dghost"; g.setAttribute("aria-hidden", "true"); pg.appendChild(g); return g; }); content.classList.add("driving"); }
+  if (d !== shownD) { content.innerHTML = dayHTML(d); shownD = d; }
+  [ALLDAYS[i - 1], ALLDAYS[i + 1]].forEach((n, k) => { const g = ghosts[k]; if (g.dataset.d !== (n || "")) { g.dataset.d = n || ""; g.innerHTML = n ? dayHTML(n) : ""; } });
+  content.style.transform = `translateX(${(-f * W).toFixed(1)}px)`;
+  ghosts[0].style.transform = `translateX(${(-W - f * W).toFixed(1)}px)`;
+  ghosts[1].style.transform = `translateX(${(W - f * W).toFixed(1)}px)`;
 }
-function land(d) {
-  content.classList.add("ph"); content.innerHTML = renderContent(d); scrollToDay(false);
-  void content.offsetHeight; requestAnimationFrame(() => content.classList.remove("ph"));
+function land(d, keep) {
+  ghosts?.forEach(g => g.remove()); ghosts = null; gCache.clear(); content.classList.remove("driving", "ph");
+  content.innerHTML = renderContent(d); if (!keep) scrollToDay(true);
 }
 function wSettle() {
   const i = Math.round(Math.max(0, Math.min(wN(), wPos))), d = ALLDAYS[i], drove = wDrive; wDrive = false;
   if (drove) { content.style.transform = ""; content.style.opacity = ""; }
   if (d !== view) { curWeek = i; view = d; refreshLive(); renderHeader(true); land(d); }
-  else if (drove && (shownD !== view || content.classList.contains("ph"))) land(view);
+  else if (drove) land(view, true);
 }
 function wStep() {
   wRaf = 0;
@@ -894,15 +902,16 @@ const content = document.getElementById("daycontent");
 let YFN = t => t;
 const SC = () => document.scrollingElement || document.documentElement;
 const atBottom = () => scrollY >= SC().scrollHeight - innerHeight - 1;
-function scrollToDay(_, iso = view) {
+function scrollToDay(smooth, iso = view) {
+  const go = y => scrollTo({ top: y, behavior: smooth && !reduce() ? "smooth" : "auto" });
   const topH = document.getElementById("top").offsetHeight;
   const evs = ITEMS.filter(e => e.k !== "free");
   let t = Math.min(420, evs.length ? Math.min(...evs.map(e => e.s)) - 30 : 420);
   if (iso === today && nowMin() - 45 > t + 300) t = nowMin() - 45;
-  if (MODE === "multi") { const mg = content.querySelector(".mg"); if (!mg) return; const top0 = mg.getBoundingClientRect().top + scrollY; let m = 420; const ds = Object.keys(MITEMS); if (ds.includes(today) && nowMin() - 45 > m + 300) m = nowMin() - 45; scrollTo(0, Math.max(0, top0 + MY(m) - topH - 44)); return; }
+  if (MODE === "multi") { const mg = content.querySelector(".mg"); if (!mg) return; const top0 = mg.getBoundingClientRect().top + scrollY; let m = 420; const ds = Object.keys(MITEMS); if (ds.includes(today) && nowMin() - 45 > m + 300) m = nowMin() - 45; go(Math.max(0, top0 + MY(m) - topH - 44)); return; }
   const gridEl = content.querySelector(".grid"); if (!gridEl) return;
   const gridTop = gridEl.getBoundingClientRect().top + scrollY;
-  scrollTo(0, Math.max(0, gridTop + YFN(Math.max(0, t)) - topH - 8));
+  go(Math.max(0, gridTop + YFN(Math.max(0, t)) - topH - 8));
 }
 function measureTop() { document.documentElement.style.setProperty("--top-h", document.getElementById("top").offsetHeight + "px"); }
 
