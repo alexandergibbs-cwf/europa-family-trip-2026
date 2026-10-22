@@ -107,6 +107,8 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .pager { touch-action: pan-y; }
 .pager { position: relative; }
 .dghost { position: absolute; top: 0; left: 0; right: 0; pointer-events: none; }
+#pager { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.dghost .ev.prompt, #daycontent.driving .ev.prompt { transition: none; }
 #daycontent.driving { pointer-events: none; }
 #daycontent, .dghost { max-width: 520px; margin: 0 auto; padding-top: var(--top-h, 180px); padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }
 #daycontent { }
@@ -699,7 +701,7 @@ function buildDay(iso) {
   EVENTS.filter(b => b.on === iso).forEach(b => { const hm = x => +x.slice(0, 2) * 60 + +x.slice(3, 5); carve(hm(b.s), hm(b.e), { k: "booked", b }); });
   /* at the hotel either side of a ride: check out / collect bags before, check in / drop bags after */
   segs.filter(x => x.k === "get" && x.dep && (x.co || x.collect) && x.from).forEach(x => carve(x.s - 30, x.s, { k: "get", coOnly: true, stay: x.from, hact: x.co ? "Check out" : "Collect bags" }));
-  segs.filter(x => x.k === "get" && !x.dep && x.at != null && (x.bags || x.checkin)).forEach(x => { const at = Math.min(x.at, x.e), end = x.e >= at + 15 ? x.e : at + 30; x.e = at; carve(at, end, { k: "get", hk: "in", stay: x.stay, hact: x.bags ? "Drop bags" : "Check in", hsub: x.bags ? `Room ready from ${s12(x.stay.ci)}` : "" }); });
+  segs.filter(x => x.k === "get" && !x.dep && x.at != null && (x.bags || x.checkin)).forEach(x => { const at = Math.min(x.at, x.e), end = x.checkin && x.e >= at + 15 ? x.e : at + 30; x.e = at; carve(at, end, { k: "get", hk: "in", stay: x.stay, hact: x.bags ? "Drop bags" : "Check in", hsub: x.bags ? `Room ready from ${s12(x.stay.ci)}` : "" }); });
   /* packing: 45 min before heading off, or the night before when the morning is early */
   const goSeg = segs.find(x => x.k === "get" && (x.dep || x.coOnly));
   if (out && goSeg && goSeg.s >= 600 && !segs.some(x => x.k === "pack")) carve(goSeg.s - 45, goSeg.s, { k: "pack", stay: out, early: false });
@@ -841,7 +843,12 @@ function wRender() {
 }
 /* while the date wheel moves, the real neighbouring days ride alongside as pages, lined up at the same height */
 let wDrive = false, ghosts = null; const gCache = new Map();
-function dayHTML(d) { if (!gCache.has(d)) { const keep = shownD; gCache.set(d, renderContent(d)); shownD = keep; } return gCache.get(d); }
+/* render a neighbouring day without disturbing the one on screen (its taps, its time scale) */
+function dayHTML(d) { if (!gCache.has(d)) { const k = [shownD, CUR, ITEMS, YFN]; gCache.set(d, renderContent(d)); [shownD, CUR, ITEMS, YFN] = k; } return gCache.get(d); }
+/* each day hides a different amount above its first hour; pages are nudged so the same time of day sits at the same height */
+const hideOf = el => { const g = el && el.querySelector(".grid"); return g ? -parseFloat(g.style.marginTop || 0) : 0; };
+let gRef = 0;
+function warmAround(d) { const i = ALLDAYS.indexOf(d), go = () => [1, -1, 2, -2].forEach(k => ALLDAYS[i + k] && dayHTML(ALLDAYS[i + k])); (window.requestIdleCallback || (f => setTimeout(f, 200)))(go); }
 function mColW() { const v = content.querySelector(".mgv"); return v ? v.clientWidth / 2 : (innerWidth - 46) / 2; }
 function wDriveContent() {
   if (!wDrive) return;
@@ -853,17 +860,22 @@ function wDriveContent() {
     return;
   }
   const i = Math.round(Math.max(0, Math.min(wN(), wPos))), d = ALLDAYS[i], f = wPos - i, pg = document.getElementById("pager"), W = pg.clientWidth || innerWidth;
-  if (!ghosts) { ghosts = [0, 1].map(() => { const g = document.createElement("div"); g.className = "dghost"; g.setAttribute("aria-hidden", "true"); pg.appendChild(g); return g; }); content.classList.add("driving"); }
-  if (d !== shownD) { content.innerHTML = dayHTML(d); shownD = d; }
-  [ALLDAYS[i - 1], ALLDAYS[i + 1]].forEach((n, k) => { const g = ghosts[k]; if (g.dataset.d !== (n || "")) { g.dataset.d = n || ""; g.innerHTML = n ? dayHTML(n) : ""; } });
-  content.style.transform = `translateX(${(-f * W).toFixed(1)}px)`;
-  ghosts[0].style.transform = `translateX(${(-W - f * W).toFixed(1)}px)`;
-  ghosts[1].style.transform = `translateX(${(W - f * W).toFixed(1)}px)`;
+  if (!ghosts) { gRef = hideOf(content); content.dataset.dy = "0"; ghosts = [0, 1].map(() => { const g = document.createElement("div"); g.className = "dghost"; g.setAttribute("aria-hidden", "true"); pg.appendChild(g); return g; }); content.classList.add("driving"); }
+  if (d !== shownD) { content.innerHTML = dayHTML(d); shownD = d; content.dataset.dy = String(hideOf(content) - gRef); }
+  [ALLDAYS[i - 1], ALLDAYS[i + 1]].forEach((n, k) => { const g = ghosts[k]; if (g.dataset.d !== (n || "")) { g.dataset.d = n || ""; g.innerHTML = n ? dayHTML(n) : ""; g.dataset.dy = String(hideOf(g) - gRef); } });
+  content.style.transform = `translate3d(${(-f * W).toFixed(1)}px, ${content.dataset.dy || 0}px, 0)`;
+  ghosts[0].style.transform = `translate3d(${(-W - f * W).toFixed(1)}px, ${ghosts[0].dataset.dy || 0}px, 0)`;
+  ghosts[1].style.transform = `translate3d(${(W - f * W).toFixed(1)}px, ${ghosts[1].dataset.dy || 0}px, 0)`;
 }
 function land(d, keep) {
-  if (MODE === "multi") { ghosts?.forEach(g => g.remove()); ghosts = null; gCache.clear(); content.innerHTML = renderContent(d); return; }
-  ghosts?.forEach(g => g.remove()); ghosts = null; gCache.clear(); content.classList.remove("driving", "ph");
-  content.innerHTML = renderContent(d); if (!keep) scrollToDay(true);
+  if (MODE === "multi") { ghosts?.forEach(g => g.remove()); ghosts = null; content.innerHTML = renderContent(d); return; }
+  const drove = !!ghosts;
+  ghosts?.forEach(g => g.remove()); ghosts = null; content.classList.remove("driving", "ph");
+  content.style.transform = ""; content.innerHTML = renderContent(d);
+  /* the new day stays at the same time of day it was shown at while swiping: no second scroll after landing */
+  if (drove) { const dy = hideOf(content) - gRef; if (dy) scrollTo(0, Math.max(0, scrollY - dy)); }
+  else if (!keep) scrollToDay(true);
+  warmAround(d);
 }
 function wSettle() {
   const i = Math.round(Math.max(0, Math.min(wN(), wPos))), d = ALLDAYS[i], drove = wDrive; wDrive = false;
@@ -1779,6 +1791,7 @@ function openShow(html) {
 function closeShow() { if (show.hidden) return; const fin = () => { show.hidden = true; try { show._lock?.release(); } catch (e) {} }; if (reduce()) return fin(); const a = show.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "scale(0.96)" }], { duration: 220, easing: "cubic-bezier(0.55, 0, 0.5, 1)", fill: "forwards" }); a.onfinish = () => { fin(); a.cancel(); }; }
 
 /* ---------- events ---------- */
+document.addEventListener("click", () => gCache.clear(), true);
 document.addEventListener("click", e => {
   const t = e.target;
   if (t.closest("[data-close-show]")) { haptic(); return closeShow(); }
@@ -1841,6 +1854,7 @@ document.addEventListener("keydown", e => {
   if (e.key === "ArrowRight") selectDay(addDays(view, 1)); if (e.key === "ArrowLeft") selectDay(addDays(view, -1));
 });
 function tick() {
+  gCache.clear();
   const t = isoLocal();
   if (t !== today) { const f = view === today; today = t; renderWeek(); if (f) view = t; showWeek(weekOf(view), false); }
   if (sheet.hidden && show.hidden && side.hidden && !pd) { const y = scrollY; renderHeader(false); content.innerHTML = renderContent(view); scrollTo(0, y); }
@@ -1848,7 +1862,7 @@ function tick() {
 renderWeek(); renderHeader(false); measureTop(); content.innerHTML = renderContent(view);
 document.getElementById("modePill").classList.toggle("on", MODE === "multi"); document.getElementById("wsel").classList.toggle("span2", MODE === "multi");
 refreshLive();
-requestAnimationFrame(() => { measureTop(); padWheel(); centreDay(view, false); scrollToDay(); });
+requestAnimationFrame(() => { measureTop(); padWheel(); centreDay(view, false); scrollToDay(); warmAround(view); });
 addEventListener("resize", () => { measureTop(); padWheel(); centreDay(view, false); });
 setInterval(tick, 60000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { tick(); refreshLive(); checkBuild(); } });
