@@ -673,13 +673,13 @@ function buildDay(iso) {
       const ci = mins(inn.ci);
       /* the block is the actual journey; arriving well before check-in means dropping bags, then the time is yours */
       if (ci - at > 20 && inn.store !== false) {
-        segs.push({ s: prev, e: at + 15, k: "get", title: "To the hotel", sub: inn.hotel, stay: inn, arr: last, bags: true });
+        segs.push({ s: prev, e: at + 15, k: "get", title: "To the hotel", sub: inn.hotel, stay: inn, arr: last, at, bags: true });
         if (ci - (at + 15) >= 15) segs.push({ s: at + 15, e: ci, k: "free", title: "Free", sub: `Until check-in at ${t12(ci)}` });
         segs.push({ s: ci, e: Math.max(DE, ci + 60), k: "free", title: "Free", sub: `Evening in ${inn.city}` });
         freeFrom = at; roomsAt = ci;
       } else {
         const t = Math.max(at, ci);
-        segs.push({ s: prev, e: t, k: "get", title: "To the hotel", sub: inn.hotel, stay: inn, arr: last, checkin: true });
+        segs.push({ s: prev, e: t, k: "get", title: "To the hotel", sub: inn.hotel, stay: inn, arr: last, at, checkin: true });
         if (t < DE) segs.push({ s: t, e: DE, k: "free", title: "Free", sub: `Evening in ${inn.city}` });
         freeFrom = t;
       }
@@ -688,9 +688,12 @@ function buildDay(iso) {
   /* drop a fixed block into free time */
   const carve = (s, e, obj) => { const keep = []; segs.forEach(x => { if ((x.k === "free" || x.k === "wait") && x.s < e && x.e > s) { if (x.s < s) keep.push({ ...x, e: s }); if (x.e > e) keep.push({ ...x, s: e }); } else keep.push(x); }); segs.length = 0; segs.push(...keep, { s, e, ...obj }); segs.sort((a, c) => a.s - c.s); };
   EVENTS.filter(b => b.on === iso).forEach(b => { const hm = x => +x.slice(0, 2) * 60 + +x.slice(3, 5); carve(hm(b.s), hm(b.e), { k: "booked", b }); });
+  /* at the hotel either side of a ride: check out / collect bags before, check in / drop bags after */
+  segs.filter(x => x.k === "get" && x.dep && (x.co || x.collect) && x.from).forEach(x => carve(x.s - 30, x.s, { k: "get", coOnly: true, stay: x.from, hact: x.co ? "Check out" : "Collect bags" }));
+  segs.filter(x => x.k === "get" && !x.dep && x.at != null && (x.bags || x.checkin)).forEach(x => { const at = Math.min(x.at, x.e), end = Math.max(x.e, at + 30); x.e = at; carve(at, end, { k: "get", hk: "in", stay: x.stay, hact: x.bags ? "Drop bags" : "Check in", hsub: x.bags ? `Room ready from ${s12(x.stay.ci)}` : "" }); });
   /* packing: 45 min before heading off, or the night before when the morning is early */
   const goSeg = segs.find(x => x.k === "get" && (x.dep || x.coOnly));
-  if (out && goSeg && goSeg.s >= 600) carve(goSeg.s - 45, goSeg.s, { k: "pack", stay: out, early: false });
+  if (out && goSeg && goSeg.s >= 600 && !segs.some(x => x.k === "pack")) carve(goSeg.s - 45, goSeg.s, { k: "pack", stay: out, early: false });
   const tmr = addDays(iso, 1), tOut = STAYS.find(x => x.out === tmr), tDep = MOVES.filter(m => m.dep[0] === tmr).sort((a, b) => a.depTs - b.depTs)[0];
   if (tOut && tDep) { const tLeave = Math.min(mins(tOut.co), mins(tDep.leave || tDep.d)); if (tLeave < 600) carve(1350, 1380, { k: "pack", stay: tOut, early: true, tLeave }); }
   const lo = Math.floor(Math.min(DS, ...segs.map(x => x.s)) / 60) * 60;
@@ -930,14 +933,15 @@ function events(iso, D) {
   D.segs.forEach((x, i) => {
     const m = x.m; let tt, sub = "", ref = "", act = "";
     if (x.k === "travel") { tt = `${m.from} → ${m.to}`;  sub = `${m.code}${m.guess ? ", time is a guess" : ""}`; ref = m.ref || ""; }
-    else if (x.k === "get" && (x.dep || x.coOnly)) { tt = x.coOnly ? x.stay.hotel : `${x.from ? x.from.hotel : "Home"} → ${placeFrom(m)}`; act = x.coOnly ? (x.stay.store === false ? "Check out" : "Check out, leave bags") : x.co ? "Check out" : x.collect ? "Collect bags" : ""; sub = x.coOnly && x.stay.store === false ? "No luggage storage listed" : ""; }
-    else if (x.k === "get") { tt = x.arr && x.stay ? `${placeTo(x.arr)} → ${x.stay.hotel}` : x.stay ? x.stay.hotel : placeFrom(m); act = x.bags ? "Drop bags" : x.checkin ? "Check in" : ""; sub = x.bags ? `Check in from ${s12(x.stay.ci)}` : ""; }
-    else if (x.k === "change") { tt = placeFrom(m); act = x.term ? (m.mode === "Flight" ? "Check in, bags, security" : "Find the platform, board") : /^Layover/.test(x.title) ? "Layover" : "Change trains"; }
+    else if (x.k === "get" && (x.dep || x.coOnly)) { tt = x.coOnly ? x.stay.hotel : `${x.from ? x.from.hotel : "Home"} → ${placeFrom(m)}`; act = x.hact || (x.coOnly ? (x.stay.store === false ? "Check out" : "Check out, leave bags") : ""); sub = x.coOnly && !x.hact && x.stay.store === false ? "No luggage storage listed" : ""; }
+    else if (x.k === "get" && x.hk) { tt = x.stay.hotel; act = x.hact; sub = x.hsub || ""; }
+    else if (x.k === "get") { tt = x.arr && x.stay ? `${placeTo(x.arr)} → ${x.stay.hotel}` : x.stay ? x.stay.hotel : placeFrom(m); act = ""; sub = ""; }
+    else if (x.k === "change") { tt = placeFrom(m); act = x.term ? (m.mode === "Flight" ? "Bags, security" : "Find the platform, board") : /^Layover/.test(x.title) ? "Layover" : "Change trains"; }
     else if (x.k === "booked") { tt = x.b.t; sub = x.b.where || ""; }
     else if (x.k === "pack") { tt = x.stay.hotel; act = "Pack suitcases"; sub = x.early ? `Leaving ${t12(x.tLeave)} tomorrow` : ""; }
     else if (x.k === "wait") { tt = "Free, with bags"; sub = x.stay && x.stay.store ? "Hotel can hold bags" : x.stay && x.stay.store === false ? "No luggage storage listed" : ""; }
     else { tt = x.title === "Free day" ? "Free all day" : x.title; sub = x.sub || ""; }
-    list.push({ k: x.k, s: x.s, e: x.e, tt, sub, ref, act, m, stay: x.stay, x, done: isToday && x.e < nm && x.k !== "free" && x.k !== "wait", cd: isToday && x.k === "travel" && m.depTs > now && !x.overnight ? m.depTs - now : 0 });
+    list.push({ k: x.k, s: x.s, e: x.e, tt, sub, ref, act, m: x.hk || x.hact ? undefined : m, stay: x.stay, x: x.hk ? { ...x, coOnly: true } : x, done: isToday && x.e < nm && x.k !== "free" && x.k !== "wait", cd: isToday && x.k === "travel" && m.depTs > now && !x.overnight ? m.depTs - now : 0 });
   });
   { const sl = slotsFor(iso, D), rebuilt = [];
     list.forEach(ev => { if (ev.k === "free" || ev.k === "wait") freePieces(ev.x, sl).forEach(([a, b]) => rebuilt.push({ ...ev, s: a, e: b, tt: ev.k === "wait" ? "Free, with bags" : "Free time", piece: true })); else rebuilt.push(ev); });
