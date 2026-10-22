@@ -452,6 +452,8 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev.prompt { opacity: 0; transform: translateY(8px) scale(0.985); pointer-events: none; transition: opacity 1100ms cubic-bezier(0.4, 0, 0.2, 1), transform 1400ms cubic-bezier(0.16, 1, 0.3, 1); }
 .ev.prompt.idea { opacity: 1; transform: none; pointer-events: auto; }
 @media (prefers-reduced-motion: reduce) { .ev.prompt { opacity: .7; transform: none; pointer-events: auto; transition: none; } }
+.ev.prompt .pk { display: block; font-size: 13px; font-weight: 500; opacity: .8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+.ev.prompt.short .pk { display: inline; margin: 0 0 0 6px; }
 </style>
 
 <div class="page" id="page">
@@ -913,7 +915,7 @@ function renderDayContent(iso) {
       return;
     }
     if (ev.k === "prompt") {
-      html += `<button class="ev prompt c-${ev.pr.k}${short ? " short" : ""} press" data-prompt="${ev.pr.cat}" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${esc(ev.tt)}</span></button>`;
+      html += `<button class="ev prompt c-${ev.pr.k}${short ? " short" : ""} press" data-prompt="${ev.pr.cat}" data-i="${i}" data-alts="${esc(ideaAlts(iso, ev.pr).join("|"))}" style="top:${top + 12}px;height:${h}px"><span class="tt">${esc(ev.tt)}</span><span class="pk"></span></button>`;
       return;
     }
     if (ev.k === "free" || ev.k === "wait") {
@@ -1021,6 +1023,7 @@ function promptTick() {
     const vis = all.filter(el => { const r = el.getBoundingClientRect(); return r.bottom > 140 && r.top < innerHeight - 60; });
     const pool = vis.length ? vis : all; const cur = all.find(el => el.classList.contains("idea"));
     const next = pool.length === 1 ? (cur ? null : pool[0]) : pool[(Math.max(-1, pool.indexOf(cur)) + 1) % pool.length];
+    if (next && next.dataset.alts) { const alts = next.dataset.alts.split("|"), n = +(next.dataset.n || 0); next.querySelector(".pk").textContent = alts[n % alts.length]; next.dataset.n = n + 1; }
     all.forEach(el => el.classList.toggle("idea", el === next));
   }
   pT = setTimeout(promptTick, 3600);
@@ -1209,6 +1212,13 @@ function slotsFor(iso, D, all) {
     if (t2 + 60 <= 1440 && (placesFor(iso, "drinks").length)) out.push({ k: "drinks", s: t2, e: Math.min(t2 + 75, 1439), seg: dw });
   }
   return [];
+}
+/* a few nearby saved places for a suggestion; lunch and dinner start at different picks so they don't repeat */
+function ideaAlts(iso, pr) {
+  const list = placesFor(iso, pr.cat).slice(0, 6); if (!list.length) return [];
+  const off = pr.k === "dinner" ? 3 : 0, out = [];
+  for (let j = 0; j < list.length; j++) { const x = list[(j + off) % list.length]; out.push(`${x.s.name}${x.k != null ? " · " + shortDist(x.k) : ""}`); }
+  return out;
 }
 function pickFor(iso, k) {
   const a = anchorFor(iso), p = getPick(iso, k);
