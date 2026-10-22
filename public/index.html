@@ -838,7 +838,7 @@ function wRender() {
   const els = wTrack.children, i = Math.round(Math.max(0, Math.min(wN(), wPos)));
   for (let k = 0; k < els.length; k++) { const off = k - wPos, d = Math.min(3.5, Math.abs(off)); const n = els[k].lastElementChild; n.style.opacity = ""; n.style.transform = ""; }
   const ws = document.getElementById("wsel"); if (ws && els[0]) { ws.style.top = (els[0].lastElementChild.offsetTop - 1) + "px"; ws.classList.toggle("today", ALLDAYS[i] === today); }
-  if (i !== wCentre) { if (wCentre >= 0) haptic("light"); wCentre = i; for (let k = 0; k < els.length; k++) els[k].classList.toggle("on", k === i); }
+  if (i !== wCentre) { if (wCentre >= 0 && wDrag) haptic("light"); wCentre = i; for (let k = 0; k < els.length; k++) els[k].classList.toggle("on", k === i); }
   wDriveContent();
 }
 /* while the date wheel moves, the real neighbouring days ride alongside as pages, lined up at the same height */
@@ -847,7 +847,7 @@ let wDrive = false, ghosts = null; const gCache = new Map();
 function dayHTML(d) { if (!gCache.has(d)) { const k = [shownD, CUR, ITEMS, YFN]; gCache.set(d, renderContent(d)); [shownD, CUR, ITEMS, YFN] = k; } return gCache.get(d); }
 /* each day hides a different amount above its first hour; pages are nudged so the same time of day sits at the same height */
 const hideOf = el => { const g = el && el.querySelector(".grid"); return g ? -parseFloat(g.style.marginTop || 0) : 0; };
-let gRef = 0;
+let gRef = 0, gBase = 0;
 function warmAround(d) { const i = ALLDAYS.indexOf(d), go = () => [1, -1, 2, -2].forEach(k => ALLDAYS[i + k] && dayHTML(ALLDAYS[i + k])); (window.requestIdleCallback || (f => setTimeout(f, 200)))(go); }
 function mColW() { const v = content.querySelector(".mgv"); return v ? v.clientWidth / 2 : (innerWidth - 46) / 2; }
 function wDriveContent() {
@@ -859,19 +859,24 @@ function wDriveContent() {
     content.querySelectorAll(".mtr").forEach(tr => tr.style.transform = `translateX(${x})`);
     return;
   }
-  const i = Math.round(Math.max(0, Math.min(wN(), wPos))), d = ALLDAYS[i], f = wPos - i, pg = document.getElementById("pager"), W = pg.clientWidth || innerWidth;
-  if (!ghosts) { gRef = hideOf(content); content.dataset.dy = "0"; ghosts = [0, 1].map(() => { const g = document.createElement("div"); g.className = "dghost"; g.setAttribute("aria-hidden", "true"); pg.appendChild(g); return g; }); content.classList.add("driving"); }
-  if (d !== shownD) { content.innerHTML = dayHTML(d); shownD = d; content.dataset.dy = String(hideOf(content) - gRef); }
-  [ALLDAYS[i - 1], ALLDAYS[i + 1]].forEach((n, k) => { const g = ghosts[k]; if (g.dataset.d !== (n || "")) { g.dataset.d = n || ""; g.innerHTML = n ? dayHTML(n) : ""; g.dataset.dy = String(hideOf(g) - gRef); } });
+  /* three pages (yesterday, today, tomorrow) that only ever move by transform: nothing is rebuilt mid-swipe */
+  const pg = document.getElementById("pager"), W = pg.clientWidth || innerWidth;
+  if (!ghosts) { gBase = Math.max(0, ALLDAYS.indexOf(shownD)); gRef = hideOf(content); content.dataset.dy = "0"; ghosts = [0, 1].map(() => { const g = document.createElement("div"); g.className = "dghost"; g.setAttribute("aria-hidden", "true"); pg.appendChild(g); return g; }); content.classList.add("driving"); }
+  if (Math.abs(wPos - gBase) > 1.5) { /* spun the wheel further than a day: move the centre page along */
+    gBase = Math.round(Math.max(0, Math.min(wN(), wPos))); content.innerHTML = dayHTML(ALLDAYS[gBase]); shownD = ALLDAYS[gBase]; content.dataset.dy = String(hideOf(content) - gRef); }
+  [ALLDAYS[gBase - 1], ALLDAYS[gBase + 1]].forEach((n, k) => { const g = ghosts[k]; if (g.dataset.d !== (n || "")) { g.dataset.d = n || ""; g.innerHTML = n ? dayHTML(n) : ""; g.dataset.dy = String(hideOf(g) - gRef); } });
+  const f = wPos - gBase;
   content.style.transform = `translate3d(${(-f * W).toFixed(1)}px, ${content.dataset.dy || 0}px, 0)`;
   ghosts[0].style.transform = `translate3d(${(-W - f * W).toFixed(1)}px, ${ghosts[0].dataset.dy || 0}px, 0)`;
   ghosts[1].style.transform = `translate3d(${(W - f * W).toFixed(1)}px, ${ghosts[1].dataset.dy || 0}px, 0)`;
 }
 function land(d, keep) {
   if (MODE === "multi") { ghosts?.forEach(g => g.remove()); ghosts = null; content.innerHTML = renderContent(d); return; }
-  const drove = !!ghosts;
-  ghosts?.forEach(g => g.remove()); ghosts = null; content.classList.remove("driving", "ph");
-  content.style.transform = ""; content.innerHTML = renderContent(d);
+  const drove = !!ghosts, from = ghosts && ghosts.find(g => g.dataset.d === d);
+  if (from) { const html = renderContent(d); if (html === dayHTML(d)) content.replaceChildren(...from.childNodes); else content.innerHTML = html; }
+  else if (!drove || shownD !== d) content.innerHTML = renderContent(d);
+  else renderContent(d);
+  ghosts?.forEach(g => g.remove()); ghosts = null; content.classList.remove("driving", "ph"); content.style.transform = "";
   /* the new day stays at the same time of day it was shown at while swiping: no second scroll after landing */
   if (drove) { const dy = hideOf(content) - gRef; if (dy) scrollTo(0, Math.max(0, scrollY - dy)); }
   else if (!keep) scrollToDay(true);
@@ -1197,7 +1202,12 @@ function endDrag() {
   if (!pd) return; const p = pd; pd = null; if (p.mode !== "h") return;
   const stale = performance.now() - p.lt > 80, v = stale ? 0 : (p.v || 0);
   if (MODE === "multi") { wVel = Math.max(-1.2, Math.min(1.2, v)); if (Math.abs(wVel) < 0.02) wTarget = Math.round(Math.max(0, Math.min(wN(), wPos))); }
-  else { const go = Math.abs(p.dx) > pageW() * 0.28 || Math.abs(v) > 0.12; const dir = (go ? (p.dx < 0 ? 1 : -1) : 0); wVel = 0; wTarget = Math.max(0, Math.min(wN(), Math.round(p.pos0) + dir)); }
+  else {
+    const go = Math.abs(p.dx) > pageW() * 0.28 || Math.abs(v) > 0.12; const dir = (go ? (p.dx < 0 ? 1 : -1) : 0); wVel = 0; wTarget = Math.max(0, Math.min(wN(), Math.round(p.pos0) + dir));
+    const rem = Math.abs(wTarget - wPos), sp = Math.abs(v) / 16, toward = Math.sign(v) === Math.sign(wTarget - wPos);
+    const dur = Math.max(240, Math.min(420, toward && sp > 0.0005 ? 3 * rem / sp : 380));
+    wTw = { from: wPos, to: wTarget, t0: performance.now(), dur, moving: true };
+  }
   wKick();
 }
 pager.addEventListener("pointerup", endDrag); pager.addEventListener("pointercancel", () => { if (pd && pd.mode === "h") endDrag(); else pd = null; });
