@@ -525,8 +525,8 @@ const MOVES = [
   { id:"f6", ride:30, mode:"Flight", from:"Zürich", to:"Berlin", code:"EW8765", carrier:"Eurowings", dep:["2026-11-05","14:20",TZ.ch], arr:["2026-11-05","15:45",TZ.de], ref:"GLL3KG", bags:"32kg checked, 8kg cabin, small bag", fromQ:"Zurich Airport", toQ:"Berlin BER", leave:"12:15", xfer:80 },
   { id:"f7", ride:50, mode:"Flight", from:"Berlin", to:"Paris", code:"TO4061", carrier:"Transavia", dep:["2026-11-08","08:45",TZ.de], arr:["2026-11-08","10:40",TZ.fr], ref:"FGLHWQ", bags:"30kg checked, cabin bag, small bag", fromQ:"Berlin Brandenburg Airport", toQ:"Paris Orly", leave:"06:15", leaveFirm:true, xfer:60, note:"Tj says leave the hotel around 6:15 AM." },
   { id:"f8", ride:60, mode:"Flight", from:"Paris", to:"Glasgow", code:"EZY3124", carrier:"easyJet", dep:["2026-11-11","15:45",TZ.fr], arr:["2026-11-11","16:35",TZ.uk], ref:"KDKM7WL", bags:"32kg checked, large cabin bag, small bag", fromQ:"Paris Charles de Gaulle Terminal 2D", leave:"13:00", xfer:50, note:"Terminal 2D. Bag drop closes at 2:45 PM. Glasgow is 1 hour behind Paris." },
-  { id:"g1", ride:15, mode:"Train", from:"Glasgow", to:"Edinburgh", code:"ScotRail", carrier:"About 50 min, every 15 min", dep:["2026-11-13",null,TZ.uk], guess:["12:00","12:50"], todo:"Walk-up tickets", fromQ:"Glasgow Queen Street station", leave:"11:30", xfer:25, note:"Any train works and walk-up tickets are fine. Tj + 1 drive a hire car via the Highlands and meet everyone in Edinburgh." },
-  { id:"g2", ride:25, mode:"Train", from:"Edinburgh", to:"London", code:"LNER", carrier:"About 4h to King’s Cross", dep:["2026-11-16",null,TZ.uk], guess:["11:00","15:20"], todo:"Not booked yet", fromQ:"Edinburgh Waverley station", leave:"10:20", xfer:40, note:"Not booked yet, so these times are a guess. Aiming for a late-morning train." },
+  { id:"g1", ride:15, mode:"Train", from:"Glasgow", to:"Edinburgh", fromSt:"Glasgow Queen Street", toSt:"Edinburgh Waverley", code:"ScotRail", carrier:"About 50 min, every 15 min", dep:["2026-11-13",null,TZ.uk], guess:["12:00","12:50"], todo:"Walk-up tickets", fromQ:"Glasgow Queen Street station", leave:"11:30", xfer:25, note:"Any train works and walk-up tickets are fine. Tj + 1 drive a hire car via the Highlands and meet everyone in Edinburgh." },
+  { id:"g2", ride:25, mode:"Train", from:"Edinburgh", to:"London", fromSt:"Edinburgh Waverley", toSt:"London King’s Cross", code:"LNER", carrier:"About 4h to King’s Cross", dep:["2026-11-16",null,TZ.uk], guess:["11:00","15:20"], todo:"Not booked yet", fromQ:"Edinburgh Waverley station", leave:"10:20", xfer:40, note:"Not booked yet, so these times are a guess. Aiming for a late-morning train." },
   { id:"f9", ride:50, mode:"Flight", from:"London", to:"Doha", code:"VA6109", carrier:"Qatar Airways", dep:["2026-11-19","14:55",TZ.uk], arr:["2026-11-20","00:40",TZ.doh], ref:"KJCTJU", fromQ:"London Heathrow Airport", leave:"11:30", note:"Leaves from Heathrow. Not on booking KJCTJU? Check your own booking shows these flights." },
   { id:"f10", mode:"Flight", from:"Doha", to:"Perth", code:"VA6128", carrier:"Qatar Airways", dep:["2026-11-20","02:40",TZ.doh], arr:["2026-11-20","18:45",TZ.per], ref:"KJCTJU" },
 ];
@@ -638,7 +638,7 @@ function buildDay(iso) {
       if (i === 0 && !transit) {
         /* the ride itself, then the time at the terminal before departure */
         const arr = Math.min(d, Math.max(goFrom, leave) + (m.ride || 45));
-        segs.push({ s: goFrom, e: arr, k: "get", m, co: goCo, collect: goCollect, stay: goCo ? out : null, dep: true });
+        segs.push({ s: goFrom, e: arr, k: "get", m, co: goCo, collect: goCollect, stay: goCo ? out : null, from: out, dep: true });
         if (d - arr >= 10) segs.push({ s: arr, e: d, k: "change", title: m.mode === "Flight" ? "At the airport" : "At the station", m, term: true });
       }
       else if (d > prev) segs.push({ s: prev, e: d, k: "change", title: i === 0 ? `Layover in ${m.from}` : `Change at ${m.fromSt || m.from}`, m });
@@ -652,13 +652,13 @@ function buildDay(iso) {
       const ci = mins(inn.ci);
       /* the block is the actual journey; arriving well before check-in means dropping bags, then the time is yours */
       if (ci - at > 20 && inn.store !== false) {
-        segs.push({ s: prev, e: at + 15, k: "get", title: "To the hotel", sub: inn.hotel, stay: inn, bags: true });
+        segs.push({ s: prev, e: at + 15, k: "get", title: "To the hotel", sub: inn.hotel, stay: inn, arr: last, bags: true });
         if (ci - (at + 15) >= 15) segs.push({ s: at + 15, e: ci, k: "free", title: "Free", sub: `Until check-in at ${t12(ci)}` });
         segs.push({ s: ci, e: Math.max(DE, ci + 60), k: "free", title: "Free", sub: `Evening in ${inn.city}` });
         freeFrom = at; roomsAt = ci;
       } else {
         const t = Math.max(at, ci);
-        segs.push({ s: prev, e: t, k: "get", title: "To the hotel", sub: inn.hotel, stay: inn, checkin: true });
+        segs.push({ s: prev, e: t, k: "get", title: "To the hotel", sub: inn.hotel, stay: inn, arr: last, checkin: true });
         if (t < DE) segs.push({ s: t, e: DE, k: "free", title: "Free", sub: `Evening in ${inn.city}` });
         freeFrom = t;
       }
@@ -900,13 +900,17 @@ function renderHeader(pop) {
 }
 
 /* ---------- day grid ---------- */
+/* where a transfer starts and ends, by its real name */
+const AIRN = { "Athens International Airport": "Athens Airport", "Zurich Airport": "Zürich Airport", "Berlin Brandenburg Airport": "Berlin BER", "Paris Charles de Gaulle Terminal 2D": "Paris CDG T2D", "London Heathrow Airport": "Heathrow" };
+const placeFrom = m => m.mode === "Train" ? (m.fromSt || (m.fromQ || m.from).replace(/ station$/i, "")) : (AIRN[m.fromQ] || m.fromQ || `${m.from} Airport`);
+const placeTo = m => m.mode === "Train" ? (m.toSt || m.to) : (AIRN[m.toQ] || m.toQ || `${m.to} Airport`);
 function events(iso, D) {
   const list = [], now = Date.now(), nm = nowMin(), isToday = iso === today;
   D.segs.forEach((x, i) => {
     const m = x.m; let tt, sub = "", ref = "";
     if (x.k === "travel") { tt = `${m.from} → ${m.to}`;  sub = `${m.code}${m.guess ? ", time is a guess" : ""}`; ref = m.ref || ""; }
-    else if (x.k === "get" && (x.dep || x.coOnly)) { const to = m ? (m.mode === "Flight" ? "the airport" : "the station") : ""; tt = x.coOnly ? (x.stay.store === false ? "Check out" : "Check out, leave bags") : x.co ? `Check out, to ${to}` : x.collect ? `Collect bags, to ${to}` : `To ${to}`; sub = x.coOnly ? (x.stay.store === false ? `${x.stay.hotel} · no luggage storage listed` : x.stay.hotel) : (m.fromQ || m.from); }
-    else if (x.k === "get") { tt = x.checkin ? "To the hotel, check in" : x.bags ? "To the hotel, drop bags" : x.stay ? "To the hotel" : `To ${m.mode === "Flight" ? "the airport" : "the station"}`; sub = x.bags ? `${x.stay.hotel} · check in from ${s12(x.stay.ci)}` : x.checkin ? `${x.stay.hotel} · check in from ${s12(x.stay.ci)}` : x.stay ? x.stay.hotel : (m.fromQ || m.from); }
+    else if (x.k === "get" && (x.dep || x.coOnly)) { tt = x.coOnly ? (x.stay.store === false ? "Check out" : "Check out, leave bags") : `${x.from ? x.from.hotel : "Home"} → ${placeFrom(m)}`; sub = x.coOnly ? (x.stay.store === false ? `${x.stay.hotel} · no luggage storage listed` : x.stay.hotel) : x.co ? "Check out" : x.collect ? "Collect bags first" : ""; }
+    else if (x.k === "get") { tt = x.arr && x.stay ? `${placeTo(x.arr)} → ${x.stay.hotel}` : x.stay ? `To ${x.stay.hotel}` : `To ${placeFrom(m)}`; sub = x.bags ? `Drop bags · check in from ${s12(x.stay.ci)}` : x.checkin ? `Check in from ${s12(x.stay.ci)}` : ""; }
     else if (x.k === "change") { tt = x.title; sub = x.term ? (m.mode === "Flight" ? "Check in, bags and security" : "Find the platform") : ""; }
     else if (x.k === "booked") { tt = x.b.t; sub = x.b.where || ""; }
     else if (x.k === "pack") { tt = "Pack suitcases"; sub = x.early ? `Leaving ${t12(x.tLeave)} tomorrow` : `Before check-out · ${x.stay.hotel}`; }
@@ -972,7 +976,7 @@ function renderDayContent(iso) {
     }
     const time = ev.k === "mark" ? t12(ev.s) : ev.x && ev.x.overnight ? `until ${t12(ev.e)}` : `${t12(ev.s)} – ${t12(ev.e)}`;
     const durTxt = (ev.k === "free" || ev.k === "wait") ? ` · ${dur(ev.e - ev.s)}` : "";
-    html += `<button class="ev ${ev.k}${short ? " short" : ""}${ev.done ? " done" : ""} press" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${ev.k === "travel" ? `<i class="ic ${ev.m.mode === "Flight" ? "fly" : "rail"}"></i>` : ""}${esc(ev.tt)}${durTxt}</span><span class="tm">${time}${ev.cd && !short ? ` · <b class="cd">${countdown(ev.cd)}</b>` : ""}${!short && ev.sub && h >= 60 && h < 80 ? ` · ${esc(ev.sub)}` : ""}</span>${!short && ev.sub && h >= 80 ? `<span class="tm">${esc(ev.sub)}</span>` : ""}${!short && ev.ref && h >= 100 ? `<span class="ref" data-show-ref="${ev.ref}" data-show-l="${esc(ev.m.code)}">${ev.ref} ›</span>` : ""}</button>`;
+    html += `<button class="ev ${ev.k}${short ? " short" : ""}${ev.done ? " done" : ""} press" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${ev.k === "travel" || (ev.k === "get" && !ev.x.coOnly && (ev.m || ev.x.arr)) ? `<i class="ic ${(ev.m || ev.x.arr).mode === "Flight" ? "fly" : "rail"}"></i>` : ""}${esc(ev.tt)}${durTxt}</span><span class="tm">${time}${ev.cd && !short ? ` · <b class="cd">${countdown(ev.cd)}</b>` : ""}${!short && ev.sub && h >= 60 && h < 80 ? ` · ${esc(ev.sub)}` : ""}</span>${!short && ev.sub && h >= 80 ? `<span class="tm">${esc(ev.sub)}</span>` : ""}${!short && ev.ref && h >= 100 ? `<span class="ref" data-show-ref="${ev.ref}" data-show-l="${esc(ev.m.code)}">${ev.ref} ›</span>` : ""}</button>`;
   });
   html += `</div>`;
   D.marks.forEach((mk, mi) => { html += `<div class="mk" style="top:${y(mk.t)}px"><button class="press" data-mark="${mi}"><b>${mk.kind === "in" ? "Check in" : "Check out"} ${t12(mk.t)}</b><span>${esc(mk.stay.hotel)}</span></button></div>`; });
