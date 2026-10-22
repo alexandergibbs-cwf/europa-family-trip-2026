@@ -55,7 +55,11 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .top { position: fixed; left: 0; right: 0; top: 0; z-index: 20; background: var(--bg); padding-top: env(safe-area-inset-top, 0px); }
 .top > * { max-width: 520px; margin-left: auto; margin-right: auto; }
 .pager { position: fixed; inset: 0; padding-top: var(--top-h, 180px); overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; scroll-padding-top: var(--top-h, 180px); }
-.pills { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-block: 10px 6px; }
+.pills { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: 10px; padding-block: 10px 6px; }
+.pill.ib { width: 44px; padding: 0; justify-content: center; }
+.pill.title { justify-self: center; padding: 0 12px 0 16px; max-width: 100%; }
+.pill.title .nm { font-weight: 600; }
+.chr { width: 9px; height: 9px; border-right: 2.2px solid var(--sub); border-top: 2.2px solid var(--sub); transform: rotate(45deg); margin-left: 2px; flex: none; border-radius: 1px; }
 .pills #cityPill { margin-right: auto; }
 .week { border-bottom: 0.5px solid var(--hair); }
 .pill { height: 44px; border: 0; border-radius: 22px; display: inline-flex; align-items: center; gap: 6px; padding: 0 16px 0 12px; font-size: 18px; font-weight: 500; cursor: pointer; color: var(--ink); min-width: 0; }
@@ -64,15 +68,21 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .pill .nm small { font-size: 12px; font-weight: 400; color: var(--sub); letter-spacing: -0.01em; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; }
 .pill.wx { padding: 0 16px; font-variant-numeric: tabular-nums; gap: 8px; }
 .pill.wx .e { font-size: 20px; }
-.week { position: relative; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
-.wtrack { display: flex; will-change: transform; }
+.week { overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+.wtrack { display: flex; }
 .wwrap { position: relative; }
 .wk { position: relative; z-index: 1; }
 .wd { width: 52px; flex: none; padding: 2px 0 8px; }
 .wd .l { font-size: 12px; font-weight: 600; color: var(--sub); letter-spacing: 0; margin-bottom: 1px; }
-.wd .n { width: 44px; height: 44px; transition: none; }
-.wd.on .n { background: var(--ink); color: var(--bg); font-weight: 600; }
-.wd.today.on .n { background: var(--red); color: #fff; }
+.wd .n { width: 44px; height: 44px; transition: none; backface-visibility: hidden; }
+.wd.on .n { font-weight: 600; }
+/* the slot: a fixed picker-style highlight the dates pass through */
+.wsel { position: absolute; left: 50%; width: 46px; height: 46px; margin-left: -23px; border-radius: 50%; background: color-mix(in srgb, var(--ink) 9%, transparent); z-index: 0; pointer-events: none; transition: background-color 160ms ease; }
+.wsel.today { background: color-mix(in srgb, var(--red) 16%, transparent); }
+.wd.on .n { font-weight: 700; }
+.wd.today.on .n { color: var(--red); }
+.wwrap { position: relative; }
+.wtrack { position: relative; }
 .wd.today.on .l { color: var(--red); }
 .wpage { flex: none; width: 100%; scroll-snap-align: start; scroll-snap-stop: always; display: grid; grid-template-columns: repeat(7, 1fr); padding: 0 max(8px, env(safe-area-inset-left, 0px)); }
 .wl { text-align: center; font-size: 13px; font-weight: 600; color: var(--ink); padding: 4px 0 6px; letter-spacing: 0; }
@@ -81,8 +91,6 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .wd .n { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font-size: 22px; font-weight: 400; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; transition: background-color 200ms ease, color 200ms ease; }
 .wd.we .n { color: var(--sub); }
 .wd.today .n { color: var(--red); font-weight: 600; }
-.wd.on .n { background: var(--ink); color: var(--bg); font-weight: 600; }
-.wd.today.on .n { background: var(--red); color: #fff; }
 .wd.out { pointer-events: none; } .wd.out .n { color: var(--hair); }
 .wd.pop .n { animation: pop 460ms var(--spring-bouncy); }
 @keyframes pop { from { transform: scale(0.7); } to { transform: scale(1); } }
@@ -335,14 +343,15 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .mh button b { display: block; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
 .mh button small { display: block; font-size: 11.5px; color: var(--sub); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mh button.today b { color: var(--red); }
-.mh button.on b { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.mh button b { color: var(--sub); font-weight: 500; } .mh button.on b { color: var(--ink); font-weight: 700; } .mh button.today b { color: var(--red); }
 .mg { position: relative; display: grid; grid-template-columns: 44px repeat(3, 1fr); grid-template-rows: 1fr; gap: 0 4px; }
 .mg .hl { grid-column: 1 / -1; } .mg .hl::after { left: 44px; }
 .mg .hl span { right: calc(100% - 40px); font-size: 11px; }
-.mcol { position: relative; grid-row: 1; min-width: 0; border-left: 0.5px solid var(--grid); }
+.mcol { position: relative; grid-row: 1; min-width: 0; border-left: 0.5px solid var(--grid); padding: 0 1px; }
 .mcol.today-col { background: color-mix(in srgb, var(--red) 3%, transparent); }
 .mev { position: absolute; left: 2px; right: 2px; border: 0; border-radius: 6px; padding: 3px 6px; text-align: left; overflow: hidden; cursor: pointer; font-size: 11.5px; line-height: 1.2; letter-spacing: -0.01em; display: block; }
-.mev b { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mev b { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-weight: 600; overflow: hidden; }
+.mev.short b { display: block; white-space: nowrap; text-overflow: ellipsis; }
 .mev span { display: block; font-size: 10.5px; opacity: .72; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
 .mev.travel { background: color-mix(in srgb, var(--e-travel) 14%, var(--bg)); color: var(--e-travel-ink); }
 .mev.change { background: color-mix(in srgb, var(--e-travel) 8%, var(--bg)); color: var(--e-travel-ink); }
@@ -351,76 +360,20 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .mev.plan { background: var(--card); box-shadow: 0 0 0 1px var(--hair); color: var(--ink); }
 .mev.done { opacity: .45; }
 .mmk { position: absolute; left: 0; right: 0; height: 0; border-top: 1.5px solid var(--e-mark); z-index: 2; pointer-events: none; }
-.mmk span { position: absolute; left: 4px; top: 2px; font-size: 10px; font-weight: 700; color: var(--e-mark); white-space: nowrap; }
+.mmk span { position: absolute; left: 2px; top: -9px; font-size: 10px; font-weight: 700; color: var(--e-mark); white-space: nowrap; background: var(--bg); padding: 1px 5px; border-radius: 5px; line-height: 1.4; }
 .mnow { position: absolute; left: 0; right: 0; height: 0; border-top: 1.5px solid var(--red); z-index: 3; pointer-events: none; }
 .mnow::before { content: ""; position: absolute; left: -4px; top: -4.5px; width: 8px; height: 8px; border-radius: 50%; background: var(--red); }
 #modePill.on { color: var(--blue); }
-.pgroup { padding: 0 4px; gap: 0; }
-.pgroup .ib { border: 0; background: none; color: var(--ink); width: 44px; height: 44px; display: grid; place-items: center; cursor: pointer; border-radius: 22px; }
-.pgroup .sep { width: 0.5px; height: 20px; background: var(--hair); }
-
-/* ---------- Liquid Glass (navigation layer only: header, pills, sheet actions) ---------- */
-:root { --lg-fill: rgba(255, 255, 255, 0.62); --lg-lens: rgba(0, 0, 0, 0.055); --lg-line: rgba(255, 255, 255, 0.95); --lg-edge: rgba(0, 0, 0, 0.09); --lg-shadow: 0 8px 22px rgba(0, 0, 0, 0.10), 0 2px 6px rgba(0, 0, 0, 0.05); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --lg-fill: rgba(44, 44, 46, 0.62); --lg-lens: rgba(0, 0, 0, 0.35); --lg-line: rgba(255, 255, 255, 0.20); --lg-edge: rgba(255, 255, 255, 0.12); --lg-shadow: 0 8px 22px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.35); } }
-:root[data-theme="dark"] { --lg-fill: rgba(44, 44, 46, 0.62); --lg-lens: rgba(0, 0, 0, 0.35); --lg-line: rgba(255, 255, 255, 0.20); --lg-edge: rgba(255, 255, 255, 0.12); --lg-shadow: 0 8px 22px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.35); }
-
-/* The header is a clear surface the timetable scrolls beneath */
-.top { background: color-mix(in srgb, var(--bg) 80%, transparent); backdrop-filter: saturate(1.7) blur(24px); -webkit-backdrop-filter: saturate(1.7) blur(24px); }
-.top::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 0.5px; background: var(--hair); opacity: .7; }
-.week { border-bottom: 0; }
-
-/* Lens: a thick soft rim that darkens at the edge and brightens just inside, like Safari's bar */
-.glass { position: relative; background: var(--lg-fill); backdrop-filter: saturate(1.8) blur(20px); -webkit-backdrop-filter: saturate(1.8) blur(20px);
-  box-shadow: var(--lg-shadow), 0 0 0 0.5px var(--lg-edge), inset 0 0 0 1px var(--lg-line), inset 0 0 0 3.5px var(--lg-lens), inset 0 0 0 4.5px color-mix(in srgb, var(--lg-line) 60%, transparent), inset 0 2px 3px rgba(255,255,255,.55); }
-.glass::before, .glass::after { display: none; }
-.glass.press { transition: transform 520ms var(--spring-bouncy), box-shadow 220ms ease, background-color 160ms ease; }
-.glass.press:active { transform: scale(1.06); background: color-mix(in srgb, var(--lg-fill) 60%, var(--bg)); transition: transform 110ms var(--ease-out), box-shadow 110ms ease, background-color 110ms ease; }
-.pgroup .ib { position: relative; z-index: 1; transition: transform 480ms var(--spring-bouncy); }
-.pgroup .ib:active { transform: scale(1.12); transition: transform 100ms var(--ease-out); }
-.pgroup .sep { position: relative; z-index: 1; }
-
-/* sheet actions pick up the same lens */
-.btn.card, .xbtn, .side .done, .chip, .cat:not([aria-pressed="true"]), .restore button { background: var(--lg-fill); backdrop-filter: saturate(1.8) blur(16px); -webkit-backdrop-filter: saturate(1.8) blur(16px); box-shadow: 0 2px 8px rgba(0,0,0,.06), 0 0 0 0.5px var(--lg-edge), inset 0 0 0 1px var(--lg-line), inset 0 0 0 2.5px var(--lg-lens); }
-.btn.blue, .addb:not(.on) { box-shadow: 0 6px 18px color-mix(in srgb, var(--blue) 35%, transparent), inset 0 0 0 1px rgba(255,255,255,.35), inset 0 0 0 3px rgba(0,0,0,.08); }
-.btn { transition: transform 480ms var(--spring-bouncy); } .btn:active { transform: scale(0.97); transition-duration: 100ms; }
-
-@media (prefers-reduced-transparency: reduce) { .glass, .top { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--panel); } .glass::before, .glass::after { display: none; } .btn.card, .xbtn, .side .done, .chip, .cat:not([aria-pressed="true"]), .restore button { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--card); } }
-@media (prefers-contrast: more) { .glass { background: var(--panel); box-shadow: inset 0 0 0 1px var(--ink); } .glass::before, .glass::after { display: none; } }
-@media (prefers-reduced-motion: reduce) { .glass.press, .glass.press:active, .pgroup .ib:active { transform: none; } }
-
-/* ---- Liquid Glass port (from the skill): glassEffect() / interactive() / tint() / GlassEffectContainer(spacing) ---- */
-.pills { position: relative; }
-.pgroup { display: flex; gap: 4px; }                     /* HStack(spacing: 8) inside a container with larger spacing → effects blend at rest (glassEffectUnion) */
-.pgroup .ib { border: 0; color: var(--ink); width: 44px; height: 44px; display: grid; place-items: center; cursor: pointer; border-radius: 22px; padding: 0; }
-.pgroup .sep { display: none; }
-/* GlassEffectContainer: one layer renders every effect behind its views, so nearby shapes merge and morph */
-.gec { position: absolute; inset: -24px; pointer-events: none; z-index: 0; filter: url(#lg-goo) drop-shadow(0 8px 20px rgba(0,0,0,.10)) drop-shadow(0 1px 2px rgba(0,0,0,.06)); }
-.blob { position: absolute; border-radius: 22px; background: var(--lg-solid); overflow: hidden; transition: transform 560ms var(--spring-bouncy), left 300ms var(--ease-out), width 300ms var(--ease-out); }
-.blob.tint { background: color-mix(in srgb, var(--blue) 85%, var(--lg-solid)); }
-.blob.down { transform: scale(1.08); transition: transform 120ms var(--ease-out); }
-/* interactive(): specular sweep under the finger */
-.blob::after { content: ""; position: absolute; top: -40%; bottom: -40%; width: 45%; left: -60%; background: linear-gradient(100deg, transparent, rgba(255,255,255,.75), transparent); transform: skewX(-18deg); opacity: 0; }
-.blob.down::after { animation: lgshimmer 650ms var(--ease-out) forwards; }
-@keyframes lgshimmer { 0% { left: -60%; opacity: 0; } 20% { opacity: 1; } 100% { left: 120%; opacity: 0; } }
-:root { --lg-solid: #ffffff; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --lg-solid: #2c2c2e; } :root:not([data-theme="light"]) .gec { filter: url(#lg-goo-dark) drop-shadow(0 8px 20px rgba(0,0,0,.5)); } }
-:root[data-theme="dark"] { --lg-solid: #2c2c2e; } :root[data-theme="dark"] .gec { filter: url(#lg-goo-dark) drop-shadow(0 8px 20px rgba(0,0,0,.5)); }
-/* views inside the container carry content only; the material lives in the container layer */
-#pills .glass { background: transparent; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; z-index: 1; }
-#pills .glass.press:active { background: transparent; box-shadow: none; }
-@media (prefers-reduced-transparency: reduce) { .gec { filter: none; } .blob { background: var(--panel); box-shadow: inset 0 0 0 1px var(--hair); } }
-@media (prefers-reduced-motion: reduce) { .blob, .blob.down { transform: none; transition: none; } .blob.down::after { animation: none; } }
 </style>
 
 <div class="top" id="top">
   <div class="pills pad" id="pills">
-    <div class="gec" id="gec" aria-hidden="true"></div>
-    <button class="pill glass press" id="backPill" aria-label="Cities"><i class="ch"></i><span class="nm" id="cityName"></span></button>
-    <div class="pgroup"><button class="ib glass press" id="modePill" aria-label="Switch between day and 3-day view"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16M15 4v16"/></svg></button><button class="ib glass press" id="infoPill" aria-label="Details for this day"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r="0.6" fill="currentColor"/></svg></button></div>
+    <button class="pill glass press ib" id="backPill" aria-label="Cities"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3.5"/><path d="M9.5 5v14"/><path d="M5.8 8.5h1.4M5.8 11h1.4M5.8 13.5h1.4"/></svg></button>
+    <button class="pill glass press title" id="titlePill" aria-label="Day details"><span class="nm" id="cityName"></span><i class="chr"></i></button>
+    <button class="pill glass press ib" id="modePill" aria-label="Switch between day and 3-day view"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16M15 4v16"/></svg></button>
   </div>
-  <div class="wwrap"><div class="week" id="week" aria-label="Days"></div></div>
+  <div class="wwrap"><div class="wsel" id="wsel" aria-hidden="true"></div><div class="week" id="week" aria-label="Days"></div></div>
 </div>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="lg-goo" x="-20%" y="-60%" width="140%" height="220%" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceGraphic" stdDeviation="7" result="b"/><feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 30 -14" result="g"/><feMorphology in="g" operator="erode" radius="1" result="e1"/><feMorphology in="g" operator="erode" radius="4" result="e4"/><feMorphology in="g" operator="erode" radius="5" result="e5"/><feComposite in="e1" in2="e4" operator="out" result="band"/><feComposite in="e4" in2="e5" operator="out" result="line"/><feComposite in="g" in2="e1" operator="out" result="edge"/><feFlood flood-color="#000" flood-opacity="0.07" result="bc"/><feComposite in="bc" in2="band" operator="in" result="bandC"/><feFlood flood-color="#fff" flood-opacity="0.95" result="lc"/><feComposite in="lc" in2="line" operator="in" result="lineC"/><feFlood flood-color="#000" flood-opacity="0.12" result="ec"/><feComposite in="ec" in2="edge" operator="in" result="edgeC"/><feMerge result="m"><feMergeNode in="g"/><feMergeNode in="bandC"/><feMergeNode in="lineC"/><feMergeNode in="edgeC"/></feMerge><feComponentTransfer in="m"><feFuncA type="table" tableValues="0 0.84"/></feComponentTransfer></filter><filter id="lg-goo-dark" x="-20%" y="-60%" width="140%" height="220%" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceGraphic" stdDeviation="7" result="b"/><feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 30 -14" result="g"/><feMorphology in="g" operator="erode" radius="1" result="e1"/><feMorphology in="g" operator="erode" radius="4" result="e4"/><feMorphology in="g" operator="erode" radius="5" result="e5"/><feComposite in="e1" in2="e4" operator="out" result="band"/><feComposite in="e4" in2="e5" operator="out" result="line"/><feComposite in="g" in2="e1" operator="out" result="edge"/><feFlood flood-color="#000" flood-opacity="0.35" result="bc"/><feComposite in="bc" in2="band" operator="in" result="bandC"/><feFlood flood-color="#fff" flood-opacity="0.22" result="lc"/><feComposite in="lc" in2="line" operator="in" result="lineC"/><feFlood flood-color="#fff" flood-opacity="0.14" result="ec"/><feComposite in="ec" in2="edge" operator="in" result="edgeC"/><feMerge result="m"><feMergeNode in="g"/><feMergeNode in="bandC"/><feMergeNode in="lineC"/><feMergeNode in="edgeC"/></feMerge><feComponentTransfer in="m"><feFuncA type="table" tableValues="0 0.86"/></feComponentTransfer></filter></defs></svg>
 <div class="pager" id="pager"><div id="daycontent"></div></div>
 <div class="scrim" id="scrim"></div>
 <aside class="side" id="side" aria-label="Cities" hidden>
@@ -721,9 +674,10 @@ function padWheel() { wRender(); }
 function wRender() {
   if (!wTrack) wTrack = weekEl.firstElementChild; if (!wTrack) return;
   const centre = weekEl.clientWidth / 2 - WDW / 2;
-  wTrack.style.transform = `translate3d(${(centre - wPos * WDW).toFixed(2)}px,0,0)`;
+  wTrack.style.left = (centre - wPos * WDW).toFixed(2) + "px";
   const els = wTrack.children, i = Math.round(Math.max(0, Math.min(wN(), wPos)));
-  for (let k = 0; k < els.length; k++) { const d = Math.min(3, Math.abs(k - wPos)); const n = els[k].lastElementChild; n.style.opacity = (1 - d * 0.22).toFixed(2); n.style.transform = `scale(${(1 - d * 0.07).toFixed(3)})`; }
+  for (let k = 0; k < els.length; k++) { const off = k - wPos, d = Math.min(3.5, Math.abs(off)); const n = els[k].lastElementChild; n.style.opacity = (1 - d * 0.2).toFixed(2); n.style.transform = `perspective(600px) rotateY(${(off * -14).toFixed(1)}deg) scale(${(1 - d * 0.06).toFixed(3)})`; }
+  const ws = document.getElementById("wsel"); if (ws && els[0]) { ws.style.top = (els[0].lastElementChild.offsetTop - 1) + "px"; ws.classList.toggle("today", ALLDAYS[i] === today); }
   if (i !== wCentre) { if (wCentre >= 0) haptic("light"); wCentre = i; for (let k = 0; k < els.length; k++) els[k].classList.toggle("on", k === i); }
 }
 function wSettle() { const i = Math.round(Math.max(0, Math.min(wN(), wPos))); const d = ALLDAYS[i]; if (d !== view) { curWeek = i; selectDay(d, 0, false); } }
@@ -772,18 +726,6 @@ function wEnd(e) {
   wKick();
 }
 weekEl.addEventListener("pointerup", wEnd); weekEl.addEventListener("pointercancel", wEnd);
-/* GlassEffectContainer sync: one blob per glass view, positioned behind it */
-function syncGlass() {
-  const box = document.getElementById("pills"), gec = document.getElementById("gec"); if (!box || !gec) return;
-  const views = [...box.querySelectorAll(".glass")];
-  while (gec.children.length < views.length) { const b = document.createElement("div"); b.className = "blob"; gec.appendChild(b); }
-  while (gec.children.length > views.length) gec.lastChild.remove();
-  const br = box.getBoundingClientRect();
-  views.forEach((v, i) => { const r = v.getBoundingClientRect(), b = gec.children[i]; b.style.left = (r.left - br.left + 24) + "px"; b.style.top = (r.top - br.top + 24) + "px"; b.style.width = r.width + "px"; b.style.height = r.height + "px"; b.style.borderRadius = (r.height / 2) + "px"; v._blob = b; });
-}
-document.addEventListener("pointerdown", e => { const v = e.target.closest && e.target.closest("#pills .glass"); if (v && v._blob) { v._blob.classList.remove("down"); void v._blob.offsetWidth; v._blob.classList.add("down"); } }, { passive: true });
-const glassUp = () => document.querySelectorAll(".blob.down").forEach(b => b.classList.remove("down"));
-document.addEventListener("pointerup", glassUp, { passive: true }); document.addEventListener("pointercancel", glassUp, { passive: true });
 function renderHeader(pop) {
   const iso = view, w = wxFor(iso), s = stayOn(iso);
 
@@ -793,7 +735,7 @@ function renderHeader(pop) {
   const n = s ? Math.round((Date.parse(iso) - Date.parse(s.in)) / 864e5) + 1 : 0;
   document.getElementById("cityName").innerHTML = esc(cityName(iso));
   const open = headsFor(iso).filter(h => !h.k || !done(h.k)).length;
-  measureTop(); syncGlass();
+  measureTop();
 }
 
 /* ---------- day grid ---------- */
@@ -889,7 +831,7 @@ function renderMultiContent(iso) {
       if (ev.k === "free" || ev.k === "prompt" || ev.k === "slot") return;
       const top = MY(ev.s), h = Math.max(MY(ev.e) - MY(ev.s) - 2, 18);
       const tt = ev.k === "wait" ? "Suitcases" : ev.k === "plan" ? ev.tt : ev.tt;
-      html += `<button class="mev ${ev.k}${ev.done ? " done" : ""} press" data-mday="${d}" data-mi="${i}" style="top:${top}px;height:${h}px"><b>${esc(tt)}</b>${h >= 30 ? `<span>${t12(ev.s)}</span>` : ""}</button>`;
+      html += `<button class="mev ${ev.k}${ev.done ? " done" : ""}${h < 34 ? " short" : ""} press" data-mday="${d}" data-mi="${i}" style="top:${top}px;height:${h}px"><b>${esc(tt)}</b>${h >= 44 ? `<span>${t12(ev.s)}</span>` : ""}</button>`;
     });
     D.marks.forEach(mk => { html += `<div class="mmk" style="top:${MY(mk.t)}px"><span>${mk.kind === "in" ? "In" : "Out"} ${t12(mk.t).replace(" ", "")}</span></div>`; });
     if (d === today) html += `<div class="mnow" style="top:${MY(nm)}px"></div>`;
@@ -1262,7 +1204,7 @@ document.addEventListener("click", e => {
     closeSide(); return selectDay(d); }
   if (t.closest(".wd")) return;
   if (t.closest("#backPill")) { haptic(); return openSide(); }
-  if (t.closest("#infoPill")) { haptic(); openSheet(menuSheet()); startCycle(view); return; }
+  if (t.closest("#titlePill")) { haptic(); openSheet(menuSheet()); startCycle(view); return; }
   if (t.closest("[data-today]")) { e.preventDefault(); haptic(); closeSheet(); return selectDay(today); }
   const mi = t.closest("[data-menu]"); if (mi) { haptic(); const k = mi.dataset.menu; if (k === "stay") { const s = stayOn(view); return openSheet(s ? staySheet(s) : tripSheet()); } if (k === "wx") return openSheet(wxSheet()); if (k === "ideas") { const h = view === today ? new Date().getHours() : 10; return openPlanner(view, h < 11 ? "coffee" : h < 14 ? "dinner" : h < 17 ? "see" : h < 21 ? "dinner" : "drinks", null); } if (k === "tasks") return openSheet(tasksSheet()); if (k === "trip") return openSheet(tripSheet()); }
   if (t.closest("[data-open-trip]")) { haptic(); return openSheet(tripSheet()); }
@@ -1281,9 +1223,8 @@ function tick() {
 renderWeek(); renderHeader(false); measureTop(); content.innerHTML = renderContent(view);
 document.getElementById("modePill").classList.toggle("on", MODE === "multi");
 refreshLive();
-requestAnimationFrame(() => { measureTop(); padWheel(); centreDay(view, false); scrollToDay(); syncGlass(); });
-addEventListener("resize", () => { measureTop(); padWheel(); centreDay(view, false); syncGlass(); });
-if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncGlass);
+requestAnimationFrame(() => { measureTop(); padWheel(); centreDay(view, false); scrollToDay(); });
+addEventListener("resize", () => { measureTop(); padWheel(); centreDay(view, false); });
 setInterval(tick, 60000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { tick(); refreshLive(); } });
 })();
