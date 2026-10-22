@@ -113,11 +113,11 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 #daycontent.ph { pointer-events: none; }
 .grid { position: relative; height: calc(var(--hour) * 24 + 24px); margin-top: 8px; }
 .hl { position: absolute; left: 0; right: 0; height: 0; }
-.hl::after { content: ""; position: absolute; left: 56px; right: 0; border-top: 0.5px solid var(--grid); }
-.hl span { position: absolute; right: calc(100% - 48px); top: -8px; font-size: 12px; color: var(--sub); white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: 0; }
+.hl::after { content: ""; position: absolute; left: 57px; right: 0; border-top: 0.5px solid var(--grid); }
+.hl span { position: absolute; right: calc(100% - 50px); top: -8px; font-size: 12px; color: var(--sub); white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: 0; }
 .hl span small { font-size: 12px; color: var(--sub); margin-left: 2px; }
 .hl.mid span { font-size: 12px; color: var(--sub); font-weight: 600; top: -8px; }
-.lane { position: absolute; left: 60px; right: 6px; top: 0; bottom: 0; }
+.lane { position: absolute; left: 61px; right: 3px; top: 0; bottom: 0; }
 .ev { position: absolute; left: 0; right: 0; border: 0; text-align: left; border-radius: 6px; padding: 4px 8px 4px 10px; overflow: hidden; cursor: pointer; display: flex; flex-direction: column; letter-spacing: -0.01em; }
 .ev::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3.5px; background: var(--c); border-radius: 6px 0 0 6px; }
 .ev .tt { font-size: 14px; font-weight: 600; line-height: 1.22; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px; }
@@ -159,7 +159,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev.press:active { transform: scale(0.98); }
 .sun { position: absolute; left: 60px; right: 6px; height: 0; border-top: 1px dashed var(--e-wait); z-index: 1; pointer-events: none; }
 .sun span { position: absolute; right: 4px; top: -9px; font-size: 11px; font-weight: 600; color: var(--e-wait-ink); background: var(--bg); padding: 0 4px; border-radius: 4px; }
-.now { position: absolute; left: 52px; right: 0; height: 0; border-top: 2px solid var(--red); z-index: 4; pointer-events: none; }
+.now { position: absolute; left: 53px; right: 0; height: 0; border-top: 2px solid var(--red); z-index: 4; pointer-events: none; }
 .now::before { content: ""; position: absolute; left: -5px; top: -6px; width: 10px; height: 10px; border-radius: 50%; background: var(--red); }
 .now span { position: absolute; right: calc(100% + 8px); top: -9px; font-size: 12px; font-weight: 700; color: var(--red); background: var(--bg); padding-left: 4px; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .grid .hl.hide span { visibility: hidden; }
@@ -281,7 +281,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .dline .ans .g { color: var(--e-free-ink); }
 .ev.get { background: transparent; border: 1.5px dashed color-mix(in srgb, var(--e-get) 65%, transparent); }
 .ev.get::before { display: none; }
-.mk { position: absolute; left: 60px; right: 6px; height: 0; border-top: 2px solid var(--e-mark); z-index: 3; pointer-events: none; }
+.mk { position: absolute; left: 61px; right: 3px; height: 0; border-top: 2px solid var(--e-mark); z-index: 3; pointer-events: none; }
 .mk::before { content: ""; position: absolute; left: -4px; top: -5px; width: 8px; height: 8px; border-radius: 50%; background: var(--e-mark); }
 .mk button { pointer-events: auto; position: absolute; right: 0; top: -12px; height: 24px; border: 0; border-radius: 980px; background: var(--e-mark); color: #fff; font-size: 12px; padding: 0 11px; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; max-width: 86%; }
 .mk button b { font-weight: 700; flex: none; }
@@ -346,7 +346,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev .tm b { opacity: 1; }
 .ev .ref { opacity: .8; }
 .ev.short { padding-block: 0; }
-.mk { border-top: 1.5px solid var(--e-mark); left: 60px; }
+.mk { border-top: 1.5px solid var(--e-mark); left: 61px; }
 .mk::before { width: 7px; height: 7px; top: -4.5px; left: -3.5px; }
 .mk button { background: var(--bg); color: var(--e-mark); height: 20px; top: -10px; padding: 0 7px; border-radius: 6px; font-size: 12px; gap: 5px; }
 .mk button b { font-weight: 700; } .mk button span { opacity: .8; font-weight: 500; }
@@ -393,6 +393,40 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 #modePill.on .mi3 { opacity: 0; transform: scale(0.6); }
 #modePill.on .mi1 { opacity: 1; transform: scale(1); }
 #daycontent { transform-origin: 50% 20%; }
+
+/* ---------- Apple Calendar blocks: tinted fill, inset accent bar, coloured title; one colour per kind ---------- */
+.ev { --c: #8e8e93; background: color-mix(in srgb, var(--c) 15%, var(--bg)); color: color-mix(in srgb, var(--c) 62%, var(--ink)); border: 0; border-radius: 6px; padding: 4px 8px 4px 13px; box-shadow: none; opacity: 1; }
+.ev::before { display: block; content: ""; position: absolute; left: 4px; top: 4px; bottom: 4px; width: 3px; border-radius: 2px; background: var(--c); }
+.ev.short::before { top: 3px; bottom: 3px; }
+.ev.get::before, .ev.wait::before, .ev.prompt::before, .ev.slot::before, .ev.mark::before, .ev.change::before, .ev.travel::before { display: block; }
+.ev .tt { color: inherit; font-weight: 600; }
+.ev .tm { color: inherit; opacity: .78; }
+.ev.travel { --c: #007aff; }
+.ev.change { --c: #007aff; background: color-mix(in srgb, var(--c) 9%, var(--bg)); }
+.ev.get { --c: #8e8e93; }
+.ev.wait { --c: #d4a300; }
+.ev.mark { --c: #af52de; }
+.ev.c-coffee, .ev.slot.coffee { --c: #a2845e; }
+.ev.c-lunch { --c: #ff9500; }
+.ev.c-day { --c: #34c759; }
+.ev.c-dinner, .ev.slot.dinner { --c: #ff2d55; }
+.ev.slot.drinks { --c: #5856d6; }
+/* suggestions stay lighter than anything booked */
+.ev.prompt { background: color-mix(in srgb, var(--c) 8%, var(--bg)); color: color-mix(in srgb, var(--c) 55%, var(--ink)); }
+.ev.prompt::before { opacity: .55; }
+.ev.prompt .tt { font-weight: 500; color: inherit; }
+.ev.slot { background: color-mix(in srgb, var(--c) 15%, var(--bg)); color: color-mix(in srgb, var(--c) 62%, var(--ink)); }
+.ev.slot::before { background: var(--c); }
+.ev.slot .pk, .ev.slot .sug { color: inherit; opacity: .8; } .ev.slot .pk b { color: inherit; }
+.ev.plan { --c: var(--sub); background: var(--card); color: var(--ink); box-shadow: 0 0 0 1px var(--hair), 0 4px 14px rgba(0,0,0,.08); }
+.ev.free { background: transparent; color: transparent; } .ev.free::before { display: none; }
+.ev.done { opacity: .45; }
+.mev.wait { background: color-mix(in srgb, #d4a300 16%, var(--bg)); color: color-mix(in srgb, #d4a300 62%, var(--ink)); }
+/* hour labels: number, small am/pm */
+.grid .hl span { font-size: 15px; font-weight: 400; color: color-mix(in srgb, var(--ink) 72%, transparent); letter-spacing: -0.01em; }
+.grid .hl span small { font-size: 11px; color: var(--sub); margin-left: 2px; }
+.grid .hl.mid span { font-size: 12px; font-weight: 600; color: color-mix(in srgb, var(--ink) 65%, transparent); top: -8px; }
+.grid .hl span { top: -10px; }
 </style>
 
 <div class="page" id="page">
@@ -840,7 +874,7 @@ function renderDayContent(iso) {
       return;
     }
     if (ev.k === "prompt") {
-      html += `<button class="ev prompt${short ? " short" : ""} press" data-prompt="${ev.pr.cat}" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${esc(ev.tt)}</span></button>`;
+      html += `<button class="ev prompt c-${ev.pr.k}${short ? " short" : ""} press" data-prompt="${ev.pr.cat}" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${esc(ev.tt)}</span></button>`;
       return;
     }
     if (ev.k === "free" || ev.k === "wait") {
@@ -1076,7 +1110,7 @@ function freeSheet(ev) {
 }
 
 
-const SLOTDEF = { coffee: { l: "Coffee", cat: "coffee", dur: 45 }, dinner: { l: "🍝 Dinner", cat: "dinner", dur: 90 }, drinks: { l: "Wine", cat: "drinks", dur: 75 } };
+const SLOTDEF = { coffee: { l: "Coffee", cat: "coffee", dur: 45 }, dinner: { l: "Dinner", cat: "dinner", dur: 90 }, drinks: { l: "Wine", cat: "drinks", dur: 75 } };
 function getPick(iso, k) { try { return localStorage.getItem(`pick:${iso}:${k}`); } catch (e) { return null; } }
 function setPick(iso, k, v) { try { v == null ? localStorage.removeItem(`pick:${iso}:${k}`) : localStorage.setItem(`pick:${iso}:${k}`, v); } catch (e) {} }
 const hasSaves = iso => { const a = anchorFor(iso); return !!a && SAVES.some(s => s.city === a.city); };
