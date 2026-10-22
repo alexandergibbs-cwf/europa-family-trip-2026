@@ -54,7 +54,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 /* Header (sticky) */
 .top { position: fixed; left: 0; right: 0; top: 0; z-index: 20; background: var(--bg); padding-top: env(safe-area-inset-top, 0px); }
 .top > * { max-width: 520px; margin-left: auto; margin-right: auto; }
-.pager { position: fixed; inset: 0; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior-y: none; scroll-padding-top: var(--top-h, 180px); }
+.pager { position: fixed; inset: 0; height: 100lvh; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior-y: none; scroll-padding-top: var(--top-h, 180px); }
 .pills { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: 10px; padding-block: 10px 6px; }
 .pill.ib { width: 44px; padding: 0; justify-content: center; }
 .pill.title { justify-self: center; padding: 0 12px 0 16px; max-width: 100%; }
@@ -103,7 +103,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 
 /* Day pager + grid */
 .pager { touch-action: pan-y; }
-#daycontent { max-width: 520px; margin: 0 auto; padding-top: var(--top-h, 180px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+#daycontent { max-width: 520px; margin: 0 auto; padding-top: var(--top-h, 180px); padding-bottom: calc(100lvh - 100svh + env(safe-area-inset-bottom, 0px) + 8px); }
 #daycontent { }
 .grid { position: relative; height: calc(var(--hour) * 24 + 24px); margin-top: 8px; }
 .hl { position: absolute; left: 0; right: 0; height: 0; }
@@ -192,7 +192,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .pill.today[disabled] { opacity: .5; }
 
 /* Sheets */
-.page { position: fixed; inset: 0; z-index: 10; background: var(--bg); transform-origin: 0 50%; transition: transform 560ms var(--spring), border-radius 300ms ease, box-shadow 300ms ease; border-radius: 0; }
+.page { position: fixed; inset: 0; height: 100lvh; z-index: 10; background: var(--bg); transform-origin: 0 50%; transition: transform 560ms var(--spring), border-radius 300ms ease, box-shadow 300ms ease; border-radius: 0; }
 .page.shifted, .page.dragging { overflow: hidden; }
 .page.shifted { transform: translateX(var(--side-w, 82vw)); border-radius: 44px 0 0 44px; box-shadow: 0 10px 50px rgba(0,0,0,.22), 0 0 0 0.5px rgba(0,0,0,.06); }
 .page.dragging { transition: none; }
@@ -755,7 +755,7 @@ function renderHeader(pop) {
   
   const n = s ? Math.round((Date.parse(iso) - Date.parse(s.in)) / 864e5) + 1 : 0;
   const cn = document.getElementById("cityName"), nm = cityName(iso);
-  if (cn.textContent !== nm) { cn.innerHTML = esc(nm); if (pop && !reduce()) cn.animate([{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], { duration: 360, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }); }
+  if (cn.textContent !== nm) { cn.innerHTML = esc(nm); if (pop && !reduce()) cn.animate([{ opacity: 0, transform: "translateY(5px)", filter: "blur(2px)" }, { opacity: 1, transform: "none", filter: "blur(0)" }], { duration: 420, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }); }
   const open = headsFor(iso).filter(h => !h.k || !done(h.k)).length;
   measureTop();
 }
@@ -894,13 +894,10 @@ function selectDay(iso, dir, syncWeek = true) {
   const old = view; view = iso; haptic(); refreshLive();
   if (syncWeek) showWeek(weekOf(iso), true);
   renderHeader(true);
-  const W = content.offsetWidth;
-  if (reduce() || !content.animate) { content.innerHTML = renderContent(iso); scrollToDay(false); return; }
-  const out = content.animate([{ transform: content.style.transform || "translateX(0)", opacity: 1 }, { transform: `translateX(${-dir * W * 0.35}px)`, opacity: 0 }], { duration: 180, easing: "cubic-bezier(0.65, 0, 0.35, 1)", fill: "forwards" });
-  out.onfinish = () => {
-    content.style.transform = ""; content.innerHTML = renderContent(iso); out.cancel(); scrollToDay(false);
-    content.animate([{ transform: `translateX(${dir * W * 0.35}px)`, opacity: 0 }, { transform: "translateX(0)", opacity: 1 }], { duration: 560, easing: EASE });
-  };
+  content.getAnimations?.().forEach(a => a.cancel()); content.style.transform = "";
+  content.innerHTML = renderContent(iso); scrollToDay(false);
+  if (reduce() || !content.animate) return;
+  content.animate([{ transform: `translateX(${dir * 26}px)`, opacity: 0 }, { transform: "translateX(0)", opacity: 1 }], { duration: 420, easing: "cubic-bezier(0.22, 1, 0.36, 1)" });
 }
 const pager = document.getElementById("pager");
 let pd = null;
