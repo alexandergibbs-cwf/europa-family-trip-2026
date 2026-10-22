@@ -104,7 +104,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 /* Day pager + grid */
 .pager { touch-action: pan-y; }
 #daycontent { max-width: 520px; margin: 0 auto; padding-top: var(--top-h, 180px); padding-bottom: env(safe-area-inset-bottom, 0px); }
-#daycontent { will-change: transform; }
+#daycontent { }
 .grid { position: relative; height: calc(var(--hour) * 24 + 24px); margin-top: 8px; }
 .hl { position: absolute; left: 0; right: 0; height: 0; }
 .hl::after { content: ""; position: absolute; left: 64px; right: 0; border-top: 0.5px solid var(--grid); }
@@ -192,7 +192,8 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .pill.today[disabled] { opacity: .5; }
 
 /* Sheets */
-.page { position: fixed; inset: 0; z-index: 10; background: var(--bg); transform-origin: 0 50%; will-change: transform; transition: transform 560ms var(--spring), border-radius 300ms ease, box-shadow 300ms ease; border-radius: 0; overflow: hidden; }
+.page { position: fixed; inset: 0; z-index: 10; background: var(--bg); transform-origin: 0 50%; transition: transform 560ms var(--spring), border-radius 300ms ease, box-shadow 300ms ease; border-radius: 0; }
+.page.shifted, .page.dragging { overflow: hidden; }
 .page.shifted { transform: translateX(var(--side-w, 82vw)); border-radius: 44px 0 0 44px; box-shadow: 0 10px 50px rgba(0,0,0,.22), 0 0 0 0.5px rgba(0,0,0,.06); }
 .page.dragging { transition: none; }
 .page.shifted::after { content: ""; position: absolute; inset: 0; z-index: 99; }
@@ -782,7 +783,7 @@ function events(iso, D) {
 function renderDayContent(iso) {
   const D = buildDay(iso); CUR = D; const evs = events(iso, D); ITEMS = evs;
   const nm = nowMin(), showNow = iso === today;
-  const LO = 0, HI = 1440;
+  const LO = Math.min(300, Math.floor(Math.min(...D.segs.map(x => x.s), 1440) / 60) * 60), HI = 1440;
   /* busy ranges: anything that isn't blank free time, padded a little, plus marks and now */
   const busy = [];
   evs.forEach(e => { if (e.k !== "free" && e.k !== "prompt") busy.push([e.s - 5, e.e + 5]); });
@@ -835,7 +836,7 @@ function renderDayContent(iso) {
   return html;
 }
 let MODE = (() => { try { return localStorage.getItem("mode") === "multi" ? "multi" : "day"; } catch (e) { return "day"; } })();
-const MSTART = 0, MEND = 1440, MPX = 0.72, MY = t => 10 + (Math.max(MSTART, Math.min(MEND, t)) - MSTART) * MPX;
+const MSTART = 300, MEND = 1440, MPX = 0.72, MY = t => 10 + (Math.max(MSTART, Math.min(MEND, t)) - MSTART) * MPX;
 let MITEMS = {};
 function multiStart(iso) { let s = iso; while (addDays(s, 2) > END) s = addDays(s, -1); return s < START ? START : s; }
 function renderMultiContent(iso) {
