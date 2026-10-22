@@ -150,7 +150,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .pill.today[disabled] { opacity: .5; }
 
 /* Sheets */
-.side { position: fixed; top: 0; bottom: 0; left: 0; width: min(78vw, 320px); z-index: 42; overflow-x: hidden; touch-action: pan-y; background: var(--panel); padding: calc(env(safe-area-inset-top, 0px) + 18px) 12px calc(env(safe-area-inset-bottom, 0px) + 90px) max(12px, env(safe-area-inset-left, 0px)); overflow-y: auto; overscroll-behavior: contain; transform: translateX(-104%); box-shadow: 8px 0 40px rgba(0,0,0,.15); }
+.side { position: fixed; top: 0; bottom: 0; left: 0; width: min(78vw, 320px); z-index: 42; overflow-x: hidden; touch-action: pan-y; background: var(--panel); padding: calc(env(safe-area-inset-top, 0px) + 18px) 12px calc(env(safe-area-inset-bottom, 0px) + 30px) max(12px, env(safe-area-inset-left, 0px)); overflow-y: auto; overscroll-behavior: contain; transform: translateX(-104%); box-shadow: 8px 0 40px rgba(0,0,0,.15); }
 .side-h { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; padding: 6px 8px 14px; }
 .side .crow { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; width: 100%; border: 0; background: none; text-align: left; padding: 12px 10px; border-radius: 12px; cursor: pointer; }
 .side .crow .a { font-size: 17px; font-weight: 600; line-height: 1.2; }
@@ -162,7 +162,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .side .crow.on { outline: 2px solid var(--blue); outline-offset: -2px; }
 .scrim { position: fixed; inset: 0; z-index: 40; background: rgba(0, 0, 0, 0.32); opacity: 0; pointer-events: none; transition: opacity 300ms var(--ease-out); }
 .scrim.open { opacity: 1; pointer-events: auto; }
-.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 41; touch-action: pan-y; max-width: 520px; margin: 0 auto; background: var(--panel); border-radius: 26px 26px 0 0; padding: 8px max(16px, env(safe-area-inset-right, 0px)) calc(88px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); transform: translateY(105%); max-height: 90vh; overflow-y: auto; overscroll-behavior: contain; }
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 41; touch-action: pan-y; max-width: 520px; margin: 0 auto; background: var(--panel); border-radius: 26px 26px 0 0; padding: 8px max(16px, env(safe-area-inset-right, 0px)) calc(28px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); transform: translateY(105%); max-height: 90vh; overflow-y: auto; overscroll-behavior: contain; }
 .grab { width: 36px; height: 5px; border-radius: 3px; background: var(--hair); margin: 0 auto 14px; }
 .sh-h { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin: 0 4px; }
 .sheet h3 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin: 0; line-height: 1.15; text-wrap: balance; }
@@ -626,7 +626,7 @@ function renderDayContent(iso) {
   anchors.push([cur, yy, ePX]); const H = yy + (HI - cur) * ePX;
   const y = t => { t = Math.max(LO, Math.min(HI, t)); let i = anchors.length - 1; while (i > 0 && anchors[i][0] > t) i--; const [t0, y0, k] = anchors[i]; return y0 + (t - t0) * k; };
   YFN = y;
-  let html = `<div class="grid" style="height:${H + 96}px">`;
+  let html = `<div class="grid" style="height:${H + 32}px">`;
   let lastLabelY = -99;
   for (let h = LO / 60; h <= 24; h++) {
     const t = h * 60, near = showNow && Math.abs(nm - t) < 12, yv = y(t), tight = yv - lastLabelY < 18;
