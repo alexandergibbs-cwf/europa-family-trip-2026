@@ -359,6 +359,39 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .pgroup { padding: 0 4px; gap: 0; }
 .pgroup .ib { border: 0; background: none; color: var(--ink); width: 44px; height: 44px; display: grid; place-items: center; cursor: pointer; border-radius: 22px; }
 .pgroup .sep { width: 0.5px; height: 20px; background: var(--hair); }
+
+/* ---------- Liquid Glass (navigation layer only: header, pills, sheet actions) ---------- */
+:root { --lg-fill: rgba(255, 255, 255, 0.42); --lg-rim: rgba(255, 255, 255, 0.85); --lg-rim2: rgba(255, 255, 255, 0.35); --lg-edge: rgba(0, 0, 0, 0.07); --lg-shadow: 0 10px 30px rgba(0, 0, 0, 0.14), 0 1px 2px rgba(0, 0, 0, 0.06); --lg-spec: rgba(255, 255, 255, 0.9); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --lg-fill: rgba(60, 60, 64, 0.40); --lg-rim: rgba(255, 255, 255, 0.22); --lg-rim2: rgba(255, 255, 255, 0.06); --lg-edge: rgba(255, 255, 255, 0.10); --lg-shadow: 0 10px 30px rgba(0, 0, 0, 0.55), 0 1px 2px rgba(0, 0, 0, 0.4); --lg-spec: rgba(255, 255, 255, 0.28); } }
+:root[data-theme="dark"] { --lg-fill: rgba(60, 60, 64, 0.40); --lg-rim: rgba(255, 255, 255, 0.22); --lg-rim2: rgba(255, 255, 255, 0.06); --lg-edge: rgba(255, 255, 255, 0.10); --lg-shadow: 0 10px 30px rgba(0, 0, 0, 0.55), 0 1px 2px rgba(0, 0, 0, 0.4); --lg-spec: rgba(255, 255, 255, 0.28); }
+
+/* The header is one glass surface the timetable scrolls beneath */
+.top { background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: saturate(1.6) blur(18px); -webkit-backdrop-filter: saturate(1.6) blur(18px); }
+.top::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 0.5px; background: var(--hair); opacity: .7; }
+.week { border-bottom: 0; }
+
+.glass { position: relative; isolation: isolate; background: var(--lg-fill); backdrop-filter: saturate(1.9) blur(24px) brightness(1.04); -webkit-backdrop-filter: saturate(1.9) blur(24px) brightness(1.04); box-shadow: var(--lg-shadow), inset 0 0 0 0.5px var(--lg-edge); overflow: hidden; }
+/* refracted rim: bright on the lit edge, fading around */
+.glass::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; background: linear-gradient(160deg, var(--lg-rim) 0%, var(--lg-rim2) 35%, transparent 60%, var(--lg-rim2) 100%); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; z-index: 0; }
+/* specular highlight sweeping the top */
+.glass::after { content: ""; position: absolute; left: 8%; right: 8%; top: 0; height: 45%; border-radius: inherit; background: linear-gradient(180deg, var(--lg-spec), transparent); opacity: .35; pointer-events: none; z-index: 0; transition: opacity 200ms ease, transform 300ms var(--ease-out); }
+.glass > * { position: relative; z-index: 1; }
+/* interactive: glass lifts and brightens under the finger, then settles on a spring */
+.glass.press { transition: transform 520ms var(--spring-bouncy), box-shadow 220ms ease, background-color 160ms ease; }
+.glass.press:active { transform: scale(1.06); background: color-mix(in srgb, var(--lg-fill) 70%, var(--bg)); box-shadow: 0 14px 36px rgba(0,0,0,.18), inset 0 0 0 0.5px var(--lg-edge); transition: transform 110ms var(--ease-out), box-shadow 110ms ease, background-color 110ms ease; }
+.glass.press:active::after { opacity: .6; }
+.pgroup .ib { position: relative; z-index: 1; transition: transform 480ms var(--spring-bouncy); }
+.pgroup .ib:active { transform: scale(1.12); transition: transform 100ms var(--ease-out); }
+.pgroup .sep { position: relative; z-index: 1; }
+
+/* sheet actions pick up the same material */
+.btn.card, .xbtn, .side .done, .chip, .cat:not([aria-pressed="true"]), .restore button { background: var(--lg-fill); backdrop-filter: saturate(1.8) blur(16px); -webkit-backdrop-filter: saturate(1.8) blur(16px); box-shadow: 0 1px 2px rgba(0,0,0,.06), inset 0 0 0 0.5px var(--lg-edge), inset 0 1px 0 var(--lg-rim2); }
+.btn.blue, .addb:not(.on) { box-shadow: 0 6px 18px color-mix(in srgb, var(--blue) 35%, transparent), inset 0 1px 0 rgba(255,255,255,.35), inset 0 0 0 0.5px rgba(255,255,255,.18); }
+.btn { transition: transform 480ms var(--spring-bouncy); } .btn:active { transform: scale(0.97); transition-duration: 100ms; }
+
+@media (prefers-reduced-transparency: reduce) { .glass, .top { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--panel); } .glass::before, .glass::after { display: none; } .btn.card, .xbtn, .side .done, .chip, .cat:not([aria-pressed="true"]), .restore button { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--card); } }
+@media (prefers-contrast: more) { .glass { background: var(--panel); box-shadow: inset 0 0 0 1px var(--ink); } .glass::before, .glass::after { display: none; } }
+@media (prefers-reduced-motion: reduce) { .glass.press, .glass.press:active, .pgroup .ib:active { transform: none; } }
 </style>
 
 <div class="top" id="top">
