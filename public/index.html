@@ -751,7 +751,7 @@ function _oldRenderWeek() {
   document.getElementById("week").innerHTML = WEEKS.map(w => `<div class="wpage">${w.map(d => `<div class="wl${["Sat", "Sun"].includes(wk(d)) ? " we" : ""}">${wk(d).replace("Mon", "M").replace("Tue", "Tu").replace("Wed", "W").replace("Thu", "Th").replace("Fri", "F").replace("Sat", "Sa").replace("Sun", "Su")}</div>`).join("")}${w.map(d => `<button class="wd${["Sat", "Sun"].includes(wk(d)) ? " we" : ""}${d === today ? " today" : ""}${d === view ? " on" : ""}${d > END ? " out" : ""}" data-d="${d}" aria-label="${dLong(d)}"${d > END ? " disabled" : ""}><span class="n">${+d.slice(8)}</span></button>`).join("")}</div>`).join("");
 }
 const weekEl = document.getElementById("week"), WDW = 52;
-let wTrack = null, wPos = 0, wVel = 0, wRaf = 0, wDrag = null, wCentre = -1, wTarget = null, curWeek = -1;
+let wTw = null, wTrack = null, wPos = 0, wVel = 0, wRaf = 0, wDrag = null, wCentre = -1, wTarget = null, curWeek = -1;
 const wN = () => ALLDAYS.length - 1;
 function padWheel() { wRender(); }
 function wRender() {
@@ -801,13 +801,16 @@ function wStep() {
   if (wDrag) return;
   const lo = 0, hi = wN();
   if (wTarget != null) {
-    /* spring to target */
-    const k = 0.16, dmp = 0.72; wVel = (wVel + (wTarget - wPos) * k) * dmp; wPos += wVel;
-    if (Math.abs(wTarget - wPos) < 0.002 && Math.abs(wVel) < 0.002) { wPos = wTarget; wVel = 0; wTarget = null; wRender(); wSettle(); return; }
+    /* glide to target: timed, no overshoot. Eases out of any carried speed, eases in and out from rest */
+    const now = performance.now();
+    if (!wTw || wTw.to !== wTarget) { const dist = Math.abs(wTarget - wPos); wTw = { from: wPos, to: wTarget, t0: now, dur: Math.min(1100, 560 + 260 * Math.sqrt(dist)), moving: Math.abs(wVel) > 0.02 }; wVel = 0; }
+    const u = Math.min(1, (now - wTw.t0) / wTw.dur), e = wTw.moving ? 1 - Math.pow(1 - u, 4) : (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
+    wPos = wTw.from + (wTw.to - wTw.from) * e;
+    if (u >= 1) { wPos = wTarget; wTarget = null; wTw = null; wRender(); wSettle(); return; }
     wRender(); wRaf = requestAnimationFrame(wStep); return;
   }
   /* free deceleration */
-  wPos += wVel; wVel *= 0.94;
+  wPos += wVel; wVel *= 0.95;
   if (wPos < lo) { wPos = lo + (wPos - lo) * 0.4; wVel = 0; } if (wPos > hi) { wPos = hi + (wPos - hi) * 0.4; wVel = 0; }
   if (Math.abs(wVel) < 0.012) { wTarget = Math.round(Math.max(lo, Math.min(hi, wPos))); }
   wRender(); wRaf = requestAnimationFrame(wStep);
@@ -815,14 +818,14 @@ function wStep() {
 function wKick() { if (!wRaf) wRaf = requestAnimationFrame(wStep); }
 function centreDay(iso, smooth) {
   const idx = ALLDAYS.indexOf(iso); if (idx < 0) return; curWeek = idx;
-  if (!smooth || reduce()) { wPos = idx; wVel = 0; wTarget = null; cancelAnimationFrame(wRaf); wRaf = 0; wRender(); return; }
+  if (!smooth || reduce()) { wPos = idx; wVel = 0; wTarget = null; wTw = null; cancelAnimationFrame(wRaf); wRaf = 0; wRender(); return; }
   wTarget = idx; wKick();
 }
 function showWeek(i, smooth) { centreDay(view, smooth); }
 function styleWheel() { wRender(); }
 weekEl.addEventListener("pointerdown", e => {
   if (e.pointerType === "mouse" && e.button) return;
-  cancelAnimationFrame(wRaf); wRaf = 0; wTarget = null; if (!reduce()) wDrive = true;
+  cancelAnimationFrame(wRaf); wRaf = 0; wTarget = null; wTw = null; if (!reduce()) wDrive = true;
   wDrag = { x: e.clientX, pos: wPos, t: performance.now(), lx: e.clientX, lt: performance.now(), moved: false, id: e.pointerId };
   try { weekEl.setPointerCapture(e.pointerId); } catch (er) {}
 });
@@ -1061,9 +1064,9 @@ function pullFlip(dir, from) {
   const swap = () => {
     content.innerHTML = renderContent(iso); a?.cancel();
     scrollToDay(false);
-    if (!reduce()) pullTarget().animate([{ transform: `translateY(${dir < 0 ? -H * 0.35 : H * 0.35}px)`, opacity: 0 }, { transform: "translateY(0)", opacity: 1 }], { duration: 620, easing: "cubic-bezier(0.22, 1.2, 0.36, 1)" });
+    if (!reduce()) pullTarget().animate([{ transform: `translateY(${dir < 0 ? -H * 0.12 : H * 0.12}px)`, opacity: 0 }, { transform: "translateY(0)", opacity: 1 }], { duration: 760, easing: "cubic-bezier(0.25, 0.1, 0.25, 1)" });
   };
-  const a = reduce() ? null : tg.animate([{ transform: `translateY(${from}px)`, opacity: 1 }, { transform: `translateY(${dir < 0 ? H * 0.55 : -H * 0.55}px)`, opacity: 0 }], { duration: 240, easing: "cubic-bezier(0.4, 0, 1, 1)", fill: "forwards" });
+  const a = reduce() ? null : tg.animate([{ transform: `translateY(${from}px)`, opacity: 1 }, { transform: `translateY(${from + (dir < 0 ? H * 0.12 : -H * 0.12)}px)`, opacity: 0 }], { duration: 340, easing: "cubic-bezier(0.4, 0, 0.6, 1)", fill: "forwards" });
   a ? (a.onfinish = swap) : swap();
 }
 pager.addEventListener("pointerdown", e => { if (e.pointerType === "mouse" && e.button) return; if (e.clientX < 24) { pd = null; openSide(); return; } pd = { x: e.clientX, y: e.clientY, t: performance.now(), mode: null, dx: 0 }; });
@@ -1071,7 +1074,7 @@ const pageW = () => MODE === "multi" ? mColW() : (pager.clientWidth || innerWidt
 pager.addEventListener("pointermove", e => {
   if (!pd) return; const dx = e.clientX - pd.x, dy = e.clientY - pd.y;
   if (!pd.mode) {
-    if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.2) { pd.mode = "h"; try { pager.setPointerCapture(e.pointerId); } catch (er) {} cancelAnimationFrame(wRaf); wRaf = 0; wTarget = null; wVel = 0; pd.pos0 = wPos; pd.x = e.clientX; pd.lx = e.clientX; pd.lt = performance.now(); if (!reduce()) wDrive = true; }
+    if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.2) { pd.mode = "h"; try { pager.setPointerCapture(e.pointerId); } catch (er) {} cancelAnimationFrame(wRaf); wRaf = 0; wTarget = null; wTw = null; wVel = 0; pd.pos0 = wPos; pd.x = e.clientX; pd.lx = e.clientX; pd.lt = performance.now(); if (!reduce()) wDrive = true; }
     else if (Math.abs(dy) > 10) { pd = null; return; } else return;
   }
   const ddx = e.clientX - pd.x, w = pageW(); let p = pd.pos0 - ddx / w;
