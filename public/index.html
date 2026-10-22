@@ -284,12 +284,68 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .fsec button { border: 0; background: none; color: var(--blue); font-size: 15px; cursor: pointer; padding: 4px 0; }
 .restore { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 4px 0; }
 .restore button { border: 0; height: 34px; padding: 0 14px; border-radius: 980px; background: var(--card); color: var(--blue); font-size: 14px; font-weight: 600; cursor: pointer; }
+
+/* ---------- calmer blocks ---------- */
+.ev { border-radius: 8px; padding: 6px 10px; }
+.ev::before { display: none; }
+.ev .tt { font-weight: 600; font-size: 14px; }
+.ev .tm { font-size: 12.5px; opacity: .72; }
+.ev.travel { background: var(--e-travel-bg); color: var(--e-travel-ink); }
+.ev.change { background: var(--e-travel-bg); color: var(--e-travel-ink); opacity: .6; }
+.ev.get { background: var(--e-get-bg); border: 0; color: var(--e-get-ink); }
+.ev.get .tt { font-weight: 500; }
+.ev.wait { background: var(--e-wait-bg); border: 0; color: var(--e-wait-ink); }
+.ev.wait .tt { font-weight: 500; }
+.ev.prompt { background: color-mix(in srgb, var(--sub) 6%, transparent); border: 0; color: var(--sub); }
+.ev.prompt .tt { font-weight: 500; }
+.ev.plan { background: var(--card); border: 0; box-shadow: 0 0 0 1px var(--hair), 0 4px 14px rgba(0,0,0,.08); }
+.ev .cd { background: none; color: inherit; padding: 0; margin-top: 2px; font-size: 12.5px; font-weight: 700; opacity: 1; }
+.ev .ref { opacity: .8; }
+.ev.short { padding-block: 0; }
+.mk { border-top: 1.5px solid var(--e-mark); left: 68px; }
+.mk::before { width: 7px; height: 7px; top: -4.5px; left: -3.5px; }
+.mk button { background: var(--bg); color: var(--e-mark); height: 20px; top: -10px; padding: 0 7px; border-radius: 6px; font-size: 12px; gap: 5px; }
+.mk button b { font-weight: 700; } .mk button span { opacity: .8; font-weight: 500; }
+.now { border-top-width: 1.5px; }
+.now::before { width: 8px; height: 8px; top: -5px; left: -4px; }
+.now span { font-weight: 600; font-size: 11.5px; top: -8px; }
+.hl::after { border-top-color: color-mix(in srgb, var(--grid) 85%, transparent); }
+.hl span, .hl span small, .hl.mid span { font-size: 11.5px; }
+
+/* ---------- 3-day view ---------- */
+.multi { position: relative; padding: 0 8px 0 0; }
+.mh { display: grid; grid-template-columns: 44px repeat(3, 1fr); gap: 0 4px; position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 8px 0 6px; }
+.mh button { border: 0; background: none; text-align: center; padding: 2px 0; cursor: pointer; color: var(--ink); line-height: 1.15; min-width: 0; }
+.mh button b { display: block; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.mh button small { display: block; font-size: 11.5px; color: var(--sub); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mh button.today b { color: var(--red); }
+.mh button.on b { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.mg { position: relative; display: grid; grid-template-columns: 44px repeat(3, 1fr); grid-template-rows: 1fr; gap: 0 4px; }
+.mg .hl { grid-column: 1 / -1; } .mg .hl::after { left: 44px; }
+.mg .hl span { right: calc(100% - 40px); font-size: 11px; }
+.mcol { position: relative; grid-row: 1; min-width: 0; border-left: 0.5px solid var(--grid); }
+.mcol.today-col { background: color-mix(in srgb, var(--red) 3%, transparent); }
+.mev { position: absolute; left: 2px; right: 2px; border: 0; border-radius: 6px; padding: 3px 6px; text-align: left; overflow: hidden; cursor: pointer; font-size: 11.5px; line-height: 1.2; letter-spacing: -0.01em; display: block; }
+.mev b { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mev span { display: block; font-size: 10.5px; opacity: .72; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+.mev.travel { background: var(--e-travel-bg); color: var(--e-travel-ink); }
+.mev.change { background: var(--e-travel-bg); color: var(--e-travel-ink); opacity: .6; }
+.mev.get { background: var(--e-get-bg); color: var(--e-get-ink); } .mev.get b { font-weight: 500; }
+.mev.wait { background: var(--e-wait-bg); color: var(--e-wait-ink); } .mev.wait b { font-weight: 500; }
+.mev.plan { background: var(--card); box-shadow: 0 0 0 1px var(--hair); color: var(--ink); }
+.mev.done { opacity: .45; }
+.mmk { position: absolute; left: 0; right: 0; height: 0; border-top: 1.5px solid var(--e-mark); z-index: 2; pointer-events: none; }
+.mmk span { position: absolute; left: 4px; top: 2px; font-size: 10px; font-weight: 700; color: var(--e-mark); white-space: nowrap; }
+.mnow { position: absolute; left: 0; right: 0; height: 0; border-top: 1.5px solid var(--red); z-index: 3; pointer-events: none; }
+.mnow::before { content: ""; position: absolute; left: -4px; top: -4.5px; width: 8px; height: 8px; border-radius: 50%; background: var(--red); }
+#modePill.on { color: var(--blue); }
 </style>
 
 <div class="top" id="top">
   <div class="pills pad">
     <button class="pill glass press" id="backPill" aria-label="Cities"><i class="ch"></i><span class="nm" id="cityName"></span></button>
     <button class="pill glass press" id="todayCap" data-today hidden style="font-size:15px;padding:0 14px">Today</button>
+    <button class="pill glass wx press" id="modePill" aria-label="Switch between day and 3-day view"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16M15 4v16"/></svg></button>
     <button class="pill glass wx press" id="infoPill" aria-label="Details for this day"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r="0.6" fill="currentColor"/></svg></button>
   </div>
   <div class="week" id="week" aria-label="Week"></div>
@@ -651,7 +707,7 @@ function renderDayContent(iso) {
   let html = `<div class="grid" style="height:${H + 32}px">`;
   let lastLabelY = -99;
   for (let h = LO / 60; h <= 24; h++) {
-    const t = h * 60, near = showNow && Math.abs(nm - t) < 12, yv = y(t), tight = yv - lastLabelY < 18;
+    const t = h * 60, near = showNow && Math.abs(nm - t) < 16, yv = y(t), tight = yv - lastLabelY < 18;
     if (!tight) lastLabelY = yv;
     html += `<div class="hl${h === 12 ? " mid" : ""}${near || tight ? " hide" : ""}" style="top:${yv}px"><span>${h === 12 ? "Midday" : `${(h % 12) || 12}<small>${h < 12 || h === 24 ? "am" : "pm"}</small>`}</span></div>`;
   }
@@ -685,6 +741,41 @@ function renderDayContent(iso) {
   html += `</div>`;
   return html;
 }
+let MODE = (() => { try { return localStorage.getItem("mode") === "multi" ? "multi" : "day"; } catch (e) { return "day"; } })();
+const MSTART = 360, MEND = 1440, MPX = 0.72, MY = t => 10 + (Math.max(MSTART, Math.min(MEND, t)) - MSTART) * MPX;
+let MITEMS = {};
+function multiStart(iso) { let s = iso; while (addDays(s, 2) > END) s = addDays(s, -1); return s < START ? START : s; }
+function renderMultiContent(iso) {
+  const start = multiStart(iso), days = [0, 1, 2].map(k => addDays(start, k)); MITEMS = {};
+  const nm = nowMin();
+  let html = `<div class="multi"><div class="mh"><span></span>`;
+  days.forEach(d => { html += `<button class="press${d === today ? " today" : ""}${d === view ? " on" : ""}" data-open-day="${d}"><b>${fmt(d, { weekday: "short" })} ${+d.slice(8)}</b><small>${esc(cityName(d))}</small></button>`; });
+  html += `</div><div class="mg" style="height:${MY(MEND) + 24}px">`;
+  for (let h = MSTART / 60; h <= 24; h++) { const near = days.includes(today) && Math.abs(nm - h * 60) < 14; html += `<div class="hl${h === 12 ? " mid" : ""}${near ? " hide" : ""}" style="top:${MY(h * 60)}px"><span>${h === 12 ? "Midday" : `${(h % 12) || 12}<small>${h < 12 || h === 24 ? "am" : "pm"}</small>`}</span></div>`; }
+  days.forEach(d => {
+    const D = buildDay(d), evs = events(d, D); MITEMS[d] = { evs, D };
+    html += `<div class="mcol${d === today ? " today-col" : ""}" data-col="${d}" style="grid-column:${days.indexOf(d) + 2}">`;
+    evs.forEach((ev, i) => {
+      if (ev.k === "free" || ev.k === "prompt" || ev.k === "slot") return;
+      const top = MY(ev.s), h = Math.max(MY(ev.e) - MY(ev.s) - 2, 18);
+      const tt = ev.k === "wait" ? "Suitcases" : ev.k === "plan" ? ev.tt : ev.tt;
+      html += `<button class="mev ${ev.k}${ev.done ? " done" : ""} press" data-mday="${d}" data-mi="${i}" style="top:${top}px;height:${h}px"><b>${esc(tt)}</b>${h >= 30 ? `<span>${t12(ev.s)}</span>` : ""}</button>`;
+    });
+    D.marks.forEach(mk => { html += `<div class="mmk" style="top:${MY(mk.t)}px"><span>${mk.kind === "in" ? "In" : "Out"} ${t12(mk.t).replace(" ", "")}</span></div>`; });
+    if (d === today) html += `<div class="mnow" style="top:${MY(nm)}px"></div>`;
+    html += `</div>`;
+  });
+  html += `</div></div>`;
+  return html;
+}
+function renderContent(iso) { return MODE === "multi" ? renderMultiContent(iso) : renderDayContent(iso); }
+function setMode(m) {
+  if (m === MODE) return; MODE = m; try { localStorage.setItem("mode", m); } catch (e) {}
+  document.getElementById("modePill").classList.toggle("on", m === "multi"); haptic();
+  const a = reduce() ? null : content.animate([{ opacity: 1, transform: "scale(1)" }, { opacity: 0, transform: "scale(0.985)" }], { duration: 140, easing: "cubic-bezier(0.65, 0, 0.35, 1)", fill: "forwards" });
+  const swap = () => { content.innerHTML = renderContent(view); a?.cancel(); scrollToDay(false); if (!reduce()) content.animate([{ opacity: 0, transform: "scale(0.985)" }, { opacity: 1, transform: "scale(1)" }], { duration: 320, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }); };
+  a ? (a.onfinish = swap) : swap();
+}
 function countdown(ms) { const m = Math.floor(ms / 6e4), d = Math.floor(m / 1440), h = Math.floor((m % 1440) / 60), mm = m % 60; return d >= 1 ? `in ${d}d ${h}h` : h ? `in ${h}h ${mm}m` : `in ${mm}m`; }
 const content = document.getElementById("daycontent");
 let YFN = t => t;
@@ -693,6 +784,7 @@ function scrollToDay() {
   const evs = ITEMS.filter(e => e.k !== "free");
   let t = Math.min(420, evs.length ? Math.min(...evs.map(e => e.s)) - 30 : 420);
   if (view === today && nowMin() - 45 > t + 300) t = nowMin() - 45;
+  if (MODE === "multi") { const mg = content.querySelector(".mg"); if (!mg) return; const top0 = mg.getBoundingClientRect().top - pager.getBoundingClientRect().top + pager.scrollTop; let m = 420; const ds = Object.keys(MITEMS); if (ds.includes(today) && nowMin() - 45 > m + 300) m = nowMin() - 45; pager.scrollTop = Math.max(0, top0 + MY(m) - topH - 44); return; }
   const gridEl = content.querySelector(".grid"); if (!gridEl) return;
   const gridTop = gridEl.getBoundingClientRect().top - pager.getBoundingClientRect().top + pager.scrollTop;
   pager.scrollTop = Math.max(0, gridTop + YFN(Math.max(0, t)) - topH - 8);
@@ -708,10 +800,10 @@ function selectDay(iso, dir, syncWeek = true) {
   if (syncWeek) showWeek(weekOf(iso), true);
   renderHeader(true);
   const W = content.offsetWidth;
-  if (reduce() || !content.animate) { content.innerHTML = renderDayContent(iso); scrollToDay(false); return; }
+  if (reduce() || !content.animate) { content.innerHTML = renderContent(iso); scrollToDay(false); return; }
   const out = content.animate([{ transform: content.style.transform || "translateX(0)", opacity: 1 }, { transform: `translateX(${-dir * W * 0.35}px)`, opacity: 0 }], { duration: 180, easing: "cubic-bezier(0.65, 0, 0.35, 1)", fill: "forwards" });
   out.onfinish = () => {
-    content.style.transform = ""; content.innerHTML = renderDayContent(iso); out.cancel(); scrollToDay(false);
+    content.style.transform = ""; content.innerHTML = renderContent(iso); out.cancel(); scrollToDay(false);
     content.animate([{ transform: `translateX(${dir * W * 0.35}px)`, opacity: 0 }, { transform: "translateX(0)", opacity: 1 }], { duration: 560, easing: EASE });
   };
 }
@@ -726,14 +818,14 @@ pager.addEventListener("pointermove", e => {
 });
 function endDrag() {
   if (!pd) return; const p = pd; pd = null; if (p.mode !== "h") return;
-  const v = p.dx / (performance.now() - p.t), W = content.offsetWidth, next = addDays(view, p.dx < 0 ? 1 : -1);
-  const go = (Math.abs(p.dx) > W * 0.28 || Math.abs(v) > 0.45) && next >= START && next <= END;
+  const v = p.dx / (performance.now() - p.t), W = content.offsetWidth, next = addDays(view, (p.dx < 0 ? 1 : -1) * (MODE === "multi" ? 3 : 1)); if (MODE === "multi") { if (next > END) next = END; if (next < START) next = START; if (multiStart(next) === multiStart(view)) next = null; }
+  const go = !!next && (Math.abs(p.dx) > W * 0.28 || Math.abs(v) > 0.45) && next >= START && next <= END;
   if (go) {
     const dir = p.dx < 0 ? 1 : -1;
     const a = content.animate([{ transform: `translateX(${p.dx}px)` }, { transform: `translateX(${-dir * W}px)` }], { duration: 200, easing: "cubic-bezier(0.3, 0, 0.2, 1)", fill: "forwards" });
     a.onfinish = () => {
       view = next; showWeek(weekOf(next), true); renderHeader(true); haptic();
-      content.innerHTML = renderDayContent(next); content.style.transform = ""; a.cancel(); scrollToDay(false);
+      content.innerHTML = renderContent(next); content.style.transform = ""; a.cancel(); scrollToDay(false);
       content.animate([{ transform: `translateX(${dir * W * 0.5}px)`, opacity: 0.4 }, { transform: "translateX(0)", opacity: 1 }], { duration: 560, easing: EASE });
     };
   } else {
@@ -891,7 +983,7 @@ function plannerSheet() {
   }).join("");
   return head(title, sub) + cats + `<div class="ig">${rows || `<p class="empty-p">Nothing saved in this category here.</p>`}${list.length > PL.n ? `<button class="more-btn" data-more>Show ${list.length - PL.n} more</button>` : ""}</div><p class="nt">From your mio saves, nearest to the hotel first. Add puts it on the timetable as a dotted block, saved on this phone.</p>`;
 }
-function refreshAll() { if (REFRESH) REFRESH(); content.innerHTML = renderDayContent(view); renderHeader(false); }
+function refreshAll() { if (REFRESH) REFRESH(); content.innerHTML = renderContent(view); renderHeader(false); }
 function openPlanner(iso, cat, block) {
   REFRESH = null;
   PL = { iso, cat: cat || PL.cat || "coffee", block: block || null, n: 12 };
@@ -1004,7 +1096,7 @@ document.addEventListener("click", e => {
   const sr = t.closest("[data-show-ref]"); if (sr) { haptic("heavy"); return openShow(`<div class="lbl">Booking ref · ${esc(sr.dataset.showL || "")}</div><div class="big">${esc(sr.dataset.showRef)}</div><div class="sm">Show this at the desk or to the conductor.</div>`); }
   const ss = t.closest("[data-show-stay]"); if (ss) { haptic("heavy"); const s = STAYS[+ss.dataset.showStay]; return openShow(`<div class="lbl">Please take us to</div><div class="big txt">${esc(s.hotel)}</div><div class="sm">${esc(s.addr && !/booking/i.test(s.addr) ? s.addr + ", " + s.city : s.city)}</div>`); }
   const ch = t.closest("[data-choose]"); if (ch) { haptic("heavy"); setPick(view, SL.slot.k, ch.dataset.choose); refreshAll(); return; }
-  const sk = t.closest("[data-skip]"); if (sk) { haptic(); setPick(view, sk.dataset.skip, "skip"); closeSheet(); content.innerHTML = renderDayContent(view); return; }
+  const sk = t.closest("[data-skip]"); if (sk) { haptic(); setPick(view, sk.dataset.skip, "skip"); closeSheet(); content.innerHTML = renderContent(view); return; }
   const up = t.closest("[data-unpick]"); if (up) { haptic(); setPick(view, up.dataset.unpick, null); refreshAll(); return; }
   const sa = t.closest("[data-seeall]"); if (sa) { haptic(); openPlanner(view, sa.dataset.seeall, FR ? FR.x : null); REFRESH = null; return; }
   const pc = t.closest("[data-plan-cat]"); if (pc) { haptic(); return openPlanner(view, pc.dataset.planCat, ITEMS[+pc.dataset.block].x); }
@@ -1014,10 +1106,13 @@ document.addEventListener("click", e => {
     haptic("heavy"); const iso = PL.iso, p = getPlan(iso), i = p.findIndex(x => x.id === ad.dataset.add);
     const cat = ad.dataset.addcat || PL.cat;
     if (i >= 0) p.splice(i, 1); else p.push({ id: ad.dataset.add, c: cat, t: slotFor(iso, cat, PL.block) });
-    setPlan(iso, p); REFRESH ? REFRESH() : refreshPlanner(); if (iso === view) { content.innerHTML = renderDayContent(view); renderHeader(false); } return;
+    setPlan(iso, p); REFRESH ? REFRESH() : refreshPlanner(); if (iso === view) { content.innerHTML = renderContent(view); renderHeader(false); } return;
   }
-  const rm = t.closest("[data-remove]"); if (rm) { haptic(); const p = getPlan(view); p.splice(+rm.dataset.remove, 1); setPlan(view, p); closeSheet(); content.innerHTML = renderDayContent(view); return; }
-  const lt = t.closest("[data-later]"); if (lt) { haptic(); const p = getPlan(view); p[+lt.dataset.later].t += 30; setPlan(view, p); closeSheet(); content.innerHTML = renderDayContent(view); return; }
+  const rm = t.closest("[data-remove]"); if (rm) { haptic(); const p = getPlan(view); p.splice(+rm.dataset.remove, 1); setPlan(view, p); closeSheet(); content.innerHTML = renderContent(view); return; }
+  const lt = t.closest("[data-later]"); if (lt) { haptic(); const p = getPlan(view); p[+lt.dataset.later].t += 30; setPlan(view, p); closeSheet(); content.innerHTML = renderContent(view); return; }
+  if (t.closest("#modePill")) return setMode(MODE === "multi" ? "day" : "multi");
+  const od = t.closest("[data-open-day]"); if (od) { haptic(); const d = od.dataset.openDay; MODE = "day"; try { localStorage.setItem("mode", "day"); } catch (e) {} document.getElementById("modePill").classList.remove("on"); if (d === view) { content.innerHTML = renderContent(view); scrollToDay(false); } else selectDay(d); return; }
+  const me = t.closest("[data-mi]"); if (me) { haptic(); const d = me.dataset.mday, i = +me.dataset.mi; const it = MITEMS[d]; if (!it) return; const ev = it.evs[i]; if (ev.k === "plan") return openSheet(planItemSheet(ev)); if (ev.m) return openSheet(moveSheet(ev.m)); if (ev.stay) return openSheet(staySheet(ev.stay)); return openSheet(staySheet(stayOn(d) || STAYS[0])); }
   const mk = t.closest("[data-mark]"); if (mk) { haptic(); return openSheet(staySheet(CUR.marks[+mk.dataset.mark].stay)); }
   const pp = t.closest("[data-prompt]"); if (pp) { haptic(); const i = ITEMS[+pp.dataset.i]; return openPlanner(view, pp.dataset.prompt, { s: i.s, e: i.e, k: "free" }); }
   const ev = t.closest("[data-i]"); if (ev) { haptic(); const i = ITEMS[+ev.dataset.i]; if (i.k === "plan") return openSheet(planItemSheet(i));
@@ -1041,9 +1136,10 @@ document.addEventListener("keydown", e => {
 function tick() {
   const t = isoLocal();
   if (t !== today) { const f = view === today; today = t; renderWeek(); if (f) view = t; showWeek(weekOf(view), false); }
-  if (sheet.hidden && show.hidden && side.hidden && !pd) { const y = pager.scrollTop; renderHeader(false); content.innerHTML = renderDayContent(view); pager.scrollTop = y; }
+  if (sheet.hidden && show.hidden && side.hidden && !pd) { const y = pager.scrollTop; renderHeader(false); content.innerHTML = renderContent(view); pager.scrollTop = y; }
 }
-renderWeek(); renderHeader(false); measureTop(); content.innerHTML = renderDayContent(view);
+renderWeek(); renderHeader(false); measureTop(); content.innerHTML = renderContent(view);
+document.getElementById("modePill").classList.toggle("on", MODE === "multi");
 refreshLive();
 requestAnimationFrame(() => { measureTop(); showWeek(weekOf(view), false); scrollToDay(); });
 addEventListener("resize", () => { measureTop(); showWeek(curWeek < 0 ? weekOf(view) : curWeek, false); });
