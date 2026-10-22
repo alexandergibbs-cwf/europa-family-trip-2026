@@ -211,7 +211,9 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev.get::before { display: none; }
 .mk { position: absolute; left: 68px; right: 6px; height: 0; border-top: 2px solid var(--e-mark); z-index: 3; pointer-events: none; }
 .mk::before { content: ""; position: absolute; left: -4px; top: -5px; width: 8px; height: 8px; border-radius: 50%; background: var(--e-mark); }
-.mk button { pointer-events: auto; position: absolute; right: 0; top: -12px; height: 22px; border: 0; border-radius: 980px; background: var(--e-mark); color: #fff; font-size: 12px; font-weight: 700; padding: 0 10px; cursor: pointer; white-space: nowrap; }
+.mk button { pointer-events: auto; position: absolute; right: 0; top: -12px; height: 24px; border: 0; border-radius: 980px; background: var(--e-mark); color: #fff; font-size: 12px; padding: 0 11px; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; max-width: 86%; }
+.mk button b { font-weight: 700; flex: none; }
+.mk button span { font-weight: 400; opacity: .85; overflow: hidden; text-overflow: ellipsis; }
 .mk button::before { content: ""; position: absolute; inset: -10px -4px; }
 .ev.free, .ev.wait { cursor: pointer; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
@@ -640,7 +642,7 @@ function renderDayContent(iso) {
     html += `<button class="ev ${ev.k}${short ? " short" : ""}${ev.done ? " done" : ""} press" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${ev.k === "travel" ? `<i class="ic ${ev.m.mode === "Flight" ? "fly" : "rail"}"></i>` : ""}${esc(ev.tt)}${durTxt}</span><span class="tm">${time}${!short && ev.sub && h < 60 ? ` · ${esc(ev.sub)}` : ""}</span>${!short && ev.sub && h >= 60 ? `<span class="tm">${esc(ev.sub)}</span>` : ""}${!short && ev.ref && h >= 60 ? `<span class="ref" data-show-ref="${ev.ref}" data-show-l="${esc(ev.m.code)}">${ev.ref} ›</span>` : ""}${ev.cd && !short ? `<span class="cd">${countdown(ev.cd)}</span>` : ""}</button>`;
   });
   html += `</div>`;
-  D.marks.forEach((mk, mi) => { html += `<div class="mk" style="top:${y(mk.t)}px"><button class="press" data-mark="${mi}">${mk.kind === "in" ? "Check in" : "Check out"} ${t12(mk.t)}</button></div>`; });
+  D.marks.forEach((mk, mi) => { html += `<div class="mk" style="top:${y(mk.t)}px"><button class="press" data-mark="${mi}"><b>${mk.kind === "in" ? "Check in" : "Check out"} ${t12(mk.t)}</b><span>${esc(mk.stay.hotel)}</span></button></div>`; });
   const ss = D.s || iso === "2026-11-19" ? sunset(iso, cityOn(iso)) : null;
 
   if (showNow) html += `<div class="now" style="top:${y(nm)}px"><span>${t12(nm).replace(" ", "")}</span></div>`;
