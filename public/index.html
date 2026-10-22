@@ -64,8 +64,19 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .pill .nm small { font-size: 12px; font-weight: 400; color: var(--sub); letter-spacing: -0.01em; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; }
 .pill.wx { padding: 0 16px; font-variant-numeric: tabular-nums; gap: 8px; }
 .pill.wx .e { font-size: 20px; }
-.week { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
+.week { position: relative; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; padding: 0 calc(50% - 26px); -webkit-overflow-scrolling: touch; }
 .week::-webkit-scrollbar { display: none; }
+.week::before { content: ""; position: absolute; }
+.wwrap { position: relative; }
+.wsel { position: absolute; left: 50%; top: 20px; width: 44px; height: 44px; margin-left: -22px; border-radius: 50%; background: var(--ink); pointer-events: none; z-index: 0; }
+.wsel.today { background: var(--red); }
+.wk { position: relative; z-index: 1; }
+.wd { width: 52px; flex: none; scroll-snap-align: center; scroll-snap-stop: normal; padding: 2px 0 8px; }
+.wd .l { font-size: 12px; font-weight: 600; color: var(--sub); letter-spacing: 0; margin-bottom: 1px; }
+.wd .n { width: 44px; height: 44px; transition: color 160ms ease, transform 160ms ease, opacity 160ms ease; }
+.wd.on .n { background: none; color: var(--bg); }
+.wd.today.on .n { background: none; }
+.wd.today.on .l { color: var(--red); }
 .wpage { flex: none; width: 100%; scroll-snap-align: start; scroll-snap-stop: always; display: grid; grid-template-columns: repeat(7, 1fr); padding: 0 max(8px, env(safe-area-inset-left, 0px)); }
 .wl { text-align: center; font-size: 13px; font-weight: 600; color: var(--ink); padding: 4px 0 6px; letter-spacing: 0; }
 .wl.we { color: var(--sub); }
@@ -299,7 +310,8 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev.prompt { background: color-mix(in srgb, var(--sub) 6%, transparent); border: 0; color: var(--sub); }
 .ev.prompt .tt { font-weight: 500; }
 .ev.plan { background: var(--card); border: 0; box-shadow: 0 0 0 1px var(--hair), 0 4px 14px rgba(0,0,0,.08); }
-.ev .cd { background: none; color: inherit; padding: 0; margin-top: 2px; font-size: 12.5px; font-weight: 700; opacity: 1; }
+.ev .cd { background: none; color: inherit; padding: 0; margin: 0; border-radius: 0; font-size: inherit; display: inline; font-weight: 700; opacity: 1; }
+.ev .tm b { opacity: 1; }
 .ev .ref { opacity: .8; }
 .ev.short { padding-block: 0; }
 .mk { border-top: 1.5px solid var(--e-mark); left: 68px; }
@@ -339,16 +351,18 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .mnow { position: absolute; left: 0; right: 0; height: 0; border-top: 1.5px solid var(--red); z-index: 3; pointer-events: none; }
 .mnow::before { content: ""; position: absolute; left: -4px; top: -4.5px; width: 8px; height: 8px; border-radius: 50%; background: var(--red); }
 #modePill.on { color: var(--blue); }
+.pgroup { padding: 0 4px; gap: 0; }
+.pgroup .ib { border: 0; background: none; color: var(--ink); width: 44px; height: 44px; display: grid; place-items: center; cursor: pointer; border-radius: 22px; }
+.pgroup .sep { width: 0.5px; height: 20px; background: var(--hair); }
 </style>
 
 <div class="top" id="top">
   <div class="pills pad">
     <button class="pill glass press" id="backPill" aria-label="Cities"><i class="ch"></i><span class="nm" id="cityName"></span></button>
     <button class="pill glass press" id="todayCap" data-today hidden style="font-size:15px;padding:0 14px">Today</button>
-    <button class="pill glass wx press" id="modePill" aria-label="Switch between day and 3-day view"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16M15 4v16"/></svg></button>
-    <button class="pill glass wx press" id="infoPill" aria-label="Details for this day"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r="0.6" fill="currentColor"/></svg></button>
+    <div class="pill glass pgroup"><button class="ib press" id="modePill" aria-label="Switch between day and 3-day view"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16M15 4v16"/></svg></button><i class="sep"></i><button class="ib press" id="infoPill" aria-label="Details for this day"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r="0.6" fill="currentColor"/></svg></button></div>
   </div>
-  <div class="week" id="week" aria-label="Week"></div>
+  <div class="wwrap"><div class="wsel" id="wsel"></div><div class="week" id="week" aria-label="Days"></div></div>
 </div>
 <div class="pager" id="pager"><div id="daycontent"></div></div>
 <div class="scrim" id="scrim"></div>
@@ -635,31 +649,44 @@ function headsFor(iso) { const hs = HEADS.filter(h => h.on.includes(iso)); if (i
 const done = k => { try { return localStorage.getItem(k) === "1"; } catch (e) { return false; } };
 
 /* ---------- header ---------- */
+const ALLDAYS = []; { let d = START; while (d <= END) { ALLDAYS.push(d); d = addDays(d, 1); } }
 function renderWeek() {
+  document.getElementById("week").innerHTML = ALLDAYS.map(d => `<button class="wd wk${["Sat", "Sun"].includes(wk(d)) ? " we" : ""}${d === today ? " today" : ""}${d === view ? " on" : ""}" data-d="${d}"><div class="l">${wk(d).slice(0, 3)}</div><div class="n">${+d.slice(8)}</div></button>`).join("");
+  styleWheel();
+}
+function _oldRenderWeek() {
   document.getElementById("week").innerHTML = WEEKS.map(w => `<div class="wpage">${w.map(d => `<div class="wl${["Sat", "Sun"].includes(wk(d)) ? " we" : ""}">${wk(d).replace("Mon", "M").replace("Tue", "Tu").replace("Wed", "W").replace("Thu", "Th").replace("Fri", "F").replace("Sat", "Sa").replace("Sun", "Su")}</div>`).join("")}${w.map(d => `<button class="wd${["Sat", "Sun"].includes(wk(d)) ? " we" : ""}${d === today ? " today" : ""}${d === view ? " on" : ""}${d > END ? " out" : ""}" data-d="${d}" aria-label="${dLong(d)}"${d > END ? " disabled" : ""}><span class="n">${+d.slice(8)}</span></button>`).join("")}</div>`).join("");
 }
-const weekEl = document.getElementById("week");
-let progWeek = false, weekT = 0, curWeek = -1;
-function showWeek(i, smooth) {
-  if (i === curWeek && smooth) return; curWeek = i; progWeek = true;
-  weekEl.scrollTo({ left: i * weekEl.clientWidth, behavior: smooth && !reduce() ? "smooth" : "auto" });
-  clearTimeout(weekT); weekT = setTimeout(() => (progWeek = false), smooth ? 500 : 30);
+const weekEl = document.getElementById("week"), WDW = 52;
+let progWeek = false, weekT = 0, curWeek = -1, wCentre = -1;
+function styleWheel() {
+  const c = weekEl.scrollLeft / WDW, els = weekEl.querySelectorAll(".wd");
+  els.forEach((b, i) => { const d = Math.min(3, Math.abs(i - c)); const n = b.firstElementChild.nextElementSibling; n.style.opacity = (1 - d * 0.22).toFixed(2); n.style.transform = `scale(${(1 - d * 0.07).toFixed(3)})`; });
+  const i = Math.round(c);
+  if (i !== wCentre) { if (wCentre >= 0) haptic("light"); wCentre = i; els.forEach((b, k) => b.classList.toggle("on", k === i)); const ws = document.getElementById("wsel"); if (ws) ws.classList.toggle("today", ALLDAYS[i] === today); }
 }
+function showWeek(i, smooth) { /* i is a week index from older callers; centre the current view instead */ centreDay(view, smooth); }
+function centreDay(iso, smooth) {
+  const idx = ALLDAYS.indexOf(iso); if (idx < 0) return; curWeek = idx; progWeek = true;
+  weekEl.scrollTo({ left: idx * WDW, behavior: smooth && !reduce() ? "smooth" : "auto" });
+  clearTimeout(weekT); weekT = setTimeout(() => { progWeek = false; styleWheel(); }, smooth ? 450 : 30);
+}
+let wRaf = 0;
 weekEl.addEventListener("scroll", () => {
+  if (!wRaf) wRaf = requestAnimationFrame(() => { wRaf = 0; styleWheel(); });
   if (progWeek) return;
   clearTimeout(weekT); weekT = setTimeout(() => {
-    const i = Math.round(weekEl.scrollLeft / weekEl.clientWidth); if (i === curWeek) return;
-    curWeek = i; haptic();
-    const pos = WEEKS[weekOf(view)].indexOf(view); let d = WEEKS[i][pos]; if (d > END) d = END;
+    const i = Math.max(0, Math.min(ALLDAYS.length - 1, Math.round(weekEl.scrollLeft / WDW))); const d = ALLDAYS[i];
+    if (d === view) return; curWeek = i;
     selectDay(d, 0, false);
-  }, 90);
+  }, 110);
 }, { passive: true });
 function renderHeader(pop) {
   const iso = view, w = wxFor(iso), s = stayOn(iso);
 
   const w2 = wxFor(iso), showToday = iso !== today && today >= START && today <= END;
   document.getElementById("todayCap").hidden = !showToday;
-  document.querySelectorAll(".wd").forEach(b => { const on = b.dataset.d === iso; b.classList.toggle("on", on); b.classList.toggle("pop", on && pop); });
+  
   const n = s ? Math.round((Date.parse(iso) - Date.parse(s.in)) / 864e5) + 1 : 0;
   document.getElementById("cityName").innerHTML = esc(cityName(iso));
   const open = headsFor(iso).filter(h => !h.k || !done(h.k)).length;
@@ -731,7 +758,7 @@ function renderDayContent(iso) {
     }
     const time = ev.k === "mark" ? t12(ev.s) : ev.x && ev.x.overnight ? `until ${t12(ev.e)}` : `${t12(ev.s)} – ${t12(ev.e)}`;
     const durTxt = (ev.k === "free" || ev.k === "wait") ? ` · ${dur(ev.e - ev.s)}` : "";
-    html += `<button class="ev ${ev.k}${short ? " short" : ""}${ev.done ? " done" : ""} press" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${ev.k === "travel" ? `<i class="ic ${ev.m.mode === "Flight" ? "fly" : "rail"}"></i>` : ""}${esc(ev.tt)}${durTxt}</span><span class="tm">${time}${!short && ev.sub && h < 60 ? ` · ${esc(ev.sub)}` : ""}</span>${!short && ev.sub && h >= 60 ? `<span class="tm">${esc(ev.sub)}</span>` : ""}${!short && ev.ref && h >= 60 ? `<span class="ref" data-show-ref="${ev.ref}" data-show-l="${esc(ev.m.code)}">${ev.ref} ›</span>` : ""}${ev.cd && !short ? `<span class="cd">${countdown(ev.cd)}</span>` : ""}</button>`;
+    html += `<button class="ev ${ev.k}${short ? " short" : ""}${ev.done ? " done" : ""} press" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${ev.k === "travel" ? `<i class="ic ${ev.m.mode === "Flight" ? "fly" : "rail"}"></i>` : ""}${esc(ev.tt)}${durTxt}</span><span class="tm">${time}${ev.cd && !short ? ` · <b class="cd">${countdown(ev.cd)}</b>` : ""}${!short && ev.sub && h >= 60 && h < 80 ? ` · ${esc(ev.sub)}` : ""}</span>${!short && ev.sub && h >= 80 ? `<span class="tm">${esc(ev.sub)}</span>` : ""}${!short && ev.ref && h >= 100 ? `<span class="ref" data-show-ref="${ev.ref}" data-show-l="${esc(ev.m.code)}">${ev.ref} ›</span>` : ""}</button>`;
   });
   html += `</div>`;
   D.marks.forEach((mk, mi) => { html += `<div class="mk" style="top:${y(mk.t)}px"><button class="press" data-mark="${mi}"><b>${mk.kind === "in" ? "Check in" : "Check out"} ${t12(mk.t)}</b><span>${esc(mk.stay.hotel)}</span></button></div>`; });
@@ -851,7 +878,7 @@ function closeSheet(from = 0) {
 const side = document.getElementById("side"); let sideAnim = null;
 function openSide() {
   const cur = STAYS.find(s => s.in <= view && view < s.out);
-  document.getElementById("side-body").innerHTML = STAYS.map(s => `<button class="crow press${s.out <= today ? " past" : ""}${s.in <= today && today < s.out ? " cur" : ""}${s === cur ? " on" : ""}" data-goto="${s.in}"><span><div class="a">${esc(s.city)}</div><div class="b">${esc(s.hotel)}</div></span><span class="r">${dRange(s.in, s.out)}<br>${nights(s)} nights</span></button>`).join("");
+  document.getElementById("side-body").innerHTML = STAYS.filter(s => s.out > today).map(s => `<button class="crow press${s.out <= today ? " past" : ""}${s.in <= today && today < s.out ? " cur" : ""}${s === cur ? " on" : ""}" data-goto="${s.in}"><span><div class="a">${esc(s.city)}</div><div class="b">${esc(s.hotel)}</div></span><span class="r">${dRange(s.in, s.out)}<br>${nights(s)} nights</span></button>`).join("");
   side.hidden = false; scrim.classList.add("open"); sideAnim?.cancel();
   const sb = document.getElementById("side-body"); sb.scrollTop = 0; side.classList.remove("scrolled");
   const on = sb.querySelector(".crow.on"); if (on) { const top = on.offsetTop - sb.clientHeight / 2 + on.offsetHeight / 2; if (top > 0) sb.scrollTop = top; }
@@ -1120,7 +1147,7 @@ document.addEventListener("click", e => {
       if (i.k === "free" || i.k === "wait") { return openPlanner(view, PL.cat && PL.cat !== "trip" ? PL.cat : "dinner", i.x); } return openSheet(i.m ? moveSheet(i.m) : staySheet(i.stay)); }
   const st = t.closest("[data-stay]"); if (st) { haptic(); return openSheet(staySheet(STAYS[+st.dataset.stay])); }
   const gt = t.closest("[data-goto]"); if (gt) { closeSheet(); closeSide(); return selectDay(gt.dataset.goto); }
-  const wd = t.closest(".wd"); if (wd) return selectDay(wd.dataset.d, 0, false);
+  const wd = t.closest(".wd"); if (wd) { const d = wd.dataset.d; if (d === view) return; centreDay(d, true); return selectDay(d, 0, false); }
   if (t.closest("#backPill")) { haptic(); return openSide(); }
   if (t.closest("#infoPill")) { haptic(); openSheet(menuSheet()); startCycle(view); return; }
   if (t.closest("[data-today]")) { haptic(); return selectDay(today); }
@@ -1141,8 +1168,8 @@ function tick() {
 renderWeek(); renderHeader(false); measureTop(); content.innerHTML = renderContent(view);
 document.getElementById("modePill").classList.toggle("on", MODE === "multi");
 refreshLive();
-requestAnimationFrame(() => { measureTop(); showWeek(weekOf(view), false); scrollToDay(); });
-addEventListener("resize", () => { measureTop(); showWeek(curWeek < 0 ? weekOf(view) : curWeek, false); });
+requestAnimationFrame(() => { measureTop(); centreDay(view, false); scrollToDay(); });
+addEventListener("resize", () => { measureTop(); centreDay(view, false); });
 setInterval(tick, 60000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { tick(); refreshLive(); } });
 })();
