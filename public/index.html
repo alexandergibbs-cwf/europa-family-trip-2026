@@ -496,6 +496,11 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev.get.ride, .mev.get.ride { background: color-mix(in srgb, var(--c) 9%, var(--bg)); color: color-mix(in srgb, var(--c) 40%, var(--ink)); }
 .ev.get.ride::before, .mev.get.ride::before { opacity: .5; }
 @media (prefers-color-scheme: dark) { .ev.travel, .mev.travel { background: color-mix(in srgb, var(--c) 85%, #000); } }
+/* already happened today: every block steps back the same way and stays readable (no white text on a faded fill) */
+.ev.done, .mev.done, .ev.change.done, .ev.get.co.done, .ev.pack.done { opacity: .55; }
+.ev.travel.done, .mev.travel.done { background: color-mix(in srgb, var(--c) 26%, var(--bg)); color: color-mix(in srgb, var(--c) 45%, var(--ink)); }
+.ev.travel.done .tm, .ev.travel.done .ref, .mev.travel.done span { color: inherit; }
+.ev.travel.done::before, .mev.travel.done::before { background: var(--c); }
 /* short blocks: title, then what you do there underneath */
 .ev.short.stack { flex-direction: column; align-items: stretch; justify-content: center; gap: 0; padding-block: 1px; }
 .ev.short.stack .tt { font-size: 12.5px; line-height: 1.15; }
@@ -1542,6 +1547,7 @@ function promptsFor(iso, free) {
     sc.forEach((pr, step) => free.forEach(f => {
       const s = Math.max(Math.ceil(f.s / 15) * 15, pr.s), e = Math.min(Math.floor(f.e / 15) * 15, pr.e); if (e - s < Math.min(pr.min || 45, pr.e - pr.s)) return;
       if (pl.some(p => p.t < e && p.t + catOf(p.c).dur > s)) return;
+      if (iso === today && e <= nowMin()) return; /* no ideas for time that has already gone */
       out.push({ k: "prompt", s, e, pr, tt: pr.l, sc: si, step });
     }));
   });
