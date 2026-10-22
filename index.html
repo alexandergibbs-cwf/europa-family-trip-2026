@@ -55,6 +55,8 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .top > * { max-width: 520px; margin-left: auto; margin-right: auto; }
 .pager { padding-top: var(--top-h, 180px); }
 .pills { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-block: 10px 6px; }
+.pills #cityPill { margin-right: auto; }
+.week { border-bottom: 0.5px solid var(--hair); }
 .pill { height: 44px; border: 0; border-radius: 22px; display: inline-flex; align-items: center; gap: 6px; padding: 0 16px 0 12px; font-size: 18px; font-weight: 500; cursor: pointer; color: var(--ink); min-width: 0; }
 .pill .ch { width: 11px; height: 11px; border-left: 2.6px solid currentColor; border-bottom: 2.6px solid currentColor; transform: rotate(45deg); margin: 0 4px 0 6px; flex: none; border-radius: 1px; }
 .pill .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; flex-direction: column; line-height: 1.1; text-align: left; }
@@ -248,10 +250,10 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 <div class="top" id="top">
   <div class="pills pad">
     <button class="pill glass press" id="cityPill" aria-label="All stops"><i class="ch"></i><span class="nm" id="cityName"></span></button>
+    <button class="pill glass press" id="todayCap" data-today hidden style="font-size:15px;padding:0 14px">Today</button>
     <button class="pill glass wx press" id="tripPill" aria-label="Whole trip and booking refs"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></button>
   </div>
   <div class="week" id="week" aria-label="Week"></div>
-  <div class="dline" id="dline"></div>
 </div>
 <div class="pager" id="pager"><div id="daycontent"></div></div>
 <div class="scrim" id="scrim"></div>
@@ -553,7 +555,7 @@ function renderHeader(pop) {
   const iso = view, w = wxFor(iso), s = stayOn(iso);
 
   const w2 = wxFor(iso), showToday = iso !== today && today >= START && today <= END;
-  document.getElementById("dline").innerHTML = `<span class="d">${fmt(iso, { weekday: "long" })} · ${fmt(iso, { day: "numeric", month: "short" })}${w2 ? ` · ${w2.e} ${w2.hi}°` : ""}${showToday ? ` · <button class="lnk" data-today>Today</button>` : ""}</span><span class="ans">${answer(iso)}</span>`;
+  document.getElementById("todayCap").hidden = !showToday;
   document.querySelectorAll(".wd").forEach(b => { const on = b.dataset.d === iso; b.classList.toggle("on", on); b.classList.toggle("pop", on && pop); });
   const n = s ? Math.round((Date.parse(iso) - Date.parse(s.in)) / 864e5) + 1 : 0;
   document.getElementById("cityName").innerHTML = s ? `${esc(cityName(iso))}<small>${esc(s.hotel)}</small>` : esc(cityName(iso));
