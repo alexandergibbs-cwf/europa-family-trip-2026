@@ -193,7 +193,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 
 /* Sheets */
 .page { position: fixed; inset: 0; z-index: 10; background: var(--bg); transform-origin: 0 50%; will-change: transform; transition: transform 560ms var(--spring), border-radius 300ms ease, box-shadow 300ms ease; border-radius: 0; overflow: hidden; }
-.page.shifted { transform: translateX(var(--side-w, 82vw)) scale(0.94); border-radius: 44px; box-shadow: 0 10px 50px rgba(0,0,0,.22), 0 0 0 0.5px rgba(0,0,0,.06); }
+.page.shifted { transform: translateX(var(--side-w, 82vw)); border-radius: 44px 0 0 44px; box-shadow: 0 10px 50px rgba(0,0,0,.22), 0 0 0 0.5px rgba(0,0,0,.06); }
 .page.dragging { transition: none; }
 .page.shifted::after { content: ""; position: absolute; inset: 0; z-index: 99; }
 @media (prefers-reduced-motion: reduce) { .page { transition: none; } }
@@ -976,7 +976,7 @@ function sMove(e, x, y) {
   if (e.cancelable) e.preventDefault();
   let d = x - sdrag.x; if (d > 0) d = Math.pow(d, 0.7); sdrag.dx = d;
   const W = sideW(), p = Math.max(0, Math.min(1, (W + d) / W));
-  page.style.transform = `translateX(${W + d}px) scale(${(0.94 + 0.06 * (1 - p)).toFixed(4)})`; page.style.borderRadius = (44 * p) + "px";
+  page.style.transform = `translateX(${W + d}px)`; page.style.borderRadius = `${44 * p}px 0 0 ${44 * p}px`;
 }
 function sEnd() {
   if (!sdrag) return; const { dx, t, mode } = sdrag; sdrag = null; if (mode !== "swipe") return;
