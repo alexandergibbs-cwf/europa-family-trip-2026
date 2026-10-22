@@ -64,12 +64,11 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .pill .nm small { font-size: 12px; font-weight: 400; color: var(--sub); letter-spacing: -0.01em; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; }
 .pill.wx { padding: 0 16px; font-variant-numeric: tabular-nums; gap: 8px; }
 .pill.wx .e { font-size: 20px; }
-.week { position: relative; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; padding: 0 calc(50% - 26px); -webkit-overflow-scrolling: touch; scroll-padding: 0; }
-.week::-webkit-scrollbar { display: none; }
-.week::before { content: ""; position: absolute; }
+.week { position: relative; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+.wtrack { display: flex; will-change: transform; }
 .wwrap { position: relative; }
 .wk { position: relative; z-index: 1; }
-.wd { width: 52px; flex: none; scroll-snap-align: center; scroll-snap-stop: normal; padding: 2px 0 8px; }
+.wd { width: 52px; flex: none; padding: 2px 0 8px; }
 .wd .l { font-size: 12px; font-weight: 600; color: var(--sub); letter-spacing: 0; margin-bottom: 1px; }
 .wd .n { width: 44px; height: 44px; transition: none; }
 .wd.on .n { background: var(--ink); color: var(--bg); font-weight: 600; }
@@ -361,32 +360,28 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .pgroup .sep { width: 0.5px; height: 20px; background: var(--hair); }
 
 /* ---------- Liquid Glass (navigation layer only: header, pills, sheet actions) ---------- */
-:root { --lg-fill: rgba(255, 255, 255, 0.42); --lg-rim: rgba(255, 255, 255, 0.85); --lg-rim2: rgba(255, 255, 255, 0.35); --lg-edge: rgba(0, 0, 0, 0.07); --lg-shadow: 0 10px 30px rgba(0, 0, 0, 0.14), 0 1px 2px rgba(0, 0, 0, 0.06); --lg-spec: rgba(255, 255, 255, 0.9); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --lg-fill: rgba(60, 60, 64, 0.40); --lg-rim: rgba(255, 255, 255, 0.22); --lg-rim2: rgba(255, 255, 255, 0.06); --lg-edge: rgba(255, 255, 255, 0.10); --lg-shadow: 0 10px 30px rgba(0, 0, 0, 0.55), 0 1px 2px rgba(0, 0, 0, 0.4); --lg-spec: rgba(255, 255, 255, 0.28); } }
-:root[data-theme="dark"] { --lg-fill: rgba(60, 60, 64, 0.40); --lg-rim: rgba(255, 255, 255, 0.22); --lg-rim2: rgba(255, 255, 255, 0.06); --lg-edge: rgba(255, 255, 255, 0.10); --lg-shadow: 0 10px 30px rgba(0, 0, 0, 0.55), 0 1px 2px rgba(0, 0, 0, 0.4); --lg-spec: rgba(255, 255, 255, 0.28); }
+:root { --lg-fill: rgba(255, 255, 255, 0.62); --lg-lens: rgba(0, 0, 0, 0.055); --lg-line: rgba(255, 255, 255, 0.95); --lg-edge: rgba(0, 0, 0, 0.09); --lg-shadow: 0 8px 22px rgba(0, 0, 0, 0.10), 0 2px 6px rgba(0, 0, 0, 0.05); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --lg-fill: rgba(44, 44, 46, 0.62); --lg-lens: rgba(0, 0, 0, 0.35); --lg-line: rgba(255, 255, 255, 0.20); --lg-edge: rgba(255, 255, 255, 0.12); --lg-shadow: 0 8px 22px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.35); } }
+:root[data-theme="dark"] { --lg-fill: rgba(44, 44, 46, 0.62); --lg-lens: rgba(0, 0, 0, 0.35); --lg-line: rgba(255, 255, 255, 0.20); --lg-edge: rgba(255, 255, 255, 0.12); --lg-shadow: 0 8px 22px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.35); }
 
-/* The header is one glass surface the timetable scrolls beneath */
-.top { background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: saturate(1.6) blur(18px); -webkit-backdrop-filter: saturate(1.6) blur(18px); }
+/* The header is a clear surface the timetable scrolls beneath */
+.top { background: color-mix(in srgb, var(--bg) 72%, transparent); backdrop-filter: saturate(1.7) blur(24px); -webkit-backdrop-filter: saturate(1.7) blur(24px); }
 .top::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 0.5px; background: var(--hair); opacity: .7; }
 .week { border-bottom: 0; }
 
-.glass { position: relative; isolation: isolate; background: var(--lg-fill); backdrop-filter: saturate(1.9) blur(24px) brightness(1.04); -webkit-backdrop-filter: saturate(1.9) blur(24px) brightness(1.04); box-shadow: var(--lg-shadow), inset 0 0 0 0.5px var(--lg-edge); overflow: hidden; }
-/* refracted rim: bright on the lit edge, fading around */
-.glass::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; background: linear-gradient(160deg, var(--lg-rim) 0%, var(--lg-rim2) 35%, transparent 60%, var(--lg-rim2) 100%); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; z-index: 0; }
-/* specular highlight sweeping the top */
-.glass::after { content: ""; position: absolute; left: 8%; right: 8%; top: 0; height: 45%; border-radius: inherit; background: linear-gradient(180deg, var(--lg-spec), transparent); opacity: .35; pointer-events: none; z-index: 0; transition: opacity 200ms ease, transform 300ms var(--ease-out); }
-.glass > * { position: relative; z-index: 1; }
-/* interactive: glass lifts and brightens under the finger, then settles on a spring */
+/* Lens: a thick soft rim that darkens at the edge and brightens just inside, like Safari's bar */
+.glass { position: relative; background: var(--lg-fill); backdrop-filter: saturate(1.8) blur(20px); -webkit-backdrop-filter: saturate(1.8) blur(20px);
+  box-shadow: var(--lg-shadow), 0 0 0 0.5px var(--lg-edge), inset 0 0 0 1px var(--lg-line), inset 0 0 0 3.5px var(--lg-lens), inset 0 0 0 4.5px color-mix(in srgb, var(--lg-line) 60%, transparent), inset 0 2px 3px rgba(255,255,255,.55); }
+.glass::before, .glass::after { display: none; }
 .glass.press { transition: transform 520ms var(--spring-bouncy), box-shadow 220ms ease, background-color 160ms ease; }
-.glass.press:active { transform: scale(1.06); background: color-mix(in srgb, var(--lg-fill) 70%, var(--bg)); box-shadow: 0 14px 36px rgba(0,0,0,.18), inset 0 0 0 0.5px var(--lg-edge); transition: transform 110ms var(--ease-out), box-shadow 110ms ease, background-color 110ms ease; }
-.glass.press:active::after { opacity: .6; }
+.glass.press:active { transform: scale(1.06); background: color-mix(in srgb, var(--lg-fill) 60%, var(--bg)); transition: transform 110ms var(--ease-out), box-shadow 110ms ease, background-color 110ms ease; }
 .pgroup .ib { position: relative; z-index: 1; transition: transform 480ms var(--spring-bouncy); }
 .pgroup .ib:active { transform: scale(1.12); transition: transform 100ms var(--ease-out); }
 .pgroup .sep { position: relative; z-index: 1; }
 
-/* sheet actions pick up the same material */
-.btn.card, .xbtn, .side .done, .chip, .cat:not([aria-pressed="true"]), .restore button { background: var(--lg-fill); backdrop-filter: saturate(1.8) blur(16px); -webkit-backdrop-filter: saturate(1.8) blur(16px); box-shadow: 0 1px 2px rgba(0,0,0,.06), inset 0 0 0 0.5px var(--lg-edge), inset 0 1px 0 var(--lg-rim2); }
-.btn.blue, .addb:not(.on) { box-shadow: 0 6px 18px color-mix(in srgb, var(--blue) 35%, transparent), inset 0 1px 0 rgba(255,255,255,.35), inset 0 0 0 0.5px rgba(255,255,255,.18); }
+/* sheet actions pick up the same lens */
+.btn.card, .xbtn, .side .done, .chip, .cat:not([aria-pressed="true"]), .restore button { background: var(--lg-fill); backdrop-filter: saturate(1.8) blur(16px); -webkit-backdrop-filter: saturate(1.8) blur(16px); box-shadow: 0 2px 8px rgba(0,0,0,.06), 0 0 0 0.5px var(--lg-edge), inset 0 0 0 1px var(--lg-line), inset 0 0 0 2.5px var(--lg-lens); }
+.btn.blue, .addb:not(.on) { box-shadow: 0 6px 18px color-mix(in srgb, var(--blue) 35%, transparent), inset 0 0 0 1px rgba(255,255,255,.35), inset 0 0 0 3px rgba(0,0,0,.08); }
 .btn { transition: transform 480ms var(--spring-bouncy); } .btn:active { transform: scale(0.97); transition-duration: 100ms; }
 
 @media (prefers-reduced-transparency: reduce) { .glass, .top { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--panel); } .glass::before, .glass::after { display: none; } .btn.card, .xbtn, .side .done, .chip, .cat:not([aria-pressed="true"]), .restore button { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--card); } }
@@ -688,39 +683,70 @@ const done = k => { try { return localStorage.getItem(k) === "1"; } catch (e) { 
 /* ---------- header ---------- */
 const ALLDAYS = []; { let d = START; while (d <= END) { ALLDAYS.push(d); d = addDays(d, 1); } }
 function renderWeek() {
-  document.getElementById("week").innerHTML = ALLDAYS.map(d => `<button class="wd wk${["Sat", "Sun"].includes(wk(d)) ? " we" : ""}${d === today ? " today" : ""}${d === view ? " on" : ""}" data-d="${d}"><div class="l">${wk(d).slice(0, 3)}</div><div class="n">${+d.slice(8)}</div></button>`).join("");
-  styleWheel();
+  document.getElementById("week").innerHTML = `<div class="wtrack">` + ALLDAYS.map(d => `<button class="wd wk${["Sat", "Sun"].includes(wk(d)) ? " we" : ""}${d === today ? " today" : ""}${d === view ? " on" : ""}" data-d="${d}"><div class="l">${wk(d).slice(0, 3)}</div><div class="n">${+d.slice(8)}</div></button>`).join("") + `</div>`;
+  wTrack = null; wRender();
 }
 function _oldRenderWeek() {
   document.getElementById("week").innerHTML = WEEKS.map(w => `<div class="wpage">${w.map(d => `<div class="wl${["Sat", "Sun"].includes(wk(d)) ? " we" : ""}">${wk(d).replace("Mon", "M").replace("Tue", "Tu").replace("Wed", "W").replace("Thu", "Th").replace("Fri", "F").replace("Sat", "Sa").replace("Sun", "Su")}</div>`).join("")}${w.map(d => `<button class="wd${["Sat", "Sun"].includes(wk(d)) ? " we" : ""}${d === today ? " today" : ""}${d === view ? " on" : ""}${d > END ? " out" : ""}" data-d="${d}" aria-label="${dLong(d)}"${d > END ? " disabled" : ""}><span class="n">${+d.slice(8)}</span></button>`).join("")}</div>`).join("");
 }
 const weekEl = document.getElementById("week"), WDW = 52;
-let progWeek = false, weekT = 0, curWeek = -1, wCentre = -1;
-function padWheel() { const pad = Math.round(weekEl.clientWidth / 2 - WDW / 2); weekEl.style.paddingLeft = weekEl.style.paddingRight = pad + "px"; }
-function styleWheel() {
-  const r = weekEl.getBoundingClientRect(), mid = r.left + r.width / 2, els = weekEl.querySelectorAll(".wd");
-  let c = 0, best = 1e9;
-  els.forEach((b, i) => { const bb = b.getBoundingClientRect(); const off = (bb.left + bb.width / 2 - mid) / WDW; if (Math.abs(off) < best) { best = Math.abs(off); c = i - off; } });
-  els.forEach((b, i) => { const d = Math.min(3, Math.abs(i - c)); const n = b.lastElementChild; n.style.opacity = (1 - d * 0.22).toFixed(2); n.style.transform = `scale(${(1 - d * 0.07).toFixed(3)})`; });
-  const i = Math.round(c);
-  if (i !== wCentre) { if (wCentre >= 0) haptic("light"); wCentre = i; els.forEach((b, k) => b.classList.toggle("on", k === i)); }
+let wTrack = null, wPos = 0, wVel = 0, wRaf = 0, wDrag = null, wCentre = -1, wTarget = null, curWeek = -1;
+const wN = () => ALLDAYS.length - 1;
+function padWheel() { wRender(); }
+function wRender() {
+  if (!wTrack) wTrack = weekEl.firstElementChild; if (!wTrack) return;
+  const centre = weekEl.clientWidth / 2 - WDW / 2;
+  wTrack.style.transform = `translate3d(${(centre - wPos * WDW).toFixed(2)}px,0,0)`;
+  const els = wTrack.children, i = Math.round(Math.max(0, Math.min(wN(), wPos)));
+  for (let k = 0; k < els.length; k++) { const d = Math.min(3, Math.abs(k - wPos)); const n = els[k].lastElementChild; n.style.opacity = (1 - d * 0.22).toFixed(2); n.style.transform = `scale(${(1 - d * 0.07).toFixed(3)})`; }
+  if (i !== wCentre) { if (wCentre >= 0) haptic("light"); wCentre = i; for (let k = 0; k < els.length; k++) els[k].classList.toggle("on", k === i); }
 }
-function showWeek(i, smooth) { /* i is a week index from older callers; centre the current view instead */ centreDay(view, smooth); }
+function wSettle() { const i = Math.round(Math.max(0, Math.min(wN(), wPos))); const d = ALLDAYS[i]; if (d !== view) { curWeek = i; selectDay(d, 0, false); } }
+function wStep() {
+  wRaf = 0;
+  if (wDrag) return;
+  const lo = 0, hi = wN();
+  if (wTarget != null) {
+    /* spring to target */
+    const k = 0.16, dmp = 0.72; wVel = (wVel + (wTarget - wPos) * k) * dmp; wPos += wVel;
+    if (Math.abs(wTarget - wPos) < 0.002 && Math.abs(wVel) < 0.002) { wPos = wTarget; wVel = 0; wTarget = null; wRender(); wSettle(); return; }
+    wRender(); wRaf = requestAnimationFrame(wStep); return;
+  }
+  /* free deceleration */
+  wPos += wVel; wVel *= 0.94;
+  if (wPos < lo) { wPos = lo + (wPos - lo) * 0.4; wVel = 0; } if (wPos > hi) { wPos = hi + (wPos - hi) * 0.4; wVel = 0; }
+  if (Math.abs(wVel) < 0.012) { wTarget = Math.round(Math.max(lo, Math.min(hi, wPos))); }
+  wRender(); wRaf = requestAnimationFrame(wStep);
+}
+function wKick() { if (!wRaf) wRaf = requestAnimationFrame(wStep); }
 function centreDay(iso, smooth) {
-  const idx = ALLDAYS.indexOf(iso); if (idx < 0) return; curWeek = idx; progWeek = true;
-  weekEl.scrollTo({ left: idx * WDW, behavior: smooth && !reduce() ? "smooth" : "auto" });
-  clearTimeout(weekT); weekT = setTimeout(() => { progWeek = false; styleWheel(); }, smooth ? 450 : 30);
+  const idx = ALLDAYS.indexOf(iso); if (idx < 0) return; curWeek = idx;
+  if (!smooth || reduce()) { wPos = idx; wVel = 0; wTarget = null; cancelAnimationFrame(wRaf); wRaf = 0; wRender(); return; }
+  wTarget = idx; wKick();
 }
-let wRaf = 0;
-weekEl.addEventListener("scroll", () => {
-  if (!wRaf) wRaf = requestAnimationFrame(() => { wRaf = 0; styleWheel(); });
-  if (progWeek) return;
-  clearTimeout(weekT); weekT = setTimeout(() => {
-    const i = Math.max(0, Math.min(ALLDAYS.length - 1, wCentre)); const d = ALLDAYS[i];
-    if (d === view) return; curWeek = i;
-    selectDay(d, 0, false);
-  }, 110);
-}, { passive: true });
+function showWeek(i, smooth) { centreDay(view, smooth); }
+function styleWheel() { wRender(); }
+weekEl.addEventListener("pointerdown", e => {
+  if (e.pointerType === "mouse" && e.button) return;
+  cancelAnimationFrame(wRaf); wRaf = 0; wTarget = null;
+  wDrag = { x: e.clientX, pos: wPos, t: performance.now(), lx: e.clientX, lt: performance.now(), moved: false, id: e.pointerId };
+  try { weekEl.setPointerCapture(e.pointerId); } catch (er) {}
+});
+weekEl.addEventListener("pointermove", e => {
+  if (!wDrag) return; const dx = e.clientX - wDrag.x; if (Math.abs(dx) > 4) wDrag.moved = true;
+  let p = wDrag.pos - dx / WDW; if (p < 0) p = p * 0.4; if (p > wN()) p = wN() + (p - wN()) * 0.4;
+  const now = performance.now(); const dt = Math.max(1, now - wDrag.lt); wVel = -((e.clientX - wDrag.lx) / WDW) / dt * 16; wDrag.lx = e.clientX; wDrag.lt = now;
+  wPos = p; wRender();
+});
+function wEnd(e) {
+  if (!wDrag) return; const d = wDrag; wDrag = null;
+  if (!d.moved) { const el = document.elementFromPoint(e.clientX, e.clientY); const b = el && el.closest && el.closest(".wd"); if (b) { const idx = ALLDAYS.indexOf(b.dataset.d); if (idx >= 0) { centreDay(ALLDAYS[idx], true); return; } } wTarget = Math.round(wPos); wKick(); return; }
+  if (performance.now() - d.lt > 80) wVel = 0;
+  wVel = Math.max(-1.2, Math.min(1.2, wVel));
+  if (Math.abs(wVel) < 0.012) wTarget = Math.round(Math.max(0, Math.min(wN(), wPos)));
+  wKick();
+}
+weekEl.addEventListener("pointerup", wEnd); weekEl.addEventListener("pointercancel", wEnd);
 function renderHeader(pop) {
   const iso = view, w = wxFor(iso), s = stayOn(iso);
 
@@ -1197,7 +1223,7 @@ document.addEventListener("click", e => {
     const d = gt.dataset.goto; closeSheet();
     if (gt.classList.contains("crow") && !side.hidden) { haptic(); ringTo(gt, true); side.querySelectorAll(".crow").forEach(b => b.classList.toggle("on", b === gt)); setTimeout(() => { closeSide(); selectDay(d); }, reduce() ? 0 : 380); return; }
     closeSide(); return selectDay(d); }
-  const wd = t.closest(".wd"); if (wd) { const d = wd.dataset.d; if (d === view) return; centreDay(d, true); return selectDay(d, 0, false); }
+  if (t.closest(".wd")) return;
   if (t.closest("#backPill")) { haptic(); return openSide(); }
   if (t.closest("#infoPill")) { haptic(); openSheet(menuSheet()); startCycle(view); return; }
   if (t.closest("[data-today]")) { e.preventDefault(); haptic(); closeSheet(); return selectDay(today); }
