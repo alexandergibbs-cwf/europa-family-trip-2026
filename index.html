@@ -108,6 +108,10 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev.free::before, .ev.free .tt, .ev.free .tm, .ev.free .hint { display: none; }
 .ev.wait { --c: var(--e-wait); background: transparent; color: var(--e-wait-ink); border: 1.5px dashed color-mix(in srgb, var(--e-wait) 55%, transparent); }
 .ev.wait::before, .ev.wait .hint { display: none; }
+.ev.prompt { background: transparent; color: var(--sub); border: 1.5px dashed color-mix(in srgb, var(--sub) 40%, transparent); left: 0; right: 0; }
+.ev.prompt::before { display: none; }
+.ev.prompt .tt { font-weight: 500; color: var(--sub); }
+.ev.prompt .tm { opacity: .6; }
 .ev.wait .tt { font-size: 13px; } .ev.wait .tm { display: none; } .ev.wait { flex-direction: row; align-items: center; padding-block: 0; }
 .ev.mark { --c: var(--e-mark); background: var(--e-mark-bg); color: var(--e-mark-ink); left: 42%; z-index: 2; box-shadow: 0 0 0 1.5px var(--bg); }
 .ev.done { opacity: .45; }
@@ -472,7 +476,7 @@ function slotFor(iso, ck, block) {
   const frees = D.segs.filter(x => x.k === "free" || x.k === "wait");
   const b = block || frees.find(x => ck === "dinner" ? x.e > 1140 : ck === "drinks" ? x.e > 1260 : x.e - x.s >= 60) || frees[0];
   if (!b) return 600;
-  const want = ck === "trip" ? Math.max(b.s, 540) : ck === "coffee" ? Math.max(b.s + 10, 510) : ck === "dinner" ? 1170 : ck === "drinks" ? 1290 : ck === "shop" ? Math.max(b.s + 30, 840) : Math.max(b.s + 30, 600);
+  const want = ck === "trip" ? Math.max(b.s, 540) : ck === "coffee" ? Math.max(b.s, 510) : ck === "dinner" ? (b.e <= 900 ? Math.max(b.s, 750) : Math.max(b.s, 1170)) : ck === "drinks" ? 1290 : ck === "shop" ? Math.max(b.s + 30, 840) : Math.max(b.s + 30, 600);
   const taken = getPlan(iso).map(p => [p.t, p.t + catOf(p.c).dur]).concat(slotsFor(iso, D).map(o => [o.s, o.e]));
   let t = Math.min(Math.max(want, b.s), Math.max(b.s, b.e - 45));
   for (let i = 0; i < 8 && taken.some(([s, e]) => t < e && t + 40 > s); i++) t += 45;
@@ -580,7 +584,8 @@ function events(iso, D) {
   { const sl = slotsFor(iso, D), rebuilt = [];
     list.forEach(ev => { if (ev.k === "free" || ev.k === "wait") freePieces(ev.x, sl).forEach(([a, b]) => rebuilt.push({ ...ev, s: a, e: b, tt: ev.k === "wait" ? "Free, with bags" : "Free time", piece: true })); else rebuilt.push(ev); });
     sl.forEach(o => rebuilt.push({ k: "slot", s: o.s, e: o.e, slot: o, tt: SLOTDEF[o.k].l }));
-    list.splice(0, list.length, ...rebuilt); }
+    list.splice(0, list.length, ...rebuilt);
+    if (stayOn(iso)) { const fr = rebuilt.filter(e => e.k === "free").sort((a, b) => a.s - b.s), mg = []; fr.forEach(f => { const l = mg[mg.length - 1]; if (l && f.s <= l.e + 1) l.e = Math.max(l.e, f.e); else mg.push({ s: f.s, e: f.e }); }); promptsFor(iso, mg).forEach(pe => list.push(pe)); } }
   getPlan(iso).forEach((p, pi) => { const s = SAVE_BY[p.id]; if (!s) return; const c = catOf(p.c); list.push({ k: "plan", s: p.t, e: p.t + c.dur, tt: `${c.l.split(" ")[0]} ${s.name}`, sub: "", save: s, pi, cat: p.c }); });
   return list;
 }
@@ -590,7 +595,7 @@ function renderDayContent(iso) {
   const LO = Math.min(420, Math.floor(Math.min(...D.segs.map(x => x.s), 1440) / 60) * 60), HI = 1440;
   /* busy ranges: anything that isn't blank free time, padded a little, plus marks and now */
   const busy = [];
-  evs.forEach(e => { if (e.k !== "free") busy.push([e.s - 5, e.e + 5]); });
+  evs.forEach(e => { if (e.k !== "free" && e.k !== "prompt") busy.push([e.s - 5, e.e + 5]); });
   D.marks.forEach(m => busy.push([m.t - 20, m.t + 20]));
   if (showNow) busy.push([nm - 20, nm + 20]);
   busy.sort((a, b) => a[0] - b[0]);
@@ -616,6 +621,10 @@ function renderDayContent(iso) {
     if (ev.k === "slot") {
       const pk = pickFor(iso, ev.slot.k), sd = SLOTDEF[ev.slot.k];
       html += `<button class="ev slot ${ev.slot.k}${h < 40 ? " short" : ""} press" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${sd.l}<span class="sug">${pk && !pk.chosen ? "Suggested" : ""}</span></span>${pk ? `<span class="pk"><b>${esc(pk.s.name)}</b>${pk.k != null ? ` · ${shortDist(pk.k)}` : ""}</span>` : `<span class="pk">${t12(ev.s)} · find a spot nearby</span>`}</button>`;
+      return;
+    }
+    if (ev.k === "prompt") {
+      html += `<button class="ev prompt${short ? " short" : ""} press" data-prompt="${ev.pr.cat}" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${esc(ev.tt)}</span>${!short ? `<span class="tm">Tap for ideas from your saves</span>` : ""}</button>`;
       return;
     }
     if (ev.k === "free" || ev.k === "wait") {
@@ -768,6 +777,22 @@ function freePieces(seg, slots) {
   return pieces.filter(([a, b]) => b - a >= (seg.k === "wait" ? 15 : 45));
 }
 let REFRESH = null;
+
+const PROMPTS = [
+  { k: "coffee", l: "Coffee?", s: 510, e: 600, cat: "coffee" },
+  { k: "lunch", l: "Lunch?", s: 750, e: 810, cat: "dinner" },
+  { k: "day", l: "Sightsee, shop or culture?", s: 840, e: 1050, cat: "see" },
+  { k: "dinner", l: "Dinner?", s: 1140, e: 1230, cat: "dinner" },
+];
+function promptsFor(iso, free) {
+  const out = [], pl = getPlan(iso);
+  free.forEach(f => PROMPTS.forEach(pr => {
+    const s = Math.max(f.s, pr.s), e = Math.min(f.e, pr.e); if (e - s < 40) return;
+    if (pl.some(p => p.t < e && p.t + catOf(p.c).dur > s)) return; /* already planned here */
+    out.push({ k: "prompt", s, e, pr, tt: pr.l });
+  }));
+  return out;
+}
 let PL = { iso: null, cat: "coffee", block: null, n: 12 };
 function plannerSheet() {
   const iso = PL.iso, a = anchorFor(iso), b = PL.block;
@@ -892,6 +917,7 @@ document.addEventListener("click", e => {
   const rm = t.closest("[data-remove]"); if (rm) { haptic(); const p = getPlan(view); p.splice(+rm.dataset.remove, 1); setPlan(view, p); closeSheet(); content.innerHTML = renderDayContent(view); return; }
   const lt = t.closest("[data-later]"); if (lt) { haptic(); const p = getPlan(view); p[+lt.dataset.later].t += 30; setPlan(view, p); closeSheet(); content.innerHTML = renderDayContent(view); return; }
   const mk = t.closest("[data-mark]"); if (mk) { haptic(); return openSheet(staySheet(CUR.marks[+mk.dataset.mark].stay)); }
+  const pp = t.closest("[data-prompt]"); if (pp) { haptic(); const i = ITEMS[+pp.dataset.i]; return openPlanner(view, pp.dataset.prompt, { s: i.s, e: i.e, k: "free" }); }
   const ev = t.closest("[data-i]"); if (ev) { haptic(); const i = ITEMS[+ev.dataset.i]; if (i.k === "plan") return openSheet(planItemSheet(i));
       if (i.k === "slot") { SL = i; REFRESH = () => { const st = sheet.scrollTop; document.getElementById("sheet-body").innerHTML = slotSheet(); sheet.scrollTop = st; }; return openSheet(slotSheet()); }
       if (i.k === "free" || i.k === "wait") { return openPlanner(view, PL.cat && PL.cat !== "trip" ? PL.cat : "dinner", i.x); } return openSheet(i.m ? moveSheet(i.m) : staySheet(i.stay)); }
