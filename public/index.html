@@ -508,21 +508,21 @@ const STAYS = [
 ];
 
 const MOVES = [
-  { id:"f1", mode:"Flight", from:"Perth", to:"Doha", code:"VA6129", carrier:"Qatar Airways", dep:["2026-10-19","22:45",TZ.per], arr:["2026-10-20","04:55",TZ.doh], ref:"KJCTJU", leave:"19:45", fromQ:"Perth Airport" },
-  { id:"f2", mode:"Flight", from:"Doha", to:"Athens", code:"VA6036", carrier:"Qatar Airways", dep:["2026-10-20","07:25",TZ.doh], arr:["2026-10-20","12:25",TZ.ath], ref:"KJCTJU", xfer:60 },
-  { id:"f3", mode:"Flight", from:"Athens", to:"Santorini", code:"GQ344", carrier:"Sky Express", dep:["2026-10-22","10:30",TZ.ath], arr:["2026-10-22","11:25",TZ.ath], ref:"K41BQD", bags:"15kg checked, 8kg cabin, personal item", fromQ:"Athens International Airport", leave:"08:15", xfer:45, note:"Only 15kg checked plus an 8kg cabin bag. The big suitcases are already at 11 Enteka." },
-  { id:"f4", mode:"Flight", from:"Santorini", to:"Athens", code:"GQ349", carrier:"Sky Express", dep:["2026-10-25","14:55",TZ.ath], arr:["2026-10-25","15:50",TZ.ath], ref:"K41BQD", bags:"15kg checked, 8kg cabin, personal item", fromQ:"Santorini Airport", leave:"13:15", xfer:90, },
-  { id:"f5", mode:"Flight", from:"Athens", to:"Rome", code:"GQ820", carrier:"Sky Express", dep:["2026-10-27","10:55",TZ.ath], arr:["2026-10-27","12:00",TZ.it], ref:"2JCREI", bags:"32kg checked, cabin bag, small bag", fromQ:"Athens International Airport", toQ:"Rome Fiumicino", leave:"08:40", xfer:70 },
-  { id:"t1", mode:"Train", from:"Rome", to:"Florence", fromSt:"Roma Termini", toSt:"Firenze S.M.N.", code:"Frecciarossa 9420", carrier:"ItaliaRail, 1st class", dep:["2026-10-30","12:30",TZ.it], arr:["2026-10-30","14:11",TZ.it], ref:"XG55EN", pnr:true, fromQ:"Roma Termini", leave:"11:45", xfer:20, note:"The ticket says 12:36 PM, but the train now leaves at 12:30 PM. Be on the platform early. Show the PNR to the conductor." },
-  { id:"t2", mode:"Train", from:"Florence", to:"Venice", fromSt:"Firenze S.M.N.", toSt:"Venezia S. Lucia", code:"Frecciarossa 9416", carrier:"ItaliaRail, 1st class", dep:["2026-11-01","12:20",TZ.it], arr:["2026-11-01","14:34",TZ.it], ref:"XHFDSN", pnr:true, fromQ:"Firenze Santa Maria Novella station", leave:"11:40", xfer:30, note:"Show the PNR to the conductor." },
-  { id:"t3", mode:"Train", from:"Venice", to:"Milan", fromSt:"Venezia S. Lucia", toSt:"Milano Centrale", code:"Frecciarossa 9708", carrier:"ItaliaRail, 1st class", dep:["2026-11-03","07:18",TZ.it], arr:["2026-11-03","09:45",TZ.it], ref:"XH6SQ5", pnr:true, fromQ:"Venezia Santa Lucia station", leave:"06:40", note:"Change at Milano Centrale: 1h 25m between trains, same station." },
+  { id:"f1", ride:30, mode:"Flight", from:"Perth", to:"Doha", code:"VA6129", carrier:"Qatar Airways", dep:["2026-10-19","22:45",TZ.per], arr:["2026-10-20","04:55",TZ.doh], ref:"KJCTJU", leave:"19:45", fromQ:"Perth Airport" },
+  { id:"f2", mode:"Flight", from:"Doha", to:"Athens", code:"VA6036", carrier:"Qatar Airways", dep:["2026-10-20","07:25",TZ.doh], arr:["2026-10-20","12:25",TZ.ath], ref:"KJCTJU", xfer:90 },
+  { id:"f3", ride:50, mode:"Flight", from:"Athens", to:"Santorini", code:"GQ344", carrier:"Sky Express", dep:["2026-10-22","10:30",TZ.ath], arr:["2026-10-22","11:25",TZ.ath], ref:"K41BQD", bags:"15kg checked, 8kg cabin, personal item", fromQ:"Athens International Airport", leave:"08:15", xfer:50, note:"Only 15kg checked plus an 8kg cabin bag. The big suitcases are already at 11 Enteka." },
+  { id:"f4", ride:30, mode:"Flight", from:"Santorini", to:"Athens", code:"GQ349", carrier:"Sky Express", dep:["2026-10-25","14:55",TZ.ath], arr:["2026-10-25","15:50",TZ.ath], ref:"K41BQD", bags:"15kg checked, 8kg cabin, personal item", fromQ:"Santorini Airport", leave:"13:15", xfer:75, },
+  { id:"f5", ride:50, mode:"Flight", from:"Athens", to:"Rome", code:"GQ820", carrier:"Sky Express", dep:["2026-10-27","10:55",TZ.ath], arr:["2026-10-27","12:00",TZ.it], ref:"2JCREI", bags:"32kg checked, cabin bag, small bag", fromQ:"Athens International Airport", toQ:"Rome Fiumicino", leave:"08:40", xfer:90 },
+  { id:"t1", ride:20, mode:"Train", from:"Rome", to:"Florence", fromSt:"Roma Termini", toSt:"Firenze S.M.N.", code:"Frecciarossa 9420", carrier:"ItaliaRail, 1st class", dep:["2026-10-30","12:30",TZ.it], arr:["2026-10-30","14:11",TZ.it], ref:"XG55EN", pnr:true, fromQ:"Roma Termini", leave:"11:45", xfer:20, note:"The ticket says 12:36 PM, but the train now leaves at 12:30 PM. Be on the platform early. Show the PNR to the conductor." },
+  { id:"t2", ride:20, mode:"Train", from:"Florence", to:"Venice", fromSt:"Firenze S.M.N.", toSt:"Venezia S. Lucia", code:"Frecciarossa 9416", carrier:"ItaliaRail, 1st class", dep:["2026-11-01","12:20",TZ.it], arr:["2026-11-01","14:34",TZ.it], ref:"XHFDSN", pnr:true, fromQ:"Firenze Santa Maria Novella station", leave:"11:40", xfer:35, note:"Show the PNR to the conductor." },
+  { id:"t3", ride:25, mode:"Train", from:"Venice", to:"Milan", fromSt:"Venezia S. Lucia", toSt:"Milano Centrale", code:"Frecciarossa 9708", carrier:"ItaliaRail, 1st class", dep:["2026-11-03","07:18",TZ.it], arr:["2026-11-03","09:45",TZ.it], ref:"XH6SQ5", pnr:true, fromQ:"Venezia Santa Lucia station", leave:"06:40", note:"Change at Milano Centrale: 1h 25m between trains, same station." },
   { id:"t4", mode:"Train", from:"Milan", to:"Zürich", fromSt:"Milano Centrale", toSt:"Zürich HB", code:"EuroCity 150", carrier:"ItaliaRail, 1st class", dep:["2026-11-03","11:10",TZ.it], arr:["2026-11-03","14:27",TZ.ch], ref:"XH6SJ5", pnr:true, fromQ:"Milano Centrale", xfer:25 },
-  { id:"f6", mode:"Flight", from:"Zürich", to:"Berlin", code:"EW8765", carrier:"Eurowings", dep:["2026-11-05","14:20",TZ.ch], arr:["2026-11-05","15:45",TZ.de], ref:"GLL3KG", bags:"32kg checked, 8kg cabin, small bag", fromQ:"Zurich Airport", toQ:"Berlin BER", leave:"12:15", xfer:60 },
-  { id:"f7", mode:"Flight", from:"Berlin", to:"Paris", code:"TO4061", carrier:"Transavia", dep:["2026-11-08","08:45",TZ.de], arr:["2026-11-08","10:40",TZ.fr], ref:"FGLHWQ", bags:"30kg checked, cabin bag, small bag", fromQ:"Berlin Brandenburg Airport", toQ:"Paris Orly", leave:"06:15", leaveFirm:true, xfer:60, note:"Tj says leave the hotel around 6:15 AM." },
-  { id:"f8", mode:"Flight", from:"Paris", to:"Glasgow", code:"EZY3124", carrier:"easyJet", dep:["2026-11-11","15:45",TZ.fr], arr:["2026-11-11","16:35",TZ.uk], ref:"KDKM7WL", bags:"32kg checked, large cabin bag, small bag", fromQ:"Paris Charles de Gaulle Terminal 2D", leave:"13:00", xfer:45, note:"Terminal 2D. Bag drop closes at 2:45 PM. Glasgow is 1 hour behind Paris." },
-  { id:"g1", mode:"Train", from:"Glasgow", to:"Edinburgh", code:"ScotRail", carrier:"About 50 min, every 15 min", dep:["2026-11-13",null,TZ.uk], guess:["12:00","12:50"], todo:"Walk-up tickets", fromQ:"Glasgow Queen Street station", leave:"11:30", xfer:20, note:"Any train works and walk-up tickets are fine. Tj + 1 drive a hire car via the Highlands and meet everyone in Edinburgh." },
-  { id:"g2", mode:"Train", from:"Edinburgh", to:"London", code:"LNER", carrier:"About 4h to King’s Cross", dep:["2026-11-16",null,TZ.uk], guess:["11:00","15:20"], todo:"Not booked yet", fromQ:"Edinburgh Waverley station", leave:"10:20", xfer:30, note:"Not booked yet, so these times are a guess. Aiming for a late-morning train." },
-  { id:"f9", mode:"Flight", from:"London", to:"Doha", code:"VA6109", carrier:"Qatar Airways", dep:["2026-11-19","14:55",TZ.uk], arr:["2026-11-20","00:40",TZ.doh], ref:"KJCTJU", fromQ:"London Heathrow Airport", leave:"11:30", note:"Leaves from Heathrow. Not on booking KJCTJU? Check your own booking shows these flights." },
+  { id:"f6", ride:30, mode:"Flight", from:"Zürich", to:"Berlin", code:"EW8765", carrier:"Eurowings", dep:["2026-11-05","14:20",TZ.ch], arr:["2026-11-05","15:45",TZ.de], ref:"GLL3KG", bags:"32kg checked, 8kg cabin, small bag", fromQ:"Zurich Airport", toQ:"Berlin BER", leave:"12:15", xfer:80 },
+  { id:"f7", ride:50, mode:"Flight", from:"Berlin", to:"Paris", code:"TO4061", carrier:"Transavia", dep:["2026-11-08","08:45",TZ.de], arr:["2026-11-08","10:40",TZ.fr], ref:"FGLHWQ", bags:"30kg checked, cabin bag, small bag", fromQ:"Berlin Brandenburg Airport", toQ:"Paris Orly", leave:"06:15", leaveFirm:true, xfer:60, note:"Tj says leave the hotel around 6:15 AM." },
+  { id:"f8", ride:60, mode:"Flight", from:"Paris", to:"Glasgow", code:"EZY3124", carrier:"easyJet", dep:["2026-11-11","15:45",TZ.fr], arr:["2026-11-11","16:35",TZ.uk], ref:"KDKM7WL", bags:"32kg checked, large cabin bag, small bag", fromQ:"Paris Charles de Gaulle Terminal 2D", leave:"13:00", xfer:50, note:"Terminal 2D. Bag drop closes at 2:45 PM. Glasgow is 1 hour behind Paris." },
+  { id:"g1", ride:15, mode:"Train", from:"Glasgow", to:"Edinburgh", code:"ScotRail", carrier:"About 50 min, every 15 min", dep:["2026-11-13",null,TZ.uk], guess:["12:00","12:50"], todo:"Walk-up tickets", fromQ:"Glasgow Queen Street station", leave:"11:30", xfer:25, note:"Any train works and walk-up tickets are fine. Tj + 1 drive a hire car via the Highlands and meet everyone in Edinburgh." },
+  { id:"g2", ride:25, mode:"Train", from:"Edinburgh", to:"London", code:"LNER", carrier:"About 4h to King’s Cross", dep:["2026-11-16",null,TZ.uk], guess:["11:00","15:20"], todo:"Not booked yet", fromQ:"Edinburgh Waverley station", leave:"10:20", xfer:40, note:"Not booked yet, so these times are a guess. Aiming for a late-morning train." },
+  { id:"f9", ride:50, mode:"Flight", from:"London", to:"Doha", code:"VA6109", carrier:"Qatar Airways", dep:["2026-11-19","14:55",TZ.uk], arr:["2026-11-20","00:40",TZ.doh], ref:"KJCTJU", fromQ:"London Heathrow Airport", leave:"11:30", note:"Leaves from Heathrow. Not on booking KJCTJU? Check your own booking shows these flights." },
   { id:"f10", mode:"Flight", from:"Doha", to:"Perth", code:"VA6128", carrier:"Qatar Airways", dep:["2026-11-20","02:40",TZ.doh], arr:["2026-11-20","18:45",TZ.per], ref:"KJCTJU" },
 ];
 
@@ -630,7 +630,12 @@ function buildDay(iso) {
     let prev = leave;
     deps.forEach((m, i) => {
       const d = mins(m.d);
-      if (i === 0 && !transit) segs.push({ s: goFrom, e: d, k: "get", m, co: goCo, collect: goCollect, stay: goCo ? out : null, dep: true });
+      if (i === 0 && !transit) {
+        /* the ride itself, then the time at the terminal before departure */
+        const arr = Math.min(d, Math.max(goFrom, leave) + (m.ride || 45));
+        segs.push({ s: goFrom, e: arr, k: "get", m, co: goCo, collect: goCollect, stay: goCo ? out : null, dep: true });
+        if (d - arr >= 10) segs.push({ s: arr, e: d, k: "change", title: m.mode === "Flight" ? "At the airport" : "At the station", m, term: true });
+      }
       else if (d > prev) segs.push({ s: prev, e: d, k: "change", title: i === 0 ? `Layover in ${m.from}` : `Change at ${m.fromSt || m.from}`, m });
       const e = m.aDate === iso ? mins(m.a) : 1440;
       segs.push({ s: d, e, k: "travel", m });
@@ -640,9 +645,10 @@ function buildDay(iso) {
     if (last.aDate === iso && inn) {
       const at = Math.min(prev + (last.xfer || 45), 1439);
       const ci = mins(inn.ci);
-      if (ci - at >= 75) {
-        segs.push({ s: prev, e: at + 30, k: "get", title: "To the hotel", sub: inn.hotel, stay: inn, bags: true });
-        if (ci - (at + 30) >= 30) segs.push({ s: at + 30, e: ci, k: "free", title: "Free", sub: `Until check-in at ${t12(ci)}` });
+      /* the block is the actual journey; arriving well before check-in means dropping bags, then the time is yours */
+      if (ci - at > 20 && inn.store !== false) {
+        segs.push({ s: prev, e: at + 15, k: "get", title: "To the hotel", sub: inn.hotel, stay: inn, bags: true });
+        if (ci - (at + 15) >= 15) segs.push({ s: at + 15, e: ci, k: "free", title: "Free", sub: `Until check-in at ${t12(ci)}` });
         segs.push({ s: ci, e: Math.max(DE, ci + 60), k: "free", title: "Free", sub: `Evening in ${inn.city}` });
         freeFrom = at; roomsAt = ci;
       } else {
@@ -896,7 +902,7 @@ function events(iso, D) {
     if (x.k === "travel") { tt = `${m.from} → ${m.to}`;  sub = `${m.code}${m.guess ? ", time is a guess" : ""}`; ref = m.ref || ""; }
     else if (x.k === "get" && (x.dep || x.coOnly)) { const to = m ? (m.mode === "Flight" ? "the airport" : "the station") : ""; tt = x.coOnly ? (x.stay.store === false ? "Check out" : "Check out, leave bags") : x.co ? `Check out, to ${to}` : x.collect ? `Collect bags, to ${to}` : `To ${to}`; sub = x.coOnly ? (x.stay.store === false ? `${x.stay.hotel} · no luggage storage listed` : x.stay.hotel) : (m.fromQ || m.from); }
     else if (x.k === "get") { tt = x.checkin ? "To the hotel, check in" : x.bags ? "To the hotel, drop bags" : x.stay ? "To the hotel" : `To ${m.mode === "Flight" ? "the airport" : "the station"}`; sub = x.bags ? `${x.stay.hotel} · check in from ${s12(x.stay.ci)}` : x.checkin ? `${x.stay.hotel} · check in from ${s12(x.stay.ci)}` : x.stay ? x.stay.hotel : (m.fromQ || m.from); }
-    else if (x.k === "change") { tt = x.title; }
+    else if (x.k === "change") { tt = x.title; sub = x.term ? (m.mode === "Flight" ? "Check in, bags and security" : "Find the platform") : ""; }
     else if (x.k === "booked") { tt = x.b.t; sub = x.b.where || ""; }
     else if (x.k === "pack") { tt = "Pack suitcases"; sub = x.early ? `Leaving ${t12(x.tLeave)} tomorrow` : `Before check-out · ${x.stay.hotel}`; }
     else if (x.k === "wait") { tt = "Free, with bags"; sub = x.stay && x.stay.store ? "Hotel can hold bags" : x.stay && x.stay.store === false ? "No luggage storage listed" : ""; }
