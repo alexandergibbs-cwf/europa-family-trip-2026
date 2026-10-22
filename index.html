@@ -388,7 +388,7 @@ function buildDay(iso) {
       if (co < leave) {
         if (co > cur) segs.push({ s: cur, e: co, k: "free", title: "Free", sub: `Pack up and check out by ${s12(out.co)}.` });
         marks.push({ t: co, kind: "out", stay: out });
-        segs.push({ s: co, e: leave, k: "wait", title: "Free, with bags", sub: out.store ? "Leave bags at the hotel." : out.store === false ? "No luggage storage listed." : "Ask about leaving bags.", stay: out });
+        segs.push({ s: co, e: leave, k: "wait", title: "Drop off suitcases at the hotel", sub: out.store === false ? "No storage listed here, ask the host." : "Collect them before you leave.", stay: out, morning: true });
       } else {
         if (leave > cur) segs.push({ s: cur, e: leave, k: "free", title: "Free", sub: leave < 600 ? "Early start. Pack the night before." : "Pack up first." });
         marks.push({ t: leave, kind: "out", stay: out });
@@ -593,7 +593,7 @@ function renderDayContent(iso) {
     }
     if (ev.k === "free" || ev.k === "wait") {
       const hint = ""; const _unused = ev.k === "wait" ? (ev.x.stay && ev.x.stay.store ? "Hotel can hold your bags" : ev.x.stay && ev.x.stay.store === false ? "No luggage storage listed" : "") : hasSaves(iso) && h >= 60 ? "Sightsee or shop nearby ›" : h >= 60 ? "Ideas nearby ›" : "";
-      html += `<div class="ev ${ev.k}${short ? " short" : ""}${ev.done ? " done" : ""}" role="button" tabindex="0" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${ev.k === "wait" ? `Bags with you · ${dur(ev.e - ev.s)}` : ""}</span><span class="tm">${ev.k === "wait" ? (ev.x.stay && ev.x.stay.store ? "Hotel can hold them" : ev.x.stay && ev.x.stay.store === false ? "No luggage storage listed" : "Ask about leaving bags") : ""}</span></div>`;
+      html += `<div class="ev ${ev.k}${short ? " short" : ""}${ev.done ? " done" : ""}" role="button" tabindex="0" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${ev.k === "wait" ? "Drop off suitcases at the hotel" : ""}</span><span class="tm">${ev.k === "wait" ? (ev.x.stay && ev.x.stay.store === false ? "No storage listed here, ask the host" : (ev.x.morning ? `Collect them before leaving at ${t12(ev.e)}` : `Then you’re free until check-in at ${t12(ev.e)}`)) : ""}</span></div>`;
       return;
     }
     const time = ev.k === "mark" ? t12(ev.s) : ev.x && ev.x.overnight ? `until ${t12(ev.e)}` : `${t12(ev.s)} – ${t12(ev.e)}`;
@@ -743,7 +743,7 @@ let PL = { iso: null, cat: "coffee", block: null, n: 12 };
 function plannerSheet() {
   const iso = PL.iso, a = anchorFor(iso), b = PL.block;
   const title = b ? `Free · ${dur(b.e - b.s)}` : `Things to do in ${esc(cityOn(iso))}`;
-  const sub = b ? `${t12(b.s)} – ${t12(b.e)}${b.k === "wait" ? ", with your bags" : ""}${a ? `. From ${esc(a.hotel)}` : ""}` : (a ? `Distances from ${esc(a.hotel)}` : "");
+  const sub = b ? `${t12(b.s)} – ${t12(b.e)}${b.k === "wait" ? ", after dropping suitcases at the hotel" : ""}${a ? `. From ${esc(a.hotel)}` : ""}` : (a ? `Distances from ${esc(a.hotel)}` : "");
   if (!a || !SAVES.some(s => s.city === cityOn(iso))) {
     const c = cityOn(iso), q = a ? a.hotel + " " + c : c;
     return head(title, sub) + `<div class="ig"><p class="empty-p">You haven’t saved anywhere in ${esc(c)} on mio yet. Search nearby instead:</p>${["coffee", "restaurants", "bars", "shops", "things to do"].map(w => `<a class="place" href="${maps(w + " near " + q)}" target="_blank" rel="noopener"><span class="a">${w.charAt(0).toUpperCase() + w.slice(1)} near ${esc(a ? a.hotel : c)}</span><span class="m" style="color:var(--blue)">Maps ›</span></a>`).join("")}</div>`;
