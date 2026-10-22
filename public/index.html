@@ -39,8 +39,8 @@
   --e-mark-bg: #3b2547; --e-mark-ink: #e0b3f5; --e-free-bg: rgba(48, 209, 88, 0.18); --e-free-ink: #7ce095; --e-wait-bg: rgba(255, 159, 10, 0.22); --e-wait-ink: #ffc069; color-scheme: dark; }
 
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; height: 100%; overflow: hidden; }
-body { height: 100%; overflow: hidden; background: var(--bg); color: var(--ink); font: 400 17px/1.35 var(--font); letter-spacing: -0.02em; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
+html { -webkit-text-size-adjust: 100%; overscroll-behavior-y: auto; }
+body { background: var(--bg); color: var(--ink); font: 400 17px/1.35 var(--font); letter-spacing: -0.02em; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
 a { color: var(--blue); text-decoration: none; }
 button { font: inherit; color: inherit; letter-spacing: inherit; }
 :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 10px; }
@@ -54,7 +54,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 /* Header (sticky) */
 .top { position: fixed; left: 0; right: 0; top: 0; z-index: 20; background: var(--bg); padding-top: env(safe-area-inset-top, 0px); }
 .top > * { max-width: 520px; margin-left: auto; margin-right: auto; }
-.pager { position: fixed; inset: 0; height: 100lvh; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior-y: none; scroll-padding-top: var(--top-h, 180px); }
+.pager { overflow-x: clip; }
 .pills { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: 10px; padding-block: 10px 6px; }
 .pill.ib { width: 44px; padding: 0; justify-content: center; }
 .pill.title { justify-self: center; padding: 0 12px 0 16px; max-width: 100%; }
@@ -103,7 +103,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 
 /* Day pager + grid */
 .pager { touch-action: pan-y; }
-#daycontent { max-width: 520px; margin: 0 auto; padding-top: var(--top-h, 180px); padding-bottom: calc(100lvh - 100svh + env(safe-area-inset-bottom, 0px) + 8px); }
+#daycontent { max-width: 520px; margin: 0 auto; padding-top: var(--top-h, 180px); padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }
 #daycontent { }
 .grid { position: relative; height: calc(var(--hour) * 24 + 24px); margin-top: 8px; }
 .hl { position: absolute; left: 0; right: 0; height: 0; }
@@ -192,8 +192,9 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .pill.today[disabled] { opacity: .5; }
 
 /* Sheets */
-.page { position: fixed; inset: 0; height: 100lvh; z-index: 10; background: var(--bg); transform-origin: 0 50%; transition: transform 560ms var(--spring), border-radius 300ms ease, box-shadow 300ms ease; border-radius: 0; }
-.page.shifted, .page.dragging { overflow: hidden; }
+.page { position: relative; min-height: 100vh; z-index: 10; background: var(--bg); transform-origin: 0 50%; transition: transform 560ms var(--spring), border-radius 300ms ease, box-shadow 300ms ease; border-radius: 0; }
+.page.shifted, .page.dragging { position: fixed; inset: 0; overflow: hidden; }
+.page.shifted .pager, .page.dragging .pager { transform: translateY(var(--sy, 0px)); }
 .page.shifted { transform: translateX(var(--side-w, 82vw)); border-radius: 44px 0 0 44px; box-shadow: 0 10px 50px rgba(0,0,0,.22), 0 0 0 0.5px rgba(0,0,0,.06); }
 .page.dragging { transition: none; }
 .page.shifted::after { content: ""; position: absolute; inset: 0; z-index: 99; }
@@ -874,15 +875,17 @@ function setMode(m) {
 function countdown(ms) { const m = Math.floor(ms / 6e4), d = Math.floor(m / 1440), h = Math.floor((m % 1440) / 60), mm = m % 60; return d >= 1 ? `in ${d}d ${h}h` : h ? `in ${h}h ${mm}m` : `in ${mm}m`; }
 const content = document.getElementById("daycontent");
 let YFN = t => t;
+const SC = () => document.scrollingElement || document.documentElement;
+const atBottom = () => scrollY >= SC().scrollHeight - innerHeight - 1;
 function scrollToDay() {
   const topH = document.getElementById("top").offsetHeight;
   const evs = ITEMS.filter(e => e.k !== "free");
   let t = Math.min(420, evs.length ? Math.min(...evs.map(e => e.s)) - 30 : 420);
   if (view === today && nowMin() - 45 > t + 300) t = nowMin() - 45;
-  if (MODE === "multi") { const mg = content.querySelector(".mg"); if (!mg) return; const top0 = mg.getBoundingClientRect().top - pager.getBoundingClientRect().top + pager.scrollTop; let m = 420; const ds = Object.keys(MITEMS); if (ds.includes(today) && nowMin() - 45 > m + 300) m = nowMin() - 45; pager.scrollTop = Math.max(0, top0 + MY(m) - topH - 44); return; }
+  if (MODE === "multi") { const mg = content.querySelector(".mg"); if (!mg) return; const top0 = mg.getBoundingClientRect().top + scrollY; let m = 420; const ds = Object.keys(MITEMS); if (ds.includes(today) && nowMin() - 45 > m + 300) m = nowMin() - 45; scrollTo(0, Math.max(0, top0 + MY(m) - topH - 44)); return; }
   const gridEl = content.querySelector(".grid"); if (!gridEl) return;
-  const gridTop = gridEl.getBoundingClientRect().top - pager.getBoundingClientRect().top + pager.scrollTop;
-  pager.scrollTop = Math.max(0, gridTop + YFN(Math.max(0, t)) - topH - 8);
+  const gridTop = gridEl.getBoundingClientRect().top + scrollY;
+  scrollTo(0, Math.max(0, gridTop + YFN(Math.max(0, t)) - topH - 8));
 }
 function measureTop() { document.documentElement.style.setProperty("--top-h", document.getElementById("top").offsetHeight + "px"); }
 
@@ -894,20 +897,23 @@ function selectDay(iso, dir, syncWeek = true) {
   const old = view; view = iso; haptic(); refreshLive();
   if (syncWeek) showWeek(weekOf(iso), true);
   renderHeader(true);
-  content.getAnimations?.().forEach(a => a.cancel()); content.style.transform = "";
-  content.innerHTML = renderContent(iso); scrollToDay(false);
-  if (reduce() || !content.animate) return;
-  content.animate([{ transform: `translateX(${dir * 26}px)`, opacity: 0 }, { transform: "translateX(0)", opacity: 1 }], { duration: 420, easing: "cubic-bezier(0.22, 1, 0.36, 1)" });
+  const W = content.offsetWidth;
+  if (reduce() || !content.animate) { content.innerHTML = renderContent(iso); scrollToDay(false); return; }
+  const out = content.animate([{ transform: content.style.transform || "translateX(0)", opacity: 1 }, { transform: `translateX(${-dir * W * 0.22}px)`, opacity: 0 }], { duration: 220, easing: "cubic-bezier(0.55, 0, 0.6, 1)", fill: "forwards" });
+  out.onfinish = () => {
+    content.style.transform = ""; content.innerHTML = renderContent(iso); out.cancel(); scrollToDay(false);
+    content.animate([{ transform: `translateX(${dir * W * 0.22}px)`, opacity: 0 }, { transform: "translateX(0)", opacity: 1 }], { duration: 620, easing: "cubic-bezier(0.16, 1, 0.3, 1)" });
+  };
 }
 const pager = document.getElementById("pager");
 let pd = null;
 /* pull past the top or bottom of a day to move to the previous / next day */
 let vpull = null;
-pager.addEventListener("touchstart", e => { vpull = { y: e.touches[0].clientY, top: pager.scrollTop <= 0, bottom: pager.scrollTop >= pager.scrollHeight - pager.clientHeight - 1, fired: false }; }, { passive: true });
+pager.addEventListener("touchstart", e => { vpull = { y: e.touches[0].clientY, top: scrollY <= 0, bottom: atBottom(), fired: false }; }, { passive: true });
 pager.addEventListener("touchmove", e => {
   if (!vpull || vpull.fired || !sheet.hidden || !side.hidden) return; const dy = e.touches[0].clientY - vpull.y;
-  if (vpull.top && dy > 90 && pager.scrollTop <= 0 && view > START) { vpull.fired = true; haptic("heavy"); selectDay(addDays(view, -1), -1); content.animate([{ transform: "translateY(-40px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 480, easing: EASE }); }
-  else if (vpull.bottom && dy < -90 && pager.scrollTop >= pager.scrollHeight - pager.clientHeight - 1 && view < END) { vpull.fired = true; haptic("heavy"); selectDay(addDays(view, 1), 1); content.animate([{ transform: "translateY(40px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 480, easing: EASE }); }
+  if (vpull.top && dy > 110 && scrollY <= 0 && view > START) { vpull.fired = true; haptic("heavy"); selectDay(addDays(view, -1), -1); content.animate([{ transform: "translateY(-40px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 480, easing: EASE }); }
+  else if (vpull.bottom && dy < -110 && atBottom() && view < END) { vpull.fired = true; haptic("heavy"); selectDay(addDays(view, 1), 1); content.animate([{ transform: "translateY(40px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 480, easing: EASE }); }
 }, { passive: true });
 pager.addEventListener("touchend", () => { vpull = null; }, { passive: true });
 pager.addEventListener("pointerdown", e => { if (e.pointerType === "mouse" && e.button) return; if (e.clientX < 24) { pd = null; openSide(); return; } pd = { x: e.clientX, y: e.clientY, t: performance.now(), mode: null, dx: 0 }; });
@@ -960,6 +966,7 @@ function openSide() {
   sb.insertAdjacentHTML("beforeend", `<div class="sring" id="sring" hidden></div>`); ringTo(sb.querySelector(".crow.on"), false);
   const on = sb.querySelector(".crow.on"); if (on) { const top = on.offsetTop - sb.clientHeight / 2 + on.offsetHeight / 2; if (top > 0) sb.scrollTop = top; }
   page.classList.remove("dragging"); page.style.transform = ""; page.style.borderRadius = "";
+  sideY = scrollY; page.style.setProperty("--sy", -sideY + "px");
   requestAnimationFrame(() => page.classList.add("shifted"));
 }
 function ringTo(row, animate) {
@@ -968,10 +975,10 @@ function ringTo(row, animate) {
   r.hidden = false; r.style.top = row.offsetTop + "px"; r.style.height = row.offsetHeight + "px";
   if (!animate) { void r.offsetHeight; r.style.transition = ""; }
 }
-let sideT = 0;
+let sideT = 0, sideY = 0;
 function closeSide() {
   if (side.hidden) return;
-  page.classList.remove("dragging"); page.style.transform = ""; page.style.borderRadius = ""; page.classList.remove("shifted");
+  page.classList.remove("dragging"); page.style.transform = ""; page.style.borderRadius = ""; page.classList.remove("shifted"); scrollTo(0, sideY);
   clearTimeout(sideT); sideT = setTimeout(() => { side.hidden = true; }, reduce() ? 0 : 420);
 }
 const sideOpen = () => !side.hidden;
@@ -1269,7 +1276,7 @@ document.addEventListener("keydown", e => {
 function tick() {
   const t = isoLocal();
   if (t !== today) { const f = view === today; today = t; renderWeek(); if (f) view = t; showWeek(weekOf(view), false); }
-  if (sheet.hidden && show.hidden && side.hidden && !pd) { const y = pager.scrollTop; renderHeader(false); content.innerHTML = renderContent(view); pager.scrollTop = y; }
+  if (sheet.hidden && show.hidden && side.hidden && !pd) { const y = scrollY; renderHeader(false); content.innerHTML = renderContent(view); scrollTo(0, y); }
 }
 renderWeek(); renderHeader(false); measureTop(); content.innerHTML = renderContent(view);
 document.getElementById("modePill").classList.toggle("on", MODE === "multi");
