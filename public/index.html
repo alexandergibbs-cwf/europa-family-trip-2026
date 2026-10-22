@@ -277,6 +277,34 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .fsec button { border: 0; background: none; color: var(--blue); font-size: 15px; cursor: pointer; padding: 4px 0; }
 .restore { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 4px 0; }
 .restore button { border: 0; height: 34px; padding: 0 14px; border-radius: 980px; background: var(--card); color: var(--blue); font-size: 14px; font-weight: 600; cursor: pointer; }
+/* ---------- polish pass ---------- */
+:root { --ease-io: cubic-bezier(0.65, 0, 0.35, 1); --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1); --ease-in-soft: cubic-bezier(0.5, 0, 0.75, 0); }
+.ev { border-radius: 9px; }
+.ev.get { border: 1px dashed color-mix(in srgb, var(--e-get) 48%, transparent); }
+.ev.get .tt { font-weight: 500; }
+.ev.wait { border: 1px dashed color-mix(in srgb, var(--e-wait) 50%, transparent); }
+.ev.prompt { border: 1px dashed color-mix(in srgb, var(--sub) 26%, transparent); }
+.ev.prompt .tt { font-weight: 400; }
+.mk { border-top-width: 1.5px; }
+.mk button { top: -11px; height: 22px; font-size: 11.5px; padding: 0 10px; background: var(--bg); color: var(--e-mark); box-shadow: inset 0 0 0 1px var(--e-mark); }
+.mk button span { opacity: .75; }
+.now { border-top-width: 1.5px; }
+.now::before { width: 8px; height: 8px; top: -5px; left: -4px; }
+.now span { font-weight: 600; font-size: 11px; top: -8px; }
+.press { transition: transform 420ms var(--spring-bouncy); }
+.press:active { transform: scale(0.96); transition: transform 90ms var(--ease-out-soft); }
+.wd .n { transition: background-color 220ms var(--ease-io), color 220ms var(--ease-io); }
+.scrim { transition: opacity 320ms var(--ease-io); }
+.cyc-item { animation: cycin 360ms var(--ease-out-soft); }
+.cyc-item.out { animation: cycout 220ms var(--ease-in-soft) forwards; }
+@keyframes cycin { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
+@keyframes cycout { to { opacity: 0; transform: translateY(-7px); } }
+.place { padding: 14px 16px; gap: 4px 12px; }
+.place .h { font-size: 13.5px; }
+.place .links { gap: 14px; font-size: 13.5px; margin-top: 6px; }
+.cat { height: 34px; font-size: 13.5px; }
+.ig .r { padding: 13px 16px; }
+
 </style>
 
 <div class="top" id="top">
@@ -700,10 +728,10 @@ function selectDay(iso, dir, syncWeek = true) {
   renderHeader(true);
   const W = content.offsetWidth;
   if (reduce() || !content.animate) { content.innerHTML = renderDayContent(iso); scrollToDay(false); return; }
-  const out = content.animate([{ transform: content.style.transform || "translateX(0)", opacity: 1 }, { transform: `translateX(${-dir * W * 0.35}px)`, opacity: 0 }], { duration: 140, easing: "cubic-bezier(0.4, 0, 1, 1)", fill: "forwards" });
+  const out = content.animate([{ transform: content.style.transform || "translateX(0)", opacity: 1 }, { transform: `translateX(${-dir * W * 0.35}px)`, opacity: 0 }], { duration: 180, easing: "cubic-bezier(0.65, 0, 0.35, 1)", fill: "forwards" });
   out.onfinish = () => {
     content.style.transform = ""; content.innerHTML = renderDayContent(iso); out.cancel(); scrollToDay(false);
-    content.animate([{ transform: `translateX(${dir * W * 0.35}px)`, opacity: 0 }, { transform: "translateX(0)", opacity: 1 }], { duration: 560, easing: EASE });
+    content.animate([{ transform: `translateX(${dir * W * 0.3}px)`, opacity: 0 }, { transform: "translateX(0)", opacity: 1 }], { duration: 520, easing: EASE });
   };
 }
 const pager = document.getElementById("pager");
@@ -721,7 +749,7 @@ function endDrag() {
   const go = (Math.abs(p.dx) > W * 0.28 || Math.abs(v) > 0.45) && next >= START && next <= END;
   if (go) {
     const dir = p.dx < 0 ? 1 : -1;
-    const a = content.animate([{ transform: `translateX(${p.dx}px)` }, { transform: `translateX(${-dir * W}px)` }], { duration: 160, easing: "cubic-bezier(0.2, 0, 0.6, 1)", fill: "forwards" });
+    const a = content.animate([{ transform: `translateX(${p.dx}px)` }, { transform: `translateX(${-dir * W}px)` }], { duration: 200, easing: "cubic-bezier(0.3, 0, 0.2, 1)", fill: "forwards" });
     a.onfinish = () => {
       view = next; showWeek(weekOf(next), true); renderHeader(true); haptic();
       content.innerHTML = renderDayContent(next); content.style.transform = ""; a.cancel(); scrollToDay(false);
@@ -740,11 +768,11 @@ const head = (title, sub) => `<div class="sh-h"><h3 id="sheet-title">${title}</h
 function openSheet(html) {
   document.getElementById("sheet-body").innerHTML = html; bindChecks(sheet); lastFocus = document.activeElement;
   sheet.hidden = false; sheet.scrollTop = 0; scrim.classList.add("open"); sAnim?.cancel();
-  sAnim = sheet.animate([{ transform: "translateY(105%)" }, { transform: "translateY(0)" }], { duration: reduce() ? 1 : 620, easing: EASE, fill: "forwards" });
+  sAnim = sheet.animate([{ transform: "translateY(105%)" }, { transform: "translateY(0)" }], { duration: reduce() ? 1 : 560, easing: EASE, fill: "forwards" });
 }
 function closeSheet(from = 0) {
   if (sheet.hidden) return; scrim.classList.remove("open"); sAnim?.cancel();
-  sAnim = sheet.animate([{ transform: `translateY(${from}px)` }, { transform: "translateY(105%)" }], { duration: reduce() ? 1 : 260, easing: "cubic-bezier(0.32, 0.72, 0, 1)", fill: "forwards" });
+  sAnim = sheet.animate([{ transform: `translateY(${from}px)` }, { transform: "translateY(105%)" }], { duration: reduce() ? 1 : 300, easing: "cubic-bezier(0.55, 0, 0.5, 1)", fill: "forwards" });
   sAnim.onfinish = () => { sheet.hidden = true; }; lastFocus?.focus?.({ preventScroll: true }); renderHeader(false); clearInterval(cycT);
 }
 const side = document.getElementById("side"); let sideAnim = null;
@@ -756,7 +784,7 @@ function openSide() {
 }
 function closeSide(from = 0) {
   if (side.hidden) return; scrim.classList.remove("open"); sideAnim?.cancel();
-  sideAnim = side.animate([{ transform: `translateX(${from}px)` }, { transform: "translateX(-104%)" }], { duration: reduce() ? 1 : 240, easing: "cubic-bezier(0.32, 0.72, 0, 1)", fill: "forwards" });
+  sideAnim = side.animate([{ transform: `translateX(${from}px)` }, { transform: "translateX(-104%)" }], { duration: reduce() ? 1 : 280, easing: "cubic-bezier(0.55, 0, 0.5, 1)", fill: "forwards" });
   sideAnim.onfinish = () => { side.hidden = true; };
 }
 let sdrag = null;
@@ -981,7 +1009,7 @@ function openShow(html) {
   show.querySelector("[data-close-show]").focus({ preventScroll: true });
   try { navigator.wakeLock?.request("screen").then(l => (show._lock = l)).catch(() => {}); } catch (e) {}
 }
-function closeShow() { show.hidden = true; try { show._lock?.release(); } catch (e) {} }
+function closeShow() { if (show.hidden) return; const fin = () => { show.hidden = true; try { show._lock?.release(); } catch (e) {} }; if (reduce()) return fin(); const a = show.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "scale(0.96)" }], { duration: 220, easing: "cubic-bezier(0.55, 0, 0.5, 1)", fill: "forwards" }); a.onfinish = () => { fin(); a.cancel(); }; }
 
 /* ---------- events ---------- */
 document.addEventListener("click", e => {
