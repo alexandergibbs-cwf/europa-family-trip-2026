@@ -465,6 +465,8 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev.prompt.short .hk { display: none; }
 .place.pinned { background: color-mix(in srgb, var(--blue) 6%, var(--card)); }
 .place .sg { display: block; font-size: 11px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; color: var(--blue); margin-bottom: 2px; }
+.ev.prompt.tight .hk { display: none; }
+.ev.prompt.tight .pk { -webkit-line-clamp: 1; }
 </style>
 
 <div class="page" id="page">
@@ -959,7 +961,7 @@ function renderDayContent(iso) {
       return;
     }
     if (ev.k === "prompt") {
-      html += `<button class="ev prompt c-${ev.pr.k}${short ? " short" : ""} press" data-prompt="${ev.pr.cat}" data-sc="${ev.sc}" data-step="${ev.step}" data-i="${i}" data-alts="${esc(sceneAlts(iso, ev.sc, ev.step).join("|"))}" style="top:${top + 12}px;height:${h}px"><span class="tt">${esc(ev.tt)}</span><span class="pk"></span><span class="hk"></span></button>`;
+      html += `<button class="ev prompt c-${ev.pr.k}${short ? " short" : ""}${h < 66 ? " tight" : ""} press" data-prompt="${ev.pr.cat}" data-sc="${ev.sc}" data-step="${ev.step}" data-i="${i}" data-alts="${esc(sceneAlts(iso, ev.sc, ev.step).join("|"))}" style="top:${top + 12}px;height:${h}px"><span class="tt">${esc(ev.tt)}</span><span class="pk"></span><span class="hk"></span></button>`;
       return;
     }
     if (ev.k === "free" || ev.k === "wait") {
@@ -1272,7 +1274,7 @@ const walk = k => shortDist(k);
 /* travel days are two half-days: before leaving you're in the old city, after arriving in the new one */
 function scenePlans(iso, si) {
   const key = iso + "|" + si; if (SCN_CACHE.has(key)) return SCN_CACHE.get(key);
-  const steps = SCENES[si], D = buildDay(iso);
+  const steps = sceneFor(iso, si), D = buildDay(iso);
   const leaving = STAYS.find(s => s.out === iso && s.lat != null), here = anchorFor(iso);
   const split = D.leaveT != null ? D.leaveT : D.deps.length ? mins(D.deps[0].d) : null;
   const groups = leaving && here && leaving !== here && split != null ? [[steps.filter(p => p.s < split), leaving], [steps.filter(p => p.s >= split), here]] : [[steps, here || leaving]];
@@ -1356,39 +1358,67 @@ const PROMPTS = [
   { k: "dinner", l: "Dinner", s: 1140, e: 1260, cat: "dinner" },
 ];
 /* ways the day could go; each builds up block by block, then gives way to the next */
+/* How long things take and when locals do them (checked 22 Oct):
+   coffee sat down with a pastry ~45 min; a big museum 2-3 h (Vatican, Uffizi); a walk of three sights ~3 h; shopping ~2-2.5 h;
+   lunch ~75 min (Italy 1-2:30 PM, Greece later, ~2 PM); dinner ~1 h 45 (Italy and France from 8 PM, Greece ~9 PM,
+   UK, Germany and Switzerland ~7 PM). In Italy and Greece drinks come before dinner (aperitivo), elsewhere after. */
+const CTRY = { Athens: "GR", Santorini: "GR", Rome: "IT", Florence: "IT", Venice: "IT", "Zürich": "CH", Berlin: "DE", Paris: "FR", Glasgow: "UK", Edinburgh: "UK", London: "UK" };
+const MEALS = { GR: { lunch: 840, dinner: 1260, aper: true }, IT: { lunch: 780, dinner: 1200, aper: true }, FR: { lunch: 750, dinner: 1200 }, CH: { lunch: 720, dinner: 1140 }, DE: { lunch: 750, dinner: 1140 }, UK: { lunch: 750, dinner: 1140 } };
+const DUR = { coffee: 45, culture: 150, see: 180, shop: 135, lunch: 75, dinner: 105, drinks: 75, trip: 540 };
 const SC_ = {
-  coffee: { k: "coffee", l: "Coffee", s: 540, e: 600, cat: "coffee" },
-  cultAM: { k: "culture", l: "Culture", s: 600, e: 780, cat: "culture", area: true },
-  cultPM: { k: "culture", l: "Culture", s: 780, e: 1020, cat: "culture", area: true },
-  food: { k: "lunch", l: "Food", s: 780, e: 840, cat: "dinner" },
-  see: { k: "day", l: "Sightsee", s: 780, e: 1020, cat: "see", area: true },
-  seeP: { k: "day", l: "Sightsee", s: 840, e: 1020, cat: "see", area: true },
-  shop: { k: "shop", l: "Shop", s: 780, e: 1020, cat: "shop", area: true },
-  shopP: { k: "shop", l: "Shop", s: 840, e: 1020, cat: "shop", area: true },
-  dinner: { k: "dinner", l: "Dinner", s: 1140, e: 1260, cat: "dinner" },
-  drinks: { k: "drinks", l: "Drinks", s: 1260, e: 1380, cat: "drinks" },
-  trip: { k: "trip", l: "Day trip", s: 540, e: 1080, cat: "trip", min: 360, area: true },
+  coffee: { k: "coffee", l: "Coffee", cat: "coffee", at: "coffee" },
+  cultAM: { k: "culture", l: "Culture", cat: "culture", area: true, at: "am" },
+  cultPM: { k: "culture", l: "Culture", cat: "culture", area: true, at: "pm" },
+  seeAM: { k: "day", l: "Sightsee", cat: "see", area: true, at: "am" },
+  seePM: { k: "day", l: "Sightsee", cat: "see", area: true, at: "pm" },
+  shopAM: { k: "shop", l: "Shop", cat: "shop", area: true, at: "am" },
+  shopPM: { k: "shop", l: "Shop", cat: "shop", area: true, at: "pm" },
+  food: { k: "lunch", l: "Food", cat: "dinner", at: "lunch" },
+  dinner: { k: "dinner", l: "Dinner", cat: "dinner", at: "dinner" },
+  drinks: { k: "drinks", l: "Drinks", cat: "drinks", at: "drinks" },
+  trip: { k: "trip", l: "Day trip", cat: "trip", area: true, at: "trip", min: 360 },
 };
 const SCENES = [
-  [SC_.coffee, SC_.see, SC_.dinner, SC_.drinks],
-  [SC_.coffee, SC_.cultAM, SC_.food, SC_.shopP, SC_.dinner],
-  [SC_.coffee, SC_.food, SC_.shopP, SC_.dinner, SC_.drinks],
-  [SC_.coffee, SC_.cultPM, SC_.dinner, SC_.drinks],
-  [SC_.coffee, SC_.cultAM, SC_.food, SC_.seeP, SC_.dinner],
-  [SC_.trip],
+  [SC_.coffee, SC_.seeAM, SC_.food, SC_.dinner, SC_.drinks],
+  [SC_.coffee, SC_.cultAM, SC_.food, SC_.shopPM, SC_.dinner],
+  [SC_.coffee, SC_.shopAM, SC_.food, SC_.seePM, SC_.dinner, SC_.drinks],
+  [SC_.coffee, SC_.food, SC_.cultPM, SC_.dinner, SC_.drinks],
+  [SC_.coffee, SC_.cultAM, SC_.food, SC_.seePM, SC_.dinner],
+  [SC_.trip, SC_.dinner],
 ];
+/* a scene laid out on this day's clock, in time order */
+const SCF = new Map();
+function sceneFor(iso, si) {
+  const key = iso + "|" + si; if (SCF.has(key)) return SCF.get(key);
+  const st = anchorFor(iso) || STAYS.find(s => s.out === iso), M = MEALS[CTRY[st ? st.city : ""] || "IT"];
+  const pmStart = M.lunch + DUR.lunch + 15;
+  let sc = SCENES[si];
+  if (EVENTS.some(b => b.on === iso && b.kind === "dinner")) sc = sc.filter(p => p.k !== "dinner");
+  const out = sc.map(p => {
+    const d = DUR[p.cat === "dinner" && p.k === "lunch" ? "lunch" : p.k === "lunch" ? "lunch" : p.cat] || 90;
+    let s;
+    if (p.at === "coffee") s = 540;
+    else if (p.at === "am") s = 600;
+    else if (p.at === "lunch") s = M.lunch;
+    else if (p.at === "pm") s = pmStart;
+    else if (p.at === "dinner") s = M.dinner;
+    else if (p.at === "drinks") s = M.aper ? M.dinner - DUR.drinks - 15 : M.dinner + DUR.dinner + 15;
+    else if (p.at === "trip") s = 540;
+    const dd = p.k === "lunch" ? DUR.lunch : p.k === "dinner" ? DUR.dinner : p.k === "drinks" ? DUR.drinks : p.k === "coffee" ? DUR.coffee : p.cat === "trip" ? DUR.trip : d;
+    return { ...p, s, e: Math.min(1380, s + dd) };
+  }).sort((a, b) => a.s - b.s);
+  SCF.set(key, out); return out;
+}
 function promptsFor(iso, free) {
   const out = [], pl = getPlan(iso);
-  SCENES.forEach((sc, si) => {
-    if (sc.some(p => p.cat === "trip") && !placesFor(iso, "trip").length) return;
-    const booked = EVENTS.filter(b => b.on === iso); if (booked.some(b => b.kind === "dinner")) sc = sc.filter(p => p.k !== "dinner"); /* no day trip without somewhere to go */
-    const got = [];
+  SCENES.forEach((_, si) => {
+    const sc = sceneFor(iso, si);
+    if (sc.some(p => p.cat === "trip") && !placesFor(iso, "trip").length) return; /* no day trip without somewhere to go */
     sc.forEach((pr, step) => free.forEach(f => {
-      const s = Math.max(Math.ceil(f.s / 60) * 60, pr.s), e = Math.min(Math.floor(f.e / 60) * 60, pr.e); if (e - s < (pr.min || 60)) return;
+      const s = Math.max(Math.ceil(f.s / 15) * 15, pr.s), e = Math.min(Math.floor(f.e / 15) * 15, pr.e); if (e - s < Math.min(pr.min || 45, pr.e - pr.s)) return;
       if (pl.some(p => p.t < e && p.t + catOf(p.c).dur > s)) return;
-      got.push({ k: "prompt", s, e, pr, tt: pr.l, sc: si, step });
+      out.push({ k: "prompt", s, e, pr, tt: pr.l, sc: si, step });
     }));
-    if (got.length) out.push(...got);
   });
   return out;
 }
