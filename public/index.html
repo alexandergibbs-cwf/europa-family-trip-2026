@@ -661,8 +661,8 @@ const CATS = [
   { k: "dinner", l: "Eat", m: s => s.cat === "restaurant", dur: 90 },
   { k: "drinks", l: "Wine", m: s => s.cat === "bar", dur: 75 },
   { k: "coffee", l: "Coffee", m: s => s.cat === "cafe", dur: 45 },
-  { k: "see", l: "Sightsee", m: s => ["attraction", "activity", "other"].includes(s.cat), dur: 75 },
-  { k: "shop", l: "Shopping", m: s => s.cat === "shop", dur: 60 },
+  { k: "see", l: "Sightsee", m: s => ["attraction", "activity", "other"].includes(s.cat) || (s.cat === "shop" && /biblioth|library/i.test(s.name)), dur: 75 },
+  { k: "shop", l: "Shopping", m: s => s.cat === "shop" && !/biblioth|library/i.test(s.name), dur: 60 },
   { k: "trip", l: "Day trip", m: () => true, dur: 300, far: true },
 ];
 const catOf = k => CATS.find(c => c.k === k);
@@ -672,7 +672,7 @@ function placesFor(iso, ck) {
   const a = anchorFor(iso); if (!a) return [];
   const c = catOf(ck);
   return SAVES.filter(s => s.lat != null && c.m(s)).map(s => ({ s, k: km(a.lat, a.lng, s.lat, s.lng) }))
-    .filter(x => c.far ? x.s.city !== a.city && x.k >= 8 && x.k < 200 : (x.s.city === a.city ? x.k < 40 : x.k < 8))
+    .filter(x => c.far ? x.s.city !== a.city && x.k >= 8 && x.k < 130 : (x.s.city === a.city ? x.k < 40 : x.k < 8))
     .sort((x, y) => (x.k - y.k) - ((x.s.rating || 4.3) - 4.3) * 1.2);
 }
 const planKey = iso => "plan:" + iso;
@@ -921,7 +921,7 @@ function renderDayContent(iso) {
       return;
     }
     if (ev.k === "prompt") {
-      html += `<button class="ev prompt c-${ev.pr.k}${short ? " short" : ""} press" data-prompt="${ev.pr.cat}" data-sc="${ev.sc}" data-step="${ev.step}" data-i="${i}" data-alts="${esc(ideaAlts(iso, ev.pr).join("|"))}" style="top:${top + 12}px;height:${h}px"><span class="tt">${esc(ev.tt)}</span><span class="pk"></span></button>`;
+      html += `<button class="ev prompt c-${ev.pr.k}${short ? " short" : ""} press" data-prompt="${ev.pr.cat}" data-sc="${ev.sc}" data-step="${ev.step}" data-i="${i}" data-alts="${esc(sceneAlts(iso, ev.sc, ev.step).join("|"))}" style="top:${top + 12}px;height:${h}px"><span class="tt">${esc(ev.tt)}</span><span class="pk"></span></button>`;
       return;
     }
     if (ev.k === "free" || ev.k === "wait") {
@@ -1030,7 +1030,7 @@ function promptTick() {
   const scs = [...new Set(all.map(el => +el.dataset.sc))].sort((x, y) => x - y);
   scI = (scI + 1) % scs.length;
   const els = all.filter(el => +el.dataset.sc === scs[scI]).sort((x, y) => x.dataset.step - y.dataset.step);
-  els.forEach(el => { const alts = (el.dataset.alts || "").split("|").filter(Boolean), n = +(el.dataset.n || el.dataset.sc || 0); el.querySelector(".pk").textContent = alts.length ? alts[n % alts.length] : ""; el.dataset.n = n + 1; });
+  els.forEach(el => { const alts = (el.dataset.alts || "").split("|"), n = +(el.dataset.n || el.dataset.sc || 0); el.querySelector(".pk").textContent = alts.length ? alts[n % alts.length] : ""; el.dataset.n = n + 1; });
   let k = 0;
   const next = () => {
     if (k < els.length) { els[k++].classList.add("idea"); pT = setTimeout(next, 1300); return; }
@@ -1224,6 +1224,63 @@ function slotsFor(iso, D, all) {
   return [];
 }
 /* a few nearby saved places for a suggestion; lunch and dinner start at different picks so they don't repeat */
+/* ---------- day plans an organiser would sketch: one area per day, stops that walk into each other ----------
+   main block (sights / shops / cafés) is a small cluster around a seed; lunch near it; coffee on the way from the hotel;
+   dinner between the area and the hotel; drinks near dinner. Each variant picks a different seed so the plans differ,
+   and each night of a stay starts further down the list so days in the same city don't repeat. */
+const SCN_CACHE = new Map();
+const dk = (a, b) => km(a.lat, a.lng, b.lat, b.lng);
+const walk = k => shortDist(k);
+function scenePlans(iso, si) {
+  const key = iso + "|" + si; if (SCN_CACHE.has(key)) return SCN_CACHE.get(key);
+  const home = anchorFor(iso), steps = SCENES[si], out = [];
+  if (!home) { SCN_CACHE.set(key, out); return out; }
+  const pool = c => placesFor(iso, c).map(x => x.s);
+  const st = stayOn(iso), night = st ? Math.round((Date.parse(iso) - Date.parse(st.in)) / 864e5) : 0;
+  const mainStep = steps.find(p => ["see", "shop", "trip"].includes(p.cat)) || steps.find(p => p.k === "cafes");
+  const seeds = mainStep ? pool(mainStep.cat).slice(0, 8) : [];
+  const V = Math.max(1, Math.min(4, seeds.length));
+  for (let v = 0; v < V; v++) {
+    const used = new Set(), txt = [];
+    /* best few under the limit, rotating with the variant/night so repeats are spread out */
+    const take = (list, score, max = 99, rot = 0) => { const cs = list.filter(s => !used.has(s.id)).map(s => [s, score(s)]).filter(x => x[1] < max).sort((a, b) => a[1] - b[1]).slice(0, 3); const c = cs.length ? cs[rot % cs.length] : null; if (c) used.add(c[0].id); return c ? c[0] : null; };
+    const R = v + night;
+    const seed = seeds.length ? seeds[(v + night * 2) % seeds.length] : null;
+    let centre = seed || home;
+    /* the main cluster first, so everything else can lean towards it */
+    const main = {};
+    if (mainStep && seed) {
+      if (mainStep.cat === "trip") { main.list = [seed]; used.add(seed.id); }
+      else {
+        used.add(seed.id); const more = [];
+        const n = mainStep.k === "cafes" ? 2 : 2;
+        for (let j = 0; j < n; j++) { const nx = take(pool(mainStep.cat), s => dk(s, centre), 1.3); if (nx) more.push(nx); }
+        main.list = [seed, ...more];
+      }
+    }
+    let prev = home;
+    steps.forEach(pr => {
+      let names = [], from = prev, to = null;
+      if (pr === mainStep && main.list) { names = main.list.map(s => s.name); to = main.list[main.list.length - 1]; from = main.list[0]; if (pr.cat === "trip") { txt.push(`${seed.city !== "Other" ? seed.city + " · " : ""}${seed.name}`); prev = home; return; } }
+      else if (pr.k === "coffee" || pr.k === "cafes") {
+        /* on the way from the hotel to the day's area: small detour, else close to home, else close to the area */
+        const cafes = pool("coffee"), detour = s => dk(home, s) + dk(s, centre) - dk(home, centre);
+        const c = take(cafes, detour, 1.2, R) || take(cafes, s => dk(home, s), 1.5, R) || take(cafes, s => dk(s, centre), 1, R);
+        if (c) { names = [c.name]; to = c; if (pr.k === "cafes") { for (let j = 0; j < 2; j++) { const nx = take(cafes, s => dk(s, to), 1.2); if (nx) { names.push(nx.name); to = nx; } } } }
+      }
+      else if (pr.k === "lunch") { const c = take(pool("dinner"), s => dk(s, centre), 1.8, R) || take(pool("coffee"), s => dk(s, centre), 1.2, R); if (c) { names = [c.name]; to = c; } }
+      else if (pr.k === "dinner") { const c = take(pool("dinner"), s => dk(s, centre) * 0.6 + dk(s, home), 5, R); if (c) { names = [c.name]; to = c; } else if (prev !== home) { txt.push(`Somewhere near ${prev.name}`); return; } }
+      else if (pr.k === "drinks") { const c = take(pool("drinks"), s => dk(s, prev), 2, R); if (c) { names = [c.name]; to = c; } else if (prev !== home) { txt.push(`A bar near ${prev.name}`); return; } }
+      if (!names.length) { const near = main.list ? main.list[0] : null; txt.push(near && (pr.k === "coffee" || pr.k === "cafes") ? `A café near ${near.name}` : near && pr.k === "lunch" ? `Somewhere near ${near.name}` : ""); return; }
+      const first = pr === mainStep && main.list ? main.list[0] : to;
+      txt.push(`${names.join(" → ")} · ${walk(dk(prev, first))}${prev === home ? " from the hotel" : ""}`);
+      prev = to;
+    });
+    out.push(txt);
+  }
+  SCN_CACHE.set(key, out); return out;
+}
+function sceneAlts(iso, si, step) { return scenePlans(iso, si).map(v => v[step] || ""); }
 function ideaAlts(iso, pr) {
   const list = placesFor(iso, pr.cat).slice(0, 6); if (!list.length) return [];
   const off = pr.k === "dinner" ? 3 : pr.k === "cafes" ? 2 : 0, out = [];
@@ -1276,6 +1333,7 @@ const SCENES = [
 function promptsFor(iso, free) {
   const out = [], pl = getPlan(iso);
   SCENES.forEach((sc, si) => {
+    if (sc.some(p => p.cat === "trip") && !placesFor(iso, "trip").length) return; /* no day trip without somewhere to go */
     const got = [];
     sc.forEach((pr, step) => free.forEach(f => {
       const s = Math.max(Math.ceil(f.s / 60) * 60, pr.s), e = Math.min(Math.floor(f.e / 60) * 60, pr.e); if (e - s < (pr.min || 60)) return;
