@@ -940,10 +940,10 @@ function wStep() {
   if (wTarget != null) {
     /* glide to target: timed, no overshoot. Eases out of any carried speed, eases in and out from rest */
     const now = performance.now();
-    if (!wTw || wTw.to !== wTarget) { const dist = Math.abs(wTarget - wPos); wTw = { from: wPos, to: wTarget, t0: now, dur: Math.min(1500, 760 + 380 * Math.sqrt(dist)), moving: Math.abs(wVel) > 0.02 }; wVel = 0; }
-    const u = Math.min(1, (now - wTw.t0) / wTw.dur), e = wTw.moving ? 1 - Math.pow(1 - u, 3) : (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
-    wPos = wTw.from + (wTw.to - wTw.from) * e;
-    if (u >= 1) { wPos = wTarget; wTarget = null; wTw = null; wRender(); wSettle(); return; }
+    if (!wTw || wTw.to !== wTarget) { wTw = springTo(wTarget, wVel, 7.5); wVel = 0; }
+    const t = (now - wTw.t0) / 1000, x = (wTw.x0 + (wTw.v0 + wTw.w * wTw.x0) * t) * Math.exp(-wTw.w * t);
+    wPos = wTw.to + x;
+    if (t > 0.15 && Math.abs(x) < 0.0015) { wPos = wTarget; wTarget = null; wTw = null; wRender(); wSettle(); return; }
     wRender(); wRaf = requestAnimationFrame(wStep); return;
   }
   /* free deceleration */
@@ -951,6 +951,16 @@ function wStep() {
   if (wPos < lo) { wPos = lo + (wPos - lo) * 0.4; wVel = 0; } if (wPos > hi) { wPos = hi + (wPos - hi) * 0.4; wVel = 0; }
   if (Math.abs(wVel) < 0.012) { wTarget = Math.round(Math.max(lo, Math.min(hi, wPos))); }
   wRender(); wRaf = requestAnimationFrame(wStep);
+}
+/* every landing is the same critically damped spring: it starts at the finger's speed, eases in and settles on the day
+   (a hard flick gets a hint of overshoot, like an iOS picker). v is days per 16 ms; w is how quickly it settles. */
+function springTo(target, v, w) {
+  const x0 = wPos - target, lim = w * Math.max(Math.abs(x0), 0.15) * 1.3;
+  const v0 = Math.max(-lim, Math.min(lim, (v || 0) / 16 * 1000));
+  return { to: target, t0: performance.now(), x0, v0, w };
+}
+function settleTo(target, v, w = 8.5) {
+  target = Math.max(0, Math.min(wN(), target)); wVel = 0; wTarget = target; wTw = springTo(target, v, w); wKick();
 }
 function wKick() { if (!wRaf) wRaf = requestAnimationFrame(wStep); }
 function centreDay(iso, smooth) {
@@ -976,9 +986,8 @@ function wEnd(e) {
   if (!wDrag) return; const d = wDrag; wDrag = null;
   if (!d.moved) { const el = document.elementFromPoint(e.clientX, e.clientY); const b = el && el.closest && el.closest(".wd"); if (b) { const idx = ALLDAYS.indexOf(b.dataset.d); if (idx >= 0) { centreDay(ALLDAYS[idx], true); return; } } wTarget = Math.round(wPos); wKick(); return; }
   if (performance.now() - d.lt > 80) wVel = 0;
-  wVel = Math.max(-1.2, Math.min(1.2, wVel));
-  if (Math.abs(wVel) < 0.012) wTarget = Math.round(Math.max(0, Math.min(wN(), wPos)));
-  wKick();
+  const v = Math.max(-0.6, Math.min(0.6, wVel));
+  settleTo(Math.round(wPos + v / 16 * 170), v, 9);
 }
 weekEl.addEventListener("pointerup", wEnd); weekEl.addEventListener("pointercancel", wEnd);
 function renderHeader(pop) {
@@ -1250,10 +1259,8 @@ function endDrag() {
   const stale = performance.now() - p.lt > 80, v = stale ? 0 : (p.v || 0);
   if (MODE === "multi") { wVel = Math.max(-1.2, Math.min(1.2, v)); if (Math.abs(wVel) < 0.02) wTarget = Math.round(Math.max(0, Math.min(wN(), wPos))); }
   else {
-    const go = Math.abs(p.dx) > pageW() * 0.28 || Math.abs(v) > 0.12; const dir = (go ? (p.dx < 0 ? 1 : -1) : 0); wVel = 0; wTarget = Math.max(0, Math.min(wN(), Math.round(p.pos0) + dir));
-    const rem = Math.abs(wTarget - wPos), sp = Math.abs(v) / 16, toward = Math.sign(v) === Math.sign(wTarget - wPos);
-    const dur = Math.max(240, Math.min(420, toward && sp > 0.0005 ? 3 * rem / sp : 380));
-    wTw = { from: wPos, to: wTarget, t0: performance.now(), dur, moving: true };
+    const go = Math.abs(p.dx) > pageW() * 0.28 || Math.abs(v) > 0.12; const dir = (go ? (p.dx < 0 ? 1 : -1) : 0);
+    settleTo(Math.round(p.pos0) + dir, v, 8); return;
   }
   wKick();
 }
