@@ -198,7 +198,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev.plan { --c: var(--ink); background: var(--card); color: var(--ink); left: 34%; z-index: 2; border: 1.5px dashed color-mix(in srgb, var(--sub) 70%, transparent); box-shadow: 0 3px 10px rgba(0,0,0,.10); }
 .ev.plan::before { display: none; }
 .ev.plan .tt { font-size: 13.5px; }
-.cats { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px 12px; padding: 0 16px; }
+.cats { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px 12px; padding: 6px 16px 8px; position: sticky; top: -8px; background: var(--panel); z-index: 2; }
 .cats::-webkit-scrollbar { display: none; }
 .cat { flex: none; border: 0; height: 36px; padding: 0 14px; border-radius: 980px; background: var(--card); font-size: 14px; font-weight: 600; color: var(--ink); cursor: pointer; transition: transform 480ms var(--spring-bouncy), background-color 160ms ease, color 160ms ease; }
 .cat:active { transform: scale(0.93); transition-duration: 100ms; }
@@ -436,12 +436,12 @@ const km = (a, b, c, d) => { const R = 6371, p = Math.PI / 180, x = Math.sin((c 
 const tripTxt = k => { const m = Math.round(20 + k / 60 * 60), h = Math.floor(m / 60); return `${Math.round(k)} km · ~${h ? `${h}h ${pad(m % 60)}m` : `${m} min`} by train each way`; };
 const distTxt = k => k < 0.95 ? `${Math.round(k * 1000 / 50) * 50} m · ${Math.max(2, Math.round(k * 1.25 / 4.8 * 60))} min walk` : k < 3 ? `${k.toFixed(1)} km · ${Math.round(k * 1.25 / 4.8 * 60)} min walk` : k < 25 ? `${k.toFixed(1)} km · ~${Math.round(8 + k * 3)} min by metro or taxi` : `${Math.round(k)} km · day trip`;
 const CATS = [
-  { k: "coffee", l: "☕ Coffee", m: s => s.cat === "cafe", dur: 45 },
-  { k: "dinner", l: "🍝 Food", m: s => s.cat === "restaurant", dur: 90 },
-  { k: "drinks", l: "🍸 Drinks", m: s => s.cat === "bar", dur: 75 },
-  { k: "shop", l: "🛍 Shopping", m: s => s.cat === "shop", dur: 60 },
-  { k: "see", l: "🏛 Sights", m: s => ["attraction", "activity", "other"].includes(s.cat), dur: 75 },
-  { k: "trip", l: "🚆 Day trip", m: () => true, dur: 300, far: true },
+  { k: "dinner", l: "Eat", m: s => s.cat === "restaurant", dur: 90 },
+  { k: "drinks", l: "Wine", m: s => s.cat === "bar", dur: 75 },
+  { k: "coffee", l: "Coffee", m: s => s.cat === "cafe", dur: 45 },
+  { k: "see", l: "Sightsee", m: s => ["attraction", "activity", "other"].includes(s.cat), dur: 75 },
+  { k: "shop", l: "Shopping", m: s => s.cat === "shop", dur: 60 },
+  { k: "trip", l: "Day trip", m: () => true, dur: 300, far: true },
 ];
 const catOf = k => CATS.find(c => c.k === k);
 const SAVE_BY = Object.fromEntries(SAVES.map(s => [s.id, s]));
@@ -742,20 +742,20 @@ let REFRESH = null;
 let PL = { iso: null, cat: "coffee", block: null, n: 12 };
 function plannerSheet() {
   const iso = PL.iso, a = anchorFor(iso), b = PL.block;
-  const title = b ? `${b.k === "wait" ? "Free, with bags" : "Free"} · ${dur(b.e - b.s)}` : "Ideas";
-  const sub = b ? `${t12(b.s)} – ${t12(b.e)}${a ? ` · distances from ${esc(a.hotel)}` : ""}` : (a ? `Distances from ${esc(a.hotel)}` : "");
+  const title = b ? `Free · ${dur(b.e - b.s)}` : `Things to do in ${esc(cityOn(iso))}`;
+  const sub = b ? `${t12(b.s)} – ${t12(b.e)}${b.k === "wait" ? ", with your bags" : ""}${a ? `. From ${esc(a.hotel)}` : ""}` : (a ? `Distances from ${esc(a.hotel)}` : "");
   if (!a || !SAVES.some(s => s.city === cityOn(iso))) {
     const c = cityOn(iso), q = a ? a.hotel + " " + c : c;
     return head(title, sub) + `<div class="ig"><p class="empty-p">You haven’t saved anywhere in ${esc(c)} on mio yet. Search nearby instead:</p>${["coffee", "restaurants", "bars", "shops", "things to do"].map(w => `<a class="place" href="${maps(w + " near " + q)}" target="_blank" rel="noopener"><span class="a">${w.charAt(0).toUpperCase() + w.slice(1)} near ${esc(a ? a.hotel : c)}</span><span class="m" style="color:var(--blue)">Maps ›</span></a>`).join("")}</div>`;
   }
   const counts = Object.fromEntries(CATS.map(c => [c.k, placesFor(iso, c.k).length]));
   const list = placesFor(iso, PL.cat), plan = getPlan(iso);
-  const cats = `<div class="cats">${CATS.filter(c => counts[c.k]).map(c => `<button class="cat" data-cat="${c.k}" aria-pressed="${c.k === PL.cat}">${c.l}<small>${counts[c.k]}</small></button>`).join("")}</div>`;
+  const cats = `<div class="cats">${CATS.filter(c => counts[c.k]).map(c => `<button class="cat" data-cat="${c.k}" aria-pressed="${c.k === PL.cat}">${c.l}</button>`).join("")}</div>`;
   const rows = list.slice(0, PL.n).map(({ s, k }) => {
     const on = plan.find(p => p.id === s.id);
     return `<div class="place"><span><span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${PL.cat === "trip" ? tripTxt(k) : distTxt(k)}</b></span><span class="links"><a href="${maps(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video${s.creator ? " · " + esc(s.creator) : ""}</a>` : ""}</span></span><button class="addb${on ? " on" : ""}" data-add="${s.id}">${on ? `✓ ${t12(on.t)}` : "Add"}</button></div>`;
   }).join("");
-  return head(title, sub) + cats + `<div class="ig">${rows || `<p class="empty-p">Nothing saved in this category here.</p>`}${list.length > PL.n ? `<button class="more-btn" data-more>Show ${list.length - PL.n} more</button>` : ""}</div><p class="nt">From your mio saves, nearest first. Added stops show as dotted blocks on the timetable and are saved on this phone.</p>`;
+  return head(title, sub) + cats + `<div class="ig">${rows || `<p class="empty-p">Nothing saved in this category here.</p>`}${list.length > PL.n ? `<button class="more-btn" data-more>Show ${list.length - PL.n} more</button>` : ""}</div><p class="nt">From your mio saves, nearest to the hotel first. Add puts it on the timetable as a dotted block, saved on this phone.</p>`;
 }
 function refreshAll() { if (REFRESH) REFRESH(); content.innerHTML = renderDayContent(view); renderHeader(false); }
 function openPlanner(iso, cat, block) {
@@ -853,14 +853,14 @@ document.addEventListener("click", e => {
   const mk = t.closest("[data-mark]"); if (mk) { haptic(); return openSheet(staySheet(CUR.marks[+mk.dataset.mark].stay)); }
   const ev = t.closest("[data-i]"); if (ev) { haptic(); const i = ITEMS[+ev.dataset.i]; if (i.k === "plan") return openSheet(planItemSheet(i));
       if (i.k === "slot") { SL = i; REFRESH = () => { const st = sheet.scrollTop; document.getElementById("sheet-body").innerHTML = slotSheet(); sheet.scrollTop = st; }; return openSheet(slotSheet()); }
-      if (i.k === "free" || i.k === "wait") { FR = i; PL = { iso: view, cat: "see", block: { s: i.s, e: i.e, k: i.k }, n: 12 }; REFRESH = () => { const st = sheet.scrollTop; document.getElementById("sheet-body").innerHTML = freeSheet2(); sheet.scrollTop = st; }; return openSheet(freeSheet2()); } return openSheet(i.m ? moveSheet(i.m) : staySheet(i.stay)); }
+      if (i.k === "free" || i.k === "wait") { return openPlanner(view, PL.cat && PL.cat !== "trip" ? PL.cat : "dinner", i.x); } return openSheet(i.m ? moveSheet(i.m) : staySheet(i.stay)); }
   const st = t.closest("[data-stay]"); if (st) { haptic(); return openSheet(staySheet(STAYS[+st.dataset.stay])); }
   const gt = t.closest("[data-goto]"); if (gt) { closeSheet(); return selectDay(gt.dataset.goto); }
   const wd = t.closest(".wd"); if (wd) return selectDay(wd.dataset.d, 0, false);
   if (t.closest("#cityPill")) { haptic(); const s = stayOn(view); return openSheet(s ? staySheet(s) : tripSheet()); }
   if (t.closest("#tripBtn") || t.closest("[data-open-trip]")) { haptic(); return openSheet(tripSheet()); }
   if (t.closest("#wxPill")) { haptic(); return openSheet(wxSheet()); }
-  if (t.closest("#ideasBtn")) { haptic(); return openPlanner(view, "see", null); }
+  if (t.closest("#ideasBtn")) { haptic(); return openPlanner(view, PL.cat && PL.cat !== "trip" ? PL.cat : "dinner", null); }
   if (t.closest("#tasksBtn")) { haptic(); return openSheet(tasksSheet()); }
   if (t.closest("#todayBtn")) return selectDay(today);
 });
