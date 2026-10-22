@@ -104,7 +104,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev.free::before, .ev.free .tt, .ev.free .tm, .ev.free .hint { display: none; }
 .ev.wait { --c: var(--e-wait); background: transparent; color: var(--e-wait-ink); border: 1.5px dashed color-mix(in srgb, var(--e-wait) 55%, transparent); }
 .ev.wait::before, .ev.wait .hint { display: none; }
-.ev.wait .tt { font-size: 14px; }
+.ev.wait .tt { font-size: 13px; } .ev.wait .tm { display: none; } .ev.wait { flex-direction: row; align-items: center; padding-block: 0; }
 .ev.mark { --c: var(--e-mark); background: var(--e-mark-bg); color: var(--e-mark-ink); left: 42%; z-index: 2; box-shadow: 0 0 0 1.5px var(--bg); }
 .ev.done { opacity: .45; }
 .ev .cd { align-self: flex-start; font-size: 11px; font-weight: 700; background: #ffd60a; color: #000; border-radius: 980px; padding: 1px 7px; margin-top: 3px; }
@@ -388,7 +388,8 @@ function buildDay(iso) {
       if (co < leave) {
         if (co > cur) segs.push({ s: cur, e: co, k: "free", title: "Free", sub: `Pack up and check out by ${s12(out.co)}.` });
         marks.push({ t: co, kind: "out", stay: out });
-        segs.push({ s: co, e: leave, k: "wait", title: "Drop off suitcases at the hotel", sub: out.store === false ? "No storage listed here, ask the host." : "Collect them before you leave.", stay: out, morning: true });
+        segs.push({ s: co, e: Math.min(co + 30, leave), k: "wait", title: "Drop off suitcases at the hotel", sub: "", stay: out, morning: true });
+        if (leave - (co + 30) >= 30) segs.push({ s: co + 30, e: leave, k: "free", title: "Free", sub: `Collect the bags and leave by ${t12(leave)}` });
       } else {
         if (leave > cur) segs.push({ s: cur, e: leave, k: "free", title: "Free", sub: leave < 600 ? "Early start. Pack the night before." : "Pack up first." });
         marks.push({ t: leave, kind: "out", stay: out });
@@ -409,7 +410,8 @@ function buildDay(iso) {
       segs.push({ s: prev, e: at, k: "get", title: "To the hotel", sub: inn.hotel, stay: inn });
       const ci = mins(inn.ci);
       if (ci - at >= 20) {
-        segs.push({ s: at, e: ci, k: "wait", title: "Free, with bags", sub: inn.store ? "Drop bags at the hotel, then explore." : "Room isn’t ready yet.", stay: inn });
+        segs.push({ s: at, e: at + 30, k: "wait", title: "Drop off suitcases at the hotel", sub: "", stay: inn });
+        if (ci - (at + 30) >= 30) segs.push({ s: at + 30, e: ci, k: "free", title: "Free", sub: `Until check-in at ${t12(ci)}` });
         marks.push({ t: ci, kind: "in", stay: inn });
         segs.push({ s: ci, e: Math.max(DE, ci + 60), k: "free", title: "Free", sub: `Evening in ${inn.city}` });
         freeFrom = at; roomsAt = ci;
@@ -473,7 +475,7 @@ function answer(iso) {
   if (!D.deps.length && D.s) parts.push(`<span class="g">Free all day</span>`);
   else {
     if (D.leaveT != null) parts.push(`Leave ${t12(D.leaveT)}`);
-    const after = free.filter(x => x.s >= (D.leaveT ?? 0) && D.deps.length && x.s >= mins(D.deps[D.deps.length - 1].a || "00:00")).sort((a, b) => a.s - b.s)[0];
+    const after = D.segs.filter(x => x.k === "free" && D.deps.length && x.s >= mins(D.deps[D.deps.length - 1].a || "00:00")).sort((a, b) => a.s - b.s)[0];
     if (after) parts.push(`<span class="g">Free from ${t12(after.s)}</span>`);
     const ci = D.marks.find(m => m.kind === "in"); if (ci) parts.push(`Check in ${t12(ci.t)}`);
     if (!D.deps.length && !D.s) parts.push("In the air");
@@ -593,7 +595,7 @@ function renderDayContent(iso) {
     }
     if (ev.k === "free" || ev.k === "wait") {
       const hint = ""; const _unused = ev.k === "wait" ? (ev.x.stay && ev.x.stay.store ? "Hotel can hold your bags" : ev.x.stay && ev.x.stay.store === false ? "No luggage storage listed" : "") : hasSaves(iso) && h >= 60 ? "Sightsee or shop nearby ›" : h >= 60 ? "Ideas nearby ›" : "";
-      html += `<div class="ev ${ev.k}${short ? " short" : ""}${ev.done ? " done" : ""}" role="button" tabindex="0" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${ev.k === "wait" ? "Drop off suitcases at the hotel" : ""}</span><span class="tm">${ev.k === "wait" ? (ev.x.stay && ev.x.stay.store === false ? "No storage listed here, ask the host" : (ev.x.morning ? `Collect them before leaving at ${t12(ev.e)}` : `Then you’re free until check-in at ${t12(ev.e)}`)) : ""}</span></div>`;
+      html += `<div class="ev ${ev.k}${short ? " short" : ""}${ev.done ? " done" : ""}" role="button" tabindex="0" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${ev.k === "wait" ? (ev.x.stay && ev.x.stay.store === false ? "Drop off suitcases (ask host, no storage listed)" : "Drop off suitcases at the hotel") : ""}</span><span class="tm"></span></div>`;
       return;
     }
     const time = ev.k === "mark" ? t12(ev.s) : ev.x && ev.x.overnight ? `until ${t12(ev.e)}` : `${t12(ev.s)} – ${t12(ev.e)}`;
@@ -736,7 +738,7 @@ const shortDist = k => k == null ? "" : k < 2.5 ? `${Math.max(2, Math.round(k * 
 function freePieces(seg, slots) {
   let pieces = [[seg.s, seg.e]];
   slots.filter(o => o.seg === seg).forEach(o => { pieces = pieces.flatMap(([a, b]) => o.e <= a || o.s >= b ? [[a, b]] : [[a, o.s], [o.e, b]].filter(([x, y]) => y - x > 0)); });
-  return pieces.filter(([a, b]) => b - a >= 45);
+  return pieces.filter(([a, b]) => b - a >= (seg.k === "wait" ? 15 : 45));
 }
 let REFRESH = null;
 let PL = { iso: null, cat: "coffee", block: null, n: 12 };
