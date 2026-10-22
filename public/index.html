@@ -406,6 +406,8 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev.c-day { --c: #34c759; }
 .ev.c-shop { --c: #30b0c7; }
 .ev.c-trip { --c: #af52de; }
+.ev.c-cafes { --c: #a2845e; }
+.ev.c-drinks { --c: #5856d6; }
 .ev.c-dinner, .ev.slot.dinner { --c: #ff2d55; }
 .ev.slot.drinks { --c: #5856d6; }
 /* suggestions stay lighter than anything booked */
@@ -1224,7 +1226,7 @@ function slotsFor(iso, D, all) {
 /* a few nearby saved places for a suggestion; lunch and dinner start at different picks so they don't repeat */
 function ideaAlts(iso, pr) {
   const list = placesFor(iso, pr.cat).slice(0, 6); if (!list.length) return [];
-  const off = pr.k === "dinner" ? 3 : 0, out = [];
+  const off = pr.k === "dinner" ? 3 : pr.k === "cafes" ? 2 : 0, out = [];
   for (let j = 0; j < list.length; j++) { const x = list[(j + off) % list.length]; out.push(`${x.s.name}${x.k != null ? " · " + shortDist(x.k) : ""}`); }
   return out;
 }
@@ -1252,10 +1254,24 @@ const PROMPTS = [
   { k: "dinner", l: "Dinner", s: 1140, e: 1260, cat: "dinner" },
 ];
 /* ways the day could go; each builds up block by block, then gives way to the next */
+const SC_ = {
+  coffee: { k: "coffee", l: "Coffee", s: 540, e: 600, cat: "coffee" },
+  cafes: { k: "cafes", l: "Coffee culture", s: 540, e: 720, cat: "coffee" },
+  food: { k: "lunch", l: "Food", s: 780, e: 840, cat: "dinner" },
+  see: { k: "day", l: "Sightsee", s: 780, e: 1020, cat: "see" },
+  seeP: { k: "day", l: "Sightsee", s: 840, e: 1020, cat: "see" },
+  shop: { k: "shop", l: "Shop", s: 780, e: 1020, cat: "shop" },
+  shopP: { k: "shop", l: "Shop", s: 840, e: 1020, cat: "shop" },
+  dinner: { k: "dinner", l: "Dinner", s: 1140, e: 1260, cat: "dinner" },
+  drinks: { k: "drinks", l: "Drinks", s: 1260, e: 1380, cat: "drinks" },
+  trip: { k: "trip", l: "Day trip", s: 540, e: 1080, cat: "trip", min: 360 },
+};
 const SCENES = [
-  [{ k: "coffee", l: "Coffee", s: 540, e: 600, cat: "coffee" }, { k: "day", l: "Sightsee", s: 780, e: 1020, cat: "see" }, { k: "dinner", l: "Dinner", s: 1140, e: 1260, cat: "dinner" }],
-  [{ k: "coffee", l: "Coffee", s: 540, e: 600, cat: "coffee" }, { k: "shop", l: "Shop", s: 780, e: 1020, cat: "shop" }, { k: "dinner", l: "Dinner", s: 1140, e: 1260, cat: "dinner" }],
-  [{ k: "trip", l: "Day trip", s: 540, e: 1080, cat: "trip", min: 360 }],
+  [SC_.coffee, SC_.see, SC_.dinner, SC_.drinks],
+  [SC_.cafes, SC_.shop, SC_.dinner],
+  [SC_.coffee, SC_.food, SC_.shopP, SC_.dinner, SC_.drinks],
+  [SC_.cafes, SC_.food, SC_.seeP, SC_.dinner],
+  [SC_.trip],
 ];
 function promptsFor(iso, free) {
   const out = [], pl = getPlan(iso);
