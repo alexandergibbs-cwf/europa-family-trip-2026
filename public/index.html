@@ -405,7 +405,8 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev.c-lunch { --c: #ff9500; }
 .ev.c-day { --c: #34c759; }
 .ev.c-shop { --c: #30b0c7; }
-.ev.c-trip { --c: #d4a300; }
+.ev.c-trip { --c: #00c7be; }
+.ev.pack, .mev.pack { --c: #d4a300; }
 .ev.c-culture { --c: #af52de; }
 .ev.booked, .mev.booked { --c: #ff2d55; }
 .ev.c-cafes { --c: #a2845e; }
@@ -652,11 +653,14 @@ function buildDay(iso) {
       }
     } else if (last.aDate === iso && !inn && prev < DE) { segs.push({ s: prev, e: DE, k: "free", title: "Home", sub: "Welcome back" }); freeFrom = prev; }
   } else if (s) segs.push({ s: cur, e: DE, k: "free", title: "Free day", sub: `Nothing booked in ${s.city}` });
-  EVENTS.filter(b => b.on === iso).forEach(b => {
-    const hm = x => +x.slice(0, 2) * 60 + +x.slice(3, 5), s = hm(b.s), e = hm(b.e), keep = [];
-    segs.forEach(x => { if ((x.k === "free" || x.k === "wait") && x.s < e && x.e > s) { if (x.s < s) keep.push({ ...x, e: s }); if (x.e > e) keep.push({ ...x, s: e }); } else keep.push(x); });
-    segs.length = 0; segs.push(...keep, { s, e, k: "booked", b }); segs.sort((a, c) => a.s - c.s);
-  });
+  /* drop a fixed block into free time */
+  const carve = (s, e, obj) => { const keep = []; segs.forEach(x => { if ((x.k === "free" || x.k === "wait") && x.s < e && x.e > s) { if (x.s < s) keep.push({ ...x, e: s }); if (x.e > e) keep.push({ ...x, s: e }); } else keep.push(x); }); segs.length = 0; segs.push(...keep, { s, e, ...obj }); segs.sort((a, c) => a.s - c.s); };
+  EVENTS.filter(b => b.on === iso).forEach(b => { const hm = x => +x.slice(0, 2) * 60 + +x.slice(3, 5); carve(hm(b.s), hm(b.e), { k: "booked", b }); });
+  /* packing: 45 min before heading off, or the night before when the morning is early */
+  const goSeg = segs.find(x => x.k === "get" && (x.dep || x.coOnly));
+  if (out && goSeg && goSeg.s >= 600) carve(goSeg.s - 45, goSeg.s, { k: "pack", stay: out, early: false });
+  const tmr = addDays(iso, 1), tOut = STAYS.find(x => x.out === tmr), tDep = MOVES.filter(m => m.dep[0] === tmr).sort((a, b) => a.depTs - b.depTs)[0];
+  if (tOut && tDep) { const tLeave = Math.min(mins(tOut.co), mins(tDep.leave || tDep.d)); if (tLeave < 600) carve(1260, 1305, { k: "pack", stay: tOut, early: true, tLeave }); }
   const lo = Math.floor(Math.min(DS, ...segs.map(x => x.s)) / 60) * 60;
   const hi = Math.min(1440, Math.ceil(Math.max(DE, ...segs.map(x => x.e)) / 60) * 60);
   return { segs, marks, lo, hi, out, inn, s, deps, leaveT, freeFrom, roomsAt };
@@ -686,8 +690,8 @@ const CATS = [
 const catOf = k => CATS.find(c => c.k === k);
 const SAVE_BY = Object.fromEntries(SAVES.map(s => [s.id, s]));
 function anchorFor(iso) { const s = stayOn(iso) || (iso === "2026-11-19" ? STAYS[11] : null); return s && s.lat != null ? s : null; }
-function placesFor(iso, ck) {
-  const a = anchorFor(iso); if (!a) return [];
+function placesFor(iso, ck, stay) {
+  const a = stay || anchorFor(iso); if (!a) return [];
   const c = catOf(ck);
   return SAVES.filter(s => s.lat != null && c.m(s)).map(s => ({ s, k: km(a.lat, a.lng, s.lat, s.lng) }))
     .filter(x => c.far ? x.s.city !== a.city && x.k >= 8 && x.k < 130 : (x.s.city === a.city ? x.k < 40 : x.k < 8))
@@ -758,7 +762,13 @@ function wxFor(iso) {
   if (lv) return { c, cond: lv[0], e: WXE2(lv[0]), hi: lv[1], lo: lv[2], rain: lv[3], prob: lv[4], live: true };
   return f ? { c, cond: f[0], e: "", hi: f[1], lo: f[2] != null ? f[2] : ty[1], loEst: f[2] == null, rain: f[3] } : { c, cond: "Typical for the season", e: "", hi: ty[0], lo: ty[1], typical: true };
 }
-function cityName(iso) { const s = stayOn(iso); return iso === START ? "Perth" : iso === "2026-11-19" ? "London" : iso === END ? "Perth" : s ? s.city : cityOn(iso); }
+function cityName(iso) {
+  const s = stayOn(iso), o = STAYS.find(x => x.out === iso);
+  if (iso === "2026-11-19") return "London → Perth";
+  if (iso === START || iso === END) return "Perth";
+  if (o && s && o.city !== s.city) return `${o.city} → ${s.city}`;
+  return s ? s.city : cityOn(iso);
+}
 function headsFor(iso) { const hs = HEADS.filter(h => h.on.includes(iso)); if (iso < "2026-11-11" && iso >= "2026-10-21") hs.push({ t: "Get your UK ETA before 11 Nov.", d: "About £16, in the UK ETA app or on gov.uk.", k: "eta-done" }); return hs; }
 const done = k => { try { return localStorage.getItem(k) === "1"; } catch (e) { return false; } };
 
@@ -888,6 +898,7 @@ function events(iso, D) {
     else if (x.k === "get") { tt = x.checkin ? "To the hotel, check in" : x.bags ? "To the hotel, drop bags" : x.stay ? "To the hotel" : `To ${m.mode === "Flight" ? "the airport" : "the station"}`; sub = x.bags ? `${x.stay.hotel} · check in from ${s12(x.stay.ci)}` : x.checkin ? `${x.stay.hotel} · check in from ${s12(x.stay.ci)}` : x.stay ? x.stay.hotel : (m.fromQ || m.from); }
     else if (x.k === "change") { tt = x.title; }
     else if (x.k === "booked") { tt = x.b.t; sub = x.b.where || ""; }
+    else if (x.k === "pack") { tt = "Pack suitcases"; sub = x.early ? `Leaving ${t12(x.tLeave)} tomorrow` : `Before check-out · ${x.stay.hotel}`; }
     else if (x.k === "wait") { tt = "Free, with bags"; sub = x.stay && x.stay.store ? "Hotel can hold bags" : x.stay && x.stay.store === false ? "No luggage storage listed" : ""; }
     else { tt = x.title === "Free day" ? "Free all day" : x.title; sub = x.sub || ""; }
     list.push({ k: x.k, s: x.s, e: x.e, tt, sub, ref, m, stay: x.stay, x, done: isToday && x.e < nm && x.k !== "free" && x.k !== "wait", cd: isToday && x.k === "travel" && m.depTs > now && !x.overnight ? m.depTs - now : 0 });
@@ -1250,12 +1261,22 @@ function slotsFor(iso, D, all) {
 const SCN_CACHE = new Map();
 const dk = (a, b) => km(a.lat, a.lng, b.lat, b.lng);
 const walk = k => shortDist(k);
+/* travel days are two half-days: before leaving you're in the old city, after arriving in the new one */
 function scenePlans(iso, si) {
   const key = iso + "|" + si; if (SCN_CACHE.has(key)) return SCN_CACHE.get(key);
-  const home = anchorFor(iso), steps = SCENES[si], out = [];
-  if (!home) { SCN_CACHE.set(key, out); return out; }
-  const pool = c => placesFor(iso, c).map(x => x.s);
-  const st = stayOn(iso), night = st ? Math.round((Date.parse(iso) - Date.parse(st.in)) / 864e5) : 0;
+  const steps = SCENES[si], D = buildDay(iso);
+  const leaving = STAYS.find(s => s.out === iso && s.lat != null), here = anchorFor(iso);
+  const split = D.leaveT != null ? D.leaveT : D.deps.length ? mins(D.deps[0].d) : null;
+  const groups = leaving && here && leaving !== here && split != null ? [[steps.filter(p => p.s < split), leaving], [steps.filter(p => p.s >= split), here]] : [[steps, here || leaving]];
+  const res = groups.map(([g, home]) => home && g.length ? planGroup(iso, g, home) : []);
+  const V = Math.max(1, ...res.map(r => r.length)), out = [];
+  for (let v = 0; v < V; v++) out.push(steps.map(pr => { const gi = groups.findIndex(([g]) => g.includes(pr)), r = res[gi]; if (!r || !r.length) return ""; return r[v % r.length][groups[gi][0].indexOf(pr)] || ""; }));
+  SCN_CACHE.set(key, out); return out;
+}
+function planGroup(iso, steps, home) {
+  const out = [];
+  const pool = c => placesFor(iso, c, home).map(x => x.s);
+  const night = Math.max(0, Math.round((Date.parse(iso) - Date.parse(home.in)) / 864e5));
   const mainStep = steps.find(p => p.area);
   const seeds = mainStep ? pool(mainStep.cat).slice(0, 8) : [];
   const V = Math.max(1, Math.min(4, seeds.length));
@@ -1293,7 +1314,7 @@ function scenePlans(iso, si) {
     });
     out.push(txt);
   }
-  SCN_CACHE.set(key, out); return out;
+  return out;
 }
 const hookOf = s => { const h = (s && s.hook || "").replace(/[|\x1f]/g, " ").trim(); return h ? h[0].toUpperCase() + h.slice(1) : ""; };
 function sceneAlts(iso, si, step) { return scenePlans(iso, si).map(v => v[step] || ""); }
