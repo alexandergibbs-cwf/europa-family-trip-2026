@@ -39,8 +39,8 @@
   --e-mark-bg: #3b2547; --e-mark-ink: #e0b3f5; --e-free-bg: rgba(48, 209, 88, 0.18); --e-free-ink: #7ce095; --e-wait-bg: rgba(255, 159, 10, 0.22); --e-wait-ink: #ffc069; color-scheme: dark; }
 
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; overscroll-behavior-y: none; }
-body { overscroll-behavior-y: none; background: var(--bg); color: var(--ink); font: 400 17px/1.35 var(--font); letter-spacing: -0.02em; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
+html { -webkit-text-size-adjust: 100%; height: 100%; overflow: hidden; }
+body { height: 100%; overflow: hidden; background: var(--bg); color: var(--ink); font: 400 17px/1.35 var(--font); letter-spacing: -0.02em; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
 a { color: var(--blue); text-decoration: none; }
 button { font: inherit; color: inherit; letter-spacing: inherit; }
 :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 10px; }
@@ -54,7 +54,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 /* Header (sticky) */
 .top { position: fixed; left: 0; right: 0; top: 0; z-index: 20; background: var(--bg); padding-top: env(safe-area-inset-top, 0px); }
 .top > * { max-width: 520px; margin-left: auto; margin-right: auto; }
-.pager { padding-top: var(--top-h, 180px); }
+.pager { position: fixed; inset: 0; padding-top: var(--top-h, 180px); overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; scroll-padding-top: var(--top-h, 180px); }
 .pills { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-block: 10px 6px; }
 .pills #cityPill { margin-right: auto; }
 .week { border-bottom: 0.5px solid var(--hair); }
@@ -86,7 +86,8 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ad.fly { background: var(--e-travel-bg); color: var(--e-travel-ink); box-shadow: inset 3px 0 0 var(--e-travel); }
 
 /* Day pager + grid */
-.pager { overflow: hidden; touch-action: pan-y; max-width: 520px; margin: 0 auto; }
+.pager { touch-action: pan-y; }
+#daycontent { max-width: 520px; margin: 0 auto; padding-bottom: env(safe-area-inset-bottom, 0px); }
 #daycontent { will-change: transform; }
 .grid { position: relative; height: calc(var(--hour) * 24 + 24px); margin-top: 8px; }
 .hl { position: absolute; left: 0; right: 0; height: 0; }
@@ -692,8 +693,8 @@ function scrollToDay() {
   const evs = ITEMS.filter(e => e.k !== "free");
   let t = view === today ? nowMin() - 45 : (evs.length ? Math.min(...evs.map(e => e.s)) - 30 : 480);
   const gridEl = content.querySelector(".grid"); if (!gridEl) return;
-  const gridTop = gridEl.getBoundingClientRect().top + scrollY;
-  window.scrollTo(0, Math.max(0, gridTop + YFN(Math.max(0, t)) - topH - 8));
+  const gridTop = gridEl.getBoundingClientRect().top - pager.getBoundingClientRect().top + pager.scrollTop;
+  pager.scrollTop = Math.max(0, gridTop + YFN(Math.max(0, t)) - topH - 8);
 }
 function measureTop() { document.documentElement.style.setProperty("--top-h", document.getElementById("top").offsetHeight + "px"); }
 
@@ -1039,7 +1040,7 @@ document.addEventListener("keydown", e => {
 function tick() {
   const t = isoLocal();
   if (t !== today) { const f = view === today; today = t; renderWeek(); if (f) view = t; showWeek(weekOf(view), false); }
-  if (sheet.hidden && show.hidden && side.hidden && !pd) { const y = scrollY; renderHeader(false); content.innerHTML = renderDayContent(view); window.scrollTo(0, y); }
+  if (sheet.hidden && show.hidden && side.hidden && !pd) { const y = pager.scrollTop; renderHeader(false); content.innerHTML = renderDayContent(view); pager.scrollTop = y; }
 }
 renderWeek(); renderHeader(false); measureTop(); content.innerHTML = renderDayContent(view);
 refreshLive();
