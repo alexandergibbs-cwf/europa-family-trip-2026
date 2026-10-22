@@ -326,6 +326,17 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .fsec { display: flex; justify-content: space-between; align-items: baseline; margin: 20px 16px 6px; }
 .fsec b { font-size: 17px; font-weight: 600; }
 .fsec button { border: 0; background: none; color: var(--blue); font-size: 15px; cursor: pointer; padding: 4px 0; }
+.qs { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 4px; }
+.qs .cat { background: var(--card); }
+.qs .cat[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.pvl .pv { display: grid; grid-template-columns: 62px 1fr; gap: 10px; padding: 11px 14px; }
+.pvl .pv + .pv { box-shadow: inset 0 .5px 0 var(--hair); }
+.pv .pvt { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink); line-height: 1.25; }
+.pv .pvt small { display: block; font-size: 12px; font-weight: 400; color: var(--sub); }
+.pv .pvb { border-left: 3px solid var(--c); padding-left: 10px; min-width: 0; }
+.pv .pvb b { display: block; font-size: 15px; color: color-mix(in srgb, var(--c) 62%, var(--ink)); }
+.pv .pvb span { display: block; font-size: 13.5px; color: var(--ink); line-height: 1.3; margin-top: 2px; }
+.pv .pvb span.h { font-size: 12.5px; color: var(--sub); }
 .restore { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 4px 0; }
 .restore button { border: 0; height: 34px; padding: 0 14px; border-radius: 980px; background: var(--card); color: var(--blue); font-size: 14px; font-weight: 600; cursor: pointer; }
 
@@ -422,6 +433,8 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev.slot::before { background: var(--c); }
 .ev.slot .pk, .ev.slot .sug { color: inherit; opacity: .8; } .ev.slot .pk b { color: inherit; }
 .ev.plan { --c: var(--sub); background: var(--card); color: var(--ink); box-shadow: 0 0 0 1px var(--hair), 0 4px 14px rgba(0,0,0,.08); }
+.ev.mine .pk { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-size: 13px; font-weight: 500; opacity: .85; white-space: normal; overflow: hidden; margin-top: 2px; line-height: 1.25; }
+.ev.mine .hk { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 12px; opacity: .7; line-height: 1.25; margin-top: 2px; white-space: normal; }
 .ev.free { background: transparent; color: transparent; } .ev.free::before { display: none; }
 .ev.done { opacity: .45; }
 .mev.wait { background: color-mix(in srgb, #d4a300 16%, var(--bg)); color: color-mix(in srgb, #d4a300 62%, var(--ink)); }
@@ -452,6 +465,9 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .mev { --c: #8e8e93; left: 2px; right: 3px; padding: 3px 5px 3px 9px; background: color-mix(in srgb, var(--c) 15%, var(--bg)); color: color-mix(in srgb, var(--c) 62%, var(--ink)); border-radius: 5px; box-shadow: none; }
 .mev::before { content: ""; position: absolute; left: 2.5px; top: 2.5px; bottom: 2.5px; width: 2.5px; border-radius: 2px; background: var(--c); }
 .mev.travel, .mev.change { --c: #007aff; } .mev.change { background: color-mix(in srgb, var(--c) 9%, var(--bg)); }
+.ev.travel.rail, .ev.change.rail, .mev.travel.rail, .mev.change.rail { --c: #e4572e; }
+.ev.travel.rail, .mev.travel.rail { background: color-mix(in srgb, var(--c) 15%, var(--bg)); color: color-mix(in srgb, var(--c) 62%, var(--ink)); }
+.ev.change.rail, .mev.change.rail { background: color-mix(in srgb, var(--c) 9%, var(--bg)); color: color-mix(in srgb, var(--c) 62%, var(--ink)); }
 .mev.get { --c: #8e8e93; } .mev.plan { --c: var(--sub); background: var(--card); color: var(--ink); box-shadow: 0 0 0 1px var(--hair); }
 .mev.slot.coffee { --c: #a2845e; } .mev.slot.dinner { --c: #ff2d55; } .mev.slot.drinks { --c: #5856d6; }
 
@@ -717,7 +733,7 @@ function slotFor(iso, ck, block) {
   const b = block || frees.find(x => ck === "dinner" ? x.e > 1140 : ck === "drinks" ? x.e > 1260 : x.e - x.s >= 60) || frees[0];
   if (!b) return 600;
   const want = ck === "trip" ? Math.max(b.s, 540) : ck === "coffee" ? Math.max(b.s, 510) : ck === "dinner" ? (b.e <= 900 ? Math.max(b.s, 750) : Math.max(b.s, 1170)) : ck === "drinks" ? 1290 : ck === "shop" ? Math.max(b.s + 30, 840) : Math.max(b.s + 30, 600);
-  const taken = getPlan(iso).map(p => [p.t, p.t + catOf(p.c).dur]).concat(slotsFor(iso, D).map(o => [o.s, o.e]));
+  const taken = getPlan(iso).map(p => [p.t, p.t + catOf(p.c).dur]).concat(((getDay(iso) || {}).steps || []).map(p => [p.s, p.e])).concat(slotsFor(iso, D).map(o => [o.s, o.e]));
   let t = Math.min(Math.max(want, b.s), Math.max(b.s, b.e - 45));
   for (let i = 0; i < 8 && taken.some(([s, e]) => t < e && t + 40 > s); i++) t += 45;
   return Math.round(t / 30) * 30;
@@ -909,9 +925,9 @@ function events(iso, D) {
   D.segs.forEach((x, i) => {
     const m = x.m; let tt, sub = "", ref = "";
     if (x.k === "travel") { tt = `${m.from} → ${m.to}`;  sub = `${m.code}${m.guess ? ", time is a guess" : ""}`; ref = m.ref || ""; }
-    else if (x.k === "get" && (x.dep || x.coOnly)) { tt = x.coOnly ? (x.stay.store === false ? "Check out" : "Check out, leave bags") : `${x.from ? x.from.hotel : "Home"} → ${placeFrom(m)}`; sub = x.coOnly ? (x.stay.store === false ? `${x.stay.hotel} · no luggage storage listed` : x.stay.hotel) : x.co ? "Check out" : x.collect ? "Collect bags first" : ""; }
+    else if (x.k === "get" && (x.dep || x.coOnly)) { tt = x.coOnly ? x.stay.hotel : `${x.from ? x.from.hotel : "Home"} → ${placeFrom(m)}`; sub = x.coOnly ? (x.stay.store === false ? "Check out · no luggage storage listed" : "Check out, leave bags") : x.co ? "Check out" : x.collect ? "Collect bags first" : ""; }
     else if (x.k === "get") { tt = x.arr && x.stay ? `${placeTo(x.arr)} → ${x.stay.hotel}` : x.stay ? `To ${x.stay.hotel}` : `To ${placeFrom(m)}`; sub = x.bags ? `Drop bags · check in from ${s12(x.stay.ci)}` : x.checkin ? `Check in from ${s12(x.stay.ci)}` : ""; }
-    else if (x.k === "change") { tt = x.title; sub = x.term ? (m.mode === "Flight" ? "Check in, bags and security" : "Find the platform") : ""; }
+    else if (x.k === "change") { tt = placeFrom(m); sub = x.term ? (m.mode === "Flight" ? "Check in, bags and security" : "Find the platform") : /^Layover/.test(x.title) ? "Layover" : "Change trains"; }
     else if (x.k === "booked") { tt = x.b.t; sub = x.b.where || ""; }
     else if (x.k === "pack") { tt = "Pack suitcases"; sub = x.early ? `Leaving ${t12(x.tLeave)} tomorrow` : `Before check-out · ${x.stay.hotel}`; }
     else if (x.k === "wait") { tt = "Free, with bags"; sub = x.stay && x.stay.store ? "Hotel can hold bags" : x.stay && x.stay.store === false ? "No luggage storage listed" : ""; }
@@ -922,7 +938,8 @@ function events(iso, D) {
     list.forEach(ev => { if (ev.k === "free" || ev.k === "wait") freePieces(ev.x, sl).forEach(([a, b]) => rebuilt.push({ ...ev, s: a, e: b, tt: ev.k === "wait" ? "Free, with bags" : "Free time", piece: true })); else rebuilt.push(ev); });
     sl.forEach(o => rebuilt.push({ k: "slot", s: o.s, e: o.e, slot: o, tt: SLOTDEF[o.k].l }));
     list.splice(0, list.length, ...rebuilt);
-    if (stayOn(iso)) { const fr = rebuilt.filter(e => e.k === "free").sort((a, b) => a.s - b.s), mg = []; fr.forEach(f => { const l = mg[mg.length - 1]; if (l && f.s <= l.e + 1) l.e = Math.max(l.e, f.e); else mg.push({ s: f.s, e: f.e }); }); promptsFor(iso, mg).forEach(pe => list.push(pe)); } }
+    if (stayOn(iso) && !getDay(iso)) { const fr = rebuilt.filter(e => e.k === "free").sort((a, b) => a.s - b.s), mg = []; fr.forEach(f => { const l = mg[mg.length - 1]; if (l && f.s <= l.e + 1) l.e = Math.max(l.e, f.e); else mg.push({ s: f.s, e: f.e }); }); promptsFor(iso, mg).forEach(pe => list.push(pe)); } }
+  const DP = getDay(iso); if (DP) DP.steps.forEach((p, mi) => list.push({ k: "mine", s: p.s, e: p.e, tt: p.l, mp: p, mi }));
   getPlan(iso).forEach((p, pi) => { const s = SAVE_BY[p.id]; if (!s) return; const c = catOf(p.c); list.push({ k: "plan", s: p.t, e: p.t + c.dur, tt: `${c.l.split(" ")[0]} ${s.name}`, sub: "", save: s, pi, cat: p.c }); });
   return list;
 }
@@ -965,6 +982,11 @@ function renderDayContent(iso) {
       html += `<button class="ev slot ${ev.slot.k}${h < 40 ? " short" : ""} press" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${sd.l}<span class="sug">${pk && !pk.chosen ? "Suggested" : ""}</span></span>${pk ? `<span class="pk"><b>${esc(pk.s.name)}</b>${pk.k != null ? ` · ${shortDist(pk.k)}` : ""}</span>` : `<span class="pk">${t12(ev.s)} · find a spot nearby</span>`}</button>`;
       return;
     }
+    if (ev.k === "mine") {
+      const p = ev.mp, [a1, a2] = (p.txt || "").split("\x1f");
+      html += `<button class="ev mine${short ? " short" : ""} press" data-i="${i}" style="--c:${KCOL[p.k] || "#8e8e93"};top:${top + 12}px;height:${h}px"><span class="tt">${esc(p.l)}</span>${short ? "" : `<span class="tm">${t12(ev.s)} – ${t12(ev.e)}</span>`}${a1 && h >= 60 ? `<span class="pk">${esc(a1)}</span>` : ""}${a2 && h >= 110 ? `<span class="hk">${esc(a2)}</span>` : ""}</button>`;
+      return;
+    }
     if (ev.k === "prompt") {
       html += `<button class="ev prompt c-${ev.pr.k}${short ? " short" : ""}${h < 66 ? " tight" : ""} press" data-prompt="${ev.pr.cat}" data-sc="${ev.sc}" data-step="${ev.step}" data-i="${i}" data-alts="${esc(sceneAlts(iso, ev.sc, ev.step).join("|"))}" style="top:${top + 12}px;height:${h}px"><span class="tt">${esc(ev.tt)}</span><span class="pk"></span><span class="hk"></span></button>`;
       return;
@@ -976,7 +998,7 @@ function renderDayContent(iso) {
     }
     const time = ev.k === "mark" ? t12(ev.s) : ev.x && ev.x.overnight ? `until ${t12(ev.e)}` : `${t12(ev.s)} – ${t12(ev.e)}`;
     const durTxt = (ev.k === "free" || ev.k === "wait") ? ` · ${dur(ev.e - ev.s)}` : "";
-    html += `<button class="ev ${ev.k}${short ? " short" : ""}${ev.done ? " done" : ""} press" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${ev.k === "travel" || (ev.k === "get" && !ev.x.coOnly && (ev.m || ev.x.arr)) ? `<i class="ic ${(ev.m || ev.x.arr).mode === "Flight" ? "fly" : "rail"}"></i>` : ""}${esc(ev.tt)}${durTxt}</span><span class="tm">${time}${ev.cd && !short ? ` · <b class="cd">${countdown(ev.cd)}</b>` : ""}${!short && ev.sub && h >= 60 && h < 80 ? ` · ${esc(ev.sub)}` : ""}</span>${!short && ev.sub && h >= 80 ? `<span class="tm">${esc(ev.sub)}</span>` : ""}${!short && ev.ref && h >= 100 ? `<span class="ref" data-show-ref="${ev.ref}" data-show-l="${esc(ev.m.code)}">${ev.ref} ›</span>` : ""}</button>`;
+    html += `<button class="ev ${ev.k}${ev.m && ev.m.mode === "Train" && (ev.k === "travel" || ev.k === "change") ? " rail" : ""}${short ? " short" : ""}${ev.done ? " done" : ""} press" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${ev.k === "travel" || (ev.k === "get" && !ev.x.coOnly && (ev.m || ev.x.arr)) ? `<i class="ic ${(ev.m || ev.x.arr).mode === "Flight" ? "fly" : "rail"}"></i>` : ""}${esc(ev.tt)}${durTxt}</span><span class="tm">${time}${ev.cd && !short ? ` · <b class="cd">${countdown(ev.cd)}</b>` : ""}${!short && ev.sub && h >= 60 && h < 80 ? ` · ${esc(ev.sub)}` : ""}</span>${!short && ev.sub && h >= 80 ? `<span class="tm">${esc(ev.sub)}</span>` : ""}${!short && ev.ref && h >= 100 ? `<span class="ref" data-show-ref="${ev.ref}" data-show-l="${esc(ev.m.code)}">${ev.ref} ›</span>` : ""}</button>`;
   });
   html += `</div>`;
   D.marks.forEach((mk, mi) => { html += `<div class="mk" style="top:${y(mk.t)}px"><button class="press" data-mark="${mi}"><b>${mk.kind === "in" ? "Check in" : "Check out"} ${t12(mk.t)}</b><span>${esc(mk.stay.hotel)}</span></button></div>`; });
@@ -1009,7 +1031,7 @@ function renderMultiContent(iso) {
     evs.forEach((ev, i) => {
       if (ev.k === "free" || ev.k === "prompt" || ev.k === "wait") return;
       const top = MY(ev.s), h = Math.max(MY(ev.e) - MY(ev.s) - 2, 18);
-      html += `<button class="mev ${ev.k}${ev.slot ? " " + ev.slot.k : ""}${ev.done ? " done" : ""}${h < 34 ? " short" : ""} press" data-mday="${d}" data-mi="${i}" style="top:${top}px;height:${h}px"><b>${esc(ev.tt)}</b>${h >= 44 ? `<span>${t12(ev.s)}</span>` : ""}</button>`;
+      html += `<button class="mev ${ev.k}${ev.m && ev.m.mode === "Train" && (ev.k === "travel" || ev.k === "change") ? " rail" : ""}${ev.slot ? " " + ev.slot.k : ""}${ev.done ? " done" : ""}${h < 34 ? " short" : ""} press" data-mday="${d}" data-mi="${i}" style="${ev.k === "mine" ? `--c:${KCOL[ev.mp.k] || "#8e8e93"};` : ""}top:${top}px;height:${h}px"><b>${esc(ev.tt)}</b>${h >= 44 ? `<span>${t12(ev.s)}</span>` : ""}</button>`;
     });
     if (d === today) html += `<div class="mnow" style="top:${MY(nm)}px"></div>`;
     html += `</div>`;
@@ -1253,6 +1275,7 @@ function freeSheet(ev) {
 const SLOTDEF = { coffee: { l: "Coffee", cat: "coffee", dur: 45 }, dinner: { l: "Dinner", cat: "dinner", dur: 90 }, drinks: { l: "Wine", cat: "drinks", dur: 75 } };
 function getPick(iso, k) { try { return localStorage.getItem(`pick:${iso}:${k}`); } catch (e) { return null; } }
 function setPick(iso, k, v) { try { v == null ? localStorage.removeItem(`pick:${iso}:${k}`) : localStorage.setItem(`pick:${iso}:${k}`, v); } catch (e) {} }
+const hasFree = iso => buildDay(iso).segs.some(x => x.k === "free" && x.e - x.s >= 120);
 const hasSaves = iso => { const a = anchorFor(iso); return !!a && SAVES.some(s => s.city === a.city); };
 function slotsFor(iso, D, all) {
   const out = [], s = stayOn(iso); if (!s) return out;
@@ -1279,24 +1302,32 @@ const walk = k => shortDist(k);
 /* travel days are two half-days: before leaving you're in the old city, after arriving in the new one */
 function scenePlans(iso, si) {
   const key = iso + "|" + si; if (SCN_CACHE.has(key)) return SCN_CACHE.get(key);
-  const steps = sceneFor(iso, si), D = buildDay(iso);
+  const out = planSteps(iso, sceneFor(iso, si)).txt;
+  SCN_CACHE.set(key, out); return out;
+}
+function planSteps(iso, steps, opts) {
+  const D = buildDay(iso);
   const leaving = STAYS.find(s => s.out === iso && s.lat != null), here = anchorFor(iso);
   const split = D.leaveT != null ? D.leaveT : D.deps.length ? mins(D.deps[0].d) : null;
   const groups = leaving && here && leaving !== here && split != null ? [[steps.filter(p => p.s < split), leaving], [steps.filter(p => p.s >= split), here]] : [[steps, here || leaving]];
-  const res = groups.map(([g, home]) => home && g.length ? planGroup(iso, g, home) : []);
-  const V = Math.max(1, ...res.map(r => r.length)), out = [];
-  for (let v = 0; v < V; v++) out.push(steps.map(pr => { const gi = groups.findIndex(([g]) => g.includes(pr)), r = res[gi]; if (!r || !r.length) return ""; return r[v % r.length][groups[gi][0].indexOf(pr)] || ""; }));
-  SCN_CACHE.set(key, out); return out;
+  const res = groups.map(([g, home]) => home && g.length ? planGroup(iso, g, home, opts) : []);
+  const V = Math.max(1, ...res.map(r => r.length)), txt = [], ids = [];
+  for (let v = 0; v < V; v++) {
+    const at = pr => { const gi = groups.findIndex(([g]) => g.includes(pr)), r = res[gi]; if (!r || !r.length) return null; const row = r[v % r.length], j = groups[gi][0].indexOf(pr); return [row[j] || "", (row.ids || [])[j] || []]; };
+    txt.push(steps.map(pr => (at(pr) || [""])[0])); ids.push(steps.map(pr => (at(pr) || ["", []])[1]));
+  }
+  return { txt, ids };
 }
-function planGroup(iso, steps, home) {
+function planGroup(iso, steps, home, opts = {}) {
   const out = [];
-  const pool = c => placesFor(iso, c, home).map(x => x.s);
+  /* "stay close" keeps to places near the hotel, unless that leaves nothing */
+  const pool = c => { const all = placesFor(iso, c, home), n = opts.near && c !== "trip" ? all.filter(x => x.k <= opts.near) : all; return (n.length ? n : all).map(x => x.s); };
   const night = Math.max(0, Math.round((Date.parse(iso) - Date.parse(home.in)) / 864e5));
   const mainStep = steps.find(p => p.area && !p.dest);
   const seeds = mainStep ? pool(mainStep.cat).slice(0, 8) : [];
   const V = Math.max(1, Math.min(4, seeds.length));
   for (let v = 0; v < V; v++) {
-    const used = new Set(), txt = [];
+    const used = new Set(), txt = [], ID = [];
     /* best few under the limit, rotating with the variant/night so repeats are spread out */
     const take = (list, score, max = 99, rot = 0) => { const cs = list.filter(s => !used.has(s.id)).map(s => [s, score(s)]).filter(x => x[1] < max).sort((a, b) => a[1] - b[1]).slice(0, 5); const c = cs.length ? cs[rot % cs.length] : null; if (c) used.add(c[0].id); return c ? c[0] : null; };
     const R = v + night;
@@ -1311,15 +1342,15 @@ function planGroup(iso, steps, home) {
     steps.filter(p => p.area && p !== mainStep).forEach(pr => { const s0 = take(pool(pr.cat), s => dk(s, centre), 99, R); if (s0) { used.delete(s0.id); areas.set(pr, cluster(pr, s0)); } });
     main.list = mainStep ? areas.get(mainStep) : null;
     let prev = home;
-    steps.forEach(pr => {
+    steps.forEach((pr, ix) => {
       let names = [], from = prev, to = null;
       if (pr.dest) {
         const dist = pr.km < 2.5 ? "" : ` · about ${Math.round(pr.km * 1.3)} km`;
         if (pr.k === "tripgo") { txt.push(`${dur(pr.T)} drive from the hotel${dist}\x1f`); return; }
         if (pr.k === "tripback") { txt.push(`${dur(pr.T)} back to the hotel\x1f`); prev = home; return; }
-        txt.push(`Day trip${pr.dest.city && pr.dest.city !== "Other" ? " · " + pr.dest.city : ""}\x1f${hookOf(pr.dest)}`); prev = home; return;
+        ID[ix] = [pr.dest.id]; txt.push(`Day trip${pr.dest.city && pr.dest.city !== "Other" ? " · " + pr.dest.city : ""}\x1f${hookOf(pr.dest)}`); prev = home; return;
       }
-      if (pr.area) { const L = areas.get(pr); if (!L) { txt.push(""); return; } if (pr.cat === "trip") { txt.push(`${L[0].city !== "Other" ? L[0].city + " · " : ""}${L[0].name}\x1f${hookOf(L[0])}`); prev = home; return; } names = L.map(s => s.name); to = L[L.length - 1]; txt.push(`${names.join(" → ")} · ${walk(dk(prev, L[0]))}${prev === home ? " from the hotel" : ""}\x1f${L.map(hookOf).filter(Boolean).slice(0, 2).join(". ")}`); prev = to; return; }
+      if (pr.area) { const L = areas.get(pr); if (!L) { txt.push(""); return; } ID[ix] = L.map(s => s.id); if (pr.cat === "trip") { txt.push(`${L[0].city !== "Other" ? L[0].city + " · " : ""}${L[0].name}\x1f${hookOf(L[0])}`); prev = home; return; } names = L.map(s => s.name); to = L[L.length - 1]; txt.push(`${names.join(" → ")} · ${walk(dk(prev, L[0]))}${prev === home ? " from the hotel" : ""}\x1f${L.map(hookOf).filter(Boolean).slice(0, 2).join(". ")}`); prev = to; return; }
       else if (pr.k === "coffee" || pr.k === "cafes") {
         /* on the way from the hotel to the day's area: small detour, else close to home, else close to the area */
         const cafes = pool("coffee"), detour = s => dk(home, s) + dk(s, centre) - dk(home, centre);
@@ -1330,10 +1361,11 @@ function planGroup(iso, steps, home) {
       else if (pr.k === "dinner") { const c = take(pool("dinner"), s => dk(s, prev) * 0.6 + dk(s, home), 8, R); if (c) { names = [c.name]; to = c; } else if (prev !== home) { txt.push(`Somewhere near ${prev.name}`); return; } }
       else if (pr.k === "drinks") { const c = take(pool("drinks"), s => dk(s, prev), 4, R); if (c) { names = [c.name]; to = c; } else if (prev !== home) { txt.push(`A bar near ${prev.name}`); return; } }
       if (!names.length) { const near = main.list ? main.list[0] : null; txt.push(near && (pr.k === "coffee" || pr.k === "cafes") ? `A café near ${near.name}` : near && pr.k === "lunch" ? `Somewhere near ${near.name}` : ""); return; }
+      ID[ix] = names.map(n => (SAVES.find(z => z.name === n && z.lat != null && dk(z, home) < 60) || {}).id).filter(Boolean);
       txt.push(`${names.join(" → ")} · ${walk(dk(prev, to))}${prev === home ? " from the hotel" : ""}\x1f${hookOf(to)}`);
       prev = to;
     });
-    out.push(txt);
+    txt.ids = ID; out.push(txt);
   }
   return out;
 }
@@ -1449,6 +1481,145 @@ function promptsFor(iso, free) {
   });
   return out;
 }
+/* ---------- plan the day: a few questions, then a whole day built the organiser's way ---------- */
+const ASKQ = [
+  { k: "start", l: "When do we start?", one: true, o: [["early", "Early"], ["usual", "Around 9"], ["slow", "Slow morning"]] },
+  { k: "want", l: "What are we in the mood for?", o: [["see", "Sights"], ["culture", "Museums"], ["shop", "Shopping"], ["food", "Food"], ["trip", "Day trip"]] },
+  { k: "pace", l: "How full a day?", one: true, o: [["easy", "Easy, with a break"], ["full", "Pack it in"]] },
+  { k: "range", l: "How far?", one: true, o: [["near", "Stay close"], ["any", "Anywhere in town"]] },
+  { k: "night", l: "And tonight?", one: true, o: [["drinks", "Dinner and drinks"], ["dinner", "Just dinner"], ["in", "Night in"]] },
+];
+const ASKDEF = { start: "usual", want: ["see"], pace: "easy", range: "any", night: "drinks" };
+const ASK_T = { early: 480, usual: 540, slow: 630 };
+const BLK = {
+  see: { k: "day", l: "Sightsee", cat: "see", area: true },
+  culture: { k: "culture", l: "Culture", cat: "culture", area: true },
+  shop: { k: "shop", l: "Shop", cat: "shop", area: true },
+  food: { k: "cafes", l: "Cafés", cat: "coffee" },
+};
+const KCOL = { coffee: "#a2845e", cafes: "#a2845e", lunch: "#ff9500", day: "#34c759", shop: "#30b0c7", culture: "#af52de", trip: "#00c7be", tripgo: "#8e8e93", tripback: "#8e8e93", rest: "#8e8e93", dinner: "#ff2d55", drinks: "#5856d6" };
+const r30 = n => Math.floor(n / 30) * 30;
+function askDefaults() { try { return { ...ASKDEF, ...JSON.parse(localStorage.getItem("ask") || "{}") }; } catch (e) { return { ...ASKDEF }; } }
+const dayKey = iso => "dayplan:" + iso;
+function getDay(iso) { try { return JSON.parse(localStorage.getItem(dayKey(iso)) || "null"); } catch (e) { return null; } }
+function setDay(iso, d) { try { d ? localStorage.setItem(dayKey(iso), JSON.stringify(d)) : localStorage.removeItem(dayKey(iso)); } catch (e) {} }
+function tripList(iso) { const st = anchorFor(iso); return st ? placesFor(iso, "trip", st).filter(x => driveMins(x.k) <= 105) : []; }
+/* the day's shape from the answers, on the local clock */
+function askSteps(iso, A, v) {
+  const st = anchorFor(iso) || STAYS.find(s => s.out === iso), M = MEALS[CTRY[st ? st.city : ""] || "IT"];
+  const S = ASK_T[A.start] || 540, out = [], food = A.want.includes("food");
+  const eve = [];
+  if (!EVENTS.some(b => b.on === iso && b.kind === "dinner") && A.night !== "in") {
+    eve.push({ ...SC_.dinner, s: M.dinner, e: M.dinner + DUR.dinner });
+    if (A.night === "drinks") { const ds = M.aper ? M.dinner - DUR.drinks : M.dinner + DUR.dinner; eve.push({ ...SC_.drinks, s: ds, e: Math.min(1410, ds + DUR.drinks) }); }
+  }
+  const eveS = eve.length ? Math.min(...eve.map(x => x.s)) : 1200;
+  if (A.want.includes("trip")) {
+    const list = tripList(iso);
+    if (list.length) {
+      const night = Math.max(0, Math.round((Date.parse(iso) - Date.parse(st.in)) / 864e5));
+      const x = list[(night + v) % Math.min(4, list.length)], T = driveMins(x.k), go = S, back = go + 2 * T + 300; /* about five hours there, lunch included */
+      const nm = x.s.name.replace(/\s*[-–(].*$/, "");
+      out.push({ k: "tripgo", l: `Travel to ${nm}`, cat: "trip", s: go, e: go + T, dest: x.s, km: x.k, T });
+      out.push({ ...SC_.trip, l: nm, s: go + T, e: back - T, dest: x.s });
+      out.push({ k: "tripback", l: "Travel back", cat: "trip", s: back - T, e: back, dest: x.s, km: x.k, T });
+      return [...out, ...eve].sort((a, b) => a.s - b.s);
+    }
+  }
+  let picks = A.want.filter(w => BLK[w]); if (!picks.length) picks = ["see"];
+  /* sights, museums and shops lead; a café wander fits the afternoon */
+  const blocks = picks.filter(w => w !== "food").concat(food ? ["food"] : []), q = blocks.slice();
+  const mk = (w, at, s, e) => ({ ...BLK[w], at, s, e });
+  out.push({ ...SC_.coffee, s: S, e: S + DUR.coffee });
+  const amS = S + DUR.coffee;
+  if (M.lunch - amS >= 90) out.push(mk(q.shift() || blocks[0], "am", amS, M.lunch));
+  const lunchL = food ? 120 : DUR.lunch;
+  out.push({ ...SC_.food, l: food ? "Long lunch" : "Lunch", s: M.lunch, e: M.lunch + lunchL });
+  let t = M.lunch + lunchL + 30;
+  const lenOf = w => w === "food" ? 120 : DUR[BLK[w].cat];
+  if (A.pace === "easy") {
+    const w = q.shift();
+    if (w && eveS - 30 - t >= 90) { const d = r30(Math.min(lenOf(w), 120, eveS - 30 - t)); out.push(mk(w, "pm", t, t + d)); t += d; }
+  } else {
+    const w = q.shift() || blocks[blocks.length > 1 ? 1 : 0];
+    if (eveS - 30 - t >= 90) { const d = r30(Math.min(lenOf(w), eveS - 30 - t)); out.push(mk(w, "pm", t, t + d)); t += d; }
+    const w2 = q.shift();
+    if (w2 && eveS - 30 - t >= 90) { const d = r30(Math.min(lenOf(w2), eveS - 30 - t)); out.push(mk(w2, "pm", t, t + d)); t += d; }
+  }
+  return [...out, ...eve].sort((a, b) => a.s - b.s);
+}
+/* keep each step inside the day's free time, on whole and half hours.
+   Meals, coffee and the trip keep their times; the main blocks move to the next free stretch if theirs is taken
+   (on a travel day the morning's sights become the afternoon's). */
+function askFit(iso, steps, A) {
+  const D = buildDay(iso), fr = [];
+  D.segs.filter(x => x.k === "free").sort((a, b) => a.s - b.s).forEach(f => { const l = fr[fr.length - 1]; if (l && f.s <= l.e + 1) l.e = Math.max(l.e, f.e); else fr.push({ s: f.s, e: f.e }); });
+  const out = [], flex = p => (p.area && !p.dest) || p.k === "cafes";
+  const gaps = () => { let g = fr.map(f => [Math.ceil(f.s / 30) * 30, f.e]); out.forEach(o => { g = g.flatMap(([a, b]) => o.e <= a || o.s >= b ? [[a, b]] : [[a, o.s], [o.e, b]]); }); return g.filter(([a, b]) => b - a >= 30); };
+  const place = (p, need) => {
+    let best = null;
+    gaps().forEach(([a, b]) => { const s = Math.max(p.s, a), d = r30(Math.min(p.e, b) - s); if (d > 0 && (!best || d > best.d)) best = { s, d }; });
+    if (best && best.d >= need) { out.push({ ...p, s: best.s, e: best.s + best.d }); return true; }
+    return false;
+  };
+  steps.filter(p => !flex(p)).forEach(p => place(p, p.k === "tripgo" || p.k === "tripback" ? p.e - p.s : p.k === "trip" ? 120 : p.k === "coffee" ? 30 : 60));
+  if (out.some(p => p.dest) && out.filter(p => p.dest).length < 3) out.splice(0, out.length, ...out.filter(p => !p.dest));
+  const eve = out.filter(p => p.k === "dinner" || p.k === "drinks"), eveS = eve.length ? Math.min(...eve.map(p => p.s)) : 1260;
+  steps.filter(flex).forEach(p => {
+    if (place(p, 90)) return;
+    /* its time is taken: the next free stretch of 1h 30m or more before the evening */
+    const L = p.e - p.s, g = gaps().map(([a, b]) => [a, Math.min(b, eveS - 30)]).find(([a, b]) => a >= p.s && b - a >= 90);
+    if (g) out.push({ ...p, s: g[0], e: g[0] + r30(Math.min(L, g[1] - g[0])) });
+  });
+  /* an easy day gets a break at the hotel before the evening, up to 2 hours */
+  if (A && A.pace === "easy" && eve.length && !out.some(p => p.dest)) {
+    const day = out.filter(p => p.s < eveS && p.k !== "coffee"), last = day.length ? Math.max(...day.map(p => p.e)) : null;
+    const g = last != null && gaps().find(([a, b]) => a <= last && b >= eveS - 30);
+    if (g && eveS - 30 - last >= 60) out.push({ k: "rest", l: "Back at the hotel", cat: "rest", s: Math.max(last, eveS - 150), e: eveS - 30 });
+  }
+  return out.sort((a, b) => a.s - b.s);
+}
+function askPlan(iso, A, v) {
+  const steps = askFit(iso, askSteps(iso, A, v), A);
+  const P = planSteps(iso, steps, { near: A.range === "near" ? 1.6 : 0 }), vv = v % P.txt.length;
+  const n = A.want.includes("trip") && steps.some(p => p.dest) ? Math.min(4, tripList(iso).length) : P.txt.length;
+  return { n, steps: steps.map((p, i) => ({ k: p.k, l: p.l, cat: p.cat, s: p.s, e: p.e, txt: P.txt[vv][i] || "", ids: P.ids[vv][i] || [] })) };
+}
+let ASK = null;
+function askSheet() {
+  const iso = ASK.iso, A = ASK.A, cur = getDay(iso);
+  const hasTrip = tripList(iso).length, bookedDinner = EVENTS.some(b => b.on === iso && b.kind === "dinner");
+  const qs = ASKQ.filter(Q => !(Q.k === "night" && bookedDinner) && !(Q.k === "range" && A.want.includes("trip"))).map(Q => {
+    const opts = Q.o.filter(([v]) => v !== "trip" || hasTrip);
+    return `<div class="sec">${Q.l}</div><div class="qs">${opts.map(([v, l]) => `<button class="cat press" data-q="${Q.k}" data-v="${v}" aria-pressed="${Q.one ? A[Q.k] === v : A[Q.k].includes(v)}">${l}</button>`).join("")}</div>`;
+  }).join("");
+  return head("Plan the day", `${dDay(iso)} · ${esc(cityName(iso))}`) + qs
+    + `<div class="acts"><button class="btn blue press" data-askgo>Make a plan</button></div>`
+    + (cur ? `<div class="restore"><button data-clearday style="color:var(--red)">Clear today’s plan</button></div>` : "");
+}
+function askPreview() {
+  const iso = ASK.iso, R = ASK.res.steps;
+  if (!R.length) return head("Plan the day", dDay(iso)) + `<div class="ig"><div class="r"><span>There’s no free time left to plan on this day.</span><span></span></div></div><div class="restore"><button data-askback>Change answers</button></div>`;
+  const rows = R.map(p => { const [a1, a2] = (p.txt || "").split("\x1f"); return `<div class="pv" style="--c:${KCOL[p.k] || "#8e8e93"}"><div class="pvt">${t12(p.s)}<small>${dur(p.e - p.s)}</small></div><div class="pvb"><b>${esc(p.l)}</b>${a1 ? `<span>${esc(a1)}</span>` : ""}${a2 ? `<span class="h">${esc(a2)}</span>` : ""}</div></div>`; }).join("");
+  const bare = R.every(p => !p.txt);
+  return head("Your day", `${dDay(iso)} · ${esc(cityName(iso))}`) + `<div class="ig pvl">${rows}</div>` + (bare ? `<p class="nt">Nothing saved in ${esc(cityOn(iso))} on mio yet, so this is the shape of the day.</p>` : "")
+    + `<div class="acts">${ASK.res.n > 1 ? `<button class="btn card press" data-askmore>Another</button>` : ""}<button class="btn blue press" data-askadd>Add to the day</button></div>`
+    + `<div class="restore"><button data-askback>Change answers</button></div>`;
+}
+function swapSheet(html) {
+  const b = document.getElementById("sheet-body");
+  if (sheet.hidden) return openSheet(html);
+  b.innerHTML = html; sheet.scrollTop = 0;
+  if (!reduce()) b.animate([{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], { duration: 320, easing: "cubic-bezier(0.16, 1, 0.3, 1)" });
+}
+function openAsk(iso) { const cur = getDay(iso); ASK = { iso, A: cur && cur.A ? { ...ASKDEF, ...cur.A } : askDefaults(), v: 0 }; swapSheet(askSheet()); }
+function mineSheet(ev, iso) {
+  const p = ev.mp, a = anchorFor(iso), [a1, a2] = (p.txt || "").split("\x1f");
+  const list = (p.ids || []).map(id => SAVE_BY[id]).filter(Boolean).map(s => ({ s, k: a ? km(a.lat, a.lng, s.lat, s.lng) : 0 }));
+  return head(esc(p.l), `${t12(p.s)} – ${t12(p.e)} · ${dur(p.e - p.s)}`)
+    + (list.length ? `<div class="ig">${list.map(x => placeRow(x, "")).join("")}</div>` : a1 ? `<div class="ig"><div class="r"><span>${esc(a1)}${a2 ? `<br><small style="color:var(--sub)">${esc(a2)}</small>` : ""}</span><span></span></div></div>` : "")
+    + `<div class="acts"><button class="btn card press" data-ask>Change the plan</button></div><div class="restore"><button data-clearday style="color:var(--red)">Clear the plan</button></div>`;
+}
 let PL = { iso: null, cat: "coffee", block: null, n: 12 };
 function plannerSheet() {
   const iso = PL.iso, a = anchorFor(iso), b = PL.block;
@@ -1465,7 +1636,8 @@ function plannerSheet() {
     const pins = PL.pin.map(n => list.find(x => x.s.name === n) || (() => { const s = SAVES.find(z => z.name === n); return s ? { s, k: a ? km(a.lat, a.lng, s.lat, s.lng) : 0 } : null; })()).filter(Boolean);
     list = [...pins.map(x => ({ ...x, pinned: true })), ...list.filter(x => !pins.some(q => q.s.id === x.s.id))];
   }
-  const cats = `<div class="cats">${CATS.filter(c => counts[c.k]).map(c => `<button class="cat" data-cat="${c.k}" aria-pressed="${c.k === PL.cat}">${c.l}</button>`).join("")}</div>`;
+  const askRow = hasFree(iso) ? `<div class="ig" style="margin-bottom:10px"><button class="mrow press" data-ask><span><span class="a">${getDay(iso) ? "Change the day’s plan" : "Plan the whole day"}</span><span class="b">A few questions, then a plan</span></span><i class="chev"></i></button></div>` : "";
+  const cats = askRow + `<div class="cats">${CATS.filter(c => counts[c.k]).map(c => `<button class="cat" data-cat="${c.k}" aria-pressed="${c.k === PL.cat}">${c.l}</button>`).join("")}</div>`;
   const rows = list.slice(0, PL.n).map(({ s, k, pinned }) => {
     const on = plan.find(p => p.id === s.id);
     return `<div class="place${pinned ? " pinned" : ""}"><span>${pinned ? `<span class="sg">Suggested</span>` : ""}<span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${PL.cat === "trip" ? tripTxt(k) : distTxt(k)}</b></span><span class="links"><a href="${maps(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video${s.creator ? " · " + esc(s.creator) : ""}</a>` : ""}</span></span><button class="addb${on ? " on" : ""}" data-add="${s.id}">${on ? `✓ ${t12(on.t)}` : "Add"}</button></div>`;
@@ -1521,6 +1693,7 @@ function menuSheet() {
   </div>
   <div class="ig">
       ${row("stay", s ? esc(s.hotel) : "No hotel tonight", s ? `Check in ${s12(s.ci)} · out ${s12(s.co)}${s.est ? " (usual)" : ""}${s.addr && !/booking/i.test(s.addr) ? " · " + esc(s.addr) : ""}` : (iso === END ? "Landing in Perth" : "Overnight flight"))}
+      ${hasFree(iso) ? row("plan", getDay(iso) ? "Day planned" : "Plan the day", getDay(iso) ? "Change or clear it" : "A few questions, then a plan") : ""}
       ${row("ideas", "Things to do", hasSaves(iso) ? `<span class="cyc" id="cyc"></span>` : `Search near the hotel`)}
       ${row("tasks", open ? `${open} thing${open > 1 ? "s" : ""} to sort` : "Nothing to sort", open ? headsFor(iso).find(h => !h.k || !done(h.k)).t : "No reminders for this day")}
   </div>`;
@@ -1588,6 +1761,18 @@ document.addEventListener("click", e => {
   if (t.closest("[data-close-side]")) { haptic(); return closeSide(); }
   const sr = t.closest("[data-show-ref]"); if (sr) { haptic("heavy"); return openShow(`<div class="lbl">Booking ref · ${esc(sr.dataset.showL || "")}</div><div class="big">${esc(sr.dataset.showRef)}</div><div class="sm">Show this at the desk or to the conductor.</div>`); }
   const ss = t.closest("[data-show-stay]"); if (ss) { haptic("heavy"); const s = STAYS[+ss.dataset.showStay]; return openShow(`<div class="lbl">Please take us to</div><div class="big txt">${esc(s.hotel)}</div><div class="sm">${esc(s.addr && !/booking/i.test(s.addr) ? s.addr + ", " + s.city : s.city)}</div>`); }
+  if (t.closest("[data-ask]")) { haptic(); return openAsk(view); }
+  const aq = t.closest("[data-q]"); if (aq && ASK) {
+    haptic(); const A = ASK.A, k = aq.dataset.q, v = aq.dataset.v, Q = ASKQ.find(x => x.k === k);
+    if (Q.one) A[k] = v;
+    else { const on = A[k].includes(v); A[k] = v === "trip" ? (on ? [] : ["trip"]) : (on ? A[k].filter(x => x !== v) : [...A[k].filter(x => x !== "trip"), v]); }
+    const st = sheet.scrollTop; document.getElementById("sheet-body").innerHTML = askSheet(); sheet.scrollTop = st; return;
+  }
+  if (t.closest("[data-askgo]") && ASK) { haptic("heavy"); try { localStorage.setItem("ask", JSON.stringify(ASK.A)); } catch (er) {} ASK.v = 0; ASK.res = askPlan(ASK.iso, ASK.A, 0); return swapSheet(askPreview()); }
+  if (t.closest("[data-askmore]") && ASK) { haptic(); ASK.v++; ASK.res = askPlan(ASK.iso, ASK.A, ASK.v); return swapSheet(askPreview()); }
+  if (t.closest("[data-askback]") && ASK) { haptic(); return swapSheet(askSheet()); }
+  if (t.closest("[data-askadd]") && ASK) { haptic("heavy"); setDay(ASK.iso, { A: ASK.A, v: ASK.v, steps: ASK.res.steps }); closeSheet(); content.innerHTML = renderContent(view); renderHeader(false); return; }
+  if (t.closest("[data-clearday]")) { haptic(); setDay(view, null); closeSheet(); content.innerHTML = renderContent(view); renderHeader(false); return; }
   const ch = t.closest("[data-choose]"); if (ch) { haptic("heavy"); setPick(view, SL.slot.k, ch.dataset.choose); refreshAll(); return; }
   const sk = t.closest("[data-skip]"); if (sk) { haptic(); setPick(view, sk.dataset.skip, "skip"); closeSheet(); content.innerHTML = renderContent(view); return; }
   const up = t.closest("[data-unpick]"); if (up) { haptic(); setPick(view, up.dataset.unpick, null); refreshAll(); return; }
@@ -1605,10 +1790,10 @@ document.addEventListener("click", e => {
   const lt = t.closest("[data-later]"); if (lt) { haptic(); const p = getPlan(view); p[+lt.dataset.later].t += 30; setPlan(view, p); closeSheet(); content.innerHTML = renderContent(view); return; }
   if (t.closest("#modePill")) return setMode(MODE === "multi" ? "day" : "multi");
   const od = t.closest("[data-open-day]"); if (od) { haptic(); const d = od.dataset.openDay; MODE = "day"; try { localStorage.setItem("mode", "day"); } catch (e) {} document.getElementById("modePill").classList.remove("on"); document.getElementById("wsel").classList.remove("span2"); if (d === view) { content.innerHTML = renderContent(view); scrollToDay(false); } else selectDay(d); return; }
-  const me = t.closest("[data-mi]"); if (me) { haptic(); const d = me.dataset.mday, i = +me.dataset.mi; const it = MITEMS[d]; if (!it) return; const ev = it.evs[i]; if (ev.k === "plan") return openSheet(planItemSheet(ev)); if (ev.m) return openSheet(moveSheet(ev.m)); if (ev.stay) return openSheet(staySheet(ev.stay)); return openSheet(staySheet(stayOn(d) || STAYS[0])); }
+  const me = t.closest("[data-mi]"); if (me) { haptic(); const d = me.dataset.mday, i = +me.dataset.mi; const it = MITEMS[d]; if (!it) return; const ev = it.evs[i]; if (ev.k === "plan") return openSheet(planItemSheet(ev)); if (ev.k === "mine") return openSheet(mineSheet(ev, d)); if (ev.m) return openSheet(moveSheet(ev.m)); if (ev.stay) return openSheet(staySheet(ev.stay)); return openSheet(staySheet(stayOn(d) || STAYS[0])); }
   const mk = t.closest("[data-mark]"); if (mk) { haptic(); return openSheet(staySheet(CUR.marks[+mk.dataset.mark].stay)); }
   const pp = t.closest("[data-prompt]"); if (pp) { haptic(); const i = ITEMS[+pp.dataset.i]; const shown = (pp.querySelector(".pk")?.textContent || "").split(" · ")[0].split(" → ").map(x => x.trim()).filter(Boolean); return openPlanner(view, pp.dataset.prompt, { s: i.s, e: i.e, k: "free" }, shown); }
-  const ev = t.closest("[data-i]"); if (ev) { haptic(); const i = ITEMS[+ev.dataset.i]; if (i.k === "plan") return openSheet(planItemSheet(i));
+  const ev = t.closest("[data-i]"); if (ev) { haptic(); const i = ITEMS[+ev.dataset.i]; if (i.k === "plan") return openSheet(planItemSheet(i)); if (i.k === "mine") return openSheet(mineSheet(i, view));
       if (i.k === "booked") return openSheet(head(esc(i.x.b.t), `${dDay(i.x.b.on)} · ${s12(i.x.b.s)} – ${s12(i.x.b.e)}`) + (i.x.b.note ? `<p class="nt">${esc(i.x.b.note)}</p>` : ""));
       if (i.k === "slot") { SL = i; REFRESH = () => { const st = sheet.scrollTop; document.getElementById("sheet-body").innerHTML = slotSheet(); sheet.scrollTop = st; }; return openSheet(slotSheet()); }
       if (i.k === "free" || i.k === "wait") { return openPlanner(view, PL.cat && PL.cat !== "trip" ? PL.cat : "dinner", i.x); } return openSheet(i.m ? moveSheet(i.m) : staySheet(i.stay)); }
@@ -1621,7 +1806,7 @@ document.addEventListener("click", e => {
   if (t.closest("#backPill")) { haptic(); return openSide(); }
   if (t.closest("#titlePill")) { haptic(); openSheet(menuSheet()); startCycle(view); return; }
   if (t.closest("[data-today]")) { e.preventDefault(); haptic(); closeSheet(); return selectDay(today); }
-  const mi = t.closest("[data-menu]"); if (mi) { haptic(); const k = mi.dataset.menu; if (k === "stay") { const s = stayOn(view); return openSheet(s ? staySheet(s) : tripSheet()); } if (k === "wx") return openSheet(wxSheet()); if (k === "ideas") { const h = view === today ? new Date().getHours() : 10; return openPlanner(view, h < 11 ? "coffee" : h < 14 ? "dinner" : h < 17 ? "see" : h < 21 ? "dinner" : "drinks", null); } if (k === "tasks") return openSheet(tasksSheet()); if (k === "trip") return openSheet(tripSheet()); }
+  const mi = t.closest("[data-menu]"); if (mi) { haptic(); const k = mi.dataset.menu; if (k === "stay") { const s = stayOn(view); return openSheet(s ? staySheet(s) : tripSheet()); } if (k === "wx") return openSheet(wxSheet()); if (k === "ideas") { const h = view === today ? new Date().getHours() : 10; return openPlanner(view, h < 11 ? "coffee" : h < 14 ? "dinner" : h < 17 ? "see" : h < 21 ? "dinner" : "drinks", null); } if (k === "tasks") return openSheet(tasksSheet()); if (k === "plan") return openAsk(view); if (k === "trip") return openSheet(tripSheet()); }
   if (t.closest("[data-open-trip]")) { haptic(); return openSheet(tripSheet()); }
 });
 document.addEventListener("keydown", e => {
