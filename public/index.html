@@ -1265,8 +1265,11 @@ function endDrag() {
   const stale = performance.now() - p.lt > 80, v = stale ? 0 : (p.v || 0);
   if (MODE === "multi") { wVel = Math.max(-1.2, Math.min(1.2, v)); if (Math.abs(wVel) < 0.02) wTarget = Math.round(Math.max(0, Math.min(wN(), wPos))); }
   else {
-    const go = Math.abs(p.dx) > pageW() * 0.28 || Math.abs(v) > 0.12; const dir = (go ? (p.dx < 0 ? 1 : -1) : 0);
-    settleTo(Math.round(p.pos0) + dir, v, 8); return;
+    /* goes to the next day once the date has started to slide out from under the circle (about a sixth of a day), or on a flick;
+       short of that it returns, briskly */
+    const off = wPos - Math.round(p.pos0), go = Math.abs(off) > 0.17 || (Math.abs(v) > 0.08 && Math.sign(v) === Math.sign(off));
+    const dir = go ? Math.sign(off) : 0;
+    settleTo(Math.round(p.pos0) + dir, v, go ? 8 : 12); return;
   }
   wKick();
 }
