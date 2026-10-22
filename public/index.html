@@ -469,6 +469,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev.travel.rail, .ev.change.rail, .mev.travel.rail, .mev.change.rail { --c: #e4572e; }
 .ev.get, .mev.get { --c: #4f7396; background: color-mix(in srgb, var(--c) 15%, var(--bg)); color: color-mix(in srgb, var(--c) 62%, var(--ink)); }
 .ev.get.co, .mev.get.co { --c: #8e8e93; }
+.ev.mine.wrap .tt { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.25; }
 .ev.get.wrap .tt { white-space: normal; line-height: 1.25; align-items: flex-start; } .ev.get.wrap .tt .ic { margin-top: 2px; }
 .ev.travel.rail, .mev.travel.rail { background: color-mix(in srgb, var(--c) 15%, var(--bg)); color: color-mix(in srgb, var(--c) 62%, var(--ink)); }
 .ev.change.rail, .mev.change.rail { background: color-mix(in srgb, var(--c) 9%, var(--bg)); color: color-mix(in srgb, var(--c) 62%, var(--ink)); }
@@ -927,16 +928,16 @@ const placeTo = m => m.mode === "Train" ? (m.toSt || m.to) : (AIRN[m.toQ] || m.t
 function events(iso, D) {
   const list = [], now = Date.now(), nm = nowMin(), isToday = iso === today;
   D.segs.forEach((x, i) => {
-    const m = x.m; let tt, sub = "", ref = "";
+    const m = x.m; let tt, sub = "", ref = "", act = "";
     if (x.k === "travel") { tt = `${m.from} → ${m.to}`;  sub = `${m.code}${m.guess ? ", time is a guess" : ""}`; ref = m.ref || ""; }
-    else if (x.k === "get" && (x.dep || x.coOnly)) { tt = x.coOnly ? `Check out · ${x.stay.hotel}` : `${x.co ? "Check out · " : x.collect ? "Collect bags · " : ""}${x.from ? x.from.hotel : "Home"} → ${placeFrom(m)}`; sub = x.coOnly ? (x.stay.store === false ? "No luggage storage listed" : "Leave bags at the hotel") : ""; }
-    else if (x.k === "get") { tt = `${x.bags ? "Drop bags · " : x.checkin ? "Check in · " : ""}${x.arr && x.stay ? `${placeTo(x.arr)} → ${x.stay.hotel}` : x.stay ? x.stay.hotel : placeFrom(m)}`; sub = x.bags ? `Check in from ${s12(x.stay.ci)}` : x.checkin ? `Check in from ${s12(x.stay.ci)}` : ""; }
-    else if (x.k === "change") { tt = `${placeFrom(m)} · ${x.term ? (m.mode === "Flight" ? "Check in" : "Board") : /^Layover/.test(x.title) ? "Layover" : "Change trains"}`; sub = x.term ? (m.mode === "Flight" ? "Bags and security" : "Find the platform") : ""; }
+    else if (x.k === "get" && (x.dep || x.coOnly)) { tt = x.coOnly ? x.stay.hotel : `${x.from ? x.from.hotel : "Home"} → ${placeFrom(m)}`; act = x.coOnly ? (x.stay.store === false ? "Check out" : "Check out, leave bags") : x.co ? "Check out" : x.collect ? "Collect bags" : ""; sub = x.coOnly && x.stay.store === false ? "No luggage storage listed" : ""; }
+    else if (x.k === "get") { tt = x.arr && x.stay ? `${placeTo(x.arr)} → ${x.stay.hotel}` : x.stay ? x.stay.hotel : placeFrom(m); act = x.bags ? "Drop bags" : x.checkin ? "Check in" : ""; sub = x.bags ? `Check in from ${s12(x.stay.ci)}` : ""; }
+    else if (x.k === "change") { tt = placeFrom(m); act = x.term ? (m.mode === "Flight" ? "Check in, bags, security" : "Find the platform, board") : /^Layover/.test(x.title) ? "Layover" : "Change trains"; }
     else if (x.k === "booked") { tt = x.b.t; sub = x.b.where || ""; }
-    else if (x.k === "pack") { tt = "Pack suitcases"; sub = x.early ? `Leaving ${t12(x.tLeave)} tomorrow` : `Before check-out · ${x.stay.hotel}`; }
+    else if (x.k === "pack") { tt = x.stay.hotel; act = "Pack suitcases"; sub = x.early ? `Leaving ${t12(x.tLeave)} tomorrow` : ""; }
     else if (x.k === "wait") { tt = "Free, with bags"; sub = x.stay && x.stay.store ? "Hotel can hold bags" : x.stay && x.stay.store === false ? "No luggage storage listed" : ""; }
     else { tt = x.title === "Free day" ? "Free all day" : x.title; sub = x.sub || ""; }
-    list.push({ k: x.k, s: x.s, e: x.e, tt, sub, ref, m, stay: x.stay, x, done: isToday && x.e < nm && x.k !== "free" && x.k !== "wait", cd: isToday && x.k === "travel" && m.depTs > now && !x.overnight ? m.depTs - now : 0 });
+    list.push({ k: x.k, s: x.s, e: x.e, tt, sub, ref, act, m, stay: x.stay, x, done: isToday && x.e < nm && x.k !== "free" && x.k !== "wait", cd: isToday && x.k === "travel" && m.depTs > now && !x.overnight ? m.depTs - now : 0 });
   });
   { const sl = slotsFor(iso, D), rebuilt = [];
     list.forEach(ev => { if (ev.k === "free" || ev.k === "wait") freePieces(ev.x, sl).forEach(([a, b]) => rebuilt.push({ ...ev, s: a, e: b, tt: ev.k === "wait" ? "Free, with bags" : "Free time", piece: true })); else rebuilt.push(ev); });
@@ -987,8 +988,8 @@ function renderDayContent(iso) {
       return;
     }
     if (ev.k === "mine") {
-      const p = ev.mp, [a1, a2] = (p.txt || "").split("\x1f");
-      html += `<button class="ev mine${short ? " short" : ""} press" data-i="${i}" style="--c:${KCOL[p.k] || "#8e8e93"};top:${top + 12}px;height:${h}px"><span class="tt">${esc(p.l)}</span>${short ? "" : `<span class="tm">${t12(ev.s)} – ${t12(ev.e)}</span>`}${a1 && h >= 60 ? `<span class="pk">${esc(a1)}</span>` : ""}${a2 && h >= 110 ? `<span class="hk">${esc(a2)}</span>` : ""}</button>`;
+      const p = ev.mp, [a1, a2] = (p.txt || "").split("\x1f"), cut = (a1 || "").lastIndexOf(" · "), place = cut > 0 ? a1.slice(0, cut) : a1, walkT = cut > 0 ? a1.slice(cut + 3) : "";
+      html += `<button class="ev mine${short ? " short" : ""}${h >= 58 ? " wrap" : ""} press" data-i="${i}" style="--c:${KCOL[p.k] || "#8e8e93"};top:${top + 12}px;height:${h}px"><span class="tt">${esc(place || p.l)}</span><span class="tm">${place ? `${esc(p.l)} · ` : ""}${t12(ev.s)} – ${t12(ev.e)}${walkT && !short ? ` · ${esc(walkT)}` : ""}</span>${a2 && h >= 96 ? `<span class="hk">${esc(a2)}</span>` : ""}</button>`;
       return;
     }
     if (ev.k === "prompt") {
@@ -1002,7 +1003,7 @@ function renderDayContent(iso) {
     }
     const time = ev.k === "mark" ? t12(ev.s) : ev.x && ev.x.overnight ? `until ${t12(ev.e)}` : `${t12(ev.s)} – ${t12(ev.e)}`;
     const durTxt = (ev.k === "free" || ev.k === "wait") ? ` · ${dur(ev.e - ev.s)}` : "";
-    html += `<button class="ev ${ev.k}${ev.k === "get" && ev.x.coOnly ? " co" : ""}${ev.k === "get" && h >= 58 ? " wrap" : ""}${ev.m && ev.m.mode === "Train" && (ev.k === "travel" || ev.k === "change") ? " rail" : ""}${short ? " short" : ""}${ev.done ? " done" : ""} press" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${ev.k === "travel" ? `<i class="ic ${ev.m.mode === "Flight" ? "fly" : "rail"}"></i>` : ev.k === "get" && !ev.x.coOnly ? `<i class="ic car"></i>` : ""}${esc(ev.tt)}${durTxt}</span><span class="tm">${time}${ev.cd && !short ? ` · <b class="cd">${countdown(ev.cd)}</b>` : ""}${!short && ev.sub && h >= 60 && h < 80 ? ` · ${esc(ev.sub)}` : ""}</span>${!short && ev.sub && h >= 80 ? `<span class="tm">${esc(ev.sub)}</span>` : ""}${!short && ev.ref && h >= 100 ? `<span class="ref" data-show-ref="${ev.ref}" data-show-l="${esc(ev.m.code)}">${ev.ref} ›</span>` : ""}</button>`;
+    html += `<button class="ev ${ev.k}${ev.k === "get" && ev.x.coOnly ? " co" : ""}${ev.k === "get" && h >= 58 ? " wrap" : ""}${ev.m && ev.m.mode === "Train" && (ev.k === "travel" || ev.k === "change") ? " rail" : ""}${short ? " short" : ""}${ev.done ? " done" : ""} press" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${ev.k === "travel" ? `<i class="ic ${ev.m.mode === "Flight" ? "fly" : "rail"}"></i>` : ev.k === "get" && !ev.x.coOnly ? `<i class="ic car"></i>` : ""}${esc(ev.tt)}${durTxt}</span><span class="tm">${ev.act ? `${esc(ev.act)} · ` : ""}${time}${ev.cd && !short ? ` · <b class="cd">${countdown(ev.cd)}</b>` : ""}${!short && ev.sub && h >= 60 && h < 80 ? ` · ${esc(ev.sub)}` : ""}</span>${!short && ev.sub && h >= 80 ? `<span class="tm">${esc(ev.sub)}</span>` : ""}${!short && ev.ref && h >= 100 ? `<span class="ref" data-show-ref="${ev.ref}" data-show-l="${esc(ev.m.code)}">${ev.ref} ›</span>` : ""}</button>`;
   });
   html += `</div>`;
   D.marks.forEach((mk, mi) => { html += `<div class="mk" style="top:${y(mk.t)}px"><button class="press" data-mark="${mi}"><b>${mk.kind === "in" ? "Check in" : "Check out"} ${t12(mk.t)}</b><span>${esc(mk.stay.hotel)}</span></button></div>`; });
@@ -1035,7 +1036,7 @@ function renderMultiContent(iso) {
     evs.forEach((ev, i) => {
       if (ev.k === "free" || ev.k === "prompt" || ev.k === "wait") return;
       const top = MY(ev.s), h = Math.max(MY(ev.e) - MY(ev.s) - 2, 18);
-      html += `<button class="mev ${ev.k}${ev.k === "get" && ev.x && ev.x.coOnly ? " co" : ""}${ev.m && ev.m.mode === "Train" && (ev.k === "travel" || ev.k === "change") ? " rail" : ""}${ev.slot ? " " + ev.slot.k : ""}${ev.done ? " done" : ""}${h < 34 ? " short" : ""} press" data-mday="${d}" data-mi="${i}" style="${ev.k === "mine" ? `--c:${KCOL[ev.mp.k] || "#8e8e93"};` : ""}top:${top}px;height:${h}px"><b>${esc(ev.tt)}</b>${h >= 44 ? `<span>${t12(ev.s)}</span>` : ""}</button>`;
+      html += `<button class="mev ${ev.k}${ev.k === "get" && ev.x && ev.x.coOnly ? " co" : ""}${ev.m && ev.m.mode === "Train" && (ev.k === "travel" || ev.k === "change") ? " rail" : ""}${ev.slot ? " " + ev.slot.k : ""}${ev.done ? " done" : ""}${h < 34 ? " short" : ""} press" data-mday="${d}" data-mi="${i}" style="${ev.k === "mine" ? `--c:${KCOL[ev.mp.k] || "#8e8e93"};` : ""}top:${top}px;height:${h}px"><b>${esc(ev.k === "mine" ? ((ev.mp.txt || "").split("\x1f")[0].replace(/ · [^·]*$/, "") || ev.tt) : ev.tt)}</b>${h >= 44 ? `<span>${ev.act ? esc(ev.act) + " · " : ev.k === "mine" && ev.mp.txt ? esc(ev.mp.l) + " · " : ""}${t12(ev.s)}</span>` : ""}</button>`;
     });
     if (d === today) html += `<div class="mnow" style="top:${MY(nm)}px"></div>`;
     html += `</div>`;
