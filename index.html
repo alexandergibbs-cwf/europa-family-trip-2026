@@ -150,6 +150,16 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .pill.today[disabled] { opacity: .5; }
 
 /* Sheets */
+.side { position: fixed; top: 0; bottom: 0; left: 0; width: min(78vw, 320px); z-index: 42; background: var(--panel); padding: calc(env(safe-area-inset-top, 0px) + 18px) 12px calc(env(safe-area-inset-bottom, 0px) + 90px) max(12px, env(safe-area-inset-left, 0px)); overflow-y: auto; overscroll-behavior: contain; transform: translateX(-104%); box-shadow: 8px 0 40px rgba(0,0,0,.15); }
+.side-h { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; padding: 6px 8px 14px; }
+.side .crow { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; width: 100%; border: 0; background: none; text-align: left; padding: 12px 10px; border-radius: 12px; cursor: pointer; }
+.side .crow .a { font-size: 17px; font-weight: 600; line-height: 1.2; }
+.side .crow .b { font-size: 13px; color: var(--sub); margin-top: 1px; }
+.side .crow .r { font-size: 12px; color: var(--sub); text-align: right; font-variant-numeric: tabular-nums; }
+.side .crow.cur { background: var(--card); }
+.side .crow.cur .a::after { content: "Now"; font-size: 11px; font-weight: 700; color: #fff; background: var(--red); border-radius: 980px; padding: 2px 7px; margin-left: 8px; vertical-align: 2px; }
+.side .crow.past { opacity: .45; }
+.side .crow.on { outline: 2px solid var(--blue); outline-offset: -2px; }
 .scrim { position: fixed; inset: 0; z-index: 40; background: rgba(0, 0, 0, 0.32); opacity: 0; pointer-events: none; transition: opacity 300ms var(--ease-out); }
 .scrim.open { opacity: 1; pointer-events: auto; }
 .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 41; max-width: 520px; margin: 0 auto; background: var(--panel); border-radius: 26px 26px 0 0; padding: 8px max(16px, env(safe-area-inset-right, 0px)) calc(88px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); transform: translateY(105%); max-height: 90vh; overflow-y: auto; overscroll-behavior: contain; }
@@ -266,6 +276,10 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 </div>
 <div class="pager" id="pager"><div id="daycontent"></div></div>
 <div class="scrim" id="scrim"></div>
+<aside class="side" id="side" aria-label="Cities" hidden>
+  <div class="side-h"><span>Cities</span></div>
+  <div id="side-body"></div>
+</aside>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden><div class="grab"></div><div id="sheet-body"></div></div>
 <div class="show" id="show" role="dialog" aria-modal="true" hidden></div>
 <div class="sr" aria-live="polite" id="live"></div>
@@ -680,7 +694,7 @@ function selectDay(iso, dir, syncWeek = true) {
 }
 const pager = document.getElementById("pager");
 let pd = null;
-pager.addEventListener("pointerdown", e => { if (e.pointerType === "mouse" && e.button) return; pd = { x: e.clientX, y: e.clientY, t: performance.now(), mode: null, dx: 0 }; });
+pager.addEventListener("pointerdown", e => { if (e.pointerType === "mouse" && e.button) return; if (e.clientX < 24) { pd = null; openSide(); return; } pd = { x: e.clientX, y: e.clientY, t: performance.now(), mode: null, dx: 0 }; });
 pager.addEventListener("pointermove", e => {
   if (!pd) return; const dx = e.clientX - pd.x, dy = e.clientY - pd.y;
   if (!pd.mode) { if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.2) { pd.mode = "h"; try { pager.setPointerCapture(e.pointerId); } catch (er) {} } else if (Math.abs(dy) > 10) { pd = null; return; } else return; }
@@ -719,7 +733,23 @@ function closeSheet(from = 0) {
   sAnim = sheet.animate([{ transform: `translateY(${from}px)` }, { transform: "translateY(105%)" }], { duration: reduce() ? 1 : 260, easing: "cubic-bezier(0.32, 0.72, 0, 1)", fill: "forwards" });
   sAnim.onfinish = () => { sheet.hidden = true; }; lastFocus?.focus?.({ preventScroll: true }); renderHeader(false);
 }
-scrim.onclick = () => closeSheet();
+const side = document.getElementById("side"); let sideAnim = null;
+function openSide() {
+  const cur = STAYS.find(s => s.in <= view && view < s.out);
+  document.getElementById("side-body").innerHTML = STAYS.map(s => `<button class="crow press${s.out <= today ? " past" : ""}${s.in <= today && today < s.out ? " cur" : ""}${s === cur ? " on" : ""}" data-goto="${s.in}"><span><div class="a">${esc(s.city)}</div><div class="b">${esc(s.hotel)}</div></span><span class="r">${dShort(s.in)} – ${dShort(s.out)}<br>${nights(s)} nights</span></button>`).join("");
+  side.hidden = false; scrim.classList.add("open"); sideAnim?.cancel();
+  sideAnim = side.animate([{ transform: "translateX(-104%)" }, { transform: "translateX(0)" }], { duration: reduce() ? 1 : 520, easing: EASE, fill: "forwards" });
+}
+function closeSide(from = 0) {
+  if (side.hidden) return; scrim.classList.remove("open"); sideAnim?.cancel();
+  sideAnim = side.animate([{ transform: `translateX(${from}px)` }, { transform: "translateX(-104%)" }], { duration: reduce() ? 1 : 240, easing: "cubic-bezier(0.32, 0.72, 0, 1)", fill: "forwards" });
+  sideAnim.onfinish = () => { side.hidden = true; };
+}
+let sdrag = null;
+side.addEventListener("touchstart", e => { sdrag = { x: e.touches[0].clientX, t: Date.now(), dx: 0 }; }, { passive: true });
+side.addEventListener("touchmove", e => { if (!sdrag) return; let dx = e.touches[0].clientX - sdrag.x; if (dx > 0) dx = Math.pow(dx, 0.7); sdrag.dx = dx; sideAnim?.cancel(); side.style.transform = `translateX(${dx}px)`; }, { passive: true });
+side.addEventListener("touchend", () => { if (!sdrag) return; const { dx, t } = sdrag, v = -dx / (Date.now() - t); sdrag = null; side.style.transform = ""; if (dx < -80 || (v > 0.11 && dx < -15)) closeSide(dx); else sideAnim = side.animate([{ transform: `translateX(${dx}px)` }, { transform: "translateX(0)" }], { duration: 480, easing: EASE, fill: "forwards" }); });
+scrim.onclick = () => { closeSheet(); closeSide(); };
 scrim.addEventListener("touchmove", e => { if (e.cancelable) e.preventDefault(); }, { passive: false });
 let drag = null;
 sheet.addEventListener("touchstart", e => { if (sheet.scrollTop <= 0) drag = { y: e.touches[0].clientY, t: Date.now(), dy: 0 }; }, { passive: true });
@@ -926,9 +956,9 @@ document.addEventListener("click", e => {
       if (i.k === "slot") { SL = i; REFRESH = () => { const st = sheet.scrollTop; document.getElementById("sheet-body").innerHTML = slotSheet(); sheet.scrollTop = st; }; return openSheet(slotSheet()); }
       if (i.k === "free" || i.k === "wait") { return openPlanner(view, PL.cat && PL.cat !== "trip" ? PL.cat : "dinner", i.x); } return openSheet(i.m ? moveSheet(i.m) : staySheet(i.stay)); }
   const st = t.closest("[data-stay]"); if (st) { haptic(); return openSheet(staySheet(STAYS[+st.dataset.stay])); }
-  const gt = t.closest("[data-goto]"); if (gt) { closeSheet(); return selectDay(gt.dataset.goto); }
+  const gt = t.closest("[data-goto]"); if (gt) { closeSheet(); closeSide(); return selectDay(gt.dataset.goto); }
   const wd = t.closest(".wd"); if (wd) return selectDay(wd.dataset.d, 0, false);
-  if (t.closest("#backPill")) { haptic(); return openSheet(tripSheet()); }
+  if (t.closest("#backPill")) { haptic(); return openSide(); }
   if (t.closest("#infoPill")) { haptic(); return openSheet(menuSheet()); }
   if (t.closest("[data-today]")) { haptic(); return selectDay(today); }
   const mi = t.closest("[data-menu]"); if (mi) { haptic(); const k = mi.dataset.menu; if (k === "stay") { const s = stayOn(view); return openSheet(s ? staySheet(s) : tripSheet()); } if (k === "wx") return openSheet(wxSheet()); if (k === "ideas") return openPlanner(view, PL.cat && PL.cat !== "trip" ? PL.cat : "dinner", null); if (k === "tasks") return openSheet(tasksSheet()); if (k === "trip") return openSheet(tripSheet()); }
@@ -936,14 +966,14 @@ document.addEventListener("click", e => {
 });
 document.addEventListener("keydown", e => {
   if ((e.key === "Enter" || e.key === " ") && e.target.matches?.(".ev[role=button]")) { e.preventDefault(); e.target.click(); return; }
-  if (e.key === "Escape") { if (!show.hidden) closeShow(); else closeSheet(); return; }
+  if (e.key === "Escape") { if (!show.hidden) closeShow(); else { closeSheet(); closeSide(); } return; }
   if (!sheet.hidden || !show.hidden || e.target.closest("input")) return;
   if (e.key === "ArrowRight") selectDay(addDays(view, 1)); if (e.key === "ArrowLeft") selectDay(addDays(view, -1));
 });
 function tick() {
   const t = isoLocal();
   if (t !== today) { const f = view === today; today = t; renderWeek(); if (f) view = t; showWeek(weekOf(view), false); }
-  if (sheet.hidden && show.hidden && !pd) { const y = scrollY; renderHeader(false); content.innerHTML = renderDayContent(view); window.scrollTo(0, y); }
+  if (sheet.hidden && show.hidden && side.hidden && !pd) { const y = scrollY; renderHeader(false); content.innerHTML = renderDayContent(view); window.scrollTo(0, y); }
 }
 renderWeek(); renderHeader(false); measureTop(); content.innerHTML = renderDayContent(view);
 refreshLive();
