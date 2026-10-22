@@ -406,6 +406,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev.c-day { --c: #34c759; }
 .ev.c-shop { --c: #30b0c7; }
 .ev.c-trip { --c: #af52de; }
+.ev.booked, .mev.booked { --c: #ff2d55; }
 .ev.c-cafes { --c: #a2845e; }
 .ev.c-drinks { --c: #5856d6; }
 .ev.c-dinner, .ev.slot.dinner { --c: #ff2d55; }
@@ -520,6 +521,10 @@ const MOVES = [
   { id:"f10", mode:"Flight", from:"Doha", to:"Perth", code:"VA6128", carrier:"Qatar Airways", dep:["2026-11-20","02:40",TZ.doh], arr:["2026-11-20","18:45",TZ.per], ref:"KJCTJU" },
 ];
 
+/* things booked that aren't travel or hotels */
+const EVENTS = [
+  { on: "2026-10-24", s: "17:00", e: "19:00", t: "Sunset dinner", kind: "dinner", note: "Last night in Santorini." },
+];
 const HEADS = [
   { on:["2026-10-21","2026-10-22"], w:1, t:"Santorini bags are 15kg checked plus 8kg cabin.", d:"Small bag for 3 nights. The big suitcases are already at 11 Enteka." },
   { on:["2026-10-29","2026-10-30"], w:1, t:"The Florence train leaves at 12:30 PM.", d:"The ticket still says 12:36 PM. Be on the platform early." },
@@ -643,6 +648,11 @@ function buildDay(iso) {
       }
     } else if (last.aDate === iso && !inn && prev < DE) { segs.push({ s: prev, e: DE, k: "free", title: "Home", sub: "Welcome back" }); freeFrom = prev; }
   } else if (s) segs.push({ s: cur, e: DE, k: "free", title: "Free day", sub: `Nothing booked in ${s.city}` });
+  EVENTS.filter(b => b.on === iso).forEach(b => {
+    const hm = x => +x.slice(0, 2) * 60 + +x.slice(3, 5), s = hm(b.s), e = hm(b.e), keep = [];
+    segs.forEach(x => { if ((x.k === "free" || x.k === "wait") && x.s < e && x.e > s) { if (x.s < s) keep.push({ ...x, e: s }); if (x.e > e) keep.push({ ...x, s: e }); } else keep.push(x); });
+    segs.length = 0; segs.push(...keep, { s, e, k: "booked", b }); segs.sort((a, c) => a.s - c.s);
+  });
   const lo = Math.floor(Math.min(DS, ...segs.map(x => x.s)) / 60) * 60;
   const hi = Math.min(1440, Math.ceil(Math.max(DE, ...segs.map(x => x.e)) / 60) * 60);
   return { segs, marks, lo, hi, out, inn, s, deps, leaveT, freeFrom, roomsAt };
@@ -869,6 +879,7 @@ function events(iso, D) {
     else if (x.k === "get" && (x.dep || x.coOnly)) { const to = m ? (m.mode === "Flight" ? "the airport" : "the station") : ""; tt = x.coOnly ? (x.stay.store === false ? "Check out" : "Check out, leave bags") : x.co ? `Check out, to ${to}` : x.collect ? `Collect bags, to ${to}` : `To ${to}`; sub = x.coOnly ? (x.stay.store === false ? `${x.stay.hotel} · no luggage storage listed` : x.stay.hotel) : (m.fromQ || m.from); }
     else if (x.k === "get") { tt = x.checkin ? "To the hotel, check in" : x.bags ? "To the hotel, drop bags" : x.stay ? "To the hotel" : `To ${m.mode === "Flight" ? "the airport" : "the station"}`; sub = x.bags ? `${x.stay.hotel} · check in from ${s12(x.stay.ci)}` : x.checkin ? `${x.stay.hotel} · check in from ${s12(x.stay.ci)}` : x.stay ? x.stay.hotel : (m.fromQ || m.from); }
     else if (x.k === "change") { tt = x.title; }
+    else if (x.k === "booked") { tt = x.b.t; sub = x.b.where || ""; }
     else if (x.k === "wait") { tt = "Free, with bags"; sub = x.stay && x.stay.store ? "Hotel can hold bags" : x.stay && x.stay.store === false ? "No luggage storage listed" : ""; }
     else { tt = x.title === "Free day" ? "Free all day" : x.title; sub = x.sub || ""; }
     list.push({ k: x.k, s: x.s, e: x.e, tt, sub, ref, m, stay: x.stay, x, done: isToday && x.e < nm && x.k !== "free" && x.k !== "wait", cd: isToday && x.k === "travel" && m.depTs > now && !x.overnight ? m.depTs - now : 0 });
@@ -1333,7 +1344,8 @@ const SCENES = [
 function promptsFor(iso, free) {
   const out = [], pl = getPlan(iso);
   SCENES.forEach((sc, si) => {
-    if (sc.some(p => p.cat === "trip") && !placesFor(iso, "trip").length) return; /* no day trip without somewhere to go */
+    if (sc.some(p => p.cat === "trip") && !placesFor(iso, "trip").length) return;
+    const booked = EVENTS.filter(b => b.on === iso); if (booked.some(b => b.kind === "dinner")) sc = sc.filter(p => p.k !== "dinner"); /* no day trip without somewhere to go */
     const got = [];
     sc.forEach((pr, step) => free.forEach(f => {
       const s = Math.max(Math.ceil(f.s / 60) * 60, pr.s), e = Math.min(Math.floor(f.e / 60) * 60, pr.e); if (e - s < (pr.min || 60)) return;
@@ -1499,6 +1511,7 @@ document.addEventListener("click", e => {
   const mk = t.closest("[data-mark]"); if (mk) { haptic(); return openSheet(staySheet(CUR.marks[+mk.dataset.mark].stay)); }
   const pp = t.closest("[data-prompt]"); if (pp) { haptic(); const i = ITEMS[+pp.dataset.i]; return openPlanner(view, pp.dataset.prompt, { s: i.s, e: i.e, k: "free" }); }
   const ev = t.closest("[data-i]"); if (ev) { haptic(); const i = ITEMS[+ev.dataset.i]; if (i.k === "plan") return openSheet(planItemSheet(i));
+      if (i.k === "booked") return openSheet(head(esc(i.x.b.t), `${dDay(i.x.b.on)} · ${s12(i.x.b.s)} – ${s12(i.x.b.e)}`) + (i.x.b.note ? `<p class="nt">${esc(i.x.b.note)}</p>` : ""));
       if (i.k === "slot") { SL = i; REFRESH = () => { const st = sheet.scrollTop; document.getElementById("sheet-body").innerHTML = slotSheet(); sheet.scrollTop = st; }; return openSheet(slotSheet()); }
       if (i.k === "free" || i.k === "wait") { return openPlanner(view, PL.cat && PL.cat !== "trip" ? PL.cat : "dinner", i.x); } return openSheet(i.m ? moveSheet(i.m) : staySheet(i.stay)); }
   const st = t.closest("[data-stay]"); if (st) { haptic(); return openSheet(staySheet(STAYS[+st.dataset.stay])); }
