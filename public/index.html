@@ -1830,7 +1830,13 @@ refreshLive();
 requestAnimationFrame(() => { measureTop(); padWheel(); centreDay(view, false); scrollToDay(); });
 addEventListener("resize", () => { measureTop(); padWheel(); centreDay(view, false); });
 setInterval(tick, 60000);
-document.addEventListener("visibilitychange", () => { if (!document.hidden) { tick(); refreshLive(); } });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { tick(); refreshLive(); checkBuild(); } });
+/* a new version was pushed: reload when the app comes back to the front (the home-screen app keeps old pages alive) */
+let BUILD = null;
+function checkBuild() {
+  try { fetch(location.pathname, { method: "HEAD", cache: "no-store" }).then(r => { const t = r.headers.get("etag") || r.headers.get("last-modified"); if (!t) return; if (BUILD && t !== BUILD && sheet.hidden) location.reload(); BUILD = BUILD || t; }).catch(() => {}); } catch (e) {}
+}
+checkBuild(); setInterval(() => { if (!document.hidden) checkBuild(); }, 5 * 60000);
 })();
 </script>
 </body></html>
