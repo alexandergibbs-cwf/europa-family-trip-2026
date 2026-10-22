@@ -563,17 +563,16 @@ function buildDay(iso) {
     const last = deps[deps.length - 1];
     if (last.aDate === iso && inn) {
       const at = Math.min(prev + (last.xfer || 45), 1439);
-      segs.push({ s: prev, e: at, k: "get", title: "To the hotel", sub: inn.hotel, stay: inn });
       const ci = mins(inn.ci);
       if (ci - at >= 75) {
-        segs.push({ s: at, e: at + 30, k: "wait", title: iso === "2026-10-25" ? "Collect suitcases from Bellén, then drop everything at 11 Enteka" : "Drop off suitcases at the hotel", sub: "", stay: inn, pickup: iso === "2026-10-25" });
+        segs.push({ s: prev, e: at + 30, k: "get", title: "To the hotel", sub: inn.hotel, stay: inn, bags: true });
         if (ci - (at + 30) >= 30) segs.push({ s: at + 30, e: ci, k: "free", title: "Free", sub: `Until check-in at ${t12(ci)}` });
         marks.push({ t: ci, kind: "in", stay: inn });
         segs.push({ s: ci, e: Math.max(DE, ci + 60), k: "free", title: "Free", sub: `Evening in ${inn.city}` });
         freeFrom = at; roomsAt = ci;
       } else {
         const t = Math.max(at, ci);
-        marks.push({ t, kind: "in", stay: inn });
+        segs.push({ s: prev, e: t, k: "get", title: "To the hotel", sub: inn.hotel, stay: inn, checkin: true });
         if (t < DE) segs.push({ s: t, e: DE, k: "free", title: "Free", sub: `Evening in ${inn.city}` });
         freeFrom = t;
       }
@@ -766,7 +765,7 @@ function events(iso, D) {
   D.segs.forEach((x, i) => {
     const m = x.m; let tt, sub = "", ref = "";
     if (x.k === "travel") { tt = `${m.from} → ${m.to}`;  sub = `${m.code}${m.guess ? ", time is a guess" : ""}`; ref = m.ref || ""; }
-    else if (x.k === "get") { const pickup = x.stay && iso === "2026-10-25"; tt = pickup ? "Collect suitcases from Bellén, then to 11 Enteka" : x.stay ? "To the hotel" : `To ${m.mode === "Flight" ? "the airport" : "the station"}`; sub = pickup ? "Taxi via Bellén Athens Hotel" : x.stay ? x.stay.hotel : (m.fromQ || m.from); }
+    else if (x.k === "get") { const pickup = x.stay && iso === "2026-10-25"; tt = pickup ? "Collect suitcases from Bellén, then to 11 Enteka" : x.checkin ? "To the hotel, check in" : x.bags ? "To the hotel, drop off suitcases" : x.stay ? "To the hotel" : `To ${m.mode === "Flight" ? "the airport" : "the station"}`; sub = pickup ? "Taxi via Bellén Athens Hotel" : x.checkin ? `${x.stay.hotel} · check in from ${s12(x.stay.ci)}` : x.stay ? x.stay.hotel : (m.fromQ || m.from); }
     else if (x.k === "change") { tt = x.title; }
     else if (x.k === "wait") { tt = "Free, with bags"; sub = x.stay && x.stay.store ? "Hotel can hold bags" : x.stay && x.stay.store === false ? "No luggage storage listed" : ""; }
     else { tt = x.title === "Free day" ? "Free all day" : x.title; sub = x.sub || ""; }
