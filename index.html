@@ -90,13 +90,16 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .grid { position: relative; height: calc(var(--hour) * 24 + 24px); margin-top: 8px; }
 .hl { position: absolute; left: 0; right: 0; height: 0; }
 .hl::after { content: ""; position: absolute; left: 64px; right: 0; border-top: 0.5px solid var(--grid); }
-.hl span { position: absolute; right: calc(100% - 56px); top: -9px; font-size: 15px; color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.hl span { position: absolute; right: calc(100% - 56px); top: -8px; font-size: 12px; color: var(--sub); white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: 0; }
 .hl span small { font-size: 12px; color: var(--sub); margin-left: 2px; }
 .hl.mid span { font-size: 12px; color: var(--sub); font-weight: 600; top: -8px; }
 .lane { position: absolute; left: 68px; right: 6px; top: 0; bottom: 0; }
 .ev { position: absolute; left: 0; right: 0; border: 0; text-align: left; border-radius: 6px; padding: 4px 8px 4px 10px; overflow: hidden; cursor: pointer; display: flex; flex-direction: column; letter-spacing: -0.01em; }
 .ev::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3.5px; background: var(--c); border-radius: 6px 0 0 6px; }
-.ev .tt { font-size: 14px; font-weight: 600; line-height: 1.22; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev .tt { font-size: 14px; font-weight: 600; line-height: 1.22; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px; }
+.ic { display: inline-block; width: 14px; height: 14px; flex: none; background: currentColor; -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; }
+.ic.fly { --m: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z'/%3E%3C/svg%3E"); }
+.ic.rail { --m: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 3h12a2 2 0 0 1 2 2v10a3 3 0 0 1-3 3h-1l2 3h-2l-2-3H10l-2 3H6l2-3H7a3 3 0 0 1-3-3V5a2 2 0 0 1 2-2zm0 3v5h12V6H6zm2 8a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm8 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z'/%3E%3C/svg%3E"); }
 .ev .tm { font-size: 12.5px; opacity: .85; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ev .ref { font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .04em; opacity: .9; margin-top: 2px; }
 .ev.short { flex-direction: row; align-items: center; gap: 6px; padding-block: 0; }
@@ -125,9 +128,9 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .grid .hl.hide span { visibility: hidden; }
 .grid .hl.hide::after { opacity: .5; }
 .note { font-size: 12px; color: var(--sub); text-align: center; padding: 6px 24px 60px; line-height: 1.4; }
-.mrow { display: grid; grid-template-columns: 34px 1fr auto; align-items: center; gap: 10px; width: 100%; border: 0; background: var(--card); text-align: left; padding: 13px 16px; cursor: pointer; }
-.mrow + .mrow { box-shadow: inset 60px 0.5px 0 var(--card), inset 0 0.5px 0 var(--hair); }
-.mrow .mi { font-size: 22px; text-align: center; }
+.mrow { display: grid; grid-template-columns: 64px 1fr auto; align-items: center; gap: 10px; width: 100%; border: 0; background: var(--card); text-align: left; padding: 14px 16px; cursor: pointer; }
+.mrow + .mrow { box-shadow: inset 90px 0.5px 0 var(--card), inset 0 0.5px 0 var(--hair); }
+.mrow .mi { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--sub); }
 .mrow .a { display: block; font-size: 17px; font-weight: 600; line-height: 1.25; }
 .mrow .b { display: block; font-size: 13px; color: var(--sub); margin-top: 1px; }
 .mrow .chev { width: 8px; height: 8px; border-right: 1.8px solid var(--faint); border-top: 1.8px solid var(--faint); transform: rotate(45deg); }
@@ -480,7 +483,7 @@ function slotFor(iso, ck, block) {
   const taken = getPlan(iso).map(p => [p.t, p.t + catOf(p.c).dur]).concat(slotsFor(iso, D).map(o => [o.s, o.e]));
   let t = Math.min(Math.max(want, b.s), Math.max(b.s, b.e - 45));
   for (let i = 0; i < 8 && taken.some(([s, e]) => t < e && t + 40 > s); i++) t += 45;
-  return Math.round(t / 15) * 15;
+  return Math.round(t / 30) * 30;
 }
 function answer(iso) {
   const D = buildDay(iso), parts = [];
@@ -512,7 +515,7 @@ const weekOf = iso => WEEKS.findIndex(w => w.includes(iso));
 const lab = n => { const a = ap(n); return a.m ? `${a.h12}:${pad(a.m)} ${a.p}` : `${a.h12} ${a.p}`; };
 /* Live forecast from Open-Meteo (no key). Cached per city in localStorage for 3h; falls back to the saved forecast. */
 const LIVE = {}, WMO = c => c === 0 ? "Sunny" : c <= 2 ? "Sunny spells" : c === 3 ? "Cloudy" : c <= 48 ? "Cloudy" : c <= 57 ? "Light rain" : c <= 67 ? "Showers" : c <= 77 ? "Snow" : c <= 82 ? "Showers" : "Storms";
-const WXE2 = c => c === "Snow" ? "🌨️" : c === "Storms" ? "⛈️" : WXE(c);
+const WXE2 = c => "";
 async function fetchLive(city) {
   const g = GEO[city]; if (!g || LIVE[city]) return;
   const key = "wx:" + city; try { const c = JSON.parse(localStorage.getItem(key) || "null"); if (c && Date.now() - c.at < 3 * 36e5) { LIVE[city] = c.d; return; } } catch (e) {}
@@ -531,7 +534,7 @@ async function refreshLive() {
 function wxFor(iso) {
   const c = cityOn(iso), lv = LIVE[c] && LIVE[c][iso], ty = TYPICAL[c], f = WX[c] && WX[c][iso]; if (!ty && !f && !lv) return null;
   if (lv) return { c, cond: lv[0], e: WXE2(lv[0]), hi: lv[1], lo: lv[2], rain: lv[3], prob: lv[4], live: true };
-  return f ? { c, cond: f[0], e: WXE(f[0]), hi: f[1], lo: f[2] != null ? f[2] : ty[1], loEst: f[2] == null, rain: f[3] } : { c, cond: "Typical for the season", e: "🌡️", hi: ty[0], lo: ty[1], typical: true };
+  return f ? { c, cond: f[0], e: "", hi: f[1], lo: f[2] != null ? f[2] : ty[1], loEst: f[2] == null, rain: f[3] } : { c, cond: "Typical for the season", e: "", hi: ty[0], lo: ty[1], typical: true };
 }
 function cityName(iso) { const s = stayOn(iso); return iso === START ? "Perth" : iso === "2026-11-19" ? "London" : iso === END ? "Perth" : s ? s.city : cityOn(iso); }
 function headsFor(iso) { const hs = HEADS.filter(h => h.on.includes(iso)); if (iso < "2026-11-11" && iso >= "2026-10-21") hs.push({ t: "Get your UK ETA before 11 Nov.", d: "About £16, in the UK ETA app or on gov.uk.", k: "eta-done" }); return hs; }
@@ -574,7 +577,7 @@ function events(iso, D) {
   const list = [], now = Date.now(), nm = nowMin(), isToday = iso === today;
   D.segs.forEach((x, i) => {
     const m = x.m; let tt, sub = "", ref = "";
-    if (x.k === "travel") { tt = x.overnight ? `${m.from} → ${m.to}` : `${m.mode === "Flight" ? "✈︎" : "🚆"} ${m.from} → ${m.to}`; sub = `${m.code}${m.guess ? ", time is a guess" : ""}`; ref = m.ref || ""; }
+    if (x.k === "travel") { tt = `${m.from} → ${m.to}`;  sub = `${m.code}${m.guess ? ", time is a guess" : ""}`; ref = m.ref || ""; }
     else if (x.k === "get") { const pickup = x.stay && iso === "2026-10-25"; tt = pickup ? "Collect suitcases from Bellén, then to 11 Enteka" : x.stay ? "To the hotel" : `To ${m.mode === "Flight" ? "the airport" : "the station"}`; sub = pickup ? "Taxi via Bellén Athens Hotel" : x.stay ? x.stay.hotel : (m.fromQ || m.from); }
     else if (x.k === "change") { tt = x.title; }
     else if (x.k === "wait") { tt = "Free, with bags"; sub = x.stay && x.stay.store ? "Hotel can hold bags" : x.stay && x.stay.store === false ? "No luggage storage listed" : ""; }
@@ -624,7 +627,7 @@ function renderDayContent(iso) {
       return;
     }
     if (ev.k === "prompt") {
-      html += `<button class="ev prompt${short ? " short" : ""} press" data-prompt="${ev.pr.cat}" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${esc(ev.tt)}</span>${!short ? `<span class="tm">Tap for ideas from your saves</span>` : ""}</button>`;
+      html += `<button class="ev prompt${short ? " short" : ""} press" data-prompt="${ev.pr.cat}" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${esc(ev.tt)}</span></button>`;
       return;
     }
     if (ev.k === "free" || ev.k === "wait") {
@@ -634,7 +637,7 @@ function renderDayContent(iso) {
     }
     const time = ev.k === "mark" ? t12(ev.s) : ev.x && ev.x.overnight ? `until ${t12(ev.e)}` : `${t12(ev.s)} – ${t12(ev.e)}`;
     const durTxt = (ev.k === "free" || ev.k === "wait") ? ` · ${dur(ev.e - ev.s)}` : "";
-    html += `<button class="ev ${ev.k}${short ? " short" : ""}${ev.done ? " done" : ""} press" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${esc(ev.tt)}${durTxt}</span><span class="tm">${time}${!short && ev.sub && h < 60 ? ` · ${esc(ev.sub)}` : ""}</span>${!short && ev.sub && h >= 60 ? `<span class="tm">${esc(ev.sub)}</span>` : ""}${!short && ev.ref && h >= 60 ? `<span class="ref" data-show-ref="${ev.ref}" data-show-l="${esc(ev.m.code)}">${ev.ref} ›</span>` : ""}${ev.cd && !short ? `<span class="cd">${countdown(ev.cd)}</span>` : ""}</button>`;
+    html += `<button class="ev ${ev.k}${short ? " short" : ""}${ev.done ? " done" : ""} press" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${ev.k === "travel" ? `<i class="ic ${ev.m.mode === "Flight" ? "fly" : "rail"}"></i>` : ""}${esc(ev.tt)}${durTxt}</span><span class="tm">${time}${!short && ev.sub && h < 60 ? ` · ${esc(ev.sub)}` : ""}</span>${!short && ev.sub && h >= 60 ? `<span class="tm">${esc(ev.sub)}</span>` : ""}${!short && ev.ref && h >= 60 ? `<span class="ref" data-show-ref="${ev.ref}" data-show-l="${esc(ev.m.code)}">${ev.ref} ›</span>` : ""}${ev.cd && !short ? `<span class="cd">${countdown(ev.cd)}</span>` : ""}</button>`;
   });
   html += `</div>`;
   D.marks.forEach((mk, mi) => { html += `<div class="mk" style="top:${y(mk.t)}px"><button class="press" data-mark="${mi}">${mk.kind === "in" ? "Check in" : "Check out"} ${t12(mk.t)}</button></div>`; });
@@ -744,7 +747,7 @@ function freeSheet(ev) {
 }
 
 
-const SLOTDEF = { coffee: { l: "☕ Coffee", cat: "coffee", dur: 45 }, dinner: { l: "🍝 Dinner", cat: "dinner", dur: 90 }, drinks: { l: "🍸 Drinks", cat: "drinks", dur: 75 } };
+const SLOTDEF = { coffee: { l: "Coffee", cat: "coffee", dur: 45 }, dinner: { l: "🍝 Dinner", cat: "dinner", dur: 90 }, drinks: { l: "Wine", cat: "drinks", dur: 75 } };
 function getPick(iso, k) { try { return localStorage.getItem(`pick:${iso}:${k}`); } catch (e) { return null; } }
 function setPick(iso, k, v) { try { v == null ? localStorage.removeItem(`pick:${iso}:${k}`) : localStorage.setItem(`pick:${iso}:${k}`, v); } catch (e) {} }
 const hasSaves = iso => { const a = anchorFor(iso); return !!a && SAVES.some(s => s.city === a.city); };
@@ -779,15 +782,15 @@ function freePieces(seg, slots) {
 let REFRESH = null;
 
 const PROMPTS = [
-  { k: "coffee", l: "Coffee?", s: 510, e: 600, cat: "coffee" },
-  { k: "lunch", l: "Lunch?", s: 750, e: 810, cat: "dinner" },
-  { k: "day", l: "Sightsee, shop or culture?", s: 840, e: 1050, cat: "see" },
-  { k: "dinner", l: "Dinner?", s: 1140, e: 1230, cat: "dinner" },
+  { k: "coffee", l: "Coffee", s: 540, e: 600, cat: "coffee" },
+  { k: "lunch", l: "Lunch", s: 780, e: 840, cat: "dinner" },
+  { k: "day", l: "Sightsee, shop or culture", s: 840, e: 1080, cat: "see" },
+  { k: "dinner", l: "Dinner", s: 1140, e: 1260, cat: "dinner" },
 ];
 function promptsFor(iso, free) {
   const out = [], pl = getPlan(iso);
   free.forEach(f => PROMPTS.forEach(pr => {
-    const s = Math.max(f.s, pr.s), e = Math.min(f.e, pr.e); if (e - s < 40) return;
+    const s = Math.max(Math.ceil(f.s / 60) * 60, pr.s), e = Math.min(Math.floor(f.e / 60) * 60, pr.e); if (e - s < 60) return;
     if (pl.some(p => p.t < e && p.t + catOf(p.c).dur > s)) return; /* already planned here */
     out.push({ k: "prompt", s, e, pr, tt: pr.l });
   }));
@@ -854,10 +857,10 @@ function menuSheet() {
   const row = (k, icon, a, b) => `<button class="mrow press" data-menu="${k}"><span class="mi">${icon}</span><span><span class="a">${a}</span>${b ? `<span class="b">${b}</span>` : ""}</span><i class="chev"></i></button>`;
   return head(esc(cityName(iso)), dDay(iso))
     + `<div class="ig">
-      ${row("stay", "🛏", s ? esc(s.hotel) : "No hotel tonight", s ? `Check in ${s12(s.ci)} · out ${s12(s.co)}${s.est ? " (usual)" : ""}` : (iso === END ? "Landing in Perth" : "Overnight flight"))}
-      ${row("wx", w ? w.e : "🌡", w ? `${w.hi}° / ${w.loEst || w.typical ? "~" : ""}${w.lo}°, ${esc(w.typical ? "typical for the season" : w.cond.toLowerCase())}` : "Weather", ss ? `Sunset ${t12(ss)}` : "")}
-      ${row("ideas", "📍", "Things to do", hasSaves(iso) ? `Eat, wine, coffee, sightsee, shop, day trips` : `Search near the hotel`)}
-      ${row("tasks", "☑", open ? `${open} thing${open > 1 ? "s" : ""} to sort` : "Tasks", open ? headsFor(iso).find(h => !h.k || !done(h.k)).t : "Nothing outstanding today")}
+      ${row("stay", "Stay", s ? esc(s.hotel) : "No hotel tonight", s ? `Check in ${s12(s.ci)} · out ${s12(s.co)}${s.est ? " (usual)" : ""}` : (iso === END ? "Landing in Perth" : "Overnight flight"))}
+      ${row("wx", "Weather", w ? `${w.hi}° / ${w.loEst || w.typical ? "~" : ""}${w.lo}°, ${esc(w.typical ? "typical for the season" : w.cond.toLowerCase())}` : "Weather", ss ? `Sunset ${t12(ss)}` : "")}
+      ${row("ideas", "Do", "Things to do", hasSaves(iso) ? `Eat, wine, coffee, sightsee, shop, day trips` : `Search near the hotel`)}
+      ${row("tasks", "Tasks", open ? `${open} thing${open > 1 ? "s" : ""} to sort` : "Tasks", open ? headsFor(iso).find(h => !h.k || !done(h.k)).t : "Nothing outstanding today")}
     </div>`;
 }
 function tasksSheet() {
@@ -875,9 +878,9 @@ function tripSheet() {
 }
 function wxSheet() {
   const w = wxFor(view), c = cityOn(view), ss = sunset(view, c);
-  const days = [0, 1, 2, 3, 4].map(n => addDays(view, n)).filter(d => d <= "2026-11-19").map(d => { const x = wxFor(d); return x ? `<div><span>${d === view ? "Today" : wk(d)}</span><span class="e">${x.e}</span><span class="h">${x.hi}°</span><span class="c">${esc(x.c)}</span></div>` : ""; }).join("");
+  const days = [0, 1, 2, 3, 4].map(n => addDays(view, n)).filter(d => d <= "2026-11-19").map(d => { const x = wxFor(d); return x ? `<div><span>${d === view ? "Today" : wk(d)}</span><span class="h">${x.hi}°</span><span class="c">${esc(x.typical ? "avg" : x.cond.toLowerCase())}</span><span class="c">${esc(x.c)}</span></div>` : ""; }).join("");
   if (!w) return head("Weather", "No forecast while flying.");
-  return head(`${w.e} ${w.hi}° in ${esc(c)}`, esc(w.cond))
+  return head(`${w.hi}° in ${esc(c)}`, esc(w.cond))
     + `<div class="ig">${r("High", `${w.hi}°`)}${r("Low", `${w.loEst || w.typical ? "~" : ""}${w.lo}°`)}${r("Rain", w.rain == null ? "Not forecast yet" : w.prob != null ? `${w.prob}% chance${w.rain >= 1 ? `, ${Math.round(w.rain)} mm` : ""}` : w.rain >= 5 ? `Likely, ${w.rain} mm` : w.rain > 0 ? "A little" : "Dry")}${ss ? r("Sunset", t12(ss)) : ""}</div>
     <div class="sec">NEXT FEW DAYS</div><div class="wk5">${days}</div>
     <p class="nt">${w.live ? "Live forecast from Open-Meteo, refreshed every few hours." : (w.loEst || w.typical ? "~ is a seasonal average. " : "") + "Saved forecast from 21 October; live forecast unavailable right now."} <a href="${wxLink(c)}" target="_blank" rel="noopener">Open in Google</a></p>`;
