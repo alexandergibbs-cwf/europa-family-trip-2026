@@ -933,9 +933,16 @@ let cycT = 0;
 function startCycle(iso) {
   clearInterval(cycT); const el = document.getElementById("cyc"); if (!el) return;
   const a = anchorFor(iso); if (!a) return;
-  const pool = []; ["coffee", "dinner", "see", "shop", "drinks"].forEach(k => placesFor(iso, k).slice(0, 3).forEach(x => pool.push(x)));
+  /* time of day decides the mix: morning leans coffee, midday lunch + sights, afternoon sights + shops, evening dinner then wine */
+  const h = iso === today ? new Date().getHours() : 10;
+  const mix = h < 11 ? [["coffee", 4], ["see", 2], ["shop", 1]] : h < 14 ? [["dinner", 3], ["see", 3], ["coffee", 1]] : h < 17 ? [["see", 3], ["shop", 3], ["coffee", 1]] : h < 21 ? [["dinner", 4], ["drinks", 2], ["see", 1]] : [["drinks", 4], ["dinner", 2]];
+  let pool = []; mix.forEach(([k, n]) => placesFor(iso, k).slice(0, n).forEach(x => pool.push(x)));
+  if (!pool.length) { ["coffee", "dinner", "see", "shop", "drinks"].forEach(k => placesFor(iso, k).slice(0, 2).forEach(x => pool.push(x))); }
   if (!pool.length) { el.textContent = "Search near the hotel"; return; }
-  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  /* keep the lead category first, shuffle the rest */
+  const lead = pool.slice(0, mix[0][1]), rest = pool.slice(mix[0][1]);
+  for (let i = rest.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [rest[i], rest[j]] = [rest[j], rest[i]]; }
+  pool = [lead[Math.floor(Math.random() * lead.length)], ...rest, ...lead.filter((_, i) => i !== 0)];
   let i = 0;
   const show = () => { const { s, k } = pool[i % pool.length]; i++;
     const span = document.createElement("span"); span.className = "cyc-item"; span.innerHTML = `<i class="ic ${CATICON[s.cat] || "pin"}"></i><span>${esc(s.name)} · ${shortDist(k)}</span>`;
@@ -1010,7 +1017,7 @@ document.addEventListener("click", e => {
   if (t.closest("#backPill")) { haptic(); return openSide(); }
   if (t.closest("#infoPill")) { haptic(); openSheet(menuSheet()); startCycle(view); return; }
   if (t.closest("[data-today]")) { haptic(); return selectDay(today); }
-  const mi = t.closest("[data-menu]"); if (mi) { haptic(); const k = mi.dataset.menu; if (k === "stay") { const s = stayOn(view); return openSheet(s ? staySheet(s) : tripSheet()); } if (k === "wx") return openSheet(wxSheet()); if (k === "ideas") return openPlanner(view, PL.cat && PL.cat !== "trip" ? PL.cat : "dinner", null); if (k === "tasks") return openSheet(tasksSheet()); if (k === "trip") return openSheet(tripSheet()); }
+  const mi = t.closest("[data-menu]"); if (mi) { haptic(); const k = mi.dataset.menu; if (k === "stay") { const s = stayOn(view); return openSheet(s ? staySheet(s) : tripSheet()); } if (k === "wx") return openSheet(wxSheet()); if (k === "ideas") { const h = view === today ? new Date().getHours() : 10; return openPlanner(view, h < 11 ? "coffee" : h < 14 ? "dinner" : h < 17 ? "see" : h < 21 ? "dinner" : "drinks", null); } if (k === "tasks") return openSheet(tasksSheet()); if (k === "trip") return openSheet(tripSheet()); }
   if (t.closest("[data-open-trip]")) { haptic(); return openSheet(tripSheet()); }
 });
 document.addEventListener("keydown", e => {
