@@ -54,7 +54,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 /* Header (sticky) */
 .top { position: fixed; left: 0; right: 0; top: 0; z-index: 20; background: var(--bg); padding-top: env(safe-area-inset-top, 0px); }
 .top > * { max-width: 520px; margin-left: auto; margin-right: auto; }
-.pager { position: fixed; inset: 0; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; scroll-padding-top: var(--top-h, 180px); }
+.pager { position: fixed; inset: 0; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior-y: none; scroll-padding-top: var(--top-h, 180px); }
 .pills { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: 10px; padding-block: 10px 6px; }
 .pill.ib { width: 44px; padding: 0; justify-content: center; }
 .pill.title { justify-self: center; padding: 0 12px 0 16px; max-width: 100%; }
@@ -160,7 +160,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .grid .hl.hide::after { opacity: .5; }
 .note { font-size: 12px; color: var(--sub); text-align: center; padding: 6px 24px 16px; line-height: 1.4; }
 .land { position: relative; margin: 2px 4px 14px; }
-.land-h { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding-right: 40px; }
+.land-h { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .land h3 { font-size: 30px; font-weight: 700; letter-spacing: -0.03em; margin: 0; line-height: 1.1; }
 .land-sub { font-size: 15px; color: var(--ink); font-weight: 500; margin-top: 4px; }
 .land-sub2 { font-size: 14px; color: var(--sub); margin-top: 2px; }
@@ -753,7 +753,8 @@ function renderHeader(pop) {
   
   
   const n = s ? Math.round((Date.parse(iso) - Date.parse(s.in)) / 864e5) + 1 : 0;
-  document.getElementById("cityName").innerHTML = esc(cityName(iso));
+  const cn = document.getElementById("cityName"), nm = cityName(iso);
+  if (cn.textContent !== nm) { cn.innerHTML = esc(nm); if (pop && !reduce()) cn.animate([{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], { duration: 360, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }); }
   const open = headsFor(iso).filter(h => !h.k || !done(h.k)).length;
   measureTop();
 }
@@ -781,7 +782,7 @@ function events(iso, D) {
 function renderDayContent(iso) {
   const D = buildDay(iso); CUR = D; const evs = events(iso, D); ITEMS = evs;
   const nm = nowMin(), showNow = iso === today;
-  const LO = Math.min(420, Math.floor(Math.min(...D.segs.map(x => x.s), 1440) / 60) * 60), HI = 1440;
+  const LO = 0, HI = 1440;
   /* busy ranges: anything that isn't blank free time, padded a little, plus marks and now */
   const busy = [];
   evs.forEach(e => { if (e.k !== "free" && e.k !== "prompt") busy.push([e.s - 5, e.e + 5]); });
@@ -834,7 +835,7 @@ function renderDayContent(iso) {
   return html;
 }
 let MODE = (() => { try { return localStorage.getItem("mode") === "multi" ? "multi" : "day"; } catch (e) { return "day"; } })();
-const MSTART = 360, MEND = 1440, MPX = 0.72, MY = t => 10 + (Math.max(MSTART, Math.min(MEND, t)) - MSTART) * MPX;
+const MSTART = 0, MEND = 1440, MPX = 0.72, MY = t => 10 + (Math.max(MSTART, Math.min(MEND, t)) - MSTART) * MPX;
 let MITEMS = {};
 function multiStart(iso) { let s = iso; while (addDays(s, 2) > END) s = addDays(s, -1); return s < START ? START : s; }
 function renderMultiContent(iso) {
@@ -902,6 +903,15 @@ function selectDay(iso, dir, syncWeek = true) {
 }
 const pager = document.getElementById("pager");
 let pd = null;
+/* pull past the top or bottom of a day to move to the previous / next day */
+let vpull = null;
+pager.addEventListener("touchstart", e => { vpull = { y: e.touches[0].clientY, top: pager.scrollTop <= 0, bottom: pager.scrollTop >= pager.scrollHeight - pager.clientHeight - 1, fired: false }; }, { passive: true });
+pager.addEventListener("touchmove", e => {
+  if (!vpull || vpull.fired || !sheet.hidden || !side.hidden) return; const dy = e.touches[0].clientY - vpull.y;
+  if (vpull.top && dy > 90 && pager.scrollTop <= 0 && view > START) { vpull.fired = true; haptic("heavy"); selectDay(addDays(view, -1), -1); content.animate([{ transform: "translateY(-40px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 480, easing: EASE }); }
+  else if (vpull.bottom && dy < -90 && pager.scrollTop >= pager.scrollHeight - pager.clientHeight - 1 && view < END) { vpull.fired = true; haptic("heavy"); selectDay(addDays(view, 1), 1); content.animate([{ transform: "translateY(40px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 480, easing: EASE }); }
+}, { passive: true });
+pager.addEventListener("touchend", () => { vpull = null; }, { passive: true });
 pager.addEventListener("pointerdown", e => { if (e.pointerType === "mouse" && e.button) return; if (e.clientX < 24) { pd = null; openSide(); return; } pd = { x: e.clientX, y: e.clientY, t: performance.now(), mode: null, dx: 0 }; });
 pager.addEventListener("pointermove", e => {
   if (!pd) return; const dx = e.clientX - pd.x, dy = e.clientY - pd.y;
@@ -1147,7 +1157,6 @@ function menuSheet() {
   const row = (k, a, b) => `<button class="mrow press" data-menu="${k}"><span><span class="a">${a}</span>${b ? `<span class="b">${b}</span>` : ""}</span><i class="chev"></i></button>`;
   return `<div class="land">
     <div class="land-h"><div><h3 id="sheet-title">${esc(cityName(iso))}</h3><div class="land-sub">${s ? `${dRange(s.in, s.out)} · night ${n} of ${nights(s)}` : dDay(iso)}</div><div class="land-sub2">${dDay(iso)}${jump ? ` · ${jump}` : ""}</div></div>${wx}</div>
-    <button class="xbtn press land-x" data-close aria-label="Close">×</button>
   </div>
   <div class="ig">
       ${row("stay", s ? esc(s.hotel) : "No hotel tonight", s ? `Check in ${s12(s.ci)} · out ${s12(s.co)}${s.est ? " (usual)" : ""}${s.addr && !/booking/i.test(s.addr) ? " · " + esc(s.addr) : ""}` : (iso === END ? "Landing in Perth" : "Overnight flight"))}
