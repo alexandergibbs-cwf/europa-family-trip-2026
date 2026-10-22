@@ -455,7 +455,7 @@ function buildDay(iso) {
       const at = Math.min(prev + (last.xfer || 45), 1439);
       segs.push({ s: prev, e: at, k: "get", title: "To the hotel", sub: inn.hotel, stay: inn });
       const ci = mins(inn.ci);
-      if (ci - at >= 20) {
+      if (ci - at >= 75) {
         segs.push({ s: at, e: at + 30, k: "wait", title: iso === "2026-10-25" ? "Collect suitcases from Bellén, then drop everything at 11 Enteka" : "Drop off suitcases at the hotel", sub: "", stay: inn, pickup: iso === "2026-10-25" });
         if (ci - (at + 30) >= 30) segs.push({ s: at + 30, e: ci, k: "free", title: "Free", sub: `Until check-in at ${t12(ci)}` });
         marks.push({ t: ci, kind: "in", stay: inn });
