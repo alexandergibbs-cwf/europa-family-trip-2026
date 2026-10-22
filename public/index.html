@@ -457,8 +457,11 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev.prompt { opacity: 0; transform: translateY(8px) scale(0.985); pointer-events: none; transition: opacity 1100ms cubic-bezier(0.4, 0, 0.2, 1), transform 1400ms cubic-bezier(0.16, 1, 0.3, 1); }
 .ev.prompt.idea { opacity: 1; transform: none; pointer-events: auto; }
 @media (prefers-reduced-motion: reduce) { .ev.prompt { opacity: .7; transform: none; pointer-events: auto; transition: none; } }
-.ev.prompt .pk { display: block; font-size: 13px; font-weight: 500; opacity: .8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+.ev.prompt .pk { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-size: 13px; font-weight: 500; opacity: .8; white-space: normal; overflow: hidden; margin-top: 1px; line-height: 1.25; }
+.ev.prompt.short .pk { display: inline; white-space: nowrap; }
 .ev.prompt.short .pk { display: inline; margin: 0 0 0 6px; }
+.ev.prompt .hk { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 12px; font-weight: 400; opacity: .7; line-height: 1.25; margin-top: 2px; white-space: normal; }
+.ev.prompt.short .hk { display: none; }
 </style>
 
 <div class="page" id="page">
@@ -937,7 +940,7 @@ function renderDayContent(iso) {
       return;
     }
     if (ev.k === "prompt") {
-      html += `<button class="ev prompt c-${ev.pr.k}${short ? " short" : ""} press" data-prompt="${ev.pr.cat}" data-sc="${ev.sc}" data-step="${ev.step}" data-i="${i}" data-alts="${esc(sceneAlts(iso, ev.sc, ev.step).join("|"))}" style="top:${top + 12}px;height:${h}px"><span class="tt">${esc(ev.tt)}</span><span class="pk"></span></button>`;
+      html += `<button class="ev prompt c-${ev.pr.k}${short ? " short" : ""} press" data-prompt="${ev.pr.cat}" data-sc="${ev.sc}" data-step="${ev.step}" data-i="${i}" data-alts="${esc(sceneAlts(iso, ev.sc, ev.step).join("|"))}" style="top:${top + 12}px;height:${h}px"><span class="tt">${esc(ev.tt)}</span><span class="pk"></span><span class="hk"></span></button>`;
       return;
     }
     if (ev.k === "free" || ev.k === "wait") {
@@ -1046,7 +1049,7 @@ function promptTick() {
   const scs = [...new Set(all.map(el => +el.dataset.sc))].sort((x, y) => x - y);
   scI = (scI + 1) % scs.length;
   const els = all.filter(el => +el.dataset.sc === scs[scI]).sort((x, y) => x.dataset.step - y.dataset.step);
-  els.forEach(el => { const alts = (el.dataset.alts || "").split("|"), n = +(el.dataset.n || el.dataset.sc || 0); el.querySelector(".pk").textContent = alts.length ? alts[n % alts.length] : ""; el.dataset.n = n + 1; });
+  els.forEach(el => { const alts = (el.dataset.alts || "").split("|"), n = +(el.dataset.n || el.dataset.sc || 0); const [a1, a2] = (alts.length ? alts[n % alts.length] : "").split("\x1f"); el.querySelector(".pk").textContent = a1 || ""; const hk = el.querySelector(".hk"); if (hk) hk.textContent = a2 || ""; el.dataset.n = n + 1; });
   let k = 0;
   const next = () => {
     if (k < els.length) { els[k++].classList.add("idea"); pT = setTimeout(next, 1300); return; }
@@ -1259,7 +1262,7 @@ function scenePlans(iso, si) {
   for (let v = 0; v < V; v++) {
     const used = new Set(), txt = [];
     /* best few under the limit, rotating with the variant/night so repeats are spread out */
-    const take = (list, score, max = 99, rot = 0) => { const cs = list.filter(s => !used.has(s.id)).map(s => [s, score(s)]).filter(x => x[1] < max).sort((a, b) => a[1] - b[1]).slice(0, 3); const c = cs.length ? cs[rot % cs.length] : null; if (c) used.add(c[0].id); return c ? c[0] : null; };
+    const take = (list, score, max = 99, rot = 0) => { const cs = list.filter(s => !used.has(s.id)).map(s => [s, score(s)]).filter(x => x[1] < max).sort((a, b) => a[1] - b[1]).slice(0, 5); const c = cs.length ? cs[rot % cs.length] : null; if (c) used.add(c[0].id); return c ? c[0] : null; };
     const R = v + night;
     const seed = seeds.length ? seeds[(v + night * 2) % seeds.length] : null;
     let centre = seed || home;
@@ -1267,31 +1270,32 @@ function scenePlans(iso, si) {
     const main = {};
     /* each area block is a small walkable cluster; the first is the day's anchor, later ones stay close to it */
     const areas = new Map();
-    const cluster = (pr, s0) => { used.add(s0.id); const list = [s0]; if (pr.cat !== "trip") for (let j = 0; j < (pr.cat === "culture" ? 1 : 2); j++) { const nx = take(pool(pr.cat), s => dk(s, list[list.length - 1]), 1.3); if (nx) list.push(nx); } return list; };
+    const cluster = (pr, s0) => { used.add(s0.id); const list = [s0]; if (pr.cat !== "trip") for (let j = 0; j < (pr.cat === "culture" ? 1 : 2); j++) { const nx = take(pool(pr.cat), s => dk(s, list[list.length - 1]), 2.5, R + j); if (nx) list.push(nx); } return list; };
     if (mainStep && seed) areas.set(mainStep, cluster(mainStep, seed));
-    steps.filter(p => p.area && p !== mainStep).forEach(pr => { const s0 = take(pool(pr.cat), s => dk(s, centre), 4, R); if (s0) { used.delete(s0.id); areas.set(pr, cluster(pr, s0)); } });
+    steps.filter(p => p.area && p !== mainStep).forEach(pr => { const s0 = take(pool(pr.cat), s => dk(s, centre), 99, R); if (s0) { used.delete(s0.id); areas.set(pr, cluster(pr, s0)); } });
     main.list = mainStep ? areas.get(mainStep) : null;
     let prev = home;
     steps.forEach(pr => {
       let names = [], from = prev, to = null;
-      if (pr.area) { const L = areas.get(pr); if (!L) { txt.push(""); return; } if (pr.cat === "trip") { txt.push(`${L[0].city !== "Other" ? L[0].city + " · " : ""}${L[0].name}`); prev = home; return; } names = L.map(s => s.name); to = L[L.length - 1]; txt.push(`${names.join(" → ")} · ${walk(dk(prev, L[0]))}${prev === home ? " from the hotel" : ""}`); prev = to; return; }
+      if (pr.area) { const L = areas.get(pr); if (!L) { txt.push(""); return; } if (pr.cat === "trip") { txt.push(`${L[0].city !== "Other" ? L[0].city + " · " : ""}${L[0].name}\x1f${hookOf(L[0])}`); prev = home; return; } names = L.map(s => s.name); to = L[L.length - 1]; txt.push(`${names.join(" → ")} · ${walk(dk(prev, L[0]))}${prev === home ? " from the hotel" : ""}\x1f${L.map(hookOf).filter(Boolean).slice(0, 2).join(". ")}`); prev = to; return; }
       else if (pr.k === "coffee" || pr.k === "cafes") {
         /* on the way from the hotel to the day's area: small detour, else close to home, else close to the area */
         const cafes = pool("coffee"), detour = s => dk(home, s) + dk(s, centre) - dk(home, centre);
-        const c = take(cafes, detour, 1.2, R) || take(cafes, s => dk(home, s), 1.5, R) || take(cafes, s => dk(s, centre), 1, R);
+        const c = take(cafes, detour, 2.5, R) || take(cafes, s => dk(home, s), 3, R) || take(cafes, s => dk(s, centre), 3, R);
         if (c) { names = [c.name]; to = c; if (pr.k === "cafes") { for (let j = 0; j < 2; j++) { const nx = take(cafes, s => dk(s, to), 1.2); if (nx) { names.push(nx.name); to = nx; } } } }
       }
-      else if (pr.k === "lunch") { const c = take(pool("dinner"), s => dk(s, prev), 1.6, R) || take(pool("coffee"), s => dk(s, prev), 1.2, R); if (c) { names = [c.name]; to = c; } else if (prev !== home) { txt.push(`Somewhere near ${prev.name}`); return; } }
-      else if (pr.k === "dinner") { const c = take(pool("dinner"), s => dk(s, prev) * 0.6 + dk(s, home), 5, R); if (c) { names = [c.name]; to = c; } else if (prev !== home) { txt.push(`Somewhere near ${prev.name}`); return; } }
-      else if (pr.k === "drinks") { const c = take(pool("drinks"), s => dk(s, prev), 2, R); if (c) { names = [c.name]; to = c; } else if (prev !== home) { txt.push(`A bar near ${prev.name}`); return; } }
+      else if (pr.k === "lunch") { const c = take(pool("dinner"), s => dk(s, prev), 3.5, R) || take(pool("coffee"), s => dk(s, prev), 2, R); if (c) { names = [c.name]; to = c; } else if (prev !== home) { txt.push(`Somewhere near ${prev.name}`); return; } }
+      else if (pr.k === "dinner") { const c = take(pool("dinner"), s => dk(s, prev) * 0.6 + dk(s, home), 8, R); if (c) { names = [c.name]; to = c; } else if (prev !== home) { txt.push(`Somewhere near ${prev.name}`); return; } }
+      else if (pr.k === "drinks") { const c = take(pool("drinks"), s => dk(s, prev), 4, R); if (c) { names = [c.name]; to = c; } else if (prev !== home) { txt.push(`A bar near ${prev.name}`); return; } }
       if (!names.length) { const near = main.list ? main.list[0] : null; txt.push(near && (pr.k === "coffee" || pr.k === "cafes") ? `A café near ${near.name}` : near && pr.k === "lunch" ? `Somewhere near ${near.name}` : ""); return; }
-      txt.push(`${names.join(" → ")} · ${walk(dk(prev, to))}${prev === home ? " from the hotel" : ""}`);
+      txt.push(`${names.join(" → ")} · ${walk(dk(prev, to))}${prev === home ? " from the hotel" : ""}\x1f${hookOf(to)}`);
       prev = to;
     });
     out.push(txt);
   }
   SCN_CACHE.set(key, out); return out;
 }
+const hookOf = s => { const h = (s && s.hook || "").replace(/[|\x1f]/g, " ").trim(); return h ? h[0].toUpperCase() + h.slice(1) : ""; };
 function sceneAlts(iso, si, step) { return scenePlans(iso, si).map(v => v[step] || ""); }
 function ideaAlts(iso, pr) {
   const list = placesFor(iso, pr.cat).slice(0, 6); if (!list.length) return [];
