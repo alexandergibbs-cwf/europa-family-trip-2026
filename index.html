@@ -115,6 +115,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .now::before { content: ""; position: absolute; left: -5px; top: -6px; width: 10px; height: 10px; border-radius: 50%; background: var(--red); }
 .now span { position: absolute; right: calc(100% + 8px); top: -9px; font-size: 12px; font-weight: 700; color: var(--red); background: var(--bg); padding-left: 4px; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .grid .hl.hide span { visibility: hidden; }
+.grid .hl.hide::after { opacity: .5; }
 .note { font-size: 12px; color: var(--sub); text-align: center; padding: 6px 24px 60px; line-height: 1.4; }
 .mrow { display: grid; grid-template-columns: 34px 1fr auto; align-items: center; gap: 10px; width: 100%; border: 0; background: var(--card); text-align: left; padding: 13px 16px; cursor: pointer; }
 .mrow + .mrow { box-shadow: inset 60px 0.5px 0 var(--card), inset 0 0.5px 0 var(--hair); }
@@ -579,17 +580,37 @@ function events(iso, D) {
 }
 function renderDayContent(iso) {
   const D = buildDay(iso); CUR = D; const evs = events(iso, D); ITEMS = evs;
-  const LO = Math.min(360, Math.floor(Math.min(...D.segs.map(x => x.s), 1440) / 60) * 60), y = t => (t - LO) * PXM + 12;
-  let html = `<div class="grid" style="height:${(1440 - LO) * PXM + 24}px">`;
   const nm = nowMin(), showNow = iso === today;
+  const LO = Math.min(420, Math.floor(Math.min(...D.segs.map(x => x.s), 1440) / 60) * 60), HI = 1440;
+  /* busy ranges: anything that isn't blank free time, padded a little, plus marks and now */
+  const busy = [];
+  evs.forEach(e => { if (e.k !== "free") busy.push([e.s - 5, e.e + 5]); });
+  D.marks.forEach(m => busy.push([m.t - 20, m.t + 20]));
+  if (showNow) busy.push([nm - 20, nm + 20]);
+  busy.sort((a, b) => a[0] - b[0]);
+  const merged = []; busy.forEach(([a, b]) => { a = Math.max(LO, a); b = Math.min(HI, b); if (b <= a) return; const l = merged[merged.length - 1]; if (l && a <= l[1]) l[1] = Math.max(l[1], b); else merged.push([a, b]); });
+  const busyMin = merged.reduce((s, [a, b]) => s + (b - a), 0);
+  const avail = Math.max(360, innerHeight - document.getElementById("top").offsetHeight - 40);
+  let full = Math.min(PXM, 1.2); const emptyMin = (HI - LO) - busyMin;
+  const minEmpty = 0.16;
+  if (busyMin * full + emptyMin * minEmpty > avail) full = Math.max(0.55, (avail - emptyMin * minEmpty) / Math.max(busyMin, 1));
+  let ePX = emptyMin > 0 ? Math.max(minEmpty, (avail - busyMin * full) / emptyMin) : 0; ePX = Math.min(ePX, full);
+  const anchors = []; let yy = 12, cur = LO;
+  merged.forEach(([a, b]) => { anchors.push([cur, yy, ePX]); yy += (a - cur) * ePX; anchors.push([a, yy, full]); yy += (b - a) * full; cur = b; });
+  anchors.push([cur, yy, ePX]); const H = yy + (HI - cur) * ePX;
+  const y = t => { t = Math.max(LO, Math.min(HI, t)); let i = anchors.length - 1; while (i > 0 && anchors[i][0] > t) i--; const [t0, y0, k] = anchors[i]; return y0 + (t - t0) * k; };
+  YFN = y;
+  let html = `<div class="grid" style="height:${H + 16}px">`;
+  let lastLabelY = -99;
   for (let h = LO / 60; h <= 24; h++) {
-    const t = h * 60, near = showNow && Math.abs(nm - t) < 12;
-    html += `<div class="hl${h === 12 ? " mid" : ""}${near ? " hide" : ""}" style="top:${y(t)}px"><span>${h === 12 ? "Midday" : `${(h % 12) || 12}<small>${h < 12 || h === 24 ? "am" : "pm"}</small>`}</span></div>`;
+    const t = h * 60, near = showNow && Math.abs(nm - t) < 12, yv = y(t), tight = yv - lastLabelY < 18;
+    if (!tight) lastLabelY = yv;
+    html += `<div class="hl${h === 12 ? " mid" : ""}${near || tight ? " hide" : ""}" style="top:${yv}px"><span>${h === 12 ? "Midday" : `${(h % 12) || 12}<small>${h < 12 || h === 24 ? "am" : "pm"}</small>`}</span></div>`;
   }
   html += `<div class="lane">`;
   evs.forEach((ev, i) => {
     if (false) return;
-    const top = y(ev.s) - 12 + 1, h = Math.max((ev.e - ev.s) * PXM - 2, 22), short = h < 40;
+    const top = y(ev.s) - 12 + 1, h = Math.max(y(ev.e) - y(ev.s) - 2, ev.k === "free" ? 0 : 22), short = h < 40;
     if (ev.k === "slot") {
       const pk = pickFor(iso, ev.slot.k), sd = SLOTDEF[ev.slot.k];
       html += `<button class="ev slot ${ev.slot.k}${h < 40 ? " short" : ""} press" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${sd.l}<span class="sug">${pk && !pk.chosen ? "Suggested" : ""}</span></span>${pk ? `<span class="pk"><b>${esc(pk.s.name)}</b>${pk.k != null ? ` · ${shortDist(pk.k)}` : ""}</span>` : `<span class="pk">${t12(ev.s)} · find a spot nearby</span>`}</button>`;
@@ -609,19 +630,13 @@ function renderDayContent(iso) {
   const ss = D.s || iso === "2026-11-19" ? sunset(iso, cityOn(iso)) : null;
   if (ss) html += `<div class="sun" style="top:${y(ss)}px"><span>Sunset ${t12(ss)}</span></div>`;
   if (showNow) html += `<div class="now" style="top:${y(nm)}px"><span>${t12(nm).replace(" ", "")}</span></div>`;
-  html += `</div><p class="note">Check-in times come from hotel listings; leave times are suggestions. Your bookings win if they differ.</p>`;
+  html += `</div>`;
   return html;
 }
 function countdown(ms) { const m = Math.floor(ms / 6e4), d = Math.floor(m / 1440), h = Math.floor((m % 1440) / 60), mm = m % 60; return d >= 1 ? `in ${d}d ${h}h` : h ? `in ${h}h ${mm}m` : `in ${mm}m`; }
 const content = document.getElementById("daycontent");
-function scrollToDay(smooth) {
-  const evs = ITEMS.filter(e => e.k !== "free" || ITEMS.length === 1);
-  let t = view === today ? nowMin() - 60 : (evs.length ? Math.min(...evs.map(e => e.s)) - 30 : 420);
-  t = Math.max(0, Math.min(t, 1440 - 600));
-  const topH = document.getElementById("top").offsetHeight, gridTop = content.getBoundingClientRect().top + scrollY + 8;
-  const LO = Math.min(360, Math.floor(Math.min(...CUR.segs.map(x => x.s), 1440) / 60) * 60);
-  window.scrollTo({ top: Math.max(0, gridTop + (Math.max(t, LO) - LO) * PXM + 12 - topH - 10), behavior: smooth && !reduce() ? "smooth" : "auto" });
-}
+let YFN = t => t;
+function scrollToDay() { window.scrollTo(0, 0); }
 
 /* ---------- day changes: follow the finger, settle on a spring ---------- */
 function selectDay(iso, dir, syncWeek = true) {
@@ -893,7 +908,7 @@ function tick() {
 renderWeek(); renderHeader(false); content.innerHTML = renderDayContent(view);
 refreshLive();
 requestAnimationFrame(() => { showWeek(weekOf(view), false); scrollToDay(false); });
-addEventListener("resize", () => showWeek(curWeek < 0 ? weekOf(view) : curWeek, false));
+let rsT = 0; addEventListener("resize", () => { showWeek(curWeek < 0 ? weekOf(view) : curWeek, false); clearTimeout(rsT); rsT = setTimeout(() => { if (sheet.hidden && show.hidden && !pd) content.innerHTML = renderDayContent(view); }, 150); });
 setInterval(tick, 60000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { tick(); refreshLive(); } });
 })();
