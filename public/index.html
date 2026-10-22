@@ -425,8 +425,8 @@ const STAYS = [
   { city:"Berlin", in:"2026-11-05", out:"2026-11-08", hotel:"SANA Berlin Hotel", addr:"Nürnberger Str. 33/34", q:"SANA Berlin Hotel Nürnberger Str. 33 Berlin", ci:"15:00", co:"12:00", store:true, note:"24-hour front desk and luggage storage." },
   { city:"Paris", in:"2026-11-08", out:"2026-11-11", hotel:"Splendid Hôtel", addr:"54 Rue Fondary, 15e", q:"Splendid Hôtel 54 Rue Fondary Paris", ci:"15:00", co:"12:00", store:true, note:"24-hour front desk and luggage storage. City tax about €5.53 per person per night." },
   { city:"Glasgow", in:"2026-11-11", out:"2026-11-13", hotel:"4-bed flat, central Glasgow", addr:"Address in the Booking.com booking", ci:"15:00", co:"10:00", est:true, store:null },
-  { city:"Edinburgh", in:"2026-11-13", out:"2026-11-16", hotel:"Waterfront Retreat for Groups", addr:"Address in the booking", ci:"15:00", co:"10:00", est:true, store:null },
-  { city:"London", in:"2026-11-16", out:"2026-11-19", hotel:"Townhouse, Kensington", addr:"Address in the booking", ci:"15:00", co:"10:00", est:true, store:null },
+  { city:"Edinburgh", in:"2026-11-13", out:"2026-11-16", hotel:"Luxury Waterfront Retreat for Groups", addr:"Address in the booking", ci:"15:00", co:"10:00", est:true, store:null },
+  { city:"London", in:"2026-11-16", out:"2026-11-19", hotel:"4-bed townhouse, Kensington", addr:"Address in the booking", ci:"15:00", co:"10:00", est:true, store:null },
 ];
 
 const MOVES = [
@@ -460,6 +460,7 @@ const HEADS = [
   { on:["2026-10-31","2026-11-01"], w:1, t:"Florence check-out is 10 AM, with no luggage storage listed.", d:"The train is at 12:20 PM. Ask the host about bags, or plan to carry them." },
   { on:["2026-11-01","2026-11-02"], t:"Do the Zürich hotel’s online registration.", d:"Reception closes at 5 PM. You arrive around 3 PM.", k:"zrh-reg" },
   { on:["2026-11-02","2026-11-03"], w:1, t:"Early start: the train leaves Venice at 7:18 AM.", d:"Change at Milano Centrale, 1h 25m between trains in the same station." },
+  { on:["2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10"], w:1, t:"Get your UK ETA before 11 Nov.", d:"Everyone needs one. About £16 via the UK ETA app or gov.uk.", k:"uk-eta" },
   { on:["2026-11-07","2026-11-08"], w:1, t:"Early night on Saturday.", d:"Leave the hotel around 6:15 AM for the 8:45 AM flight." },
   { on:["2026-11-10","2026-11-11"], w:1, t:"easyJet bag drop at CDG closes at 2:45 PM.", d:"Terminal 2D. Glasgow is 1 hour behind Paris." },
   { on:["2026-11-15","2026-11-16"], t:"The LNER train to London isn’t booked yet.", d:"Aiming for a late-morning train to King’s Cross." },
