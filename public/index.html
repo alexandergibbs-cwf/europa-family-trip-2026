@@ -142,7 +142,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .now span { position: absolute; right: calc(100% + 8px); top: -9px; font-size: 12px; font-weight: 700; color: var(--red); background: var(--bg); padding-left: 4px; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .grid .hl.hide span { visibility: hidden; }
 .grid .hl.hide::after { opacity: .5; }
-.note { font-size: 12px; color: var(--sub); text-align: center; padding: 6px 24px 60px; line-height: 1.4; }
+.note { font-size: 12px; color: var(--sub); text-align: center; padding: 6px 24px 16px; line-height: 1.4; }
 .mrow { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; width: 100%; border: 0; background: var(--card); text-align: left; padding: 14px 16px; cursor: pointer; }
 .mrow + .mrow { box-shadow: inset 16px 0.5px 0 var(--card), inset 0 0.5px 0 var(--hair); }
 .mrow .mi { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--sub); }
@@ -691,7 +691,8 @@ let YFN = t => t;
 function scrollToDay() {
   const topH = document.getElementById("top").offsetHeight;
   const evs = ITEMS.filter(e => e.k !== "free");
-  let t = view === today ? nowMin() - 45 : (evs.length ? Math.min(...evs.map(e => e.s)) - 30 : 480);
+  let t = Math.min(420, evs.length ? Math.min(...evs.map(e => e.s)) - 30 : 420);
+  if (view === today && nowMin() - 45 > t + 300) t = nowMin() - 45;
   const gridEl = content.querySelector(".grid"); if (!gridEl) return;
   const gridTop = gridEl.getBoundingClientRect().top - pager.getBoundingClientRect().top + pager.scrollTop;
   pager.scrollTop = Math.max(0, gridTop + YFN(Math.max(0, t)) - topH - 8);
