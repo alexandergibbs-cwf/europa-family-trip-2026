@@ -128,8 +128,8 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .grid .hl.hide span { visibility: hidden; }
 .grid .hl.hide::after { opacity: .5; }
 .note { font-size: 12px; color: var(--sub); text-align: center; padding: 6px 24px 60px; line-height: 1.4; }
-.mrow { display: grid; grid-template-columns: 64px 1fr auto; align-items: center; gap: 10px; width: 100%; border: 0; background: var(--card); text-align: left; padding: 14px 16px; cursor: pointer; }
-.mrow + .mrow { box-shadow: inset 90px 0.5px 0 var(--card), inset 0 0.5px 0 var(--hair); }
+.mrow { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; width: 100%; border: 0; background: var(--card); text-align: left; padding: 14px 16px; cursor: pointer; }
+.mrow + .mrow { box-shadow: inset 16px 0.5px 0 var(--card), inset 0 0.5px 0 var(--hair); }
 .mrow .mi { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--sub); }
 .mrow .a { display: block; font-size: 17px; font-weight: 600; line-height: 1.25; }
 .mrow .b { display: block; font-size: 13px; color: var(--sub); margin-top: 1px; }
@@ -905,13 +905,13 @@ function freeSheet2() {
 
 function menuSheet() {
   const iso = view, s = stayOn(iso), w = wxFor(iso), c = cityOn(iso), open = headsFor(iso).filter(h => !h.k || !done(h.k)).length, ss = sunset(iso, c);
-  const row = (k, icon, a, b) => `<button class="mrow press" data-menu="${k}"><span class="mi">${icon}</span><span><span class="a">${a}</span>${b ? `<span class="b">${b}</span>` : ""}</span><i class="chev"></i></button>`;
+  const row = (k, icon, a, b) => `<button class="mrow press" data-menu="${k}"><span><span class="a">${a}</span>${b ? `<span class="b">${b}</span>` : ""}</span><i class="chev"></i></button>`;
   return head(esc(cityName(iso)), dDay(iso))
     + `<div class="ig">
       ${row("stay", "Stay", s ? esc(s.hotel) : "No hotel tonight", s ? `Check in ${s12(s.ci)} · out ${s12(s.co)}${s.est ? " (usual)" : ""}` : (iso === END ? "Landing in Perth" : "Overnight flight"))}
       ${row("wx", "Weather", w ? `${w.hi}° / ${w.loEst || w.typical ? "~" : ""}${w.lo}°, ${esc(w.typical ? "typical for the season" : w.cond.toLowerCase())}` : "Weather", ss ? `Sunset ${t12(ss)}` : "")}
-      ${row("ideas", "Do", "Things to do", hasSaves(iso) ? `Eat, wine, coffee, sightsee, shop, day trips` : `Search near the hotel`)}
-      ${row("tasks", "Tasks", open ? `${open} thing${open > 1 ? "s" : ""} to sort` : "Tasks", open ? headsFor(iso).find(h => !h.k || !done(h.k)).t : "Nothing outstanding today")}
+      ${row("ideas", "", "Things to do", hasSaves(iso) ? `Eat, wine, coffee, sightsee, shop, day trips` : `Search near the hotel`)}
+      ${row("tasks", "", open ? `${open} thing${open > 1 ? "s" : ""} to sort` : "Nothing to sort", open ? headsFor(iso).find(h => !h.k || !done(h.k)).t : "No reminders for this day")}
     </div>`;
 }
 function tasksSheet() {
