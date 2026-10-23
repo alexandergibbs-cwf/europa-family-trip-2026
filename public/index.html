@@ -450,6 +450,9 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev.prompt { background: color-mix(in srgb, var(--c) 8%, var(--bg)); color: color-mix(in srgb, var(--c) 55%, var(--ink)); }
 .ev.prompt::before { opacity: .55; }
 .ev.prompt .tt { font-weight: 500; color: inherit; }
+/* suggestions read as pencilled in: dashed outline in the kind's colour, faint wash, no solid bar */
+.ev.prompt { background: color-mix(in srgb, var(--c) 5%, var(--bg)); border: 1.5px dashed color-mix(in srgb, var(--c) 55%, transparent); color: color-mix(in srgb, var(--c) 60%, var(--ink)); box-shadow: none; padding-left: 10px; }
+.ev.prompt::before { display: none; }
 .ev.slot { background: color-mix(in srgb, var(--c) 15%, var(--bg)); color: color-mix(in srgb, var(--c) 62%, var(--ink)); }
 .ev.slot::before { background: var(--c); }
 .ev.slot .pk, .ev.slot .sug { color: inherit; opacity: .8; } .ev.slot .pk b { color: inherit; }
