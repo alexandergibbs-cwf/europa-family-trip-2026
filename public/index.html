@@ -775,18 +775,21 @@ const KIND_FIX = {
   sweet: ["Vermicelleria", "Gelateria di Berna", "Chapon", "Bachir", "Gelateria Gallonetto", "Vivoli", "Gelateria Fassi - Gelato artigianale a Roma dal 1880", "Giolitti", "Gelateria La Romana dal 1947", "Mr. 100 Tiramisù"],
   dinner: ["Markthalle Neun", "Maxies Bistro", "Testaccio Market", "Seven Dials Market"],
   drinks: ["Cassiopeia Sommergarten", "Early June", "Hackney Bridge"],
-  see: ["East Side Gallery", "RAW-Gelände", "Haus Schwarzenberg", "Libreria Acqua Alta", "Leadenhall Market", "Academy of Athens"],
+  see: ["Buttercup Farm Park", "East Side Gallery", "RAW-Gelände", "Haus Schwarzenberg", "Libreria Acqua Alta", "Leadenhall Market", "Academy of Athens"],
   shop: ["Brupbacherplatz", "Museum Context: Retailer of Harry Potter Merchandise", "Giunti Odeon - Libreria e Cinema", "Royal Exchange"],
   culture: ["Bibliothèque Sainte-Geneviève", "Halle Saint-Pierre", "Maison de Victor Hugo", "Topography of Terror", "V&A East Storehouse", "Tate Britain", "Humboldt Forum", "The Royal Mews, Buckingham Palace"],
   experience: ["Rome With Chef", "Twilight Trastevere Rome Food Tour", "Electric Cinema", "Wheel of Fate"],
   /* a whole city, a save whose details describe somewhere else, and duplicates */
-  skip: ["Zürich", "Buttercup Farm Park", "Apostolic Palace", "Saint Peter’s Basilica", "Hôtel Particulier"],
+  skip: ["Zürich", "Apostolic Palace", "Saint Peter’s Basilica", "Hôtel Particulier"],
 };
+/* the saved description was about a graveyard; the place itself is a farm park on the west edge of the city */
+const HOOK_FIX = { "Buttercup Farm Park": "farm park on the west edge of edinburgh" };
 const KIND_BY_NAME = {}; Object.entries(KIND_FIX).forEach(([k, ns]) => ns.forEach(n => (KIND_BY_NAME[n] = k)));
 { const seen = new Set(); SAVES.forEach(s => {
   const key = s.name + "|" + s.city;
   s.kind = seen.has(key) ? "skip" : KIND_BY_NAME[s.name] || (s.cat === "restaurant" ? "dinner" : s.cat === "bar" ? "drinks" : s.cat === "cafe" ? "coffee" : s.cat === "accommodation" ? "skip"
     : CULT.test(s.name) ? "culture" : s.cat === "shop" ? "shop" : "see");
+  if (HOOK_FIX[s.name]) s.hook = HOOK_FIX[s.name];
   seen.add(key); }); }
 const isCulture = s => s.kind === "culture";
 const CATS = [
