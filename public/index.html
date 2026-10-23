@@ -940,6 +940,30 @@ function dayHTML(d) { if (!gCache.has(d)) { const k = [shownD, CUR, ITEMS, YFN];
 /* each day hides a different amount above its first hour; pages are nudged so the same time of day sits at the same height */
 const hideOf = el => { const g = el && el.querySelector(".grid"); return g ? -parseFloat(g.style.marginTop || 0) : 0; };
 let gRef = 0, gBase = 0;
+/* the time a day opens at: 7 AM, earlier if something starts before then, or the current time later in today */
+const DST = new Map();
+function dayStartT(iso) {
+  if (DST.has(iso)) return DST.get(iso);
+  const evs = events(iso, buildDay(iso)).filter(e => e.k !== "free" && e.k !== "prompt");
+  let t = Math.min(420, evs.length ? Math.min(...evs.map(e => e.s)) - 30 : 420);
+  if (iso === today && nowMin() - 45 > t + 300) t = nowMin() - 45;
+  t = Math.max(0, t); DST.set(iso, t); return t;
+}
+/* where time t sits on a rendered page, measured from the page's own top (read off its hour lines) */
+function pageTimeY(el, t) {
+  const g = el && el.querySelector(".grid"); if (!g) return null;
+  const hl = g.querySelectorAll(":scope > .hl"), h = Math.floor(t / 60), a = hl[h], b = hl[h + 1]; if (!a) return null;
+  const ya = parseFloat(a.style.top), yb = b ? parseFloat(b.style.top) : ya + 60;
+  const dy = parseFloat(el.dataset.dy || 0) || 0;
+  return g.getBoundingClientRect().top - (el.getBoundingClientRect().top - dy) + g.offsetTop * 0 + ya + (yb - ya) * (t % 60) / 60;
+}
+/* shift a page sliding in so its opening time sits at the top of the screen, where it will land */
+function alignOpen(el, iso) {
+  el.dataset.dy = "0"; el.style.transform = "translate3d(0,0,0)";
+  const y = pageTimeY(el, dayStartT(iso)); if (y == null) return;
+  const top = el.getBoundingClientRect().top, want = document.getElementById("top").offsetHeight + 8;
+  el.dataset.dy = String(Math.round(want - (top + y)));
+}
 /* get the days either side ready while nothing is happening, one at a time so a new swipe never waits on it */
 function warmAround(d) {
   const i = ALLDAYS.indexOf(d), q = [1, -1, 2, -2].map(k => ALLDAYS[i + k]).filter(Boolean), idle = window.requestIdleCallback || (f => setTimeout(f, 120));
@@ -958,10 +982,10 @@ function wDriveContent() {
   }
   /* three pages (yesterday, today, tomorrow) that only ever move by transform: nothing is rebuilt mid-swipe */
   const pg = document.getElementById("pager"), W = pg.clientWidth || innerWidth;
-  if (!ghosts) { gBase = Math.max(0, ALLDAYS.indexOf(shownD)); gRef = hideOf(content); content.dataset.dy = "0"; ghosts = [0, 1].map(() => { const g = document.createElement("div"); g.className = "dghost"; g.setAttribute("aria-hidden", "true"); pg.appendChild(g); return g; }); content.classList.add("driving"); }
+  if (!ghosts) { gBase = Math.max(0, ALLDAYS.indexOf(shownD)); gRef = 0; content.dataset.dy = "0"; ghosts = [0, 1].map(() => { const g = document.createElement("div"); g.className = "dghost"; g.setAttribute("aria-hidden", "true"); pg.appendChild(g); return g; }); content.classList.add("driving"); }
   if (Math.abs(wPos - gBase) > 1.5) { /* spun the wheel further than a day: move the centre page along */
-    gBase = Math.round(Math.max(0, Math.min(wN(), wPos))); content.innerHTML = dayHTML(ALLDAYS[gBase]); shownD = ALLDAYS[gBase]; content.dataset.dy = String(hideOf(content) - gRef); }
-  [ALLDAYS[gBase - 1], ALLDAYS[gBase + 1]].forEach((n, k) => { const g = ghosts[k]; if (g.dataset.d !== (n || "")) { g.dataset.d = n || ""; g.innerHTML = n ? dayHTML(n) : ""; g.dataset.dy = String(hideOf(g) - gRef); } });
+    gBase = Math.round(Math.max(0, Math.min(wN(), wPos))); content.innerHTML = dayHTML(ALLDAYS[gBase]); shownD = ALLDAYS[gBase]; alignOpen(content, shownD); }
+  [ALLDAYS[gBase - 1], ALLDAYS[gBase + 1]].forEach((n, k) => { const g = ghosts[k]; if (g.dataset.d !== (n || "")) { g.dataset.d = n || ""; g.innerHTML = n ? dayHTML(n) : ""; if (n) alignOpen(g, n); } });
   const f = wPos - gBase;
   content.style.transform = `translate3d(${(-f * W).toFixed(1)}px, ${content.dataset.dy || 0}px, 0)`;
   ghosts[0].style.transform = `translate3d(${(-W - f * W).toFixed(1)}px, ${ghosts[0].dataset.dy || 0}px, 0)`;
@@ -975,7 +999,8 @@ function land(d, keep) {
   else renderContent(d);
   ghosts?.forEach(g => g.remove()); ghosts = null; content.classList.remove("driving", "ph"); content.style.transform = "";
   /* the new day stays at the same time of day it was shown at while swiping: no second scroll after landing */
-  if (drove) { const dy = hideOf(content) - gRef; if (dy) scrollTo(0, Math.max(0, scrollY - dy)); }
+  /* every day opens at its start time (7 AM); the page slid in already lined up there, so this is not a visible jump */
+  if (drove) scrollToDay(false);
   else if (!keep) scrollToDay(true);
   warmAround(d);
 }
@@ -1937,7 +1962,7 @@ function openShow(html) {
 function closeShow() { if (show.hidden) return; const fin = () => { show.hidden = true; try { show._lock?.release(); } catch (e) {} }; if (reduce()) return fin(); const a = show.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "scale(0.96)" }], { duration: 220, easing: "cubic-bezier(0.55, 0, 0.5, 1)", fill: "forwards" }); a.onfinish = () => { fin(); a.cancel(); }; }
 
 /* ---------- events ---------- */
-document.addEventListener("click", () => gCache.clear(), true);
+document.addEventListener("click", () => { gCache.clear(); DST.clear(); }, true);
 document.addEventListener("click", e => {
   const t = e.target;
   if (t.closest("[data-close-show]")) { haptic(); return closeShow(); }
@@ -2000,7 +2025,7 @@ document.addEventListener("keydown", e => {
   if (e.key === "ArrowRight") selectDay(addDays(view, 1)); if (e.key === "ArrowLeft") selectDay(addDays(view, -1));
 });
 function tick() {
-  gCache.clear();
+  gCache.clear(); DST.clear();
   const t = isoLocal();
   if (t !== today) { const f = view === today; today = t; renderWeek(); if (f) view = t; showWeek(weekOf(view), false); }
   if (sheet.hidden && show.hidden && side.hidden && !pd) { const y = scrollY; renderHeader(false); content.innerHTML = renderContent(view); scrollTo(0, y); }
