@@ -769,15 +769,36 @@ const tripTxt = k => { const m = Math.round(20 + k / 60 * 60), h = Math.floor(m 
 const distTxt = k => k < 0.95 ? `${Math.round(k * 1000 / 50) * 50} m · ${Math.max(2, Math.round(k * 1.25 / 4.8 * 60))} min walk` : k < 3 ? `${k.toFixed(1)} km · ${Math.round(k * 1.25 / 4.8 * 60)} min walk` : k < 25 ? `${k.toFixed(1)} km · ~${Math.round(8 + k * 3)} min by metro or taxi` : `${Math.round(k)} km · day trip`;
 /* museums, galleries, palaces, libraries, theatre: "culture"; everything else you'd wander to is "sightsee" */
 const CULT = /museum|museo|musée|musee|museu|gallery|galleria|galerie|galleries|gallerie|kunst|exhibit|palazzo|palace|palais|biblioth|library|opera|theatre|theater|uffizi|louvre|orangerie|pergamon|vatican|academy|collection|foundation|fondation|fondazione/i;
-const isCulture = s => (["attraction", "activity", "other", "shop"].includes(s.cat)) && CULT.test(s.name);
+/* what each saved place really is, checked by hand (23 Oct): mio's own category is wrong for some, e.g. a bagel café saved as an attraction */
+const KIND_FIX = {
+  coffee: ["Shakespeare & Sons - Fine Bagels", "Coucou", "The COO Bakehouse", "Hotel Café Royal"],
+  sweet: ["Vermicelleria", "Gelateria di Berna", "Chapon", "Bachir", "Gelateria Gallonetto", "Vivoli", "Gelateria Fassi - Gelato artigianale a Roma dal 1880", "Giolitti", "Gelateria La Romana dal 1947", "Mr. 100 Tiramisù"],
+  dinner: ["Markthalle Neun", "Maxies Bistro", "Testaccio Market", "Seven Dials Market"],
+  drinks: ["Cassiopeia Sommergarten", "Early June", "Hackney Bridge"],
+  see: ["East Side Gallery", "RAW-Gelände", "Haus Schwarzenberg", "Libreria Acqua Alta", "Leadenhall Market", "Academy of Athens"],
+  shop: ["Brupbacherplatz", "Museum Context: Retailer of Harry Potter Merchandise", "Giunti Odeon - Libreria e Cinema", "Royal Exchange"],
+  culture: ["Bibliothèque Sainte-Geneviève", "Halle Saint-Pierre", "Maison de Victor Hugo", "Topography of Terror", "V&A East Storehouse", "Tate Britain", "Humboldt Forum", "The Royal Mews, Buckingham Palace"],
+  experience: ["Rome With Chef", "Twilight Trastevere Rome Food Tour", "Electric Cinema", "Wheel of Fate"],
+  /* a whole city, a save whose details describe somewhere else, and duplicates */
+  skip: ["Zürich", "Buttercup Farm Park", "Apostolic Palace", "Saint Peter’s Basilica", "Hôtel Particulier"],
+};
+const KIND_BY_NAME = {}; Object.entries(KIND_FIX).forEach(([k, ns]) => ns.forEach(n => (KIND_BY_NAME[n] = k)));
+{ const seen = new Set(); SAVES.forEach(s => {
+  const key = s.name + "|" + s.city;
+  s.kind = seen.has(key) ? "skip" : KIND_BY_NAME[s.name] || (s.cat === "restaurant" ? "dinner" : s.cat === "bar" ? "drinks" : s.cat === "cafe" ? "coffee" : s.cat === "accommodation" ? "skip"
+    : CULT.test(s.name) ? "culture" : s.cat === "shop" ? "shop" : "see");
+  seen.add(key); }); }
+const isCulture = s => s.kind === "culture";
 const CATS = [
-  { k: "dinner", l: "Eat", m: s => s.cat === "restaurant", dur: 90 },
-  { k: "drinks", l: "Wine", m: s => s.cat === "bar", dur: 75 },
-  { k: "coffee", l: "Coffee", m: s => s.cat === "cafe", dur: 45 },
-  { k: "culture", l: "Culture", m: s => isCulture(s), dur: 120 },
-  { k: "see", l: "Sightsee", m: s => ["attraction", "activity", "other"].includes(s.cat) && !isCulture(s), dur: 75 },
-  { k: "shop", l: "Shopping", m: s => s.cat === "shop" && !/biblioth|library/i.test(s.name), dur: 60 },
-  { k: "trip", l: "Day trip", m: () => true, dur: 300, far: true },
+  { k: "dinner", l: "Eat", m: s => s.kind === "dinner", dur: 90 },
+  { k: "drinks", l: "Wine", m: s => s.kind === "drinks", dur: 75 },
+  { k: "coffee", l: "Coffee", m: s => s.kind === "coffee", dur: 45 },
+  { k: "sweet", l: "Gelato & sweets", m: s => s.kind === "sweet", dur: 30 },
+  { k: "culture", l: "Culture", m: s => s.kind === "culture", dur: 120 },
+  { k: "see", l: "Sightsee", m: s => s.kind === "see", dur: 75 },
+  { k: "shop", l: "Shopping", m: s => s.kind === "shop", dur: 60 },
+  { k: "experience", l: "Experiences", m: s => s.kind === "experience", dur: 150 },
+  { k: "trip", l: "Day trip", m: s => s.kind === "see" || s.kind === "culture", dur: 300, far: true },
 ];
 const catOf = k => CATS.find(c => c.k === k);
 const SAVE_BY = Object.fromEntries(SAVES.map(s => [s.id, s]));
@@ -1450,7 +1471,7 @@ function planGroup(iso, steps, home, opts = {}) {
     const main = {};
     /* each area block is a small walkable cluster; the first is the day's anchor, later ones stay close to it */
     const areas = new Map();
-    const cluster = (pr, s0) => { used.add(s0.id); const list = [s0]; if (pr.cat !== "trip") for (let j = 0; j < (pr.cat === "culture" ? 0 : pr.of ? pr.of - 1 : 2); j++) { const nx = take(pool(pr.cat), s => dk(s, list[list.length - 1]), 2.5, R + j); if (nx) list.push(nx); } return list; };
+    const cluster = (pr, s0) => { used.add(s0.id); const list = [s0]; if (pr.cat !== "trip") for (let j = 0; j < (pr.cat === "culture" ? 0 : pr.of ? pr.of - 1 : 0); j++) { const nx = take(pool(pr.cat), s => dk(s, list[list.length - 1]), 2.5, R + j); if (nx) list.push(nx); } return list; };
     if (mainStep && seed) areas.set(key(mainStep), cluster(mainStep, seed));
     steps.filter(p => p.area && key(p) !== key(mainStep) && !(p.part > 0)).forEach(pr => { const s0 = take(pool(pr.cat), s => dk(s, centre), 99, R); if (s0) { used.delete(s0.id); areas.set(key(pr), cluster(pr, s0)); } });
     main.list = mainStep ? areas.get(key(mainStep)) : null;
@@ -1851,7 +1872,7 @@ function startCycle(iso) {
   pool = [lead[Math.floor(Math.random() * lead.length)], ...rest, ...lead.filter((_, i) => i !== 0)];
   let i = 0;
   const show = () => { const { s, k } = pool[i % pool.length]; i++;
-    const span = document.createElement("span"); span.className = "cyc-item"; span.innerHTML = `<i class="ic ${CATICON[s.cat] || "pin"}"></i><span class="t">${esc(s.name)} · ${shortDist(k)}</span>`;
+    const span = document.createElement("span"); span.className = "cyc-item"; span.innerHTML = `<i class="ic ${({ coffee: "cup", sweet: "cup", dinner: "fork", drinks: "glass", shop: "bag" })[s.kind] || "pin"}"></i><span class="t">${esc(s.name)} · ${shortDist(k)}</span>`;
     const old = el.firstElementChild; el.appendChild(span);
     if (old) { old.classList.add("out"); setTimeout(() => old.remove(), 260); }
   };
