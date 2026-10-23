@@ -516,22 +516,6 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .mev { --c: #8e8e93; left: 2px; right: 3px; padding: 3px 5px 3px 9px; background: color-mix(in srgb, var(--c) 15%, var(--bg)); color: color-mix(in srgb, var(--c) 62%, var(--ink)); border-radius: 5px; box-shadow: none; }
 .mev::before { content: ""; position: absolute; left: 2.5px; top: 2.5px; bottom: 2.5px; width: 2.5px; border-radius: 2px; background: var(--c); }
 .mev.travel, .mev.change { --c: #007aff; } .mev.change { background: color-mix(in srgb, var(--c) 9%, var(--bg)); }
-/* short blocks: title, then what you do there underneath */
-.ev.short.stack { flex-direction: column; align-items: stretch; justify-content: center; gap: 0; padding-block: 1px; }
-.ev.short.stack .tt { font-size: 12.5px; line-height: 1.15; }
-.ev.short.stack .tt .ic { width: 12px; height: 12px; }
-.ev.short.stack .tm { font-size: 11px; line-height: 1.15; }
-.ev.mine.wrap .tt { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.25; }
-.ev.get.wrap .tt { white-space: normal; line-height: 1.25; align-items: flex-start; } .ev.get.wrap .tt .ic { margin-top: 2px; }
-.mev.get { --c: #8e8e93; } .mev.plan { --c: var(--sub); background: var(--card); color: var(--ink); box-shadow: 0 0 0 1px var(--hair); }
-/* short blocks: title, then what you do there underneath */
-.ev.short.stack { flex-direction: column; align-items: stretch; justify-content: center; gap: 0; padding-block: 1px; }
-.ev.short.stack .tt { font-size: 12.5px; line-height: 1.15; }
-.ev.short.stack .tt .ic { width: 12px; height: 12px; }
-.ev.short.stack .tm { font-size: 11px; line-height: 1.15; }
-.ev.mine.wrap .tt { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.25; }
-.ev.get.wrap .tt { white-space: normal; line-height: 1.25; align-items: flex-start; } .ev.get.wrap .tt .ic { margin-top: 2px; }
-.mev.get { --c: #8e8e93; } .mev.plan { --c: var(--sub); background: var(--card); color: var(--ink); box-shadow: 0 0 0 1px var(--hair); }
 /* a travel day is one chain in one colour (orange), so it reads as a unit next to the day's plans.
    Strength follows how fixed the time is: the flight or train is solid, the places you wait in
    (hotel, airport, station) are a clear tint, the rides between them are the palest. Icons tell them apart. */
@@ -548,6 +532,10 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev.travel.done, .mev.travel.done { background: color-mix(in srgb, var(--c) 26%, var(--bg)); color: color-mix(in srgb, var(--c) 45%, var(--ink)); }
 .ev.travel.done .tm, .ev.travel.done .ref, .mev.travel.done span { color: inherit; }
 .ev.travel.done::before, .mev.travel.done::before { background: var(--c); }
+/* your own bookings: a drive sits in the travel colours, an outing is solid green */
+.ev.booked.bk-ride, .mev.booked.bk-ride { --c: #ff8a00; background: color-mix(in srgb, var(--c) 9%, var(--bg)); color: color-mix(in srgb, var(--c) 40%, var(--ink)); }
+.ev.booked.bk-ride::before, .mev.booked.bk-ride::before { opacity: .5; }
+.ev.booked.bk-see, .mev.booked.bk-see { --c: #34c759; background: color-mix(in srgb, var(--c) 20%, var(--bg)); color: color-mix(in srgb, var(--c) 55%, var(--ink)); }
 /* short blocks: title, then what you do there underneath */
 .ev.short.stack { flex-direction: column; align-items: stretch; justify-content: center; gap: 0; padding-block: 1px; }
 .ev.short.stack .tt { font-size: 12.5px; line-height: 1.15; }
@@ -555,7 +543,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev.short.stack .tm { font-size: 11px; line-height: 1.15; }
 .ev.mine.wrap .tt { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.25; }
 .ev.get.wrap .tt { white-space: normal; line-height: 1.25; align-items: flex-start; } .ev.get.wrap .tt .ic { margin-top: 2px; }
-.mev.get { --c: #8e8e93; } .mev.plan { --c: var(--sub); background: var(--card); color: var(--ink); box-shadow: 0 0 0 1px var(--hair); }
+.mev.plan { --c: var(--sub); background: var(--card); color: var(--ink); box-shadow: 0 0 0 1px var(--hair); }
 .mev.slot.coffee { --c: #a2845e; } .mev.slot.dinner { --c: #ff2d55; } .mev.slot.drinks { --c: #5856d6; }
 
 /* suggestions drift in and out one at a time, like ideas, not plans */
@@ -640,6 +628,11 @@ const MOVES = [
 
 /* things booked that aren't travel or hotels */
 const EVENTS = [
+  /* Akrotiri: downstairs at 9. Oia to the site is about 22 km, 40-45 min by road via Fira. The site is open 8 am-6 pm in late October
+     and most visits take 60-90 min; allowing 1h 45 for the ruins, a slow walk and the queue. */
+  { on: "2026-10-24", s: "09:00", e: "09:45", t: "The Museum Project Oia → Akrotiri", act: "Drive · about 45 min", style: "ride", where: "Archaeological Site of Akrotiri", note: "About 22 km by road, through Fira. Parking by the entrance." },
+  { on: "2026-10-24", s: "09:45", e: "11:30", t: "Akrotiri", act: "Explore the ruins", style: "see", where: "Archaeological Site of Akrotiri", note: "Bronze Age town buried by the eruption, under one big roof. Open 8 am – 6 pm in late October. Tickets at the gate or on hhticket.gr." },
+  { on: "2026-10-24", s: "11:30", e: "12:15", t: "Akrotiri → The Museum Project Oia", act: "Drive · about 45 min", style: "ride", where: "The Museum Project Oia" },
   { on: "2026-10-24", s: "17:00", e: "19:00", t: "Sunset dinner", kind: "dinner", note: "Last night in Santorini." },
 ];
 const HEADS = [
@@ -1076,7 +1069,7 @@ function events(iso, D) {
     else if (x.k === "get" && x.hk) { tt = x.stay.hotel; act = x.hact; sub = x.hsub || ""; }
     else if (x.k === "get") { tt = x.arr && x.stay ? `${placeTo(x.arr)} → ${x.stay.hotel}` : x.stay ? x.stay.hotel : placeFrom(m); act = ""; sub = ""; }
     else if (x.k === "change") { tt = placeFrom(m); act = x.term ? (m.mode === "Flight" ? "Bags, security" : "Find the platform, board") : /^Layover/.test(x.title) ? "Layover" : "Change trains"; }
-    else if (x.k === "booked") { tt = x.b.t; sub = x.b.where || ""; }
+    else if (x.k === "booked") { tt = x.b.t; act = x.b.act || ""; sub = x.b.act ? "" : x.b.where || ""; }
     else if (x.k === "pack") { tt = x.stay.hotel; act = "Pack suitcases"; sub = x.early ? `Leaving ${t12(x.tLeave)} tomorrow` : ""; }
     else if (x.k === "wait") { tt = "Free, with bags"; sub = x.stay && x.stay.store ? "Hotel can hold bags" : x.stay && x.stay.store === false ? "No luggage storage listed" : ""; }
     else { tt = x.title === "Free day" ? "Free all day" : x.title; sub = x.sub || ""; }
@@ -1154,8 +1147,8 @@ function renderDayContent(iso) {
     }
     const time = ev.k === "mark" ? t12(ev.s) : ev.x && ev.x.overnight ? `until ${t12(ev.e)}` : `${t12(ev.s)} – ${t12(ev.e)}`;
     const durTxt = (ev.k === "free" || ev.k === "wait") ? ` · ${dur(ev.e - ev.s)}` : "";
-    const modeOf = ev.m || (ev.x && ev.x.arr), isRide = ev.k === "get" && !ev.x.coOnly;
-    html += `<button class="ev ${ev.k}${ev.k === "get" && ev.x.coOnly ? " co" : ""}${isRide ? " ride" : ""}${ev.k === "get" && h >= 58 ? " wrap" : ""}${modeOf && modeOf.mode === "Train" && (ev.k === "travel" || ev.k === "change" || isRide) ? " rail" : ""}${short ? " short stack" : ""}${ev.done ? " done" : ""} press" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${ev.k === "travel" ? `<i class="ic ${ev.m.mode === "Flight" ? "fly" : "rail"}"></i>` : ev.k === "get" && !ev.x.coOnly ? `<i class="ic car"></i>` : (ev.k === "get" || ev.k === "pack") ? `<i class="ic bed"></i>` : ""}${esc(ev.tt)}${durTxt}</span><span class="tm">${ev.act ? `${esc(ev.act)} · ` : ""}${time}${ev.cd && !short ? ` · <b class="cd">${countdown(ev.cd)}</b>` : ""}${!short && ev.sub && h >= 60 && h < 80 ? ` · ${esc(ev.sub)}` : ""}</span>${!short && ev.sub && h >= 80 ? `<span class="tm">${esc(ev.sub)}</span>` : ""}${!short && ev.ref && h >= 100 ? `<span class="ref" data-show-ref="${ev.ref}" data-show-l="${esc(ev.m.code)}">${ev.ref} ›</span>` : ""}</button>`;
+    const modeOf = ev.m || (ev.x && ev.x.arr), isRide = (ev.k === "get" && !ev.x.coOnly) || (ev.k === "booked" && ev.x.b.style === "ride");
+    html += `<button class="ev ${ev.k}${ev.k === "booked" && ev.x.b.style ? " bk-" + ev.x.b.style : ""}${ev.k === "get" && ev.x.coOnly ? " co" : ""}${isRide ? " ride" : ""}${ev.k === "get" && h >= 58 ? " wrap" : ""}${modeOf && modeOf.mode === "Train" && (ev.k === "travel" || ev.k === "change" || isRide) ? " rail" : ""}${short ? " short stack" : ""}${ev.done ? " done" : ""} press" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${ev.k === "travel" ? `<i class="ic ${ev.m.mode === "Flight" ? "fly" : "rail"}"></i>` : isRide ? `<i class="ic car"></i>` : (ev.k === "get" || ev.k === "pack") ? `<i class="ic bed"></i>` : ""}${esc(ev.tt)}${durTxt}</span><span class="tm">${ev.act ? `${esc(ev.act)} · ` : ""}${time}${ev.cd && !short ? ` · <b class="cd">${countdown(ev.cd)}</b>` : ""}${!short && ev.sub && h >= 60 && h < 80 ? ` · ${esc(ev.sub)}` : ""}</span>${!short && ev.sub && h >= 80 ? `<span class="tm">${esc(ev.sub)}</span>` : ""}${!short && ev.ref && h >= 100 ? `<span class="ref" data-show-ref="${ev.ref}" data-show-l="${esc(ev.m.code)}">${ev.ref} ›</span>` : ""}</button>`;
   });
   html += `</div>`;
   D.marks.forEach((mk, mi) => { html += `<div class="mk" style="top:${y(mk.t)}px"><button class="press" data-mark="${mi}"><b>${mk.kind === "in" ? "Check in" : "Check out"} ${t12(mk.t)}</b><span>${esc(mk.stay.hotel)}</span></button></div>`; });
@@ -1188,7 +1181,7 @@ function renderMultiContent(iso) {
     evs.forEach((ev, i) => {
       if (ev.k === "free" || ev.k === "prompt" || ev.k === "wait") return;
       const top = MY(ev.s), h = Math.max(MY(ev.e) - MY(ev.s) - 2, 18);
-      html += `<button class="mev ${ev.k}${ev.k === "get" && ev.x && ev.x.coOnly ? " co" : ""}${ev.k === "get" && ev.x && !ev.x.coOnly ? " ride" : ""}${(ev.m || (ev.x && ev.x.arr) || {}).mode === "Train" && (ev.k === "travel" || ev.k === "change" || (ev.k === "get" && ev.x && !ev.x.coOnly)) ? " rail" : ""}${ev.slot ? " " + ev.slot.k : ""}${ev.done ? " done" : ""}${h < 34 ? " short" : ""} press" data-mday="${d}" data-mi="${i}" style="${ev.k === "mine" ? `--c:${KCOL[ev.mp.k] || "#8e8e93"};` : ""}top:${top}px;height:${h}px"><b>${esc(ev.k === "mine" ? ((ev.mp.txt || "").split("\x1f")[0].replace(/ · [^·]*$/, "") || ev.tt) : ev.tt)}</b>${h >= 44 ? `<span>${ev.act ? esc(ev.act) + " · " : ev.k === "mine" && ev.mp.txt ? esc(ev.mp.l) + " · " : ""}${t12(ev.s)}</span>` : ""}</button>`;
+      html += `<button class="mev ${ev.k}${ev.k === "booked" && ev.x && ev.x.b.style ? " bk-" + ev.x.b.style : ""}${ev.k === "get" && ev.x && ev.x.coOnly ? " co" : ""}${ev.k === "get" && ev.x && !ev.x.coOnly ? " ride" : ""}${(ev.m || (ev.x && ev.x.arr) || {}).mode === "Train" && (ev.k === "travel" || ev.k === "change" || (ev.k === "get" && ev.x && !ev.x.coOnly)) ? " rail" : ""}${ev.slot ? " " + ev.slot.k : ""}${ev.done ? " done" : ""}${h < 34 ? " short" : ""} press" data-mday="${d}" data-mi="${i}" style="${ev.k === "mine" ? `--c:${KCOL[ev.mp.k] || "#8e8e93"};` : ""}top:${top}px;height:${h}px"><b>${esc(ev.k === "mine" ? ((ev.mp.txt || "").split("\x1f")[0].replace(/ · [^·]*$/, "") || ev.tt) : ev.tt)}</b>${h >= 44 ? `<span>${ev.act ? esc(ev.act) + " · " : ev.k === "mine" && ev.mp.txt ? esc(ev.mp.l) + " · " : ""}${t12(ev.s)}</span>` : ""}</button>`;
     });
     if (d === today) html += `<div class="mnow" style="top:${MY(nm)}px"></div>`;
     html += `</div>`;
@@ -1985,7 +1978,7 @@ document.addEventListener("click", e => {
   const mk = t.closest("[data-mark]"); if (mk) { haptic(); return openSheet(staySheet(CUR.marks[+mk.dataset.mark].stay)); }
   const pp = t.closest("[data-prompt]"); if (pp) { haptic(); const i = ITEMS[+pp.dataset.i]; const shown = (pp.querySelector(".pk")?.textContent || "").split(" · ")[0].split(" → ").map(x => x.trim()).filter(Boolean); return openPlanner(view, pp.dataset.prompt, { s: i.s, e: i.e, k: "free" }, shown); }
   const ev = t.closest("[data-i]"); if (ev) { haptic(); const i = ITEMS[+ev.dataset.i]; if (i.k === "plan") return openSheet(planItemSheet(i)); if (i.k === "mine") return openSheet(mineSheet(i, view));
-      if (i.k === "booked") return openSheet(head(esc(i.x.b.t), `${dDay(i.x.b.on)} · ${s12(i.x.b.s)} – ${s12(i.x.b.e)}`) + (i.x.b.note ? `<p class="nt">${esc(i.x.b.note)}</p>` : ""));
+      if (i.k === "booked") { const b = i.x.b; return openSheet(head(esc(b.t), `${b.act ? esc(b.act) + " · " : ""}${dDay(b.on)} · ${s12(b.s)} – ${s12(b.e)}`) + (b.note ? `<p class="nt">${esc(b.note)}</p>` : "") + (b.where ? `<div class="acts"><a class="btn blue press" href="${maps(b.where + " Santorini")}" target="_blank" rel="noopener">Directions</a></div>` : "")); }
       if (i.k === "slot") { SL = i; REFRESH = () => { const st = sheet.scrollTop; document.getElementById("sheet-body").innerHTML = slotSheet(); sheet.scrollTop = st; }; return openSheet(slotSheet()); }
       if (i.k === "free" || i.k === "wait") { return openPlanner(view, PL.cat && PL.cat !== "trip" ? PL.cat : "dinner", i.x); } return openSheet(i.m ? moveSheet(i.m) : staySheet(i.stay)); }
   const st = t.closest("[data-stay]"); if (st) { haptic(); return openSheet(staySheet(STAYS[+st.dataset.stay])); }
