@@ -356,6 +356,33 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .a2step i .ls, .a2step i .dn, .a2step i .sh, .a2step i .pl { width: 16px; height: 16px; background: var(--blue); -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; }
 .a2step i .sh { --m: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l4 4-1.4 1.4L13 5.8V15h-2V5.8L9.4 7.4 8 6l4-4zM5 10h3v2H6v8h12v-8h-2v-2h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V11a1 1 0 0 1 1-1z'/%3E%3C/svg%3E"); }
 .a2step i .pl { --m: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h14V5H5zm6 3h2v3h3v2h-3v3h-2v-3H8v-2h3V8z'/%3E%3C/svg%3E"); }
+.tour { position: fixed; left: 50%; top: 50%; z-index: 60; width: min(320px, calc(100vw - 48px)); transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; padding: 22px 0 12px; background: var(--panel); border-radius: 28px; box-shadow: 0 20px 60px rgba(0,0,0,.22), 0 0 0 .5px var(--hair); overflow: hidden; touch-action: pan-y; }
+.tvp { width: 100%; overflow: hidden; }
+.ttrack { display: flex; transition: transform 460ms cubic-bezier(0.22, 1, 0.36, 1); }
+.tpg { flex: 0 0 100%; box-sizing: border-box; padding: 0 22px; text-align: center; }
+.tpg b { display: block; font-size: 19px; line-height: 1.25; color: var(--ink); margin-top: 16px; letter-spacing: -0.01em; }
+.tpg span { display: block; font-size: 15px; line-height: 1.4; color: var(--sub); margin-top: 6px; }
+.tdots { display: flex; gap: 7px; margin-top: 16px; }
+.tdots i { width: 7px; height: 7px; border-radius: 50%; background: var(--hair); transition: background-color 200ms ease, width 300ms ease; }
+.tdots i.on { background: var(--ink); width: 18px; border-radius: 4px; }
+.tnext { width: calc(100% - 44px); height: 48px; margin-top: 18px; }
+/* little pictures of the real thing */
+.tpic { height: 150px; border-radius: 16px; background: var(--card); position: relative; overflow: hidden; text-align: left; }
+.tpic .bk { position: absolute; left: 12px; right: 12px; border-radius: 6px; padding: 5px 8px 5px 12px; font-size: 11.5px; font-weight: 600; line-height: 1.2; }
+.tpic .bk::before { content: ""; position: absolute; left: 4px; top: 4px; bottom: 4px; width: 3px; border-radius: 2px; background: var(--c); }
+.tpic .bk small { display: block; font-weight: 400; opacity: .8; }
+.tpic .solid { background: var(--c); color: #fff; } .tpic .solid::before { background: rgba(0,0,0,.25); }
+.tpic .tint { background: color-mix(in srgb, var(--c) 26%, var(--bg)); color: color-mix(in srgb, var(--c) 45%, var(--ink)); }
+.tpic .dash { background: color-mix(in srgb, var(--c) 6%, var(--bg)); border: 1.5px dashed color-mix(in srgb, var(--c) 55%, transparent); color: color-mix(in srgb, var(--c) 60%, var(--ink)); } .tpic .dash::before { display: none; }
+.tpic .strip { position: absolute; left: 0; right: 0; top: 40px; display: flex; justify-content: center; gap: 14px; font-size: 22px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.tpic .strip .c { width: 40px; height: 40px; margin: -7px -7px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in srgb, var(--ink) 9%, transparent); font-weight: 600; }
+.tpic .hand { position: absolute; left: 50%; top: 96px; width: 34px; height: 34px; margin-left: -17px; border-radius: 50%; background: color-mix(in srgb, var(--blue) 22%, transparent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--blue) 55%, transparent); animation: tswipe 1.8s cubic-bezier(0.45, 0, 0.25, 1) infinite; }
+@keyframes tswipe { 0% { transform: translateX(46px); opacity: 0; } 15% { opacity: 1; } 70% { transform: translateX(-46px); opacity: 1; } 100% { transform: translateX(-46px); opacity: 0; } }
+.tpic .pill { position: absolute; left: 50%; top: 22px; transform: translateX(-50%); padding: 8px 16px; border-radius: 980px; background: var(--panel); box-shadow: 0 2px 10px rgba(0,0,0,.1); font-size: 16px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+.tpic .pill::after { content: " ›"; color: var(--sub); }
+.tpic .menu { position: absolute; left: 22px; right: 22px; top: 72px; border-radius: 12px; background: var(--panel); font-size: 13px; color: var(--ink); }
+.tpic .menu div { padding: 9px 12px; } .tpic .menu div + div { box-shadow: inset 0 .5px 0 var(--hair); } .tpic .menu .hl { font-weight: 600; color: var(--blue); }
+@media (prefers-reduced-motion: reduce) { .tpic .hand { animation: none; } .ttrack { transition: none; } }
 .a2go { width: 100%; height: 48px; margin-top: 18px; }
 .a2x { border: 0; background: none; color: var(--blue); font-size: 16px; font-weight: 500; height: 44px; margin-top: 6px; padding: 0 16px; cursor: pointer; }
 .restore { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 4px 0; }
@@ -559,6 +586,8 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 </div>
 <div class="scrim" id="scrim" hidden></div>
 <div class="a2bg" id="a2bg" data-a2x hidden></div>
+<div class="a2bg" id="tourbg" hidden></div>
+<div class="tour" id="tour" role="dialog" aria-modal="true" aria-label="How it works" hidden><div class="tvp"><div class="ttrack" id="ttrack"></div></div><div class="tdots" id="tdots"></div><button class="btn blue press tnext" id="tnext">Next</button><button class="a2x press" id="tskip">Skip</button></div>
 <div class="a2hs" id="a2hs" role="dialog" aria-modal="true" aria-label="Add to Home Screen" hidden><img src="/apple-touch-icon.png" alt="" width="76" height="76"><b>Add Europe Trip to your Home Screen</b><span id="a2how"></span><button class="btn blue press a2go" id="a2go" hidden>Install</button><button class="a2x press" data-a2x>Not now</button></div>
 <aside class="side" id="side" aria-label="Cities" hidden>
   <div class="side-h"><span>Cities</span></div>
@@ -1855,6 +1884,7 @@ function menuSheet() {
       ${row("stay", s ? esc(s.hotel) : "No hotel tonight", s ? `Check in ${s12(s.ci)} · out ${s12(s.co)}${s.est ? " (usual)" : ""}${s.addr && !/booking/i.test(s.addr) ? " · " + esc(s.addr) : ""}` : (iso === END ? "Landing in Perth" : "Overnight flight"))}
       ${hasFree(iso) ? row("plan", getDay(iso) ? "Day planned" : "Plan the day", getDay(iso) ? "Change or clear it" : "A few questions, then a plan") : ""}
       ${row("ideas", "Things to do", hasSaves(iso) ? `<span class="cyc" id="cyc"></span>` : `Search near the hotel`)}
+      ${row("tour", "How it works", "A quick look at the app")}
       ${row("tasks", open ? `${open} thing${open > 1 ? "s" : ""} to sort` : "Nothing to sort", open ? headsFor(iso).find(h => !h.k || !done(h.k)).t : "No reminders for this day")}
   </div>`;
 }
@@ -1967,7 +1997,7 @@ document.addEventListener("click", e => {
   if (t.closest("#backPill")) { haptic(); return openSide(); }
   if (t.closest("#titlePill")) { haptic(); openSheet(menuSheet()); startCycle(view); return; }
   if (t.closest("[data-today]")) { e.preventDefault(); haptic(); closeSheet(); return selectDay(today); }
-  const mi = t.closest("[data-menu]"); if (mi) { haptic(); const k = mi.dataset.menu; if (k === "stay") { const s = stayOn(view); return openSheet(s ? staySheet(s) : tripSheet()); } if (k === "wx") return openSheet(wxSheet()); if (k === "ideas") { const h = view === today ? new Date().getHours() : 10; return openPlanner(view, h < 11 ? "coffee" : h < 14 ? "dinner" : h < 17 ? "see" : h < 21 ? "dinner" : "drinks", null); } if (k === "tasks") return openSheet(tasksSheet()); if (k === "plan") return openAsk(view); if (k === "trip") return openSheet(tripSheet()); }
+  const mi = t.closest("[data-menu]"); if (mi) { haptic(); const k = mi.dataset.menu; if (k === "stay") { const s = stayOn(view); return openSheet(s ? staySheet(s) : tripSheet()); } if (k === "wx") return openSheet(wxSheet()); if (k === "ideas") { const h = view === today ? new Date().getHours() : 10; return openPlanner(view, h < 11 ? "coffee" : h < 14 ? "dinner" : h < 17 ? "see" : h < 21 ? "dinner" : "drinks", null); } if (k === "tasks") return openSheet(tasksSheet()); if (k === "tour") { closeSheet(); return setTimeout(openTour, 320); } if (k === "plan") return openAsk(view); if (k === "trip") return openSheet(tripSheet()); }
   if (t.closest("[data-open-trip]")) { haptic(); return openSheet(tripSheet()); }
 });
 document.addEventListener("keydown", e => {
@@ -1996,7 +2026,7 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) { ti
   const snoozed = () => { try { return Date.now() - (+localStorage.getItem("a2hs") || 0) < 3 * 864e5; } catch (e) { return false; } };
   let deferred = null;
   const C = "translate(-50%, -50%)";
-  const show = () => { if (installed || snoozed() || !a2.hidden || !sheet.hidden) return; a2.hidden = false; a2bg.hidden = false; if (!reduce()) { a2bg.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, easing: "ease-out" }); a2.animate([{ transform: `${C} scale(.92)`, opacity: 0 }, { transform: `${C} scale(1)`, opacity: 1 }], { duration: 520, easing: EASE }); } };
+  const show = () => { if (installed || snoozed() || !a2.hidden || !sheet.hidden) return; if (!document.getElementById("tour").hidden) { setTimeout(show, 1500); return; } a2.hidden = false; a2bg.hidden = false; if (!reduce()) { a2bg.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, easing: "ease-out" }); a2.animate([{ transform: `${C} scale(.92)`, opacity: 0 }, { transform: `${C} scale(1)`, opacity: 1 }], { duration: 520, easing: EASE }); } };
   const hide = () => { try { localStorage.setItem("a2hs", String(Date.now())); } catch (e) {} if (reduce()) { a2.hidden = a2bg.hidden = true; return; }
     a2bg.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 260, easing: "ease-in", fill: "forwards" }).onfinish = function () { a2bg.hidden = true; this.cancel(); };
     a2.animate([{ transform: `${C} scale(1)`, opacity: 1 }, { transform: `${C} scale(.94)`, opacity: 0 }], { duration: 240, easing: "cubic-bezier(0.55, 0, 0.5, 1)", fill: "forwards" }).onfinish = function () { a2.hidden = true; this.cancel(); }; };
@@ -2007,6 +2037,47 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) { ti
     document.getElementById("a2go").onclick = async e => { e.stopPropagation(); haptic("heavy"); if (!deferred) return; deferred.prompt(); try { await deferred.userChoice; } catch (er) {} deferred = null; hide(); };
     addEventListener("appinstalled", () => { a2.hidden = true; });
   }
+}
+/* a short "how it works" the first time the app is opened (from the Home Screen on iPhone, so it isn't stacked on the add-to-home card) */
+const TOUR = [
+  { t: "Your trip, day by day", d: "It opens on today: where you’re staying and what’s booked.", p: `<div class="bk tint" style="--c:#ff8a00;top:14px">Hotel<small>Check out · 10:30 am</small></div><div class="bk solid" style="--c:#ff8a00;top:54px;height:40px">Rome → Florence<small>12:30 pm – 2:11 pm</small></div><div class="bk tint" style="--c:#ff8a00;top:104px">Hotel<small>Check in · 2:30 pm</small></div>` },
+  { t: "Swipe between days", d: "Swipe the page sideways, or tap a date at the top.", p: `<div class="strip"><span>27</span><span class="c">28</span><span>29</span></div><div class="hand"></div>` },
+  { t: "Ideas for free time", d: "Dashed blocks are ideas from your saved places. Tap one to see it.", p: `<div class="bk dash" style="--c:#a2845e;top:14px">Coffee<small>Caffè Teichner · 5 min walk</small></div><div class="bk dash" style="--c:#34c759;top:54px">Sightsee<small>Trevi Fountain · 8 min walk</small></div><div class="bk dash" style="--c:#ff2d55;top:94px;height:42px">Food<small>Supplizio · 9 min walk</small></div>` },
+  { t: "Plan a whole day", d: "Tap the city name, then Plan the day. A few taps and it’s done.", p: `<div class="pill">Rome</div><div class="menu"><div>Spagna Boutique</div><div class="hl">Plan the day</div></div>` },
+];
+let tourAt = 0;
+function tourGo(i) {
+  tourAt = Math.max(0, Math.min(TOUR.length - 1, i));
+  document.getElementById("ttrack").style.transform = `translateX(${-tourAt * 100}%)`;
+  document.querySelectorAll("#tdots i").forEach((d, k) => d.classList.toggle("on", k === tourAt));
+  document.getElementById("tnext").textContent = tourAt === TOUR.length - 1 ? "Get started" : "Next";
+  document.getElementById("tskip").style.visibility = tourAt === TOUR.length - 1 ? "hidden" : "";
+}
+function openTour() {
+  const el = document.getElementById("tour"), bg = document.getElementById("tourbg");
+  document.getElementById("ttrack").innerHTML = TOUR.map(x => `<div class="tpg"><div class="tpic" aria-hidden="true">${x.p}</div><b>${x.t}</b><span>${x.d}</span></div>`).join("");
+  document.getElementById("tdots").innerHTML = TOUR.map(() => "<i></i>").join("");
+  tourGo(0); el.hidden = false; bg.hidden = false;
+  if (!reduce()) { bg.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, easing: "ease-out" }); el.animate([{ transform: "translate(-50%, -50%) scale(.92)", opacity: 0 }, { transform: "translate(-50%, -50%) scale(1)", opacity: 1 }], { duration: 520, easing: EASE }); }
+}
+function closeTour() {
+  try { localStorage.setItem("tour", "1"); } catch (e) {}
+  const el = document.getElementById("tour"), bg = document.getElementById("tourbg");
+  if (reduce()) { el.hidden = bg.hidden = true; return; }
+  bg.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 260, easing: "ease-in", fill: "forwards" }).onfinish = function () { bg.hidden = true; this.cancel(); };
+  el.animate([{ transform: "translate(-50%, -50%) scale(1)", opacity: 1 }, { transform: "translate(-50%, -50%) scale(.94)", opacity: 0 }], { duration: 240, easing: "cubic-bezier(0.55, 0, 0.5, 1)", fill: "forwards" }).onfinish = function () { el.hidden = true; this.cancel(); };
+}
+{
+  const el = document.getElementById("tour");
+  document.getElementById("tnext").onclick = e => { e.stopPropagation(); haptic(); tourAt === TOUR.length - 1 ? closeTour() : tourGo(tourAt + 1); };
+  document.getElementById("tskip").onclick = e => { e.stopPropagation(); haptic(); closeTour(); };
+  let sx = null;
+  el.addEventListener("touchstart", e => { sx = e.touches[0].clientX; }, { passive: true });
+  el.addEventListener("touchend", e => { if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; sx = null; if (Math.abs(dx) > 40) { haptic(); tourGo(tourAt + (dx < 0 ? 1 : -1)); } }, { passive: true });
+  const installed = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  let seen = false; try { seen = localStorage.getItem("tour") === "1"; } catch (e) {}
+  if (!seen && (installed || !ios) && !/[?&]notour/.test(location.search)) setTimeout(() => { if (sheet.hidden && document.getElementById("a2hs").hidden) openTour(); }, 900);
 }
 /* a new version was pushed: reload when the app comes back to the front (the home-screen app keeps old pages alive) */
 let BUILD = null;
