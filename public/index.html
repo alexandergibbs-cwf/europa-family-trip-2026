@@ -317,6 +317,9 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .place .h { font-size: 14px; color: var(--sub); line-height: 1.35; }
 .place .m { font-size: 13px; color: var(--sub); font-variant-numeric: tabular-nums; }
 .place .m b { color: var(--e-free-ink); font-weight: 600; }
+.ttq { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; border: 0; padding: 18px 16px; margin-bottom: 10px; text-align: center; cursor: pointer; }
+.ttq .ttw { font-size: 20px; font-weight: 600; color: var(--ink); line-height: 1.25; -webkit-user-select: all; user-select: all; }
+.ttq .ttc { font-size: 14px; font-weight: 600; color: #34c759; }
 .place .links { display: flex; flex-wrap: wrap; gap: 2px 16px; font-size: 14px; margin-top: 4px; } .place .links a { white-space: nowrap; }
 .addb { border: 0; height: 34px; padding: 0 14px; border-radius: 980px; background: var(--blue); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; align-self: start; transition: transform 480ms var(--spring-bouncy); white-space: nowrap; }
 .addb:active { transform: scale(0.92); transition-duration: 100ms; }
@@ -2088,14 +2091,28 @@ function closeShow() { if (show.hidden) return; const fin = () => { show.hidden 
 
 /* ---------- events ---------- */
 document.addEventListener("click", () => { gCache.clear(); DST.clear(); }, true);
-/* TikTok's app drops the search term from web links, so copy it first: tap search in TikTok and paste */
+/* Search a place on TikTok. Web links land on TikTok's website, which can't search without signing in,
+   and the app ignores the words in them. So: copy the name here (shown big, so you know it worked),
+   then open the app itself with its own link; tap search there and paste. */
+function copyText(q) {
+  const old = () => { const ta = document.createElement("textarea"); ta.value = q; ta.setAttribute("readonly", ""); ta.style.cssText = "position:fixed;top:0;opacity:0;font-size:16px"; document.body.appendChild(ta); ta.focus(); ta.setSelectionRange(0, q.length); let ok = false; try { ok = document.execCommand("copy"); } catch (y) {} ta.remove(); return ok; };
+  try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(q).catch(old); return true; } } catch (x) {}
+  return old();
+}
+function ttSheet(q, ok) {
+  return head("Search on TikTok", "")
+    + `<button class="ig press ttq" data-copyq="${esc(q)}"><span class="ttw">${esc(q)}</span><span class="ttc" id="ttc">${ok ? "✓ Copied" : "Tap to copy"}</span></button>
+    <p class="nt" style="margin-top:0">Open the app, tap search and paste.</p>
+    <div class="acts"><a class="btn blue press" href="snssdk1233://search?keyword=${encodeURIComponent(q)}">Open TikTok</a><a class="btn card press" href="instagram://app">Instagram</a></div>
+    <div class="restore"><a href="${ttq(q, "")}" target="_blank" rel="noopener">Search on the TikTok website instead ›</a></div>`;
+}
 document.addEventListener("click", e => {
-  const l = e.target.closest && e.target.closest('a[href*="tiktok.com/search"]'); if (!l) return;
+  const c = e.target.closest && e.target.closest("[data-copyq]");
+  if (c) { e.preventDefault(); e.stopPropagation(); haptic(); copyText(c.dataset.copyq); const t = document.getElementById("ttc"); if (t) t.textContent = "✓ Copied"; if (t && !reduce()) t.animate([{ transform: "scale(1.15)" }, { transform: "none" }], { duration: 260 }); return; }
+  const l = e.target.closest && e.target.closest('a[href*="tiktok.com/search"]'); if (!l || l.closest(".restore")) return;
+  e.preventDefault(); e.stopPropagation(); haptic();
   const q = new URL(l.href).searchParams.get("q") || "";
-  const old = () => { const ta = document.createElement("textarea"); ta.value = q; ta.setAttribute("readonly", ""); ta.style.cssText = "position:fixed;opacity:0"; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); } catch (y) {} ta.remove(); };
-  try { navigator.clipboard.writeText(q).catch(old); } catch (x) { old(); }
-  let t = document.getElementById("ttToast"); if (!t) { t = document.createElement("div"); t.id = "ttToast"; t.style.cssText = "position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:80;background:rgba(30,30,30,.92);color:#fff;font-size:14px;line-height:1.35;padding:10px 16px;border-radius:14px;max-width:calc(100vw - 48px);text-align:center;transition:opacity .3s"; document.body.appendChild(t); }
-  t.innerHTML = `Copied <b>${esc(q)}</b><br>Paste it into TikTok search`; t.style.opacity = 1; clearTimeout(t._h); t._h = setTimeout(() => t.style.opacity = 0, 4000);
+  swapSheet(ttSheet(q, copyText(q)));
 }, true);
 document.addEventListener("click", e => {
   const t = e.target;
