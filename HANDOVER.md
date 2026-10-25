@@ -151,3 +151,8 @@ They sit in free time and play as whole-day ideas ("scenes").
 - **Durations:** rounded to whole or half hours.
 - **Motion:** smooth, light and airy, not bouncy (except the pull stretch, which should feel springy). Revert quickly if a change looks worse.
 - **Home-screen app:** updates live. Only the icon and name need a re-add.
+
+## Shared state (added 25 Oct)
+- `src/worker.js` runs before assets for `/api/*` and `/cal/*` (see `wrangler.jsonc`). KV namespace `europa-trip-shared` (binding `SHARED`) holds one value `state` = `{ key: { v, ts } }`, newest change wins.
+- Shared keys: `plan:<iso>` (added stops), `dayplan:<iso>` (Plan the day), `pick:<iso>:<k>`, `cal:<iso>` (calendar lines worked out in the app), `uk-eta`. The app writes through `put()`, pulls on open, every minute and when it comes back to the front.
+- The calendar feed is served by the worker: the static `public/cal/<token>.ics` plus the `cal:*` entries. Still rerun `python3 tools/make_ics.py` after changing STAYS, MOVES or EVENTS.

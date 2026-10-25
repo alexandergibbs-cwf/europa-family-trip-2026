@@ -296,7 +296,7 @@ DTSTAMP:20261025T000000Z
 DTSTART:20261020T092500Z
 DTEND:20261020T105500Z
 SUMMARY:Athens Airport → Bellén Athens Hotel
-LOCATION:Bellén Athens Hotel\, Athens
+LOCATION:Bellén Athens Hotel\, Karaiskaki 7\, Psyri\, Athens
 DESCRIPTION:12:25 pm Athens time
 END:VEVENT
 BEGIN:VEVENT
@@ -305,7 +305,7 @@ DTSTAMP:20261025T000000Z
 DTSTART:20261020T105500Z
 DTEND:20261020T112500Z
 SUMMARY:Bellén Athens Hotel · Drop bags
-LOCATION:Bellén Athens Hotel\, Athens
+LOCATION:Bellén Athens Hotel\, Karaiskaki 7\, Psyri\, Athens
 DESCRIPTION:1:55 pm Athens time\nCheck in from 3:00 pm\n24-hour front desk
   and luggage storage.
 END:VEVENT
@@ -315,7 +315,7 @@ DTSTAMP:20261025T000000Z
 DTSTART:20261021T193000Z
 DTEND:20261021T200000Z
 SUMMARY:Bellén Athens Hotel · Pack suitcases
-LOCATION:Bellén Athens Hotel\, Athens
+LOCATION:Bellén Athens Hotel\, Karaiskaki 7\, Psyri\, Athens
 DESCRIPTION:10:30 pm Athens time\nLeaving 8:15 am tomorrow
 BEGIN:VALARM
 ACTION:DISPLAY
@@ -329,7 +329,7 @@ DTSTAMP:20261025T000000Z
 DTSTART:20261022T044500Z
 DTEND:20261022T051500Z
 SUMMARY:Bellén Athens Hotel · Check out
-LOCATION:Bellén Athens Hotel\, Athens
+LOCATION:Bellén Athens Hotel\, Karaiskaki 7\, Psyri\, Athens
 DESCRIPTION:7:45 am Athens time
 BEGIN:VALARM
 ACTION:DISPLAY
@@ -343,7 +343,7 @@ DTSTAMP:20261025T000000Z
 DTSTART:20261022T051500Z
 DTEND:20261022T060500Z
 SUMMARY:Bellén Athens Hotel → Athens Airport
-LOCATION:Bellén Athens Hotel\, Athens
+LOCATION:Bellén Athens Hotel\, Karaiskaki 7\, Psyri\, Athens
 DESCRIPTION:8:15 am Athens time
 END:VEVENT
 BEGIN:VEVENT
@@ -498,7 +498,7 @@ DTSTAMP:20261025T000000Z
 DTSTART:20261025T135000Z
 DTEND:20261025T150500Z
 SUMMARY:Athens Airport → 11 Enteka Acropolis Suites
-LOCATION:11 Enteka Acropolis Suites\, Athens
+LOCATION:11 Enteka Acropolis Suites\, Kallaischrou 8\, Koukaki\, Athens
 DESCRIPTION:3:50 pm Athens time
 END:VEVENT
 BEGIN:VEVENT
@@ -507,7 +507,7 @@ DTSTAMP:20261025T000000Z
 DTSTART:20261025T150500Z
 DTEND:20261025T153500Z
 SUMMARY:11 Enteka Acropolis Suites · Check in
-LOCATION:11 Enteka Acropolis Suites\, Athens
+LOCATION:11 Enteka Acropolis Suites\, Kallaischrou 8\, Koukaki\, Athens
 DESCRIPTION:5:05 pm Athens time\nCheck in from 3:00 pm\nReception 8:30 AM–
  10:30 PM.
 END:VEVENT
@@ -517,7 +517,7 @@ DTSTAMP:20261025T000000Z
 DTSTART:20261026T203000Z
 DTEND:20261026T210000Z
 SUMMARY:11 Enteka Acropolis Suites · Pack suitcases
-LOCATION:11 Enteka Acropolis Suites\, Athens
+LOCATION:11 Enteka Acropolis Suites\, Kallaischrou 8\, Koukaki\, Athens
 DESCRIPTION:10:30 pm Athens time\nLeaving 8:40 am tomorrow
 BEGIN:VALARM
 ACTION:DISPLAY
@@ -531,7 +531,7 @@ DTSTAMP:20261025T000000Z
 DTSTART:20261027T061000Z
 DTEND:20261027T064000Z
 SUMMARY:11 Enteka Acropolis Suites · Check out
-LOCATION:11 Enteka Acropolis Suites\, Athens
+LOCATION:11 Enteka Acropolis Suites\, Kallaischrou 8\, Koukaki\, Athens
 DESCRIPTION:8:10 am Athens time
 BEGIN:VALARM
 ACTION:DISPLAY
@@ -545,7 +545,7 @@ DTSTAMP:20261025T000000Z
 DTSTART:20261027T064000Z
 DTEND:20261027T073000Z
 SUMMARY:11 Enteka Acropolis Suites → Athens Airport
-LOCATION:11 Enteka Acropolis Suites\, Athens
+LOCATION:11 Enteka Acropolis Suites\, Kallaischrou 8\, Koukaki\, Athens
 DESCRIPTION:8:40 am Athens time
 END:VEVENT
 BEGIN:VEVENT
@@ -771,7 +771,7 @@ DTSTAMP:20261025T000000Z
 DTSTART:20261103T132700Z
 DTEND:20261103T135200Z
 SUMMARY:Zürich HB → Sorell Hotel Rex
-LOCATION:Sorell Hotel Rex\, Zürich
+LOCATION:Sorell Hotel Rex\, Weinbergstrasse 92\, Zürich
 DESCRIPTION:2:27 pm Zürich time
 END:VEVENT
 BEGIN:VEVENT
@@ -780,7 +780,7 @@ DTSTAMP:20261025T000000Z
 DTSTART:20261103T135200Z
 DTEND:20261103T142200Z
 SUMMARY:Sorell Hotel Rex · Check in
-LOCATION:Sorell Hotel Rex\, Zürich
+LOCATION:Sorell Hotel Rex\, Weinbergstrasse 92\, Zürich
 DESCRIPTION:2:52 pm Zürich time\nCheck in from 3:00 pm\nReception 7 AM–5 P
  M; after that you get an emailed access code.
 END:VEVENT
@@ -790,7 +790,7 @@ DTSTAMP:20261025T000000Z
 DTSTART:20261105T094500Z
 DTEND:20261105T103000Z
 SUMMARY:Sorell Hotel Rex · Pack suitcases
-LOCATION:Sorell Hotel Rex\, Zürich
+LOCATION:Sorell Hotel Rex\, Weinbergstrasse 92\, Zürich
 DESCRIPTION:10:45 am Zürich time
 BEGIN:VALARM
 ACTION:DISPLAY
@@ -804,7 +804,7 @@ DTSTAMP:20261025T000000Z
 DTSTART:20261105T103000Z
 DTEND:20261105T110000Z
 SUMMARY:Sorell Hotel Rex · Check out
-LOCATION:Sorell Hotel Rex\, Zürich
+LOCATION:Sorell Hotel Rex\, Weinbergstrasse 92\, Zürich
 DESCRIPTION:11:30 am Zürich time
 BEGIN:VALARM
 ACTION:DISPLAY
@@ -818,7 +818,7 @@ DTSTAMP:20261025T000000Z
 DTSTART:20261105T110000Z
 DTEND:20261105T114500Z
 SUMMARY:Sorell Hotel Rex → Zürich Airport
-LOCATION:Sorell Hotel Rex\, Zürich
+LOCATION:Sorell Hotel Rex\, Weinbergstrasse 92\, Zürich
 DESCRIPTION:12:00 pm Zürich time
 END:VEVENT
 BEGIN:VEVENT

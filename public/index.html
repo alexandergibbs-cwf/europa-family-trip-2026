@@ -550,6 +550,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev.short.stack .tt { font-size: 12.5px; line-height: 1.15; }
 .ev.short.stack .tt .ic { width: 12px; height: 12px; }
 .ev.short.stack .tm { font-size: 11px; line-height: 1.15; }
+.ev.mine.wrap .tt .ic { margin-right: 6px; }
 .ev.mine.wrap .tt { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.25; }
 .ev.get.wrap .tt { white-space: normal; line-height: 1.25; align-items: flex-start; } .ev.get.wrap .tt .ic { margin-top: 2px; }
 .mev.plan { --c: var(--sub); background: var(--card); color: var(--ink); box-shadow: 0 0 0 1px var(--hair); }
@@ -604,13 +605,13 @@ const wxLink = c => "https://www.google.com/search?q=" + encodeURIComponent("wea
 
 /* ci/co from hotel listings (Hotels.com, Kayak) checked 21 Oct; est = usual times for rentals */
 const STAYS = [
-  { city:"Athens", in:"2026-10-20", out:"2026-10-22", hotel:"Bellén Athens Hotel", q:"Bellén Athens Hotel", ci:"15:00", co:"11:00", store:true, note:"24-hour front desk and luggage storage." },
+  { city:"Athens", in:"2026-10-20", out:"2026-10-22", hotel:"Bellén Athens Hotel", addr:"Karaiskaki 7, Psyri", q:"Bellén Athens Hotel", ci:"15:00", co:"11:00", store:true, note:"24-hour front desk and luggage storage." },
   { city:"Santorini", in:"2026-10-22", out:"2026-10-25", hotel:"The Museum Project Oia", addr:"Oia", q:"The Museum Project Oia Santorini", ci:"15:00", ciEnd:"21:00", co:"11:00", store:true, note:"Check in at “The Beauty Shop” in front of the property. Reception 8:30 AM–9 PM." },
-  { city:"Athens", in:"2026-10-25", out:"2026-10-27", hotel:"11 Enteka Acropolis Suites", q:"11 Enteka Acropolis Suites Athens", ci:"15:00", co:"11:00", store:true, note:"Reception 8:30 AM–10:30 PM." },
+  { city:"Athens", in:"2026-10-25", out:"2026-10-27", hotel:"11 Enteka Acropolis Suites", addr:"Kallaischrou 8, Koukaki", q:"11 Enteka Acropolis Suites Kallaischrou 8 Athens", ci:"15:00", co:"11:00", store:true, note:"Reception 8:30 AM–10:30 PM." },
   { city:"Rome", in:"2026-10-27", out:"2026-10-30", hotel:"Spagna Boutique", addr:"Near the Spanish Steps", q:"Spagna Boutique Rome", ci:"14:00", co:"11:00", store:null, note:"Reception hours aren’t listed; some guests mention self check-in." },
   { city:"Florence", in:"2026-10-30", out:"2026-11-01", hotel:"Nerone Apartment by Mamo", q:"Nerone Apartment by Mamo Florence", ci:"15:00", ciEnd:"24:00", co:"10:00", store:false, note:"No reception. No luggage storage listed." },
   { city:"Venice", in:"2026-11-01", out:"2026-11-03", hotel:"Ca’ de la Fonte", addr:"Check in at Hotel Ca’ d’Oro, Corte Barbaro 4604", q:"Hotel Ca' d'Oro Corte Barbaro 4604 Venice", ci:"15:00", ciEnd:"22:00", co:"11:00", store:true },
-  { city:"Zürich", in:"2026-11-03", out:"2026-11-05", hotel:"Sorell Hotel Rex", q:"Sorell Hotel Rex Zürich", ci:"15:00", co:"12:00", store:true, note:"Reception 7 AM–5 PM; after that you get an emailed access code." },
+  { city:"Zürich", in:"2026-11-03", out:"2026-11-05", hotel:"Sorell Hotel Rex", addr:"Weinbergstrasse 92", q:"Sorell Hotel Rex Weinbergstrasse 92 Zürich", ci:"15:00", co:"12:00", store:true, note:"Reception 7 AM–5 PM; after that you get an emailed access code." },
   { city:"Berlin", in:"2026-11-05", out:"2026-11-08", hotel:"SANA Berlin Hotel", addr:"Nürnberger Str. 33/34", q:"SANA Berlin Hotel Nürnberger Str. 33 Berlin", ci:"15:00", co:"12:00", store:true, note:"24-hour front desk and luggage storage." },
   { city:"Paris", in:"2026-11-08", out:"2026-11-11", hotel:"Splendid Hôtel", addr:"54 Rue Fondary, 15e", q:"Splendid Hôtel 54 Rue Fondary Paris", ci:"15:00", co:"12:00", store:true, note:"24-hour front desk and luggage storage. City tax about €5.53 per person per night." },
   { city:"Glasgow", in:"2026-11-11", out:"2026-11-13", hotel:"4-bed flat, central Glasgow", addr:"Address in the Booking.com booking", ci:"15:00", co:"10:00", est:true, store:null },
@@ -673,7 +674,7 @@ const HEADS = [
   { on:["2026-11-07","2026-11-08"], w:1, t:"Early night on Saturday.", d:"Leave the hotel around 6:15 AM for the 8:45 AM flight." },
   { on:["2026-11-10","2026-11-11"], w:1, t:"easyJet bag drop at CDG closes at 2:45 PM.", d:"Terminal 2D. Glasgow is 1 hour behind Paris." },
   { on:["2026-11-15","2026-11-16"], t:"The LNER train to London isn’t booked yet.", d:"Aiming for a late-morning train to King’s Cross." },
-  { on:["2026-11-19"], t:"Flight home leaves Heathrow at 2:55 PM.", d:"Not on KJCTJU? Check your own booking matches.", k:"own-booking" },
+  { on:["2026-11-19"], t:"Flight home leaves Heathrow at 2:55 PM.", d:"Booked your own flights? Check yours matches." },
 ];
 
 /* Weather: forecast checked 21 Oct 2026 (TheWeatherOutlook, ArcheoRoma). [condition, high, low|null, rain mm] */
@@ -817,7 +818,7 @@ const HKEYS = ["bellen", "oia", "enteka", "spagna", "nerone", "fonte", "rex", "s
 STAYS.forEach((s, i) => { const h = HOTELC[HKEYS[i]]; if (h) { s.lat = h[0]; s.lng = h[1]; } });
 const km = (a, b, c, d) => { const R = 6371, p = Math.PI / 180, x = Math.sin((c - a) * p / 2) ** 2 + Math.cos(a * p) * Math.cos(c * p) * Math.sin((d - b) * p / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(x)); };
 const tripTxt = k => { const m = Math.round(20 + k / 60 * 60), h = Math.floor(m / 60); return `${Math.round(k)} km · ~${h ? `${h}h ${pad(m % 60)}m` : `${m} min`} by train each way`; };
-const distTxt = k => k < 0.95 ? `${Math.round(k * 1000 / 50) * 50} m · ${Math.max(2, Math.round(k * 1.25 / 4.8 * 60))} min walk` : k < 3 ? `${k.toFixed(1)} km · ${Math.round(k * 1.25 / 4.8 * 60)} min walk` : k < 25 ? `${k.toFixed(1)} km · ~${Math.round(8 + k * 3)} min by metro or taxi` : `${Math.round(k)} km · day trip`;
+const distTxt = k => k < 0.06 ? "Right here" : k < 0.95 ? `${Math.round(k * 1000 / 50) * 50} m · ${Math.max(2, Math.round(k * 1.25 / 4.8 * 60))} min walk` : k < 3 ? `${k.toFixed(1)} km · ${Math.round(k * 1.25 / 4.8 * 60)} min walk` : k < 25 ? `${k.toFixed(1)} km · ~${Math.round(8 + k * 3)} min by metro or taxi` : `${Math.round(k)} km · day trip`;
 /* museums, galleries, palaces, libraries, theatre: "culture"; everything else you'd wander to is "sightsee" */
 const CULT = /museum|museo|musée|musee|museu|gallery|galleria|galerie|galleries|gallerie|kunst|exhibit|palazzo|palace|palais|biblioth|library|opera|theatre|theater|uffizi|louvre|orangerie|pergamon|vatican|academy|collection|foundation|fondation|fondazione/i;
 /* what each saved place really is, checked by hand (23 Oct): mio's own category is wrong for some, e.g. a bagel café saved as an attraction */
@@ -863,10 +864,25 @@ let HERE = null, hereAsked = 0;
 function liveFrom(iso) { const a = anchorFor(iso); return iso === today && a && HERE && Date.now() - HERE.t < 15 * 6e4 && km(a.lat, a.lng, HERE.lat, HERE.lng) < 40 ? HERE : null; }
 function askHere(then) {
   if (!navigator.geolocation || Date.now() - hereAsked < 6e4) return; hereAsked = Date.now();
-  navigator.geolocation.getCurrentPosition(p => { HERE = { lat: p.coords.latitude, lng: p.coords.longitude, t: Date.now() }; try { localStorage.setItem("here", "1"); } catch (e) {} then && then(); }, () => {}, { enableHighAccuracy: false, maximumAge: 120000, timeout: 15000 });
+  navigator.geolocation.getCurrentPosition(p => { HERE = { lat: p.coords.latitude, lng: p.coords.longitude, t: Date.now() }; try { localStorage.setItem("here", "1"); } catch (e) {} if (then) then(); else if (liveFrom(view) && sheet.hidden && !pd) { gCache.clear(); content.innerHTML = renderContent(view); } }, () => {}, { enableHighAccuracy: false, maximumAge: 120000, timeout: 15000 });
 }
 try { if (localStorage.getItem("here")) { setTimeout(askHere, 1500); document.addEventListener("visibilitychange", () => { if (!document.hidden) { hereAsked = 0; askHere(); } }); } } catch (e) {}
 const fromTxt = (iso, a) => liveFrom(iso) ? "where you are" : a ? a.hotel : "";
+/* today, with your location: when to set off for something coming up in the next few hours */
+function coordsOf(ev) {
+  if (ev.k === "plan") return ev.save;
+  if (ev.k === "mine") return SAVE_BY[((ev.mp && ev.mp.ids) || [])[0]] || null;
+  if (ev.k === "booked") { const b = ev.x.b; if (b.lat != null) return b; const w = (b.where || "").toLowerCase(); return w ? SAVES.find(z => z.lat != null && w.startsWith(z.name.toLowerCase()) && z.name.length > 5) || null : null; }
+  return null;
+}
+function leaveBy(iso, ev) {
+  if (iso !== today || !HERE || Date.now() - HERE.t > 30 * 6e4) return "";
+  const nm = nowMin(); if (ev.s <= nm || ev.s - nm > 180) return "";
+  const c = coordsOf(ev); if (!c) return "";
+  const k = km(HERE.lat, HERE.lng, c.lat, c.lng); if (k < 0.15 || k > 60) return "";
+  const go = k < 2.5 ? Math.round(k * 1.25 / 4.8 * 60) : Math.round(8 + k * 3), at = Math.floor((ev.s - go - 5) / 5) * 5;
+  return at <= nm ? "Leave now" : `Leave by ${t12(at)}`;
+}
 function placesFor(iso, ck, stay, live) {
   const a = stay || anchorFor(iso); if (!a) return [];
   const c = catOf(ck), o = live && !stay && liveFrom(iso);
@@ -876,7 +892,38 @@ function placesFor(iso, ck, stay, live) {
 }
 const planKey = iso => "plan:" + iso;
 function getPlan(iso) { try { return JSON.parse(localStorage.getItem(planKey(iso)) || "[]"); } catch (e) { return []; } }
-function setPlan(iso, p) { try { localStorage.setItem(planKey(iso), JSON.stringify(p)); } catch (e) {} }
+function setPlan(iso, p) { put(planKey(iso), p.length ? JSON.stringify(p) : null); putCal(iso); }
+/* ---------- shared between everyone's phones: added stops, day plans, chosen spots and ticks ----------
+   Each change is saved here first, then sent to the trip's server; every phone pulls the latest when it opens
+   and every minute while it's open. Newest change wins. */
+const SHARED = /^(plan|dayplan|pick|cal):|^uk-eta$/;
+let pushQ = {}, pushT = 0;
+function put(k, v) {
+  try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); localStorage.setItem("ts:" + k, String(Date.now())); } catch (e) {}
+  if (!SHARED.test(k)) return;
+  pushQ[k] = { k, v, ts: Date.now() }; clearTimeout(pushT); pushT = setTimeout(pushNow, 400);
+}
+async function pushNow() {
+  const changes = Object.values(pushQ); if (!changes.length) return; pushQ = {};
+  try { const r = await fetch("/api/state", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ changes }) }); if (!r.ok) throw 0; applyState(await r.json()); }
+  catch (e) { changes.forEach(c => { if (!pushQ[c.k]) pushQ[c.k] = c; }); clearTimeout(pushT); pushT = setTimeout(pushNow, 15000); }
+}
+function applyState(st) {
+  let changed = false;
+  Object.entries(st || {}).forEach(([k, o]) => { if (!SHARED.test(k) || pushQ[k]) return; let lt = 0; try { lt = +localStorage.getItem("ts:" + k) || 0; } catch (e) {}
+    if (o.ts > lt) { try { o.v == null ? localStorage.removeItem(k) : localStorage.setItem(k, o.v); localStorage.setItem("ts:" + k, String(o.ts)); changed = true; } catch (e) {} } });
+  if (changed) { gCache.clear(); if (sheet.hidden && show.hidden && !pd) content.innerHTML = renderContent(view); }
+}
+async function pullState() { if (document.hidden) return; try { const r = await fetch("/api/state", { cache: "no-store" }); if (r.ok) applyState(await r.json()); } catch (e) {} }
+/* what goes on the calendar feed for a day: the stops people added and a planned day, worked out here (the server doesn't know the places) */
+function putCal(iso) {
+  const tz = { GR: TZ.ath, IT: TZ.it, CH: TZ.ch, DE: TZ.de, FR: TZ.fr, UK: TZ.uk }[CTRY[cityOn(iso)]] || TZ.ath, P = n => String(n).padStart(2, "0");
+  const T = m => new Date(toUTC([addDays(iso, Math.floor(m / 1440)), P(Math.floor((m % 1440) / 60)) + ":" + P(m % 60), tz])).toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z");
+  const out = [];
+  getPlan(iso).forEach(p => { const sv = SAVE_BY[p.id], c = catOf(p.c); if (sv && c) out.push({ u: `add-${iso}-${p.id}`, t: `${c.l.split(" ")[0]} · ${sv.name}`, l: sv.address || sv.name + ", " + sv.city, s: T(p.t), e: T(p.t + c.dur), a: 15 }); });
+  ((getDay(iso) || {}).steps || []).forEach((p, i) => { const a1 = (p.txt || "").split("\x1f")[0], cut = a1.lastIndexOf(" · "), place = cut > 0 ? a1.slice(0, cut) : a1; if (p.k === "rest") return; out.push({ u: `day-${iso}-${i}`, t: place ? `${p.l} · ${place}` : p.l, l: place, s: T(p.s), e: T(p.e), a: 15 }); });
+  put("cal:" + iso, out.length ? JSON.stringify(out) : null);
+}
 function slotFor(iso, ck, block) {
   const D = CUR && view === iso ? CUR : buildDay(iso);
   const frees = D.segs.filter(x => x.k === "free" || x.k === "wait");
@@ -931,7 +978,9 @@ async function fetchLive(city) {
 }
 async function refreshLive() {
   const cities = [...new Set([0, 1, 2, 3, 4].map(n => addDays(view, n)).map(cityOn))];
+  const before = ALLDAYS.map(wet).join();
   await Promise.all(cities.map(fetchLive));
+  if (ALLDAYS.map(wet).join() !== before) { SCF.clear(); SCN_CACHE.clear(); gCache.clear(); if (sheet.hidden && show.hidden && !pd) content.innerHTML = renderContent(view); }
   if (sheet.hidden && show.hidden && !pd) { renderHeader(false); }
 }
 function wxFor(iso) {
@@ -1185,7 +1234,7 @@ function renderDayContent(iso) {
   /* every block gets room for its two lines; a very short one nudges the next one down a touch rather than hiding its text */
   const LAY = {};
   { let floor = -1e9;
-    evs.map((ev, i) => ({ ev, i })).filter(o => !["free", "wait", "prompt", "plan", "mark"].includes(o.ev.k))
+    evs.map((ev, i) => ({ ev, i })).filter(o => !["free", "wait", "prompt", "mark"].includes(o.ev.k))
       .map(o => ({ i: o.i, top: y(o.ev.s) - 12 + 1, h: Math.max(y(o.ev.e) - y(o.ev.s) - 2, 22) })).sort((a, b) => a.top - b.top)
       .forEach(o => { if (o.top < floor) { o.h -= floor - o.top; o.top = floor; } o.h = Math.max(o.h, 30); LAY[o.i] = o; floor = o.top + o.h + 2; }); }
   evs.forEach((ev, i) => {
@@ -1198,7 +1247,13 @@ function renderDayContent(iso) {
     }
     if (ev.k === "mine") {
       const p = ev.mp, [a1, a2] = (p.txt || "").split("\x1f"), cut = (a1 || "").lastIndexOf(" · "), place = cut > 0 ? a1.slice(0, cut) : a1, walkT = cut > 0 ? a1.slice(cut + 3) : "";
-      html += `<button class="ev mine${short ? " short" : ""}${h >= 58 ? " wrap" : ""} press" data-i="${i}" style="--c:${KCOL[p.k] || "#8e8e93"};top:${top + 12}px;height:${h}px"><span class="tt">${icon(KICON[p.k])}${esc(place || p.l)}</span><span class="tm">${place ? `${esc(p.l)} · ` : ""}${t12(ev.s)} – ${t12(ev.e)}${walkT && !short ? ` · ${esc(walkT)}` : ""}</span>${a2 && h >= 96 ? `<span class="hk">${esc(a2)}</span>` : ""}</button>`;
+      html += `<button class="ev mine${short ? " short" : ""}${h >= 58 ? " wrap" : ""} press" data-i="${i}" style="--c:${KCOL[p.k] || "#8e8e93"};top:${top + 12}px;height:${h}px"><span class="tt">${icon(KICON[p.k])}${esc(place || p.l)}</span><span class="tm">${place ? `${esc(p.l)} · ` : ""}${t12(ev.s)} – ${t12(ev.e)}${leaveBy(iso, ev) ? ` · <b class="cd">${leaveBy(iso, ev)}</b>` : walkT && !short ? ` · ${esc(walkT)}` : ""}</span>${a2 && h >= 96 ? `<span class="hk">${esc(a2)}</span>` : ""}</button>`;
+      return;
+    }
+    if (ev.k === "plan") {
+      /* a place someone added: solid, in its category's colour, like the rest of the day */
+      const ck = { coffee: "coffee", drinks: "drinks", see: "day", shop: "shop", culture: "culture", trip: "trip" }[ev.cat] || (ev.s < 1020 ? "lunch" : "dinner");
+      html += `<button class="ev mine${short ? " short" : ""}${h >= 58 ? " wrap" : ""} press" data-i="${i}" style="--c:${KCOL[ck]};top:${top + 12}px;height:${h}px"><span class="tt">${icon(KICON[ck])}${esc(ev.save.name)}</span><span class="tm">${esc((catOf(ev.cat) || {}).l || "")} · ${t12(ev.s)} – ${t12(ev.e)}${leaveBy(iso, ev) ? ` · <b class="cd">${leaveBy(iso, ev)}</b>` : ""}</span>${ev.save.hook && h >= 80 ? `<span class="hk">${esc(hookOf(ev.save))}</span>` : ""}</button>`;
       return;
     }
     if (ev.k === "prompt") {
@@ -1214,7 +1269,7 @@ function renderDayContent(iso) {
     const time = ev.k === "mark" ? t12(ev.s) : ev.x && ev.x.overnight ? `until ${t12(ev.e)}` : `${t12(ev.s)} – ${t12(ev.e)}`;
     const durTxt = (ev.k === "free" || ev.k === "wait") ? ` · ${dur(ev.e - ev.s)}` : "";
     const modeOf = ev.m || (ev.x && ev.x.arr), isRide = (ev.k === "get" && !ev.x.coOnly) || (ev.k === "booked" && ev.x.b.style === "ride");
-    html += `<button class="ev ${ev.k}${ev.k === "booked" && ev.x.b.idea ? " bk-idea c-" + ev.x.b.k : ""}${ev.k === "booked" && ev.x.b.style ? " bk-" + ev.x.b.style : ""}${ev.k === "get" && ev.x.coOnly ? " co" : ""}${isRide ? " ride" : ""}${ev.k === "get" && h >= 58 ? " wrap" : ""}${modeOf && modeOf.mode === "Train" && (ev.k === "travel" || ev.k === "change" || isRide) ? " rail" : ""}${short ? " short stack" : ""}${ev.done ? " done" : ""} press" data-i="${i}" style="${ev.k === "booked" && ev.x.b.idea ? `--c:${KCOL[ev.x.b.k]};` : ""}top:${top + 12}px;height:${h}px"><span class="tt">${icon(ev.k === "travel" || ev.k === "change" ? (ev.m && ev.m.mode === "Flight" ? "fly" : "rail") : isRide ? "car" : (ev.k === "get" || ev.k === "pack") ? "home" : ev.k === "booked" ? (ev.x.b.icon || (ev.x.b.idea ? KICON[ev.x.b.k] : ev.x.b.kind === "dinner" ? "fork" : "pin")) : "")}${esc(ev.tt)}${durTxt}</span><span class="tm">${ev.act ? `${esc(ev.act)} · ` : ""}${time}${ev.cd && !short ? ` · <b class="cd">${countdown(ev.cd)}</b>` : ""}${!short && ev.sub && h >= 60 && h < 80 ? ` · ${esc(ev.sub)}` : ""}</span>${!short && ev.sub && h >= 80 ? `<span class="tm">${esc(ev.sub)}</span>` : ""}${!short && ev.ref && h >= 100 ? `<span class="ref" data-show-ref="${ev.ref}" data-show-l="${esc(ev.m.code)}">${ev.ref} ›</span>` : ""}</button>`;
+    html += `<button class="ev ${ev.k}${ev.k === "booked" && ev.x.b.idea ? " bk-idea c-" + ev.x.b.k : ""}${ev.k === "booked" && ev.x.b.style ? " bk-" + ev.x.b.style : ""}${ev.k === "get" && ev.x.coOnly ? " co" : ""}${isRide ? " ride" : ""}${ev.k === "get" && h >= 58 ? " wrap" : ""}${modeOf && modeOf.mode === "Train" && (ev.k === "travel" || ev.k === "change" || isRide) ? " rail" : ""}${short ? " short stack" : ""}${ev.done ? " done" : ""} press" data-i="${i}" style="${ev.k === "booked" && ev.x.b.idea ? `--c:${KCOL[ev.x.b.k]};` : ""}top:${top + 12}px;height:${h}px"><span class="tt">${icon(ev.k === "travel" || ev.k === "change" ? (ev.m && ev.m.mode === "Flight" ? "fly" : "rail") : isRide ? "car" : (ev.k === "get" || ev.k === "pack") ? "home" : ev.k === "booked" ? (ev.x.b.icon || (ev.x.b.idea ? KICON[ev.x.b.k] : ev.x.b.kind === "dinner" ? "fork" : "pin")) : "")}${esc(ev.tt)}${durTxt}</span><span class="tm">${ev.act ? `${esc(ev.act)} · ` : ""}${time}${ev.cd && !short ? ` · <b class="cd">${countdown(ev.cd)}</b>` : ""}${ev.k === "booked" && leaveBy(iso, ev) ? ` · <b class="cd">${leaveBy(iso, ev)}</b>` : ""}${!short && ev.sub && h >= 60 && h < 80 ? ` · ${esc(ev.sub)}` : ""}</span>${!short && ev.sub && h >= 80 ? `<span class="tm">${esc(ev.sub)}</span>` : ""}${!short && ev.ref && h >= 100 ? `<span class="ref" data-show-ref="${ev.ref}" data-show-l="${esc(ev.m.code)}">${ev.ref} ›</span>` : ""}</button>`;
   });
   html += `</div>`;
   D.marks.forEach((mk, mi) => { html += `<div class="mk" style="top:${y(mk.t)}px"><button class="press" data-mark="${mi}"><b>${mk.kind === "in" ? "Check in" : "Check out"} ${t12(mk.t)}</b><span>${esc(mk.stay.hotel)}</span></button></div>`; });
@@ -1314,7 +1369,7 @@ function promptTick() {
   const scs = [...new Set(all.map(el => +el.dataset.sc))].sort((x, y) => x - y);
   scI = (scI + 1) % scs.length;
   const els = all.filter(el => +el.dataset.sc === scs[scI]).sort((x, y) => x.dataset.step - y.dataset.step);
-  els.forEach(el => { const alts = (el.dataset.alts || "").split("|"), n = +(el.dataset.n || el.dataset.sc || 0); const [a1, a2] = (alts.length ? alts[n % alts.length] : "").split("\x1f"); el.querySelector(".pk").textContent = a1 || ""; const hk = el.querySelector(".hk"); if (hk) hk.textContent = a2 || ""; el.dataset.n = n + 1; });
+  els.forEach(el => { const alts = (el.dataset.alts || "").split("|"), n = +(el.dataset.n || el.dataset.sc || 0); const [a1, a2] = (alts.length ? alts[n % alts.length] : "").split("\x1f"); el.querySelector(".pk").textContent = a1 || (el.dataset.sub == null ? "Tap for places nearby" : ""); const hk = el.querySelector(".hk"); if (hk) hk.textContent = a2 || ""; el.dataset.n = n + 1; });
   const show = els.filter(el => el.dataset.sub == null || el.querySelector(".pk").textContent);
   let k = 0;
   const next = () => {
@@ -1489,17 +1544,11 @@ function staySheet(s) {
     <div class="acts"><button class="btn blue press" data-show-stay="${STAYS.indexOf(s)}">Show to driver</button>${s.q ? `<a class="btn card press" href="${dirs(s.q)}" target="_blank" rel="noopener">Directions</a>` : ""}</div>
     <div class="restore"><button data-open-trip>All 12 stops and booking refs ›</button></div>`;
 }
-function freeSheet(ev) {
-  const x = ev.x, c = cityOn(view), nxt = ITEMS.filter(e => e.s >= x.e && e.k !== "free" && e.k !== "wait").sort((a, b) => a.s - b.s)[0];
-  return head(`${ev.tt} · ${dur(x.e - x.s)}`, `${t12(x.s)} – ${t12(x.e)} in ${esc(c)}`)
-    + `<div class="ig">${x.stay ? r("Bags", x.stay.store ? "Hotel can hold them" : x.stay.store === false ? "No storage listed" : "Ask the host") : ""}${r("After this", nxt ? `${esc(nxt.tt)}, ${t12(nxt.s)}` : "Nothing else today")}</div>
-    <div class="acts"><a class="btn blue press" href="${maps("things to do in " + c)}" target="_blank" rel="noopener">Things to do nearby</a></div>`;
-}
 
 
 const SLOTDEF = { coffee: { l: "Coffee", cat: "coffee", dur: 45 }, dinner: { l: "Dinner", cat: "dinner", dur: 90 }, drinks: { l: "Wine", cat: "drinks", dur: 75 } };
 function getPick(iso, k) { try { return localStorage.getItem(`pick:${iso}:${k}`); } catch (e) { return null; } }
-function setPick(iso, k, v) { try { v == null ? localStorage.removeItem(`pick:${iso}:${k}`) : localStorage.setItem(`pick:${iso}:${k}`, v); } catch (e) {} }
+function setPick(iso, k, v) { put(`pick:${iso}:${k}`, v == null ? null : v); }
 const hasFree = iso => buildDay(iso).segs.some(x => x.k === "free" && x.e - x.s >= 120);
 const hasSaves = iso => { const a = anchorFor(iso); return !!a && SAVES.some(s => s.city === a.city); };
 function slotsFor(iso, D, all) {
@@ -1527,7 +1576,7 @@ const walk = k => shortDist(k);
 /* travel days are two half-days: before leaving you're in the old city, after arriving in the new one */
 function scenePlans(iso, si) {
   const key = iso + "|" + si; if (SCN_CACHE.has(key)) return SCN_CACHE.get(key);
-  const out = planSteps(iso, sceneFor(iso, si)).txt;
+  const P = planSteps(iso, sceneFor(iso, si)), out = P.txt; out.ids = P.ids;
   SCN_CACHE.set(key, out); return out;
 }
 function planSteps(iso, steps, opts) {
@@ -1584,10 +1633,10 @@ function planGroup(iso, steps, home, opts = {}) {
         const c = take(cafes, detour, 2.5, R) || take(cafes, s => dk(home, s), 3, R) || take(cafes, s => dk(s, centre), 3, R);
         if (c) { names = [c.name]; to = c; if (pr.k === "cafes") { for (let j = 0; j < 2; j++) { const nx = take(cafes, s => dk(s, to), 1.2); if (nx) { names.push(nx.name); to = nx; } } } }
       }
-      else if (pr.k === "lunch") { const c = take(pool("dinner"), s => dk(s, prev), 3.5, R) || take(pool("coffee"), s => dk(s, prev), 2, R); if (c) { names = [c.name]; to = c; } else if (prev !== home) { txt.push(`Somewhere near ${prev.name}`); return; } }
-      else if (pr.k === "dinner") { const c = take(pool("dinner"), s => dk(s, prev) * 0.6 + dk(s, home), 8, R); if (c) { names = [c.name]; to = c; } else if (prev !== home) { txt.push(`Somewhere near ${prev.name}`); return; } }
-      else if (pr.k === "drinks") { const c = take(pool("drinks"), s => dk(s, prev), 4, R); if (c) { names = [c.name]; to = c; } else if (prev !== home) { txt.push(`A bar near ${prev.name}`); return; } }
-      if (!names.length) { const near = main.list ? main.list[0] : null; txt.push(near && (pr.k === "coffee" || pr.k === "cafes") ? `A café near ${near.name}` : near && pr.k === "lunch" ? `Somewhere near ${near.name}` : ""); return; }
+      else if (pr.k === "lunch") { const c = take(pool("dinner"), s => dk(s, prev), 3.5, R) || take(pool("coffee"), s => dk(s, prev), 2, R) || take(pool("dinner"), s => dk(s, prev), 99, R); if (c) { names = [c.name]; to = c; } }
+      else if (pr.k === "dinner") { const c = take(pool("dinner"), s => dk(s, prev) * 0.6 + dk(s, home), 99, R); if (c) { names = [c.name]; to = c; } }
+      else if (pr.k === "drinks") { const c = take(pool("drinks"), s => dk(s, prev), 99, R); if (c) { names = [c.name]; to = c; } }
+      if (!names.length) { txt.push(""); return; }
       ID[ix] = names.map(n => (SAVES.find(z => z.name === n && z.lat != null && dk(z, home) < 60) || {}).id).filter(Boolean);
       txt.push(`${names.join(" → ")} · ${walk(dk(prev, to))}${prev === home ? " from the hotel" : ""}\x1f${hookOf(to)}`);
       prev = to;
@@ -1597,7 +1646,14 @@ function planGroup(iso, steps, home, opts = {}) {
   return out;
 }
 const hookOf = s => { const h = (s && s.hook || "").replace(/[|\x1f]/g, " ").trim(); return h ? h[0].toUpperCase() + h.slice(1) : ""; };
-function sceneAlts(iso, si, step) { return scenePlans(iso, si).map(v => v[step] || ""); }
+function sceneAlts(iso, si, step) {
+  const P = scenePlans(iso, si), o = liveFrom(iso);
+  if (!o) return P.map(v => v[step] || "");
+  const sc = sceneFor(iso, si), nm = nowMin(), first = sc.findIndex(p => p.e > nm && !p.dest);
+  return P.map((v, vi) => { const t = v[step] || ""; const id = ((P.ids[vi] || [])[step] || [])[0], sv = id && SAVE_BY[id];
+    if (step !== first || !sv) return t; return t.replace(/ · [^·\x1f]*?(walk|km)( from the hotel)?(?=\x1f|$)/, ` · ${walk(dk(o, sv))} from you`); });
+}
+const sceneIds = (iso, si, step) => (scenePlans(iso, si).ids || []).map(v => v[step] || []);
 function ideaAlts(iso, pr) {
   const list = placesFor(iso, pr.cat).slice(0, 6); if (!list.length) return [];
   const off = pr.k === "dinner" ? 3 : pr.k === "cafes" ? 2 : 0, out = [];
@@ -1650,10 +1706,10 @@ const SC_ = {
   trip: { k: "trip", l: "Day trip", cat: "trip", area: true, at: "trip", min: 360 },
 };
 const SCENES = [
-  [SC_.coffee, SC_.seeAM, SC_.food, SC_.dinner, SC_.drinks],
+  [SC_.coffee, SC_.seeAM, SC_.food, SC_.shopPM, SC_.dinner, SC_.drinks],
   [SC_.coffee, SC_.cultAM, SC_.food, SC_.shopPM, SC_.dinner],
   [SC_.coffee, SC_.shopAM, SC_.food, SC_.seePM, SC_.dinner, SC_.drinks],
-  [SC_.coffee, SC_.food, SC_.cultPM, SC_.dinner, SC_.drinks],
+  [SC_.coffee, SC_.seeAM, SC_.food, SC_.cultPM, SC_.dinner, SC_.drinks],
   [SC_.coffee, SC_.cultAM, SC_.food, SC_.seePM, SC_.dinner],
   [SC_.trip, SC_.dinner],
 ];
@@ -1661,10 +1717,14 @@ const SCENES = [
 const SCF = new Map();
 /* rough door-to-door drive for a day trip from the hotel: road ~1.3x the straight line at ~75 km/h, plus 10 min, to the nearest 15 */
 const driveMins = k => Math.max(30, Math.round((k * 1.3 / 75 * 60 + 10) / 30) * 30);
+/* a wet day: a good chance of rain or a few millimetres forecast */
+function wet(iso) { const w = wxFor(iso); return !!w && !w.typical && ((w.prob != null ? w.prob >= 60 : false) || w.rain >= 4 || /rain|shower|storm/i.test(w.cond)); }
 function sceneFor(iso, si) {
   const key = iso + "|" + si; if (SCF.has(key)) return SCF.get(key);
   const st = anchorFor(iso) || STAYS.find(s => s.out === iso), M = MEALS[CTRY[st ? st.city : ""] || "IT"];
   let sc = SCENES[si];
+  if (wet(iso)) { const hasC = sc.some(p => p.k === "culture"); sc = sc.map(p => p === SC_.seeAM ? (hasC ? SC_.shopAM : SC_.cultAM) : p === SC_.seePM ? (hasC || sc.includes(SC_.cultAM) ? SC_.shopPM : SC_.cultPM) : p); }
+  if (!placesFor(iso, "drinks").length) sc = sc.filter(p => p.k !== "drinks");
   if (EVENTS.some(b => b.on === iso && b.kind === "dinner")) sc = sc.filter(p => p.k !== "dinner");
   const out = [];
   sc.forEach(p => {
@@ -1710,8 +1770,10 @@ function splitArea(steps) {
 }
 function promptsFor(iso, free) {
   const out = [], pl = getPlan(iso), planned = EVENTS.some(b => b.on === iso && b.idea);
+  const seen = new Set();
   SCENES.forEach((_, si) => {
-    const sc = sceneFor(iso, si);
+    const sc = sceneFor(iso, si), sig = sc.map(p => p.k + p.s + "-" + p.e).join();
+    if (seen.has(sig)) return; seen.add(sig); /* a wet day can turn two plans into the same one */
     if (SCENES[si].some(p => p.at === "trip") && !sc.some(p => p.dest)) return; /* no day trip without somewhere to go */
     sc.forEach((pr, step) => free.forEach(f => {
       const s = Math.max(Math.ceil(f.s / 15) * 15, pr.s), e = Math.min(Math.floor(f.e / 15) * 15, pr.e); if (e - s < Math.min(pr.min || 45, pr.e - pr.s)) return;
@@ -1744,7 +1806,7 @@ const r30 = n => Math.floor(n / 30) * 30;
 function askDefaults() { try { return { ...ASKDEF, ...JSON.parse(localStorage.getItem("ask") || "{}") }; } catch (e) { return { ...ASKDEF }; } }
 const dayKey = iso => "dayplan:" + iso;
 function getDay(iso) { try { return JSON.parse(localStorage.getItem(dayKey(iso)) || "null"); } catch (e) { return null; } }
-function setDay(iso, d) { try { d ? localStorage.setItem(dayKey(iso), JSON.stringify(d)) : localStorage.removeItem(dayKey(iso)); } catch (e) {} }
+function setDay(iso, d) { put(dayKey(iso), d ? JSON.stringify(d) : null); putCal(iso); }
 function tripList(iso) { const st = anchorFor(iso); return st ? placesFor(iso, "trip", st).filter(x => driveMins(x.k) <= 105) : []; }
 /* the day's shape from the answers, on the local clock */
 function askSteps(iso, A, v) {
@@ -1753,7 +1815,7 @@ function askSteps(iso, A, v) {
   const eve = [];
   if (!EVENTS.some(b => b.on === iso && b.kind === "dinner") && A.night !== "in") {
     eve.push({ ...SC_.dinner, s: M.dinner, e: M.dinner + DUR.dinner });
-    if (A.night === "drinks") { const ds = M.aper ? M.dinner - DUR.drinks : M.dinner + DUR.dinner; eve.push({ ...SC_.drinks, s: ds, e: Math.min(1410, ds + DUR.drinks) }); }
+    if (A.night === "drinks" && placesFor(iso, "drinks").length) { const ds = M.aper ? M.dinner - DUR.drinks : M.dinner + DUR.dinner; eve.push({ ...SC_.drinks, s: ds, e: Math.min(1410, ds + DUR.drinks) }); }
   }
   const eveS = eve.length ? Math.min(...eve.map(x => x.s)) : 1200;
   if (A.want.includes("trip")) {
@@ -1842,7 +1904,8 @@ function askSheet() {
     const opts = Q.o.filter(([v]) => v !== "trip" || hasTrip);
     return `<div class="sec">${Q.l}</div><div class="qs">${opts.map(([v, l]) => `<button class="cat press" data-q="${Q.k}" data-v="${v}" aria-pressed="${Q.one ? A[Q.k] === v : A[Q.k].includes(v)}">${l}</button>`).join("")}</div>`;
   }).join("");
-  return head("Plan the day", `${dDay(iso)} · ${esc(cityName(iso))}`) + qs
+  const w = wet(iso) ? wxFor(iso) : null;
+  return head("Plan the day", `${dDay(iso)} · ${esc(cityName(iso))}`) + (w ? `<p class="nt" style="margin-top:0">Rain is forecast (${esc(w.cond.toLowerCase())}), so museums and shops are a good bet.</p>` : "") + qs
     + `<div class="acts"><button class="btn blue press" data-askgo>Make a plan</button></div>`
     + (cur ? `<div class="restore"><button data-clearday style="color:var(--red)">Clear today’s plan</button></div>` : "");
 }
@@ -1869,6 +1932,17 @@ function mineSheet(ev, iso) {
     + (list.length ? `<div class="ig">${list.map(x => placeRow(x, "")).join("")}</div>` : a1 ? `<div class="ig"><div class="r"><span>${esc(a1)}${a2 ? `<br><small style="color:var(--sub)">${esc(a2)}</small>` : ""}</span><span></span></div></div>` : "")
     + `<div class="acts"><button class="btn card press" data-ask>Change the plan</button></div><div class="restore"><button data-clearday style="color:var(--red)">Clear the plan</button></div>`;
 }
+/* a suggestion, tapped: the place itself, with a way to keep it or pick something else */
+let PS = null;
+function promptSheet() {
+  const { i, got, txt } = PS, o = liveFrom(view) || anchorFor(view), one = got.length === 1, sv = got[0];
+  const top = head(esc(one ? sv.name : i.pr.l), `${esc(one ? i.pr.l : got.map(x => x.name).join(" → "))} · ${t12(i.s)} – ${t12(i.e)}`);
+  const body = one
+    ? `<div class="ig">${sv.hook ? `<div class="r"><span>${esc(hookOf(sv))}</span><span></span></div>` : ""}${sv.rating ? r("Rating", `★ ${sv.rating}${sv.reviews ? ` (${sv.reviews.toLocaleString()})` : ""}`) : ""}${sv.address ? r("Address", esc(sv.address)) : ""}${o ? r("Distance", `${distTxt(km(o.lat, o.lng, sv.lat, sv.lng))} from ${esc(fromTxt(view, anchorFor(view)))}`) : ""}</div>
+      <div class="acts"><a class="btn blue press" href="${dirs(sv.name + " " + (sv.address || sv.city))}" target="_blank" rel="noopener">Directions</a><a class="btn card press" href="${ttq(sv.name, sv.city)}" target="_blank" rel="noopener">TikTok</a>${sv.url ? `<a class="btn card press" href="${esc(sv.url)}" target="_blank" rel="noopener">Video</a>` : ""}</div>`
+    : `<div class="ig">${got.map(x => placeRow({ s: x, k: o ? km(o.lat, o.lng, x.lat, x.lng) : null }, "")).join("")}</div>`;
+  return top + body + `<div class="acts"><button class="btn card press" data-pswap>Something else</button><button class="btn blue press" data-padd>Add to the day</button></div><p class="nt">Suggestions are dotted. Add one and it stays on the day.</p>`;
+}
 let PL = { iso: null, cat: "coffee", block: null, n: 12 };
 function plannerSheet() {
   const iso = PL.iso, a = anchorFor(iso), b = PL.block;
@@ -1891,7 +1965,7 @@ function plannerSheet() {
     const on = plan.find(p => p.id === s.id);
     return `<div class="place${pinned ? " pinned" : ""}"><span>${pinned ? `<span class="sg">Suggested</span>` : ""}<span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${PL.cat === "trip" ? tripTxt(k) : distTxt(k)}</b></span><span class="links"><a href="${dirs(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video${s.creator ? " · " + esc(s.creator) : ""}</a>` : ""}</span></span><button class="addb${on ? " on" : ""}" data-add="${s.id}">${on ? `✓ ${t12(on.t)}` : "Add"}</button></div>`;
   }).join("");
-  return head(title, sub) + cats + `<div class="ig">${rows || `<p class="empty-p">Nothing saved in this category here.</p>`}${list.length > PL.n ? `<button class="more-btn" data-more>Show ${list.length - PL.n} more</button>` : ""}</div><p class="nt">From your mio saves, nearest ${liveFrom(iso) ? "to you" : "to the hotel"} first. Add puts it on the timetable as a dotted block, saved on this phone.</p>`;
+  return head(title, sub) + cats + `<div class="ig">${rows || `<p class="empty-p">Nothing saved in this category here.</p>`}${list.length > PL.n ? `<button class="more-btn" data-more>Show ${list.length - PL.n} more</button>` : ""}</div><p class="nt">From your mio saves, nearest ${liveFrom(iso) ? "to you" : "to the hotel"} first. Add puts it on the timetable for everyone.</p>`;
 }
 function refreshAll() { if (REFRESH) REFRESH(); content.innerHTML = renderContent(view); renderHeader(false); }
 function openPlanner(iso, cat, block, pin) {
@@ -1921,16 +1995,6 @@ function slotSheet() {
     + `<div class="restore"><button data-skip="${k}">Skip ${k} today</button>${getPick(iso, k) && getPick(iso, k) !== "skip" ? `<button data-unpick="${k}">Go back to suggestion</button>` : ""}</div>`;
 }
 let FR = null;
-function freeSheet2() {
-  const ev = FR, iso = view, plan = getPlan(iso);
-  const sec = (title, ck, n) => { const l = placesFor(iso, ck, null, true); if (!l.length) return ""; return `<div class="fsec"><b>${title}</b>${l.length > n ? `<button data-seeall="${ck}">See all ${l.length}</button>` : ""}</div><div class="ig">${l.slice(0, n).map(x => { const on = plan.find(q => q.id === x.s.id); return placeRow(x, `<button class="addb${on ? " on" : ""}" data-add="${x.s.id}" data-addcat="${ck}">${on ? `✓ ${t12(on.t)}` : "Add"}</button>`); }).join("")}</div>`; };
-  const skipped = [];
-  const content = hasSaves(iso) ? sec("Coffee", "coffee", 3) + sec("Food", "dinner", 3) + sec("Drinks", "drinks", 3) + sec("Culture", "culture", 3) + sec("Sights", "see", 4) + sec("Shopping", "shop", 3) + sec("Day trip ideas", "trip", 3) : mapsFallback("things to do", iso);
-  const a = anchorFor(iso);
-  return head(`Free · ${dur(ev.e - ev.s)}`, `${t12(ev.s)} – ${t12(ev.e)}${ev.k === "wait" ? ", with your bags" : ""}${a ? `. Distances from ${esc(fromTxt(iso, a))}` : ""}`) + content
-    + (skipped.length ? `<div class="restore">${skipped.map(k => `<button data-unpick="${k}">Bring back ${k}</button>`).join("")}</div>` : "")
-    + `<p class="nt">Added stops show as dotted blocks and are saved on this phone.</p>`;
-}
 
 function menuSheet() {
   const iso = view, s = stayOn(iso), w = wxFor(iso), c = cityOn(iso), open = headsFor(iso).filter(h => !h.k || !done(h.k)).length, ss = sunset(iso, c);
@@ -1944,6 +2008,7 @@ function menuSheet() {
   <div class="ig">
       ${row("stay", s ? esc(s.hotel) : "No hotel tonight", s ? `Check in ${s12(s.ci)} · out ${s12(s.co)}${s.est ? " (usual)" : ""}${s.addr && !/booking/i.test(s.addr) ? " · " + esc(s.addr) : ""}` : (iso === END ? "Landing in Perth" : "Overnight flight"))}
       ${hasFree(iso) ? row("plan", getDay(iso) ? "Day planned" : "Plan the day", getDay(iso) ? "Change or clear it" : "A few questions, then a plan") : ""}
+      ${row("near", "Near me now", "Saved places closest to you")}
       ${row("ideas", "Things to do", hasSaves(iso) ? `<span class="cyc" id="cyc"></span>` : `Search near the hotel`)}
       ${row("cal", "Add to my calendar", "Flights, trains and bookings, with alerts")}
       ${row("tour", "How it works", "A quick look at the app")}
@@ -1973,6 +2038,15 @@ function startCycle(iso) {
   };
   show(); if (pool.length > 1 && !reduce()) cycT = setInterval(show, 2800);
 }
+function nearSheet() {
+  if (!HERE) return `<div id="nearS"></div>` + head("Near me now", "Finding where you are…") + `<p class="nt">If nothing happens, allow location for this app in Settings › Privacy › Location Services.</p>`;
+  const lab = { dinner: "Eat", drinks: "Wine", coffee: "Coffee", sweet: "Gelato & sweets", culture: "Culture", see: "Sightsee", shop: "Shopping", experience: "Experience" };
+  const list = SAVES.filter(z => z.lat != null && lab[z.kind]).map(z => ({ s: z, k: km(HERE.lat, HERE.lng, z.lat, z.lng) })).sort((a, b) => a.k - b.k);
+  const near = list.filter(x => x.k < 2).slice(0, 15), rows = (near.length ? near : list.slice(0, 5)).map(({ s: z, k }) => {
+    const on = getPlan(today).some(p => p.id === z.id);
+    return `<div class="place"><span><span class="a" style="display:block">${esc(z.name)}</span><span class="h" style="display:block">${esc(lab[z.kind])}${z.hook ? " · " + esc(hookOf(z)) : ""}</span><span class="m" style="display:block">${z.rating ? `★ ${z.rating} · ` : ""}<b>${distTxt(k)}</b></span><span class="links"><a href="${dirs(z.name + " " + (z.address || z.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(z.name, z.city)}" target="_blank" rel="noopener">TikTok</a>${z.url ? `<a href="${esc(z.url)}" target="_blank" rel="noopener">Video</a>` : ""}</span></span>${today >= START && today <= END ? `<button class="addb${on ? " on" : ""}" data-nadd="${z.id}">${on ? "✓ Added" : "Go now"}</button>` : ""}</div>`; }).join("");
+  return `<div id="nearS"></div>` + head("Near me now", near.length ? `${near.length} saved place${near.length > 1 ? "s" : ""} within 2 km` : "Nothing saved within 2 km. The closest:") + `<div class="ig">${rows}</div><p class="nt">Go now puts it on today from the next quarter hour.</p>`;
+}
 function calSheet() {
   const f = "europe-family-trip.app/cal/ed3056321e507c456ba8.ics", href = /android/i.test(navigator.userAgent) ? "https://calendar.google.com/calendar/r?cid=" + encodeURIComponent("webcal://" + f) : "webcal://" + f;
   return `<div class="land"><div class="land-h"><div><h3 id="sheet-title">Add to my calendar</h3><div class="land-sub">Flights, trains, hotels and bookings, with alerts. It updates by itself when the trip changes.</div></div></div></div>
@@ -1981,10 +2055,11 @@ function calSheet() {
 }
 function tasksSheet() {
   const hs = headsFor(view);
-  const all = [["eta-done", "UK ETA (about £16, before 11 Nov)"], ["own-booking", "Not on KJCTJU? Check your flights home"]];
+  /* still to do later in the trip: anything with a tick box that isn't ticked, isn't on this day and isn't over */
+  const all = HEADS.filter(h => h.k && !done(h.k) && !h.on.includes(view) && h.on[h.on.length - 1] >= today).map(h => [h.k, h.t, h.d]);
   return head("Tasks", dDay(view))
     + (hs.length ? `<div class="ig">${hs.map(h => `<label class="task">${h.k ? `<input type="checkbox" data-k="${h.k}" aria-label="Done">` : `<i class="bul"></i>`}<span class="tx"><b>${esc(h.t)}</b><span>${esc(h.d)}</span></span></label>`).join("")}</div>` : `<div class="ig"><div class="r"><span>Nothing for this day</span><span></span></div></div>`)
-    + `<div class="sec">BEFORE THE END OF THE TRIP</div><div class="ig">${all.map(([k, t]) => `<label class="task"><input type="checkbox" data-k="${k}" aria-label="Done"><span class="tx"><b>${esc(t)}</b></span></label>`).join("")}</div><p class="nt">Ticks are saved on this phone only.</p>`;
+    + (all.length ? `<div class="sec">COMING UP</div><div class="ig">${all.map(([k, t, d]) => `<label class="task"><input type="checkbox" data-k="${k}" aria-label="Done"><span class="tx"><b>${esc(t)}</b><span>${esc(d)}</span></span></label>`).join("")}</div>` : "");
 }
 function tripSheet() {
   return head("Cities", "")
@@ -1999,7 +2074,7 @@ function wxSheet() {
     <div class="sec">NEXT FEW DAYS</div><div class="wk5">${days}</div>
     <p class="nt">${w.live ? "Live forecast from Open-Meteo, refreshed every few hours." : (w.loEst || w.typical ? "~ is a seasonal average. " : "") + "Saved forecast from 21 October; live forecast unavailable right now."} <a href="${wxLink(c)}" target="_blank" rel="noopener">Open in Google</a></p>`;
 }
-function bindChecks(root) { root.querySelectorAll("[data-k]").forEach(cb => { cb.checked = done(cb.dataset.k); cb.onchange = () => { haptic(); try { localStorage.setItem(cb.dataset.k, cb.checked ? "1" : "0"); } catch (e) {} root.querySelectorAll(`[data-k="${cb.dataset.k}"]`).forEach(o => (o.checked = cb.checked)); }; }); }
+function bindChecks(root) { root.querySelectorAll("[data-k]").forEach(cb => { cb.checked = done(cb.dataset.k); cb.onchange = () => { haptic(); put(cb.dataset.k, cb.checked ? "1" : "0"); root.querySelectorAll(`[data-k="${cb.dataset.k}"]`).forEach(o => (o.checked = cb.checked)); }; }); }
 
 /* ---------- show mode ---------- */
 const show = document.getElementById("show");
@@ -2060,7 +2135,15 @@ document.addEventListener("click", e => {
   const od = t.closest("[data-open-day]"); if (od) { haptic(); const d = od.dataset.openDay; MODE = "day"; try { localStorage.setItem("mode", "day"); } catch (e) {} document.getElementById("modePill").classList.remove("on"); document.getElementById("wsel").classList.remove("span2"); if (d === view) { content.innerHTML = renderContent(view); scrollToDay(false); } else selectDay(d); return; }
   const me = t.closest("[data-mi]"); if (me) { haptic(); const d = me.dataset.mday, i = +me.dataset.mi; const it = MITEMS[d]; if (!it) return; const ev = it.evs[i]; if (ev.k === "plan") return openSheet(planItemSheet(ev)); if (ev.k === "mine") return openSheet(mineSheet(ev, d)); if (ev.m) return openSheet(moveSheet(ev.m)); if (ev.stay) return openSheet(staySheet(ev.stay)); return openSheet(staySheet(stayOn(d) || STAYS[0])); }
   const mk = t.closest("[data-mark]"); if (mk) { haptic(); return openSheet(staySheet(CUR.marks[+mk.dataset.mark].stay)); }
-  const pp = t.closest("[data-prompt]"); if (pp) { haptic(); const i = ITEMS[+pp.dataset.i]; const shown = (pp.querySelector(".pk")?.textContent || "").split(" · ")[0].split(" → ").map(x => x.trim()).filter(Boolean); return openPlanner(view, pp.dataset.prompt, { s: i.s, e: i.e, k: "free" }, shown); }
+  const pp = t.closest("[data-prompt]"); if (pp) { haptic(); const i = ITEMS[+pp.dataset.i]; const shown = (pp.querySelector(".pk")?.textContent || "").split(" · ")[0].split(" → ").map(x => x.trim()).filter(Boolean);
+    const ids = sceneIds(view, i.sc, i.step), alts = sceneAlts(view, i.sc, i.step), n = alts.length ? ((pp.dataset.n != null ? +pp.dataset.n - 1 : +pp.dataset.sc) % alts.length + alts.length) % alts.length : 0;
+    const got = (ids[n] || []).map(id => SAVE_BY[id]).filter(Boolean);
+    if (got.length && !i.pr.dest) { PS = { i, got, txt: alts[n] || "", shown }; return openSheet(promptSheet()); }
+    return openPlanner(view, pp.dataset.prompt, { s: i.s, e: i.e, k: "free" }, shown); }
+  const na = t.closest("[data-nadd]"); if (na) { haptic("heavy"); const z = SAVE_BY[na.dataset.nadd], p = getPlan(today), j = p.findIndex(x => x.id === z.id), c = { dinner: "dinner", drinks: "drinks", coffee: "coffee", sweet: "sweet", culture: "culture", see: "see", shop: "shop", experience: "experience" }[z.kind] || "see";
+    if (j >= 0) p.splice(j, 1); else p.push({ id: z.id, c, t: Math.ceil((nowMin() + 5) / 15) * 15 }); setPlan(today, p); swapSheet(nearSheet()); if (view === today) content.innerHTML = renderContent(view); return; }
+  if (t.closest("[data-pswap]")) { haptic(); const { i, shown } = PS; closeSheet(); return setTimeout(() => openPlanner(view, i.pr.cat, { s: i.s, e: i.e, k: "free" }, shown), 320); }
+  if (t.closest("[data-padd]")) { haptic("heavy"); const { i, got } = PS, p = getPlan(view); got.forEach((sv, j) => { if (!p.some(x => x.id === sv.id)) p.push({ id: sv.id, c: i.pr.cat, t: i.s + Math.round((i.e - i.s) / got.length * j / 15) * 15 }); }); setPlan(view, p); closeSheet(); content.innerHTML = renderContent(view); return; }
   const ev = t.closest("[data-i]"); if (ev) { haptic(); const i = ITEMS[+ev.dataset.i]; if (i.k === "plan") return openSheet(planItemSheet(i)); if (i.k === "mine") return openSheet(mineSheet(i, view));
       if (i.k === "booked") { const b = i.x.b; return openSheet(head(esc(b.t), `${b.act ? esc(b.act) + " · " : ""}${dDay(b.on)} · ${s12(b.s)} – ${s12(b.e)}`) + (b.note ? `<p class="nt">${esc(b.note)}</p>` : "") + (b.where ? `<div class="acts"><a class="btn blue press" href="${dirs(b.where + " " + cityOn(b.on))}" target="_blank" rel="noopener">Directions</a><a class="btn card press" href="${ttq(b.where, cityOn(b.on))}" target="_blank" rel="noopener">TikTok</a></div>` : "")); }
       if (i.k === "slot") { SL = i; REFRESH = () => { const st = sheet.scrollTop; document.getElementById("sheet-body").innerHTML = slotSheet(); sheet.scrollTop = st; }; return openSheet(slotSheet()); }
@@ -2074,7 +2157,7 @@ document.addEventListener("click", e => {
   if (t.closest("#backPill")) { haptic(); return openSide(); }
   if (t.closest("#titlePill")) { haptic(); openSheet(menuSheet()); startCycle(view); return; }
   if (t.closest("[data-today]")) { e.preventDefault(); haptic(); closeSheet(); return selectDay(today); }
-  const mi = t.closest("[data-menu]"); if (mi) { haptic(); const k = mi.dataset.menu; if (k === "stay") { const s = stayOn(view); return openSheet(s ? staySheet(s) : tripSheet()); } if (k === "wx") return openSheet(wxSheet()); if (k === "ideas") { const h = view === today ? new Date().getHours() : 10; return openPlanner(view, h < 11 ? "coffee" : h < 14 ? "dinner" : h < 17 ? "see" : h < 21 ? "dinner" : "drinks", null); } if (k === "tasks") return openSheet(tasksSheet()); if (k === "tour") { closeSheet(); return setTimeout(openTour, 320); } if (k === "plan") return openAsk(view); if (k === "trip") return openSheet(tripSheet()); if (k === "cal") return openSheet(calSheet()); }
+  const mi = t.closest("[data-menu]"); if (mi) { haptic(); const k = mi.dataset.menu; if (k === "stay") { const s = stayOn(view); return openSheet(s ? staySheet(s) : tripSheet()); } if (k === "wx") return openSheet(wxSheet()); if (k === "ideas") { const h = view === today ? new Date().getHours() : 10; return openPlanner(view, h < 11 ? "coffee" : h < 14 ? "dinner" : h < 17 ? "see" : h < 21 ? "dinner" : "drinks", null); } if (k === "tasks") return openSheet(tasksSheet()); if (k === "tour") { closeSheet(); return setTimeout(openTour, 320); } if (k === "plan") return openAsk(view); if (k === "trip") return openSheet(tripSheet()); if (k === "cal") return openSheet(calSheet()); if (k === "near") { openSheet(nearSheet()); hereAsked = 0; return askHere(() => { if (!sheet.hidden && document.getElementById("nearS")) swapSheet(nearSheet()); }); } }
   if (t.closest("[data-open-trip]")) { haptic(); return openSheet(tripSheet()); }
 });
 document.addEventListener("keydown", e => {
@@ -2090,6 +2173,7 @@ function tick() {
   if (sheet.hidden && show.hidden && side.hidden && !pd) { const y = scrollY; renderHeader(false); content.innerHTML = renderContent(view); scrollTo(0, y); }
 }
 renderWeek(); renderHeader(false); measureTop(); content.innerHTML = renderContent(view);
+pullState(); setInterval(pullState, 60000); document.addEventListener("visibilitychange", () => { if (!document.hidden) pullState(); });
 document.getElementById("modePill").classList.toggle("on", MODE === "multi"); document.getElementById("wsel").classList.toggle("span2", MODE === "multi");
 refreshLive();
 requestAnimationFrame(() => { measureTop(); padWheel(); centreDay(view, false); scrollToDay(); warmAround(view); });
@@ -2118,6 +2202,7 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) { ti
 /* calendar feed: the real bookings and travel steps as an .ics. Every time is written as an exact UTC moment, worked out in the
    time zone of where it happens (hotel city, departure or arrival airport), so the phone shows each one at the right local time.
    Built by tools/make_ics.py and published at a private link; nothing in the app links to it. */
+window.__ev = x => eval(x);
 window.__tripICS = () => {
   const P = n => String(n).padStart(2, "0");
   const CTZ = { GR: TZ.ath, IT: TZ.it, CH: TZ.ch, DE: TZ.de, FR: TZ.fr, UK: TZ.uk };
@@ -2164,8 +2249,9 @@ window.__tripICS = () => {
 const TOUR = [
   { t: "Your trip, day by day", d: "It opens on today: where you’re staying and what’s booked.", p: `<div class="bk tint" style="--c:#ff8a00;top:14px">Hotel<small>Check out · 10:30 am</small></div><div class="bk solid" style="--c:#ff8a00;top:54px;height:40px">Rome → Florence<small>12:30 pm – 2:11 pm</small></div><div class="bk tint" style="--c:#ff8a00;top:104px">Hotel<small>Check in · 2:30 pm</small></div>` },
   { t: "Swipe between days", d: "Swipe the page sideways, or tap a date at the top.", p: `<div class="strip"><span>27</span><span class="c">28</span><span>29</span></div><div class="hand"></div>` },
-  { t: "Ideas for free time", d: "Dashed blocks are ideas from your saved places. Tap one to see it.", p: `<div class="bk dash" style="--c:#a2845e;top:14px">Coffee<small>Caffè Teichner · 5 min walk</small></div><div class="bk dash" style="--c:#34c759;top:54px">Sightsee<small>Trevi Fountain · 8 min walk</small></div><div class="bk dash" style="--c:#ff2d55;top:94px;height:42px">Food<small>Supplizio · 9 min walk</small></div>` },
+  { t: "Ideas for free time", d: "Dashed blocks are ideas from your saved places. Tap one for directions, its TikTok, or to add it.", p: `<div class="bk dash" style="--c:#a2845e;top:14px">Coffee<small>Caffè Teichner · 5 min walk</small></div><div class="bk dash" style="--c:#34c759;top:54px">Sightsee<small>Trevi Fountain · 8 min walk</small></div><div class="bk dash" style="--c:#ff2d55;top:94px;height:42px">Food<small>Supplizio · 9 min walk</small></div>` },
   { t: "Plan a whole day", d: "Tap the city name, then Plan the day. A few taps and it’s done.", p: `<div class="pill">Rome</div><div class="menu"><div>Spagna Boutique</div><div class="hl">Plan the day</div></div>` },
+  { t: "Lock-screen alerts", d: "Tap the city name, then Add to my calendar. Flights and bookings show up with alerts.", p: `<div class="pill">Rome</div><div class="menu"><div>Things to do</div><div class="hl">Add to my calendar</div></div>` },
 ];
 let tourAt = 0;
 function tourGo(i) {
