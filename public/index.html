@@ -2002,6 +2002,15 @@ function closeShow() { if (show.hidden) return; const fin = () => { show.hidden 
 
 /* ---------- events ---------- */
 document.addEventListener("click", () => { gCache.clear(); DST.clear(); }, true);
+/* TikTok's app drops the search term from web links, so copy it first: tap search in TikTok and paste */
+document.addEventListener("click", e => {
+  const l = e.target.closest && e.target.closest('a[href*="tiktok.com/search"]'); if (!l) return;
+  const q = new URL(l.href).searchParams.get("q") || "";
+  const old = () => { const ta = document.createElement("textarea"); ta.value = q; ta.setAttribute("readonly", ""); ta.style.cssText = "position:fixed;opacity:0"; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); } catch (y) {} ta.remove(); };
+  try { navigator.clipboard.writeText(q).catch(old); } catch (x) { old(); }
+  let t = document.getElementById("ttToast"); if (!t) { t = document.createElement("div"); t.id = "ttToast"; t.style.cssText = "position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:80;background:rgba(30,30,30,.92);color:#fff;font-size:14px;line-height:1.35;padding:10px 16px;border-radius:14px;max-width:calc(100vw - 48px);text-align:center;transition:opacity .3s"; document.body.appendChild(t); }
+  t.innerHTML = `Copied <b>${esc(q)}</b><br>Paste it into TikTok search`; t.style.opacity = 1; clearTimeout(t._h); t._h = setTimeout(() => t.style.opacity = 0, 4000);
+}, true);
 document.addEventListener("click", e => {
   const t = e.target;
   if (t.closest("[data-close-show]")) { haptic(); return closeShow(); }
