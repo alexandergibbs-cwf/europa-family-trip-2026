@@ -2063,16 +2063,20 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) { ti
     addEventListener("appinstalled", () => { a2.hidden = true; });
   }
 }
-/* calendar feed: the real bookings and travel steps as an .ics, in local (floating) times so the phone shows them as the app does.
+/* calendar feed: the real bookings and travel steps as an .ics. Every time is written as an exact UTC moment, worked out in the
+   time zone of where it happens (hotel city, departure or arrival airport), so the phone shows each one at the right local time.
    Built by tools/make_ics.py and published at a private link; nothing in the app links to it. */
 window.__tripICS = () => {
-  const P = n => String(n).padStart(2, "0"), dt = (iso, m) => { const d = addDays(iso, Math.floor(m / 1440)), mm = ((m % 1440) + 1440) % 1440; return d.replace(/-/g, "") + "T" + P(Math.floor(mm / 60)) + P(mm % 60) + "00"; };
+  const P = n => String(n).padStart(2, "0");
+  const CTZ = { GR: TZ.ath, IT: TZ.it, CH: TZ.ch, DE: TZ.de, FR: TZ.fr, UK: TZ.uk };
+  const tzCity = c => CTZ[CTRY[c]] || TZ.ath;
+  const dt = (iso, m, tz) => { const d = addDays(iso, Math.floor(m / 1440)), mm = ((m % 1440) + 1440) % 1440; return new Date(toUTC([d, P(Math.floor(mm / 60)) + ":" + P(mm % 60), tz])).toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z"); };
   const esc2 = t => String(t || "").replace(/\\/g, "\\\\").replace(/;/g, "\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
   const fold = l => { const out = []; let x = l; while (x.length > 74) { out.push(x.slice(0, 74)); x = " " + x.slice(74); } out.push(x); return out.join("\r\n"); };
   const out = [], seen = new Set();
   const add = (uid, iso, s, e, title, o = {}) => {
     if (seen.has(uid)) return; seen.add(uid);
-    const L = ["BEGIN:VEVENT", "UID:" + uid + "@europe-family-trip.app", "DTSTAMP:20261025T000000Z", "DTSTART:" + dt(iso, s), "DTEND:" + dt(o.endIso || iso, e), "SUMMARY:" + esc2(title)];
+    const L = ["BEGIN:VEVENT", "UID:" + uid + "@europe-family-trip.app", "DTSTAMP:20261025T000000Z", "DTSTART:" + dt(iso, s, o.tz), "DTEND:" + dt(o.endIso || iso, e, o.tzEnd || o.tz), "SUMMARY:" + esc2(title)];
     if (o.loc) L.push("LOCATION:" + esc2(o.loc));
     if (o.notes) L.push("DESCRIPTION:" + esc2(o.notes));
     (o.alarms || []).forEach(a => L.push("BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:" + esc2(title), "TRIGGER:-PT" + a + "M", "END:VALARM"));
@@ -2080,8 +2084,8 @@ window.__tripICS = () => {
   };
   MOVES.forEach(m => {
     const notes = [m.code + (m.carrier ? " · " + m.carrier : ""), m.ref ? "Booking ref: " + m.ref : m.todo || "", m.bags ? "Bags: " + m.bags : "", m.guess ? "Times are a guess." : "", m.note || ""].filter(Boolean).join("\n");
-    add("move-" + m.id, m.dep[0], mins(m.d), m.aDate === m.dep[0] ? mins(m.a) : mins(m.a) + 1440 * Math.round((Date.parse(m.aDate) - Date.parse(m.dep[0])) / 864e5),
-      `${m.mode === "Flight" ? "✈︎" : "🚆"} ${m.from} → ${m.to}`, { loc: m.mode === "Train" ? placeFrom(m) : (m.fromQ || placeFrom(m)), notes, alarms: [m.mode === "Flight" ? 180 : 60] });
+    add("move-" + m.id, m.dep[0], mins(m.d), mins(m.a),
+      `${m.mode === "Flight" ? "✈︎" : "🚆"} ${m.from} → ${m.to}`, { tz: m.dep[2], tzEnd: m.arr ? m.arr[2] : m.dep[2], endIso: m.aDate, loc: m.mode === "Train" ? placeFrom(m) : (m.fromQ || placeFrom(m)), notes, alarms: [m.mode === "Flight" ? 180 : 60] });
   });
   ALLDAYS.forEach(iso => {
     const D = buildDay(iso);
@@ -2094,7 +2098,9 @@ window.__tripICS = () => {
       const notes2 = notes && !title.includes(notes) ? notes : "";
       const firstOut = ev.k === "get" && (ev.x.coOnly || ev.x.dep) && ev.act && /Check out|Collect/.test(ev.act);
       const alarms = ev.k === "pack" ? [0] : firstOut ? [30] : ev.k === "booked" ? [ev.x.b.kind === "dinner" ? 60 : 30] : [];
-      add(`${iso}-${ev.k}-${ev.s}-${title.replace(/[^a-z0-9]/gi, "").slice(0, 24)}`, iso, ev.s, Math.max(ev.e, ev.s + 5), title, { loc, notes: notes2, alarms });
+      /* where it happens: a hotel's city, the airport or station you leave from, or the city you're in that day */
+      const tz = ev.k === "change" && ev.m ? ev.m.dep[2] : st ? tzCity(st.city) : ev.m ? ev.m.dep[2] : tzCity(cityOn(iso));
+      add(`${iso}-${ev.k}-${ev.s}-${title.replace(/[^a-z0-9]/gi, "").slice(0, 24)}`, iso, ev.s, Math.max(ev.e, ev.s + 5), title, { tz, loc, notes: notes2, alarms });
     });
   });
   return ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Europe Trip//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "X-WR-CALNAME:Europe Trip", "X-APPLE-CALENDAR-COLOR:#FF8A00", "REFRESH-INTERVAL;VALUE=DURATION:PT2H", "X-PUBLISHED-TTL:PT2H", ...out, "END:VCALENDAR"].map(fold).join("\r\n") + "\r\n";
