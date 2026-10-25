@@ -867,9 +867,23 @@ let HERE = null, hereAsked = 0;
 function liveFrom(iso) { const a = anchorFor(iso); return iso === today && a && HERE && Date.now() - HERE.t < 15 * 6e4 && km(a.lat, a.lng, HERE.lat, HERE.lng) < 40 ? HERE : null; }
 function askHere(then) {
   if (!navigator.geolocation || Date.now() - hereAsked < 6e4) return; hereAsked = Date.now();
-  navigator.geolocation.getCurrentPosition(p => { HERE = { lat: p.coords.latitude, lng: p.coords.longitude, t: Date.now() }; try { localStorage.setItem("here", "1"); } catch (e) {} if (then) then(); else if (liveFrom(view) && sheet.hidden && !pd) { gCache.clear(); content.innerHTML = renderContent(view); } }, () => {}, { enableHighAccuracy: false, maximumAge: 120000, timeout: 15000 });
+  navigator.geolocation.getCurrentPosition(p => {
+    const was = HERE; HERE = { lat: p.coords.latitude, lng: p.coords.longitude, t: Date.now() }; try { localStorage.setItem("here", "1"); localStorage.removeItem("here-no"); } catch (e) {}
+    if (then) then();
+    /* redraw when it's the first fix or you've moved a block or two, so walk times stay right */
+    else if ((!was || km(was.lat, was.lng, HERE.lat, HERE.lng) > 0.12) && liveFrom(view) && sheet.hidden && !pd) { SCN_CACHE.clear(); gCache.clear(); content.innerHTML = renderContent(view); }
+  }, err => { if (err && err.code === 1) try { localStorage.setItem("here-no", String(Date.now())); localStorage.removeItem("here"); } catch (e) {} }, { enableHighAccuracy: false, maximumAge: 60000, timeout: 15000 });
 }
-try { if (localStorage.getItem("here")) { setTimeout(askHere, 1500); document.addEventListener("visibilitychange", () => { if (!document.hidden) { hereAsked = 0; askHere(); } }); } } catch (e) {}
+/* ask for location as soon as the app opens (after the tour or Add to Home Screen card), not only on Near me now.
+   If someone says no, don't ask again for three days. While allowed, keep it fresh every couple of minutes. */
+(function hereBoot() {
+  let no = 0; try { no = +localStorage.getItem("here-no") || 0; } catch (e) {}
+  if (Date.now() - no < 3 * 864e5 || today > END) return;
+  let n = 0; const wait = () => { const busy = !document.getElementById("a2hs").hidden || document.querySelector(".tour:not([hidden])") || !sheet.hidden; if (busy && n++ < 120) return setTimeout(wait, 1000); hereAsked = 0; askHere(); };
+  setTimeout(wait, 1500);
+  setInterval(() => { if (!document.hidden) { hereAsked = 0; askHere(); } }, 150000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) { hereAsked = 0; askHere(); } });
+})();
 const fromTxt = (iso, a) => liveFrom(iso) ? "where you are" : a ? a.hotel : "";
 /* today, with your location: when to set off for something coming up in the next few hours */
 function coordsOf(ev) {
@@ -1249,7 +1263,7 @@ function renderDayContent(iso) {
       return;
     }
     if (ev.k === "mine") {
-      const p = ev.mp, [a1, a2] = (p.txt || "").split("\x1f"), cut = (a1 || "").lastIndexOf(" · "), place = cut > 0 ? a1.slice(0, cut) : a1, walkT = cut > 0 ? a1.slice(cut + 3) : "";
+      const p = ev.mp, [a1, a2] = (p.txt || "").split("\x1f"), cut = (a1 || "").lastIndexOf(" · "), place = cut > 0 ? a1.slice(0, cut) : a1, lo = liveFrom(iso), sv0 = lo && SAVE_BY[(p.ids || [])[0]], walkT = sv0 ? `${walk(dk(lo, sv0))} from you` : cut > 0 ? a1.slice(cut + 3) : "";
       html += `<button class="ev mine${short ? " short" : ""}${h >= 58 ? " wrap" : ""} press" data-i="${i}" style="--c:${KCOL[p.k] || "#8e8e93"};top:${top + 12}px;height:${h}px"><span class="tt">${icon(KICON[p.k])}${esc(place || p.l)}</span><span class="tm">${place ? `${esc(p.l)} · ` : ""}${t12(ev.s)} – ${t12(ev.e)}${leaveBy(iso, ev) ? ` · <b class="cd">${leaveBy(iso, ev)}</b>` : walkT && !short ? ` · ${esc(walkT)}` : ""}</span>${a2 && h >= 96 ? `<span class="hk">${esc(a2)}</span>` : ""}</button>`;
       return;
     }
@@ -1652,9 +1666,8 @@ const hookOf = s => { const h = (s && s.hook || "").replace(/[|\x1f]/g, " ").tri
 function sceneAlts(iso, si, step) {
   const P = scenePlans(iso, si), o = liveFrom(iso);
   if (!o) return P.map(v => v[step] || "");
-  const sc = sceneFor(iso, si), nm = nowMin(), first = sc.findIndex(p => p.e > nm && !p.dest);
   return P.map((v, vi) => { const t = v[step] || ""; const id = ((P.ids[vi] || [])[step] || [])[0], sv = id && SAVE_BY[id];
-    if (step !== first || !sv) return t; return t.replace(/ · [^·\x1f]*?(walk|km)( from the hotel)?(?=\x1f|$)/, ` · ${walk(dk(o, sv))} from you`); });
+    if (!sv) return t; return t.replace(/ · [^·\x1f]*?(walk|km)( from the hotel)?(?=\x1f|$)/, ` · ${walk(dk(o, sv))} from you`); });
 }
 const sceneIds = (iso, si, step) => (scenePlans(iso, si).ids || []).map(v => v[step] || []);
 function ideaAlts(iso, pr) {
