@@ -537,6 +537,10 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .ev.travel.done, .mev.travel.done { background: color-mix(in srgb, var(--c) 26%, var(--bg)); color: color-mix(in srgb, var(--c) 45%, var(--ink)); }
 .ev.travel.done .tm, .ev.travel.done .ref, .mev.travel.done span { color: inherit; }
 .ev.travel.done::before, .mev.travel.done::before { background: var(--c); }
+/* a suggested plan: same dashed look as the other ideas, but it stays put */
+.ev.booked.bk-idea { background: color-mix(in srgb, var(--c) 5%, var(--bg)); border: 1.5px dashed color-mix(in srgb, var(--c) 55%, transparent); color: color-mix(in srgb, var(--c) 60%, var(--ink)); padding-left: 10px; }
+.ev.booked.bk-idea::before { display: none; }
+.mev.booked.bk-idea { background: color-mix(in srgb, var(--c) 6%, var(--bg)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 45%, transparent); color: color-mix(in srgb, var(--c) 60%, var(--ink)); }
 /* your own bookings: a drive sits in the travel colours, an outing is solid green */
 .ev.booked.bk-ride, .mev.booked.bk-ride { --c: #ff8a00; background: color-mix(in srgb, var(--c) 9%, var(--bg)); color: color-mix(in srgb, var(--c) 40%, var(--ink)); }
 .ev.booked.bk-ride::before, .mev.booked.bk-ride::before { opacity: .5; }
@@ -639,6 +643,24 @@ const EVENTS = [
   { on: "2026-10-24", s: "09:45", e: "11:30", t: "Akrotiri", act: "Explore the ruins", style: "see", icon: "col", where: "Archaeological Site of Akrotiri", note: "Bronze Age town buried by the eruption, under one big roof. Open 8 am – 6 pm in late October. Tickets at the gate or on hhticket.gr." },
   { on: "2026-10-24", s: "11:30", e: "12:15", t: "Akrotiri → The Museum Project Oia", act: "Drive · about 45 min", style: "ride", where: "The Museum Project Oia" },
   { on: "2026-10-24", s: "17:00", e: "19:00", t: "Sunset dinner", kind: "dinner", note: "Last night in Santorini." },
+  /* Rome in three days (from @vitortrip's guide), fitted around arrival and checked against late-October hours (23 Oct):
+     Colosseum winter hours from 25 Oct are 8:30-15:30, last entry 14:30; Vatican Museums Mon-Sat 8-20, last entry 18:00;
+     sunset is about 5:10 pm. These are ideas, not bookings: they show dashed and stay off the calendar feed. */
+  { idea: true, k: "day", on: "2026-10-27", s: "14:30", e: "15:00", t: "Piazza Navona", act: "Sightsee · 20 min walk from the hotel", where: "Piazza Navona Rome", note: "About 30 min. Free." },
+  { idea: true, k: "culture", on: "2026-10-27", s: "15:00", e: "15:30", t: "Pantheon", act: "Culture · 5 min walk", where: "Pantheon Rome", note: "About 45 min. €5." },
+  { idea: true, k: "day", on: "2026-10-27", s: "15:30", e: "16:00", t: "Trevi Fountain", act: "Sightsee · 8 min walk", where: "Trevi Fountain Rome", note: "About 45 min. Free." },
+  { idea: true, k: "day", on: "2026-10-27", s: "16:00", e: "16:30", t: "Spanish Steps", act: "Sightsee · 10 min walk", where: "Spanish Steps Rome", note: "About 30 min. Free. Right by the hotel." },
+  { idea: true, k: "day", on: "2026-10-27", s: "16:30", e: "17:30", t: "Villa Borghese", act: "Sunset · 15 min walk", where: "Terrazza del Pincio Rome", note: "Sunset is about 5:10 pm. Watch it from the Pincio terrace. Free." },
+  { idea: true, k: "culture", on: "2026-10-28", s: "09:00", e: "11:00", t: "Colosseum", act: "Culture · 25 min from the hotel", where: "Colosseum Rome", note: "About 2 hours. €18, or €24+ with the arena. Winter hours: 8:30 am – 3:30 pm, last entry 2:30 pm. Book a timed ticket ahead." },
+  { idea: true, k: "day", on: "2026-10-28", s: "11:00", e: "12:30", t: "Roman Forum", act: "Sightsee · 2 min walk", where: "Roman Forum", note: "1½ – 2 hours. Included in the Colosseum ticket." },
+  { idea: true, k: "day", on: "2026-10-28", s: "12:30", e: "13:30", t: "Palatine Hill", act: "Sightsee · 5 min walk", where: "Palatine Hill Rome", note: "About 45 min. Included in the Colosseum ticket." },
+  { idea: true, k: "day", on: "2026-10-28", s: "15:00", e: "16:00", t: "Altare della Patria", act: "Sightsee · 12 min walk", where: "Altare della Patria Rome", note: "About 45 min. Free; the lift to the top is €15." },
+  { idea: true, k: "culture", on: "2026-10-28", s: "16:00", e: "16:30", t: "Sant’Ignazio di Loyola", act: "Culture · 8 min walk", where: "Chiesa di Sant'Ignazio di Loyola Rome", note: "About 30 min. Free. Look up at the painted dome." },
+  { idea: true, k: "culture", on: "2026-10-29", s: "09:00", e: "12:00", t: "Vatican Museums", act: "Culture · 30 min from the hotel", where: "Vatican Museums", note: "About 3 hours. €20, or €25+ guided. Open 8 am – 8 pm, last entry 6 pm. Book ahead." },
+  { idea: true, k: "culture", on: "2026-10-29", s: "12:00", e: "13:30", t: "St Peter’s Basilica", act: "Culture · 10 min walk", where: "St. Peter's Basilica", note: "About 1½ hours. Free; the dome climb is €10." },
+  { idea: true, k: "culture", on: "2026-10-29", s: "15:00", e: "16:00", t: "Castel Sant’Angelo", act: "Culture · 10 min walk", where: "Castel Sant'Angelo", note: "About 1 hour. €13." },
+  { idea: true, k: "day", on: "2026-10-29", s: "16:30", e: "17:30", t: "Janiculum Hill", act: "Sunset · 15 min walk", where: "Gianicolo Terrace Rome", note: "Sunset is about 5:10 pm. Free." },
+  { idea: true, k: "dinner", kind: "dinner", on: "2026-10-29", s: "20:00", e: "22:00", t: "Trastevere", act: "Dinner · 15 min walk", where: "Trastevere Rome", note: "About €25–40 a head." },
 ];
 const HEADS = [
   { on:["2026-10-21","2026-10-22"], w:1, t:"Santorini bags are 15kg checked plus 8kg cabin.", d:"Small bag for 3 nights. The big suitcases are already at 11 Enteka." },
@@ -1180,7 +1202,7 @@ function renderDayContent(iso) {
     const time = ev.k === "mark" ? t12(ev.s) : ev.x && ev.x.overnight ? `until ${t12(ev.e)}` : `${t12(ev.s)} – ${t12(ev.e)}`;
     const durTxt = (ev.k === "free" || ev.k === "wait") ? ` · ${dur(ev.e - ev.s)}` : "";
     const modeOf = ev.m || (ev.x && ev.x.arr), isRide = (ev.k === "get" && !ev.x.coOnly) || (ev.k === "booked" && ev.x.b.style === "ride");
-    html += `<button class="ev ${ev.k}${ev.k === "booked" && ev.x.b.style ? " bk-" + ev.x.b.style : ""}${ev.k === "get" && ev.x.coOnly ? " co" : ""}${isRide ? " ride" : ""}${ev.k === "get" && h >= 58 ? " wrap" : ""}${modeOf && modeOf.mode === "Train" && (ev.k === "travel" || ev.k === "change" || isRide) ? " rail" : ""}${short ? " short stack" : ""}${ev.done ? " done" : ""} press" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${icon(ev.k === "travel" || ev.k === "change" ? (ev.m && ev.m.mode === "Flight" ? "fly" : "rail") : isRide ? "car" : (ev.k === "get" || ev.k === "pack") ? "home" : ev.k === "booked" ? (ev.x.b.icon || (ev.x.b.kind === "dinner" ? "fork" : "pin")) : "")}${esc(ev.tt)}${durTxt}</span><span class="tm">${ev.act ? `${esc(ev.act)} · ` : ""}${time}${ev.cd && !short ? ` · <b class="cd">${countdown(ev.cd)}</b>` : ""}${!short && ev.sub && h >= 60 && h < 80 ? ` · ${esc(ev.sub)}` : ""}</span>${!short && ev.sub && h >= 80 ? `<span class="tm">${esc(ev.sub)}</span>` : ""}${!short && ev.ref && h >= 100 ? `<span class="ref" data-show-ref="${ev.ref}" data-show-l="${esc(ev.m.code)}">${ev.ref} ›</span>` : ""}</button>`;
+    html += `<button class="ev ${ev.k}${ev.k === "booked" && ev.x.b.idea ? " bk-idea c-" + ev.x.b.k : ""}${ev.k === "booked" && ev.x.b.style ? " bk-" + ev.x.b.style : ""}${ev.k === "get" && ev.x.coOnly ? " co" : ""}${isRide ? " ride" : ""}${ev.k === "get" && h >= 58 ? " wrap" : ""}${modeOf && modeOf.mode === "Train" && (ev.k === "travel" || ev.k === "change" || isRide) ? " rail" : ""}${short ? " short stack" : ""}${ev.done ? " done" : ""} press" data-i="${i}" style="${ev.k === "booked" && ev.x.b.idea ? `--c:${KCOL[ev.x.b.k]};` : ""}top:${top + 12}px;height:${h}px"><span class="tt">${icon(ev.k === "travel" || ev.k === "change" ? (ev.m && ev.m.mode === "Flight" ? "fly" : "rail") : isRide ? "car" : (ev.k === "get" || ev.k === "pack") ? "home" : ev.k === "booked" ? (ev.x.b.icon || (ev.x.b.idea ? KICON[ev.x.b.k] : ev.x.b.kind === "dinner" ? "fork" : "pin")) : "")}${esc(ev.tt)}${durTxt}</span><span class="tm">${ev.act ? `${esc(ev.act)} · ` : ""}${time}${ev.cd && !short ? ` · <b class="cd">${countdown(ev.cd)}</b>` : ""}${!short && ev.sub && h >= 60 && h < 80 ? ` · ${esc(ev.sub)}` : ""}</span>${!short && ev.sub && h >= 80 ? `<span class="tm">${esc(ev.sub)}</span>` : ""}${!short && ev.ref && h >= 100 ? `<span class="ref" data-show-ref="${ev.ref}" data-show-l="${esc(ev.m.code)}">${ev.ref} ›</span>` : ""}</button>`;
   });
   html += `</div>`;
   D.marks.forEach((mk, mi) => { html += `<div class="mk" style="top:${y(mk.t)}px"><button class="press" data-mark="${mi}"><b>${mk.kind === "in" ? "Check in" : "Check out"} ${t12(mk.t)}</b><span>${esc(mk.stay.hotel)}</span></button></div>`; });
@@ -1213,7 +1235,7 @@ function renderMultiContent(iso) {
     evs.forEach((ev, i) => {
       if (ev.k === "free" || ev.k === "prompt" || ev.k === "wait") return;
       const top = MY(ev.s), h = Math.max(MY(ev.e) - MY(ev.s) - 2, 18);
-      html += `<button class="mev ${ev.k}${ev.k === "booked" && ev.x && ev.x.b.style ? " bk-" + ev.x.b.style : ""}${ev.k === "get" && ev.x && ev.x.coOnly ? " co" : ""}${ev.k === "get" && ev.x && !ev.x.coOnly ? " ride" : ""}${(ev.m || (ev.x && ev.x.arr) || {}).mode === "Train" && (ev.k === "travel" || ev.k === "change" || (ev.k === "get" && ev.x && !ev.x.coOnly)) ? " rail" : ""}${ev.slot ? " " + ev.slot.k : ""}${ev.done ? " done" : ""}${h < 34 ? " short" : ""} press" data-mday="${d}" data-mi="${i}" style="${ev.k === "mine" ? `--c:${KCOL[ev.mp.k] || "#8e8e93"};` : ""}top:${top}px;height:${h}px"><b>${esc(ev.k === "mine" ? ((ev.mp.txt || "").split("\x1f")[0].replace(/ · [^·]*$/, "") || ev.tt) : ev.tt)}</b>${h >= 44 ? `<span>${ev.act ? esc(ev.act) + " · " : ev.k === "mine" && ev.mp.txt ? esc(ev.mp.l) + " · " : ""}${t12(ev.s)}</span>` : ""}</button>`;
+      html += `<button class="mev ${ev.k}${ev.k === "booked" && ev.x && ev.x.b.idea ? " bk-idea" : ""}${ev.k === "booked" && ev.x && ev.x.b.style ? " bk-" + ev.x.b.style : ""}${ev.k === "get" && ev.x && ev.x.coOnly ? " co" : ""}${ev.k === "get" && ev.x && !ev.x.coOnly ? " ride" : ""}${(ev.m || (ev.x && ev.x.arr) || {}).mode === "Train" && (ev.k === "travel" || ev.k === "change" || (ev.k === "get" && ev.x && !ev.x.coOnly)) ? " rail" : ""}${ev.slot ? " " + ev.slot.k : ""}${ev.done ? " done" : ""}${h < 34 ? " short" : ""} press" data-mday="${d}" data-mi="${i}" style="${ev.k === "mine" ? `--c:${KCOL[ev.mp.k] || "#8e8e93"};` : ""}top:${top}px;height:${h}px"><b>${esc(ev.k === "mine" ? ((ev.mp.txt || "").split("\x1f")[0].replace(/ · [^·]*$/, "") || ev.tt) : ev.tt)}</b>${h >= 44 ? `<span>${ev.act ? esc(ev.act) + " · " : ev.k === "mine" && ev.mp.txt ? esc(ev.mp.l) + " · " : ""}${t12(ev.s)}</span>` : ""}</button>`;
     });
     if (d === today) html += `<div class="mnow" style="top:${MY(nm)}px"></div>`;
     html += `</div>`;
@@ -1675,7 +1697,7 @@ function splitArea(steps) {
   return out;
 }
 function promptsFor(iso, free) {
-  const out = [], pl = getPlan(iso);
+  const out = [], pl = getPlan(iso), planned = EVENTS.some(b => b.on === iso && b.idea);
   SCENES.forEach((_, si) => {
     const sc = sceneFor(iso, si);
     if (SCENES[si].some(p => p.at === "trip") && !sc.some(p => p.dest)) return; /* no day trip without somewhere to go */
@@ -1683,6 +1705,7 @@ function promptsFor(iso, free) {
       const s = Math.max(Math.ceil(f.s / 15) * 15, pr.s), e = Math.min(Math.floor(f.e / 15) * 15, pr.e); if (e - s < Math.min(pr.min || 45, pr.e - pr.s)) return;
       if (pl.some(p => p.t < e && p.t + catOf(p.c).dur > s)) return;
       if (iso === today && e <= nowMin()) return; /* no ideas for time that has already gone */
+      if (planned && !["coffee", "lunch", "dinner", "drinks"].includes(pr.k)) return;
       out.push({ k: "prompt", s, e, pr, tt: pr.l, sc: si, step });
     }));
   });
@@ -2090,7 +2113,7 @@ window.__tripICS = () => {
   ALLDAYS.forEach(iso => {
     const D = buildDay(iso);
     events(iso, D).forEach(ev => {
-      if (!["get", "change", "pack", "booked"].includes(ev.k)) return;
+      if (!["get", "change", "pack", "booked"].includes(ev.k) || (ev.k === "booked" && ev.x.b.idea)) return;
       const title = ev.act ? `${ev.tt} · ${ev.act}` : ev.tt;
       const st = ev.stay || (ev.x && ev.x.from) || null;
       const loc = ev.k === "booked" ? (ev.x.b.where || "") : st ? `${st.hotel}${st.addr && /\d/.test(st.addr) && !/booking/i.test(st.addr) ? ", " + st.addr : ""}, ${st.city}` : ev.m ? (ev.m.fromQ || placeFrom(ev.m)) : "";
