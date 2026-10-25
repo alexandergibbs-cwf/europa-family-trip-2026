@@ -317,7 +317,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .place .h { font-size: 14px; color: var(--sub); line-height: 1.35; }
 .place .m { font-size: 13px; color: var(--sub); font-variant-numeric: tabular-nums; }
 .place .m b { color: var(--e-free-ink); font-weight: 600; }
-.place .links { display: flex; gap: 16px; font-size: 14px; margin-top: 4px; }
+.place .links { display: flex; flex-wrap: wrap; gap: 2px 16px; font-size: 14px; margin-top: 4px; } .place .links a { white-space: nowrap; }
 .addb { border: 0; height: 34px; padding: 0 14px; border-radius: 980px; background: var(--blue); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; align-self: start; transition: transform 480ms var(--spring-bouncy); white-space: nowrap; }
 .addb:active { transform: scale(0.92); transition-duration: 100ms; }
 .addb.on { background: transparent; color: var(--blue); box-shadow: inset 0 0 0 1.5px var(--blue); }
@@ -597,6 +597,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 <script>
 (() => {
 const TZ = { ath:"Europe/Athens", it:"Europe/Rome", ch:"Europe/Zurich", de:"Europe/Berlin", fr:"Europe/Paris", uk:"Europe/London", doh:"Asia/Qatar", per:"Australia/Perth" };
+const ttq = (n, c) => "https://www.tiktok.com/search?q=" + encodeURIComponent((n + (c && c !== "Other" && !n.includes(c) ? " " + c : "")).trim());
 const maps = q => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
 const wxLink = c => "https://www.google.com/search?q=" + encodeURIComponent("weather " + c);
 
@@ -1878,7 +1879,7 @@ function plannerSheet() {
   const cats = askRow + `<div class="cats">${CATS.filter(c => counts[c.k]).map(c => `<button class="cat" data-cat="${c.k}" aria-pressed="${c.k === PL.cat}">${c.l}</button>`).join("")}</div>`;
   const rows = list.slice(0, PL.n).map(({ s, k, pinned }) => {
     const on = plan.find(p => p.id === s.id);
-    return `<div class="place${pinned ? " pinned" : ""}"><span>${pinned ? `<span class="sg">Suggested</span>` : ""}<span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${PL.cat === "trip" ? tripTxt(k) : distTxt(k)}</b></span><span class="links"><a href="${maps(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video${s.creator ? " · " + esc(s.creator) : ""}</a>` : ""}</span></span><button class="addb${on ? " on" : ""}" data-add="${s.id}">${on ? `✓ ${t12(on.t)}` : "Add"}</button></div>`;
+    return `<div class="place${pinned ? " pinned" : ""}"><span>${pinned ? `<span class="sg">Suggested</span>` : ""}<span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${PL.cat === "trip" ? tripTxt(k) : distTxt(k)}</b></span><span class="links"><a href="${maps(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video${s.creator ? " · " + esc(s.creator) : ""}</a>` : ""}</span></span><button class="addb${on ? " on" : ""}" data-add="${s.id}">${on ? `✓ ${t12(on.t)}` : "Add"}</button></div>`;
   }).join("");
   return head(title, sub) + cats + `<div class="ig">${rows || `<p class="empty-p">Nothing saved in this category here.</p>`}${list.length > PL.n ? `<button class="more-btn" data-more>Show ${list.length - PL.n} more</button>` : ""}</div><p class="nt">From your mio saves, nearest to the hotel first. Add puts it on the timetable as a dotted block, saved on this phone.</p>`;
 }
@@ -1894,11 +1895,11 @@ function planItemSheet(ev) {
   const s = ev.save, a = anchorFor(view), k = a ? km(a.lat, a.lng, s.lat, s.lng) : null;
   return head(esc(s.name), `${catOf(ev.cat).l} · ${t12(ev.s)}${k != null ? ` · ${distTxt(k)}` : ""}`)
     + `<div class="ig">${s.hook ? `<div class="r"><span>${esc(s.hook)}</span><span></span></div>` : ""}${s.rating ? r("Rating", `★ ${s.rating}${s.reviews ? ` (${s.reviews.toLocaleString()})` : ""}`) : ""}${s.address ? r("Address", esc(s.address)) : ""}${s.creator ? r("Saved from", esc(s.creator)) : ""}</div>
-    <div class="acts"><a class="btn blue press" href="${maps(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><button class="btn card press" data-later="${ev.pi}">+30 min</button><button class="btn card press" data-remove="${ev.pi}" style="color:var(--red)">Remove</button></div>`;
+    <div class="acts"><a class="btn blue press" href="${maps(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a class="btn card press" href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a><button class="btn card press" data-later="${ev.pi}">+30 min</button><button class="btn card press" data-remove="${ev.pi}" style="color:var(--red)">Remove</button></div>`;
 }
 
 function placeRow({ s, k }, btn) {
-  return `<div class="place"><span><span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${k >= 8 && s.city !== (anchorFor(view) || {}).city ? tripTxt(k) : distTxt(k)}</b></span><span class="links"><a href="${maps(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video</a>` : ""}</span></span>${btn}</div>`;
+  return `<div class="place"><span><span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${k >= 8 && s.city !== (anchorFor(view) || {}).city ? tripTxt(k) : distTxt(k)}</b></span><span class="links"><a href="${maps(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video</a>` : ""}</span></span>${btn}</div>`;
 }
 function mapsFallback(what, iso) { const a = anchorFor(iso), c = cityOn(iso), q = a ? a.hotel + " " + c : c; return `<div class="ig"><p class="empty-p">You haven’t saved ${what} in ${esc(c)} on mio yet.</p><a class="place" href="${maps(what + " near " + q)}" target="_blank" rel="noopener"><span class="a">Find ${what} near ${esc(a ? a.hotel : c)}</span><span class="m" style="color:var(--blue)">Maps ›</span></a></div>`; }
 let SL = null;
@@ -2041,7 +2042,7 @@ document.addEventListener("click", e => {
   const mk = t.closest("[data-mark]"); if (mk) { haptic(); return openSheet(staySheet(CUR.marks[+mk.dataset.mark].stay)); }
   const pp = t.closest("[data-prompt]"); if (pp) { haptic(); const i = ITEMS[+pp.dataset.i]; const shown = (pp.querySelector(".pk")?.textContent || "").split(" · ")[0].split(" → ").map(x => x.trim()).filter(Boolean); return openPlanner(view, pp.dataset.prompt, { s: i.s, e: i.e, k: "free" }, shown); }
   const ev = t.closest("[data-i]"); if (ev) { haptic(); const i = ITEMS[+ev.dataset.i]; if (i.k === "plan") return openSheet(planItemSheet(i)); if (i.k === "mine") return openSheet(mineSheet(i, view));
-      if (i.k === "booked") { const b = i.x.b; return openSheet(head(esc(b.t), `${b.act ? esc(b.act) + " · " : ""}${dDay(b.on)} · ${s12(b.s)} – ${s12(b.e)}`) + (b.note ? `<p class="nt">${esc(b.note)}</p>` : "") + (b.where ? `<div class="acts"><a class="btn blue press" href="${maps(b.where + " Santorini")}" target="_blank" rel="noopener">Directions</a></div>` : "")); }
+      if (i.k === "booked") { const b = i.x.b; return openSheet(head(esc(b.t), `${b.act ? esc(b.act) + " · " : ""}${dDay(b.on)} · ${s12(b.s)} – ${s12(b.e)}`) + (b.note ? `<p class="nt">${esc(b.note)}</p>` : "") + (b.where ? `<div class="acts"><a class="btn blue press" href="${maps(b.where + " " + cityOn(b.on))}" target="_blank" rel="noopener">Directions</a><a class="btn card press" href="${ttq(b.where, cityOn(b.on))}" target="_blank" rel="noopener">TikTok</a></div>` : "")); }
       if (i.k === "slot") { SL = i; REFRESH = () => { const st = sheet.scrollTop; document.getElementById("sheet-body").innerHTML = slotSheet(); sheet.scrollTop = st; }; return openSheet(slotSheet()); }
       if (i.k === "free" || i.k === "wait") { return openPlanner(view, PL.cat && PL.cat !== "trip" ? PL.cat : "dinner", i.x); } return openSheet(i.m ? moveSheet(i.m) : staySheet(i.stay)); }
   const st = t.closest("[data-stay]"); if (st) { haptic(); return openSheet(staySheet(STAYS[+st.dataset.stay])); }
