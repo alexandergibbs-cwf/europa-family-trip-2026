@@ -1961,6 +1961,12 @@ function startCycle(iso) {
   };
   show(); if (pool.length > 1 && !reduce()) cycT = setInterval(show, 2800);
 }
+function calSheet() {
+  const f = "europe-family-trip.app/cal/ed3056321e507c456ba8.ics", href = /android/i.test(navigator.userAgent) ? "https://calendar.google.com/calendar/r?cid=" + encodeURIComponent("webcal://" + f) : "webcal://" + f;
+  return `<div class="land"><div class="land-h"><div><h3 id="sheet-title">Add to my calendar</h3><div class="land-sub">Flights, trains, hotels and bookings, with alerts. It updates by itself when the trip changes.</div></div></div></div>
+  <div style="display:flex;padding:4px 0 14px"><a class="btn blue press" href="${href}">Subscribe</a></div>
+  <div class="ig" style="padding:14px 16px;font-size:14px;line-height:1.4;color:var(--sub)"><b style="color:var(--ink)">Times look off?</b> Turn off <b style="color:var(--ink)">Time Zone Override</b> in Settings › Apps › Calendar. Every event also says its local time, like “9:00 am Athens time”.</div>`;
+}
 function tasksSheet() {
   const hs = headsFor(view);
   const all = [["eta-done", "UK ETA (about £16, before 11 Nov)"], ["own-booking", "Not on KJCTJU? Check your flights home"]];
@@ -2047,7 +2053,7 @@ document.addEventListener("click", e => {
   if (t.closest("#backPill")) { haptic(); return openSide(); }
   if (t.closest("#titlePill")) { haptic(); openSheet(menuSheet()); startCycle(view); return; }
   if (t.closest("[data-today]")) { e.preventDefault(); haptic(); closeSheet(); return selectDay(today); }
-  const mi = t.closest("[data-menu]"); if (mi) { haptic(); const k = mi.dataset.menu; if (k === "stay") { const s = stayOn(view); return openSheet(s ? staySheet(s) : tripSheet()); } if (k === "wx") return openSheet(wxSheet()); if (k === "ideas") { const h = view === today ? new Date().getHours() : 10; return openPlanner(view, h < 11 ? "coffee" : h < 14 ? "dinner" : h < 17 ? "see" : h < 21 ? "dinner" : "drinks", null); } if (k === "tasks") return openSheet(tasksSheet()); if (k === "tour") { closeSheet(); return setTimeout(openTour, 320); } if (k === "plan") return openAsk(view); if (k === "trip") return openSheet(tripSheet()); if (k === "cal") { const f = "europe-family-trip.app/cal/ed3056321e507c456ba8.ics"; closeSheet(); location.href = /android/i.test(navigator.userAgent) ? "https://calendar.google.com/calendar/r?cid=" + encodeURIComponent("webcal://" + f) : "webcal://" + f; return; } }
+  const mi = t.closest("[data-menu]"); if (mi) { haptic(); const k = mi.dataset.menu; if (k === "stay") { const s = stayOn(view); return openSheet(s ? staySheet(s) : tripSheet()); } if (k === "wx") return openSheet(wxSheet()); if (k === "ideas") { const h = view === today ? new Date().getHours() : 10; return openPlanner(view, h < 11 ? "coffee" : h < 14 ? "dinner" : h < 17 ? "see" : h < 21 ? "dinner" : "drinks", null); } if (k === "tasks") return openSheet(tasksSheet()); if (k === "tour") { closeSheet(); return setTimeout(openTour, 320); } if (k === "plan") return openAsk(view); if (k === "trip") return openSheet(tripSheet()); if (k === "cal") return openSheet(calSheet()); }
   if (t.closest("[data-open-trip]")) { haptic(); return openSheet(tripSheet()); }
 });
 document.addEventListener("keydown", e => {
@@ -2098,19 +2104,22 @@ window.__tripICS = () => {
   const dt = (iso, m, tz) => { const d = addDays(iso, Math.floor(m / 1440)), mm = ((m % 1440) + 1440) % 1440; return new Date(toUTC([d, P(Math.floor(mm / 60)) + ":" + P(mm % 60), tz])).toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z"); };
   const esc2 = t => String(t || "").replace(/\\/g, "\\\\").replace(/;/g, "\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
   const fold = l => { const out = []; let x = l; while (x.length > 74) { out.push(x.slice(0, 74)); x = " " + x.slice(74); } out.push(x); return out.join("\r\n"); };
+  const TZN = { "Europe/Athens": "Athens", "Europe/Rome": "Rome", "Europe/Zurich": "Zürich", "Europe/Berlin": "Berlin", "Europe/Paris": "Paris", "Europe/London": "UK", "Asia/Qatar": "Doha", "Australia/Perth": "Perth" };
+  const lt = (m, tz) => { const mm = ((m % 1440) + 1440) % 1440, h = Math.floor(mm / 60); return `${h % 12 || 12}:${P(mm % 60)} ${h < 12 ? "am" : "pm"} ${TZN[tz] || "local"} time`; };
   const out = [], seen = new Set();
   const add = (uid, iso, s, e, title, o = {}) => {
     if (seen.has(uid)) return; seen.add(uid);
     const L = ["BEGIN:VEVENT", "UID:" + uid + "@europe-family-trip.app", "DTSTAMP:20261025T000000Z", "DTSTART:" + dt(iso, s, o.tz), "DTEND:" + dt(o.endIso || iso, e, o.tzEnd || o.tz), "SUMMARY:" + esc2(title)];
     if (o.loc) L.push("LOCATION:" + esc2(o.loc));
-    if (o.notes) L.push("DESCRIPTION:" + esc2(o.notes));
+    const desc = [o.when || lt(s, o.tz), o.notes].filter(Boolean).join("\n");
+    L.push("DESCRIPTION:" + esc2(desc));
     (o.alarms || []).forEach(a => L.push("BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:" + esc2(title), "TRIGGER:-PT" + a + "M", "END:VALARM"));
     L.push("END:VEVENT"); out.push(...L);
   };
   MOVES.forEach(m => {
     const notes = [m.code + (m.carrier ? " · " + m.carrier : ""), m.ref ? "Booking ref: " + m.ref : m.todo || "", m.bags ? "Bags: " + m.bags : "", m.guess ? "Times are a guess." : "", m.note || ""].filter(Boolean).join("\n");
     add("move-" + m.id, m.dep[0], mins(m.d), mins(m.a),
-      `${m.mode === "Flight" ? "✈︎" : "🚆"} ${m.from} → ${m.to}`, { tz: m.dep[2], tzEnd: m.arr ? m.arr[2] : m.dep[2], endIso: m.aDate, loc: m.mode === "Train" ? placeFrom(m) : (m.fromQ || placeFrom(m)), notes, alarms: [m.mode === "Flight" ? 180 : 60] });
+      `${m.mode === "Flight" ? "✈︎" : "🚆"} ${m.from} → ${m.to}`, { tz: m.dep[2], tzEnd: m.arr ? m.arr[2] : m.dep[2], endIso: m.aDate, when: `${m.mode === "Flight" ? "Departs" : "Leaves"} ${lt(mins(m.d), m.dep[2])} · ${m.mode === "Flight" ? "lands" : "arrives"} ${lt(mins(m.a), m.arr ? m.arr[2] : m.dep[2])}`, loc: m.mode === "Train" ? placeFrom(m) : (m.fromQ || placeFrom(m)), notes, alarms: [m.mode === "Flight" ? 180 : 60] });
   });
   ALLDAYS.forEach(iso => {
     const D = buildDay(iso);

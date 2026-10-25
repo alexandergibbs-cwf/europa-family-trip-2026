@@ -14,7 +14,8 @@ DTSTART:20261019T144500Z
 DTEND:20261020T015500Z
 SUMMARY:✈︎ Perth → Doha
 LOCATION:Perth Airport
-DESCRIPTION:VA6129 · Qatar Airways\nBooking ref: KJCTJU
+DESCRIPTION:Departs 10:45 pm Perth time · lands 4:55 am Doha time\nVA6129 
+ · Qatar Airways\nBooking ref: KJCTJU
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:✈︎ Perth → Doha
@@ -28,7 +29,8 @@ DTSTART:20261020T042500Z
 DTEND:20261020T092500Z
 SUMMARY:✈︎ Doha → Athens
 LOCATION:Doha Airport
-DESCRIPTION:VA6036 · Qatar Airways\nBooking ref: KJCTJU
+DESCRIPTION:Departs 7:25 am Doha time · lands 12:25 pm Athens time\nVA6036
+  · Qatar Airways\nBooking ref: KJCTJU
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:✈︎ Doha → Athens
@@ -42,9 +44,10 @@ DTSTART:20261022T073000Z
 DTEND:20261022T082500Z
 SUMMARY:✈︎ Athens → Santorini
 LOCATION:Athens International Airport
-DESCRIPTION:GQ344 · Sky Express\nBooking ref: K41BQD\nBags: 15kg checked\,
-  8kg cabin\, personal item\nOnly 15kg checked plus an 8kg cabin bag. The 
- big suitcases are already at 11 Enteka.
+DESCRIPTION:Departs 10:30 am Athens time · lands 11:25 am Athens time\nGQ3
+ 44 · Sky Express\nBooking ref: K41BQD\nBags: 15kg checked\, 8kg cabin\, p
+ ersonal item\nOnly 15kg checked plus an 8kg cabin bag. The big suitcases 
+ are already at 11 Enteka.
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:✈︎ Athens → Santorini
@@ -58,8 +61,9 @@ DTSTART:20261025T125500Z
 DTEND:20261025T135000Z
 SUMMARY:✈︎ Santorini → Athens
 LOCATION:Santorini Airport
-DESCRIPTION:GQ349 · Sky Express\nBooking ref: K41BQD\nBags: 15kg checked\,
-  8kg cabin\, personal item
+DESCRIPTION:Departs 2:55 pm Athens time · lands 3:50 pm Athens time\nGQ349
+  · Sky Express\nBooking ref: K41BQD\nBags: 15kg checked\, 8kg cabin\, per
+ sonal item
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:✈︎ Santorini → Athens
@@ -73,8 +77,9 @@ DTSTART:20261027T085500Z
 DTEND:20261027T110000Z
 SUMMARY:✈︎ Athens → Rome
 LOCATION:Athens International Airport
-DESCRIPTION:GQ820 · Sky Express\nBooking ref: 2JCREI\nBags: 32kg checked\,
-  cabin bag\, small bag
+DESCRIPTION:Departs 10:55 am Athens time · lands 12:00 pm Rome time\nGQ820
+  · Sky Express\nBooking ref: 2JCREI\nBags: 32kg checked\, cabin bag\, sma
+ ll bag
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:✈︎ Athens → Rome
@@ -88,9 +93,10 @@ DTSTART:20261030T113000Z
 DTEND:20261030T131100Z
 SUMMARY:🚆 Rome → Florence
 LOCATION:Roma Termini
-DESCRIPTION:Frecciarossa 9420 · ItaliaRail\, 1st class\nBooking ref: XG55E
- N\nThe ticket says 12:36 PM\, but the train now leaves at 12:30 PM. Be on
-  the platform early. Show the PNR to the conductor.
+DESCRIPTION:Leaves 12:30 pm Rome time · arrives 2:11 pm Rome time\nFreccia
+ rossa 9420 · ItaliaRail\, 1st class\nBooking ref: XG55EN\nThe ticket says
+  12:36 PM\, but the train now leaves at 12:30 PM. Be on the platform earl
+ y. Show the PNR to the conductor.
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:🚆 Rome → Florence
@@ -104,8 +110,9 @@ DTSTART:20261101T112000Z
 DTEND:20261101T133400Z
 SUMMARY:🚆 Florence → Venice
 LOCATION:Firenze S.M.N.
-DESCRIPTION:Frecciarossa 9416 · ItaliaRail\, 1st class\nBooking ref: XHFDS
- N\nShow the PNR to the conductor.
+DESCRIPTION:Leaves 12:20 pm Rome time · arrives 2:34 pm Rome time\nFreccia
+ rossa 9416 · ItaliaRail\, 1st class\nBooking ref: XHFDSN\nShow the PNR to
+  the conductor.
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:🚆 Florence → Venice
@@ -119,8 +126,9 @@ DTSTART:20261103T061800Z
 DTEND:20261103T084500Z
 SUMMARY:🚆 Venice → Milan
 LOCATION:Venezia S. Lucia
-DESCRIPTION:Frecciarossa 9708 · ItaliaRail\, 1st class\nBooking ref: XH6SQ
- 5\nChange at Milano Centrale: 1h 25m between trains\, same station.
+DESCRIPTION:Leaves 7:18 am Rome time · arrives 9:45 am Rome time\nFrecciar
+ ossa 9708 · ItaliaRail\, 1st class\nBooking ref: XH6SQ5\nChange at Milano
+  Centrale: 1h 25m between trains\, same station.
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:🚆 Venice → Milan
@@ -134,7 +142,8 @@ DTSTART:20261103T101000Z
 DTEND:20261103T132700Z
 SUMMARY:🚆 Milan → Zürich
 LOCATION:Milano Centrale
-DESCRIPTION:EuroCity 150 · ItaliaRail\, 1st class\nBooking ref: XH6SJ5
+DESCRIPTION:Leaves 11:10 am Rome time · arrives 2:27 pm Zürich time\nEuroC
+ ity 150 · ItaliaRail\, 1st class\nBooking ref: XH6SJ5
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:🚆 Milan → Zürich
@@ -148,8 +157,9 @@ DTSTART:20261105T132000Z
 DTEND:20261105T144500Z
 SUMMARY:✈︎ Zürich → Berlin
 LOCATION:Zurich Airport
-DESCRIPTION:EW8765 · Eurowings\nBooking ref: GLL3KG\nBags: 32kg checked\, 
- 8kg cabin\, small bag
+DESCRIPTION:Departs 2:20 pm Zürich time · lands 3:45 pm Berlin time\nEW876
+ 5 · Eurowings\nBooking ref: GLL3KG\nBags: 32kg checked\, 8kg cabin\, smal
+ l bag
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:✈︎ Zürich → Berlin
@@ -163,8 +173,9 @@ DTSTART:20261108T074500Z
 DTEND:20261108T094000Z
 SUMMARY:✈︎ Berlin → Paris
 LOCATION:Berlin Brandenburg Airport
-DESCRIPTION:TO4061 · Transavia\nBooking ref: FGLHWQ\nBags: 30kg checked\, 
- cabin bag\, small bag\nTj says leave the hotel around 6:15 AM.
+DESCRIPTION:Departs 8:45 am Berlin time · lands 10:40 am Paris time\nTO406
+ 1 · Transavia\nBooking ref: FGLHWQ\nBags: 30kg checked\, cabin bag\, smal
+ l bag\nTj says leave the hotel around 6:15 AM.
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:✈︎ Berlin → Paris
@@ -178,9 +189,10 @@ DTSTART:20261111T144500Z
 DTEND:20261111T163500Z
 SUMMARY:✈︎ Paris → Glasgow
 LOCATION:Paris Charles de Gaulle Terminal 2D
-DESCRIPTION:EZY3124 · easyJet\nBooking ref: KDKM7WL\nBags: 32kg checked\, 
- large cabin bag\, small bag\nTerminal 2D. Bag drop closes at 2:45 PM. Gla
- sgow is 1 hour behind Paris.
+DESCRIPTION:Departs 3:45 pm Paris time · lands 4:35 pm UK time\nEZY3124 · 
+ easyJet\nBooking ref: KDKM7WL\nBags: 32kg checked\, large cabin bag\, sma
+ ll bag\nTerminal 2D. Bag drop closes at 2:45 PM. Glasgow is 1 hour behind
+  Paris.
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:✈︎ Paris → Glasgow
@@ -194,9 +206,10 @@ DTSTART:20261113T120000Z
 DTEND:20261113T125000Z
 SUMMARY:🚆 Glasgow → Edinburgh
 LOCATION:Glasgow Queen Street
-DESCRIPTION:ScotRail · About 50 min\, every 15 min\nWalk-up tickets\nTimes
-  are a guess.\nAny train works and walk-up tickets are fine. Tj + 1 drive
-  a hire car via the Highlands and meet everyone in Edinburgh.
+DESCRIPTION:Leaves 12:00 pm UK time · arrives 12:50 pm UK time\nScotRail ·
+  About 50 min\, every 15 min\nWalk-up tickets\nTimes are a guess.\nAny tr
+ ain works and walk-up tickets are fine. Tj + 1 drive a hire car via the H
+ ighlands and meet everyone in Edinburgh.
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:🚆 Glasgow → Edinburgh
@@ -210,9 +223,9 @@ DTSTART:20261116T110000Z
 DTEND:20261116T152000Z
 SUMMARY:🚆 Edinburgh → London
 LOCATION:Edinburgh Waverley
-DESCRIPTION:LNER · About 4h to King’s Cross\nNot booked yet\nTimes are a g
- uess.\nNot booked yet\, so these times are a guess. Aiming for a late-mor
- ning train.
+DESCRIPTION:Leaves 11:00 am UK time · arrives 3:20 pm UK time\nLNER · Abou
+ t 4h to King’s Cross\nNot booked yet\nTimes are a guess.\nNot booked yet\
+ , so these times are a guess. Aiming for a late-morning train.
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:🚆 Edinburgh → London
@@ -226,8 +239,9 @@ DTSTART:20261119T145500Z
 DTEND:20261119T214000Z
 SUMMARY:✈︎ London → Doha
 LOCATION:London Heathrow Airport
-DESCRIPTION:VA6109 · Qatar Airways\nBooking ref: KJCTJU\nLeaves from Heath
- row. Not on booking KJCTJU? Check your own booking shows these flights.
+DESCRIPTION:Departs 2:55 pm UK time · lands 12:40 am Doha time\nVA6109 · Q
+ atar Airways\nBooking ref: KJCTJU\nLeaves from Heathrow. Not on booking K
+ JCTJU? Check your own booking shows these flights.
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:✈︎ London → Doha
@@ -241,7 +255,8 @@ DTSTART:20261119T234000Z
 DTEND:20261120T104500Z
 SUMMARY:✈︎ Doha → Perth
 LOCATION:Doha Airport
-DESCRIPTION:VA6128 · Qatar Airways\nBooking ref: KJCTJU
+DESCRIPTION:Departs 2:40 am Doha time · lands 6:45 pm Perth time\nVA6128 ·
+  Qatar Airways\nBooking ref: KJCTJU
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:✈︎ Doha → Perth
@@ -255,6 +270,7 @@ DTSTART:20261019T114500Z
 DTEND:20261019T121500Z
 SUMMARY:Home → Perth Airport
 LOCATION:Perth Airport
+DESCRIPTION:7:45 pm Perth time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-10-19-change-1215-PerthAirportBagssecurity@europe-family-trip.app
@@ -263,6 +279,7 @@ DTSTART:20261019T121500Z
 DTEND:20261019T144500Z
 SUMMARY:Perth Airport · Bags\, security
 LOCATION:Perth Airport
+DESCRIPTION:8:15 pm Perth time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-10-20-change-295-DohaAirportLayover@europe-family-trip.app
@@ -271,6 +288,7 @@ DTSTART:20261020T015500Z
 DTEND:20261020T042500Z
 SUMMARY:Doha Airport · Layover
 LOCATION:Doha Airport
+DESCRIPTION:4:55 am Doha time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-10-20-get-745-AthensAirportBellnAthens@europe-family-trip.app
@@ -279,6 +297,7 @@ DTSTART:20261020T092500Z
 DTEND:20261020T105500Z
 SUMMARY:Athens Airport → Bellén Athens Hotel
 LOCATION:Bellén Athens Hotel\, Athens
+DESCRIPTION:12:25 pm Athens time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-10-20-get-835-BellnAthensHotelDropbags@europe-family-trip.app
@@ -287,7 +306,8 @@ DTSTART:20261020T105500Z
 DTEND:20261020T112500Z
 SUMMARY:Bellén Athens Hotel · Drop bags
 LOCATION:Bellén Athens Hotel\, Athens
-DESCRIPTION:Check in from 3:00 pm\n24-hour front desk and luggage storage.
+DESCRIPTION:1:55 pm Athens time\nCheck in from 3:00 pm\n24-hour front desk
+  and luggage storage.
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-10-21-pack-1350-BellnAthensHotelPacksuit@europe-family-trip.app
@@ -296,7 +316,7 @@ DTSTART:20261021T193000Z
 DTEND:20261021T200000Z
 SUMMARY:Bellén Athens Hotel · Pack suitcases
 LOCATION:Bellén Athens Hotel\, Athens
-DESCRIPTION:Leaving 8:15 am tomorrow
+DESCRIPTION:10:30 pm Athens time\nLeaving 8:15 am tomorrow
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:Bellén Athens Hotel · Pack suitcases
@@ -310,6 +330,7 @@ DTSTART:20261022T044500Z
 DTEND:20261022T051500Z
 SUMMARY:Bellén Athens Hotel · Check out
 LOCATION:Bellén Athens Hotel\, Athens
+DESCRIPTION:7:45 am Athens time
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:Bellén Athens Hotel · Check out
@@ -323,6 +344,7 @@ DTSTART:20261022T051500Z
 DTEND:20261022T060500Z
 SUMMARY:Bellén Athens Hotel → Athens Airport
 LOCATION:Bellén Athens Hotel\, Athens
+DESCRIPTION:8:15 am Athens time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-10-22-change-545-AthensAirportBagssecurit@europe-family-trip.app
@@ -331,6 +353,7 @@ DTSTART:20261022T060500Z
 DTEND:20261022T073000Z
 SUMMARY:Athens Airport · Bags\, security
 LOCATION:Athens International Airport
+DESCRIPTION:9:05 am Athens time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-10-22-get-685-SantoriniAirportTheMuseu@europe-family-trip.app
@@ -339,6 +362,7 @@ DTSTART:20261022T082500Z
 DTEND:20261022T091500Z
 SUMMARY:Santorini Airport → The Museum Project Oia
 LOCATION:The Museum Project Oia\, Santorini
+DESCRIPTION:11:25 am Athens time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-10-22-get-735-TheMuseumProjectOiaDropb@europe-family-trip.app
@@ -347,8 +371,8 @@ DTSTART:20261022T091500Z
 DTEND:20261022T094500Z
 SUMMARY:The Museum Project Oia · Drop bags
 LOCATION:The Museum Project Oia\, Santorini
-DESCRIPTION:Check in from 3:00 pm\nCheck in at “The Beauty Shop” in front 
- of the property. Reception 8:30 AM–9 PM.
+DESCRIPTION:12:15 pm Athens time\nCheck in from 3:00 pm\nCheck in at “The 
+ Beauty Shop” in front of the property. Reception 8:30 AM–9 PM.
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-10-24-booked-540-TheMuseumProjectOiaAkrot@europe-family-trip.app
@@ -357,7 +381,8 @@ DTSTART:20261024T060000Z
 DTEND:20261024T064500Z
 SUMMARY:The Museum Project Oia → Akrotiri · Drive · about 45 min
 LOCATION:Archaeological Site of Akrotiri
-DESCRIPTION:About 22 km by road\, through Fira. Parking by the entrance.
+DESCRIPTION:9:00 am Athens time\nAbout 22 km by road\, through Fira. Parki
+ ng by the entrance.
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:The Museum Project Oia → Akrotiri · Drive · about 45 min
@@ -371,8 +396,9 @@ DTSTART:20261024T064500Z
 DTEND:20261024T083000Z
 SUMMARY:Akrotiri · Explore the ruins
 LOCATION:Archaeological Site of Akrotiri
-DESCRIPTION:Bronze Age town buried by the eruption\, under one big roof. O
- pen 8 am – 6 pm in late October. Tickets at the gate or on hhticket.gr.
+DESCRIPTION:9:45 am Athens time\nBronze Age town buried by the eruption\, 
+ under one big roof. Open 8 am – 6 pm in late October. Tickets at the gate
+  or on hhticket.gr.
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:Akrotiri · Explore the ruins
@@ -386,6 +412,7 @@ DTSTART:20261024T083000Z
 DTEND:20261024T091500Z
 SUMMARY:Akrotiri → The Museum Project Oia · Drive · about 45 min
 LOCATION:The Museum Project Oia
+DESCRIPTION:11:30 am Athens time
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:Akrotiri → The Museum Project Oia · Drive · about 45 min
@@ -398,7 +425,7 @@ DTSTAMP:20261025T000000Z
 DTSTART:20261024T140000Z
 DTEND:20261024T160000Z
 SUMMARY:Sunset dinner
-DESCRIPTION:Last night in Santorini.
+DESCRIPTION:5:00 pm Athens time\nLast night in Santorini.
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:Sunset dinner
@@ -412,6 +439,7 @@ DTSTART:20261025T081500Z
 DTEND:20261025T090000Z
 SUMMARY:The Museum Project Oia · Pack suitcases
 LOCATION:The Museum Project Oia\, Santorini
+DESCRIPTION:10:15 am Athens time
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:The Museum Project Oia · Pack suitcases
@@ -425,6 +453,7 @@ DTSTART:20261025T090000Z
 DTEND:20261025T093000Z
 SUMMARY:The Museum Project Oia · Check out\, leave bags
 LOCATION:The Museum Project Oia\, Santorini
+DESCRIPTION:11:00 am Athens time
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:The Museum Project Oia · Check out\, leave bags
@@ -438,6 +467,7 @@ DTSTART:20261025T104500Z
 DTEND:20261025T111500Z
 SUMMARY:The Museum Project Oia · Collect bags
 LOCATION:The Museum Project Oia\, Santorini
+DESCRIPTION:12:45 pm Athens time
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:The Museum Project Oia · Collect bags
@@ -451,6 +481,7 @@ DTSTART:20261025T111500Z
 DTEND:20261025T114500Z
 SUMMARY:The Museum Project Oia → Santorini Airport
 LOCATION:The Museum Project Oia\, Santorini
+DESCRIPTION:1:15 pm Athens time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-10-25-change-825-SantoriniAirportBagssecu@europe-family-trip.app
@@ -459,6 +490,7 @@ DTSTART:20261025T114500Z
 DTEND:20261025T125500Z
 SUMMARY:Santorini Airport · Bags\, security
 LOCATION:Santorini Airport
+DESCRIPTION:1:45 pm Athens time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-10-25-get-950-AthensAirport11EntekaAcr@europe-family-trip.app
@@ -467,6 +499,7 @@ DTSTART:20261025T135000Z
 DTEND:20261025T150500Z
 SUMMARY:Athens Airport → 11 Enteka Acropolis Suites
 LOCATION:11 Enteka Acropolis Suites\, Athens
+DESCRIPTION:3:50 pm Athens time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-10-25-get-1025-11EntekaAcropolisSuitesC@europe-family-trip.app
@@ -475,7 +508,8 @@ DTSTART:20261025T150500Z
 DTEND:20261025T153500Z
 SUMMARY:11 Enteka Acropolis Suites · Check in
 LOCATION:11 Enteka Acropolis Suites\, Athens
-DESCRIPTION:Check in from 3:00 pm\nReception 8:30 AM–10:30 PM.
+DESCRIPTION:5:05 pm Athens time\nCheck in from 3:00 pm\nReception 8:30 AM–
+ 10:30 PM.
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-10-26-pack-1350-11EntekaAcropolisSuitesP@europe-family-trip.app
@@ -484,7 +518,7 @@ DTSTART:20261026T203000Z
 DTEND:20261026T210000Z
 SUMMARY:11 Enteka Acropolis Suites · Pack suitcases
 LOCATION:11 Enteka Acropolis Suites\, Athens
-DESCRIPTION:Leaving 8:40 am tomorrow
+DESCRIPTION:10:30 pm Athens time\nLeaving 8:40 am tomorrow
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:11 Enteka Acropolis Suites · Pack suitcases
@@ -498,6 +532,7 @@ DTSTART:20261027T061000Z
 DTEND:20261027T064000Z
 SUMMARY:11 Enteka Acropolis Suites · Check out
 LOCATION:11 Enteka Acropolis Suites\, Athens
+DESCRIPTION:8:10 am Athens time
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:11 Enteka Acropolis Suites · Check out
@@ -511,6 +546,7 @@ DTSTART:20261027T064000Z
 DTEND:20261027T073000Z
 SUMMARY:11 Enteka Acropolis Suites → Athens Airport
 LOCATION:11 Enteka Acropolis Suites\, Athens
+DESCRIPTION:8:40 am Athens time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-10-27-change-570-AthensAirportBagssecurit@europe-family-trip.app
@@ -519,6 +555,7 @@ DTSTART:20261027T073000Z
 DTEND:20261027T085500Z
 SUMMARY:Athens Airport · Bags\, security
 LOCATION:Athens International Airport
+DESCRIPTION:9:30 am Athens time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-10-27-get-720-RomeFiumicinoSpagnaBouti@europe-family-trip.app
@@ -527,6 +564,7 @@ DTSTART:20261027T110000Z
 DTEND:20261027T123000Z
 SUMMARY:Rome Fiumicino → Spagna Boutique
 LOCATION:Spagna Boutique\, Rome
+DESCRIPTION:12:00 pm Rome time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-10-27-get-810-SpagnaBoutiqueDropbags@europe-family-trip.app
@@ -535,8 +573,8 @@ DTSTART:20261027T123000Z
 DTEND:20261027T130000Z
 SUMMARY:Spagna Boutique · Drop bags
 LOCATION:Spagna Boutique\, Rome
-DESCRIPTION:Check in from 2:00 pm\nReception hours aren’t listed; some gue
- sts mention self check-in.
+DESCRIPTION:1:30 pm Rome time\nCheck in from 2:00 pm\nReception hours aren
+ ’t listed; some guests mention self check-in.
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-10-30-pack-585-SpagnaBoutiquePacksuitca@europe-family-trip.app
@@ -545,6 +583,7 @@ DTSTART:20261030T084500Z
 DTEND:20261030T093000Z
 SUMMARY:Spagna Boutique · Pack suitcases
 LOCATION:Spagna Boutique\, Rome
+DESCRIPTION:9:45 am Rome time
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:Spagna Boutique · Pack suitcases
@@ -558,6 +597,7 @@ DTSTART:20261030T093000Z
 DTEND:20261030T100000Z
 SUMMARY:Spagna Boutique · Check out
 LOCATION:Spagna Boutique\, Rome
+DESCRIPTION:10:30 am Rome time
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:Spagna Boutique · Check out
@@ -571,6 +611,7 @@ DTSTART:20261030T100000Z
 DTEND:20261030T110500Z
 SUMMARY:Spagna Boutique → Roma Termini
 LOCATION:Spagna Boutique\, Rome
+DESCRIPTION:11:00 am Rome time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-10-30-change-725-RomaTerminiFindtheplatfo@europe-family-trip.app
@@ -579,6 +620,7 @@ DTSTART:20261030T110500Z
 DTEND:20261030T113000Z
 SUMMARY:Roma Termini · Find the platform\, board
 LOCATION:Roma Termini
+DESCRIPTION:12:05 pm Rome time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-10-30-get-851-FirenzeSMNNeroneApartmen@europe-family-trip.app
@@ -587,6 +629,7 @@ DTSTART:20261030T131100Z
 DTEND:20261030T133100Z
 SUMMARY:Firenze S.M.N. → Nerone Apartment by Mamo
 LOCATION:Nerone Apartment by Mamo\, Florence
+DESCRIPTION:2:11 pm Rome time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-10-30-get-871-NeroneApartmentbyMamoChe@europe-family-trip.app
@@ -595,8 +638,8 @@ DTSTART:20261030T133100Z
 DTEND:20261030T140000Z
 SUMMARY:Nerone Apartment by Mamo · Check in
 LOCATION:Nerone Apartment by Mamo\, Florence
-DESCRIPTION:Check in from 3:00 pm\nNo reception. No luggage storage listed
- .
+DESCRIPTION:2:31 pm Rome time\nCheck in from 3:00 pm\nNo reception. No lug
+ gage storage listed.
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-01-pack-555-NeroneApartmentbyMamoPac@europe-family-trip.app
@@ -605,6 +648,7 @@ DTSTART:20261101T081500Z
 DTEND:20261101T090000Z
 SUMMARY:Nerone Apartment by Mamo · Pack suitcases
 LOCATION:Nerone Apartment by Mamo\, Florence
+DESCRIPTION:9:15 am Rome time
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:Nerone Apartment by Mamo · Pack suitcases
@@ -618,7 +662,7 @@ DTSTART:20261101T090000Z
 DTEND:20261101T093000Z
 SUMMARY:Nerone Apartment by Mamo · Check out
 LOCATION:Nerone Apartment by Mamo\, Florence
-DESCRIPTION:No luggage storage listed
+DESCRIPTION:10:00 am Rome time\nNo luggage storage listed
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:Nerone Apartment by Mamo · Check out
@@ -632,6 +676,7 @@ DTSTART:20261101T104000Z
 DTEND:20261101T110000Z
 SUMMARY:Nerone Apartment by Mamo → Firenze S.M.N.
 LOCATION:Nerone Apartment by Mamo\, Florence
+DESCRIPTION:11:40 am Rome time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-01-change-720-FirenzeSMNFindtheplatfor@europe-family-trip.app
@@ -640,6 +685,7 @@ DTSTART:20261101T110000Z
 DTEND:20261101T112000Z
 SUMMARY:Firenze S.M.N. · Find the platform\, board
 LOCATION:Firenze Santa Maria Novella station
+DESCRIPTION:12:00 pm Rome time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-01-get-874-VeneziaSLuciaCadelaFonte@europe-family-trip.app
@@ -649,6 +695,7 @@ DTEND:20261101T140900Z
 SUMMARY:Venezia S. Lucia → Ca’ de la Fonte
 LOCATION:Ca’ de la Fonte\, Check in at Hotel Ca’ d’Oro\, Corte Barbaro 460
  4\, Venice
+DESCRIPTION:2:34 pm Rome time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-01-get-909-CadelaFonteCheckin@europe-family-trip.app
@@ -658,7 +705,7 @@ DTEND:20261101T143900Z
 SUMMARY:Ca’ de la Fonte · Check in
 LOCATION:Ca’ de la Fonte\, Check in at Hotel Ca’ d’Oro\, Corte Barbaro 460
  4\, Venice
-DESCRIPTION:Check in from 3:00 pm
+DESCRIPTION:3:09 pm Rome time\nCheck in from 3:00 pm
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-02-pack-1350-CadelaFontePacksuitcases@europe-family-trip.app
@@ -668,7 +715,7 @@ DTEND:20261102T220000Z
 SUMMARY:Ca’ de la Fonte · Pack suitcases
 LOCATION:Ca’ de la Fonte\, Check in at Hotel Ca’ d’Oro\, Corte Barbaro 460
  4\, Venice
-DESCRIPTION:Leaving 6:40 am tomorrow
+DESCRIPTION:10:30 pm Rome time\nLeaving 6:40 am tomorrow
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:Ca’ de la Fonte · Pack suitcases
@@ -683,6 +730,7 @@ DTEND:20261103T054000Z
 SUMMARY:Ca’ de la Fonte · Check out
 LOCATION:Ca’ de la Fonte\, Check in at Hotel Ca’ d’Oro\, Corte Barbaro 460
  4\, Venice
+DESCRIPTION:6:10 am Rome time
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:Ca’ de la Fonte · Check out
@@ -697,6 +745,7 @@ DTEND:20261103T060500Z
 SUMMARY:Ca’ de la Fonte → Venezia S. Lucia
 LOCATION:Ca’ de la Fonte\, Check in at Hotel Ca’ d’Oro\, Corte Barbaro 460
  4\, Venice
+DESCRIPTION:6:40 am Rome time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-03-change-425-VeneziaSLuciaFindtheplat@europe-family-trip.app
@@ -705,6 +754,7 @@ DTSTART:20261103T060500Z
 DTEND:20261103T061800Z
 SUMMARY:Venezia S. Lucia · Find the platform\, board
 LOCATION:Venezia Santa Lucia station
+DESCRIPTION:7:05 am Rome time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-03-change-585-MilanoCentraleChangetrai@europe-family-trip.app
@@ -713,6 +763,7 @@ DTSTART:20261103T084500Z
 DTEND:20261103T101000Z
 SUMMARY:Milano Centrale · Change trains
 LOCATION:Milano Centrale
+DESCRIPTION:9:45 am Rome time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-03-get-867-ZrichHBSorellHotelRex@europe-family-trip.app
@@ -721,6 +772,7 @@ DTSTART:20261103T132700Z
 DTEND:20261103T135200Z
 SUMMARY:Zürich HB → Sorell Hotel Rex
 LOCATION:Sorell Hotel Rex\, Zürich
+DESCRIPTION:2:27 pm Zürich time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-03-get-892-SorellHotelRexCheckin@europe-family-trip.app
@@ -729,8 +781,8 @@ DTSTART:20261103T135200Z
 DTEND:20261103T142200Z
 SUMMARY:Sorell Hotel Rex · Check in
 LOCATION:Sorell Hotel Rex\, Zürich
-DESCRIPTION:Check in from 3:00 pm\nReception 7 AM–5 PM; after that you get
-  an emailed access code.
+DESCRIPTION:2:52 pm Zürich time\nCheck in from 3:00 pm\nReception 7 AM–5 P
+ M; after that you get an emailed access code.
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-05-pack-645-SorellHotelRexPacksuitca@europe-family-trip.app
@@ -739,6 +791,7 @@ DTSTART:20261105T094500Z
 DTEND:20261105T103000Z
 SUMMARY:Sorell Hotel Rex · Pack suitcases
 LOCATION:Sorell Hotel Rex\, Zürich
+DESCRIPTION:10:45 am Zürich time
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:Sorell Hotel Rex · Pack suitcases
@@ -752,6 +805,7 @@ DTSTART:20261105T103000Z
 DTEND:20261105T110000Z
 SUMMARY:Sorell Hotel Rex · Check out
 LOCATION:Sorell Hotel Rex\, Zürich
+DESCRIPTION:11:30 am Zürich time
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:Sorell Hotel Rex · Check out
@@ -765,6 +819,7 @@ DTSTART:20261105T110000Z
 DTEND:20261105T114500Z
 SUMMARY:Sorell Hotel Rex → Zürich Airport
 LOCATION:Sorell Hotel Rex\, Zürich
+DESCRIPTION:12:00 pm Zürich time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-05-change-765-ZrichAirportBagssecurity@europe-family-trip.app
@@ -773,6 +828,7 @@ DTSTART:20261105T114500Z
 DTEND:20261105T132000Z
 SUMMARY:Zürich Airport · Bags\, security
 LOCATION:Zurich Airport
+DESCRIPTION:12:45 pm Zürich time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-05-get-945-BerlinBERSANABerlinHotel@europe-family-trip.app
@@ -781,6 +837,7 @@ DTSTART:20261105T144500Z
 DTEND:20261105T160500Z
 SUMMARY:Berlin BER → SANA Berlin Hotel
 LOCATION:SANA Berlin Hotel\, Nürnberger Str. 33/34\, Berlin
+DESCRIPTION:3:45 pm Berlin time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-05-get-1025-SANABerlinHotelCheckin@europe-family-trip.app
@@ -789,7 +846,8 @@ DTSTART:20261105T160500Z
 DTEND:20261105T163500Z
 SUMMARY:SANA Berlin Hotel · Check in
 LOCATION:SANA Berlin Hotel\, Nürnberger Str. 33/34\, Berlin
-DESCRIPTION:Check in from 3:00 pm\n24-hour front desk and luggage storage.
+DESCRIPTION:5:05 pm Berlin time\nCheck in from 3:00 pm\n24-hour front desk
+  and luggage storage.
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-07-pack-1350-SANABerlinHotelPacksuitc@europe-family-trip.app
@@ -798,7 +856,7 @@ DTSTART:20261107T213000Z
 DTEND:20261107T220000Z
 SUMMARY:SANA Berlin Hotel · Pack suitcases
 LOCATION:SANA Berlin Hotel\, Nürnberger Str. 33/34\, Berlin
-DESCRIPTION:Leaving 6:15 am tomorrow
+DESCRIPTION:10:30 pm Berlin time\nLeaving 6:15 am tomorrow
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:SANA Berlin Hotel · Pack suitcases
@@ -812,6 +870,7 @@ DTSTART:20261108T044500Z
 DTEND:20261108T051500Z
 SUMMARY:SANA Berlin Hotel · Check out
 LOCATION:SANA Berlin Hotel\, Nürnberger Str. 33/34\, Berlin
+DESCRIPTION:5:45 am Berlin time
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:SANA Berlin Hotel · Check out
@@ -825,6 +884,7 @@ DTSTART:20261108T051500Z
 DTEND:20261108T060500Z
 SUMMARY:SANA Berlin Hotel → Berlin BER
 LOCATION:SANA Berlin Hotel\, Nürnberger Str. 33/34\, Berlin
+DESCRIPTION:6:15 am Berlin time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-08-change-425-BerlinBERBagssecurity@europe-family-trip.app
@@ -833,6 +893,7 @@ DTSTART:20261108T060500Z
 DTEND:20261108T074500Z
 SUMMARY:Berlin BER · Bags\, security
 LOCATION:Berlin Brandenburg Airport
+DESCRIPTION:7:05 am Berlin time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-08-get-640-ParisOrlySplendidHtel@europe-family-trip.app
@@ -841,6 +902,7 @@ DTSTART:20261108T094000Z
 DTEND:20261108T104000Z
 SUMMARY:Paris Orly → Splendid Hôtel
 LOCATION:Splendid Hôtel\, 54 Rue Fondary\, 15e\, Paris
+DESCRIPTION:10:40 am Paris time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-08-get-700-SplendidHtelDropbags@europe-family-trip.app
@@ -849,8 +911,8 @@ DTSTART:20261108T104000Z
 DTEND:20261108T111000Z
 SUMMARY:Splendid Hôtel · Drop bags
 LOCATION:Splendid Hôtel\, 54 Rue Fondary\, 15e\, Paris
-DESCRIPTION:Check in from 3:00 pm\n24-hour front desk and luggage storage.
-  City tax about €5.53 per person per night.
+DESCRIPTION:11:40 am Paris time\nCheck in from 3:00 pm\n24-hour front desk
+  and luggage storage. City tax about €5.53 per person per night.
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-11-pack-645-SplendidHtelPacksuitcase@europe-family-trip.app
@@ -859,6 +921,7 @@ DTSTART:20261111T094500Z
 DTEND:20261111T103000Z
 SUMMARY:Splendid Hôtel · Pack suitcases
 LOCATION:Splendid Hôtel\, 54 Rue Fondary\, 15e\, Paris
+DESCRIPTION:10:45 am Paris time
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:Splendid Hôtel · Pack suitcases
@@ -872,6 +935,7 @@ DTSTART:20261111T103000Z
 DTEND:20261111T110000Z
 SUMMARY:Splendid Hôtel · Check out
 LOCATION:Splendid Hôtel\, 54 Rue Fondary\, 15e\, Paris
+DESCRIPTION:11:30 am Paris time
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:Splendid Hôtel · Check out
@@ -885,6 +949,7 @@ DTSTART:20261111T110000Z
 DTEND:20261111T130000Z
 SUMMARY:Splendid Hôtel → Paris CDG T2D
 LOCATION:Splendid Hôtel\, 54 Rue Fondary\, 15e\, Paris
+DESCRIPTION:12:00 pm Paris time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-11-change-840-ParisCDGT2DBagssecurity@europe-family-trip.app
@@ -893,6 +958,7 @@ DTSTART:20261111T130000Z
 DTEND:20261111T144500Z
 SUMMARY:Paris CDG T2D · Bags\, security
 LOCATION:Paris Charles de Gaulle Terminal 2D
+DESCRIPTION:2:00 pm Paris time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-11-get-995-GlasgowAirport4bedflatce@europe-family-trip.app
@@ -901,6 +967,7 @@ DTSTART:20261111T163500Z
 DTEND:20261111T172500Z
 SUMMARY:Glasgow Airport → 4-bed flat\, central Glasgow
 LOCATION:4-bed flat\, central Glasgow\, Glasgow
+DESCRIPTION:4:35 pm UK time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-11-get-1045-4bedflatcentralGlasgowCh@europe-family-trip.app
@@ -909,7 +976,7 @@ DTSTART:20261111T172500Z
 DTEND:20261111T175500Z
 SUMMARY:4-bed flat\, central Glasgow · Check in
 LOCATION:4-bed flat\, central Glasgow\, Glasgow
-DESCRIPTION:Check in from 3:00 pm
+DESCRIPTION:5:25 pm UK time\nCheck in from 3:00 pm
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-13-pack-555-4bedflatcentralGlasgowPa@europe-family-trip.app
@@ -918,6 +985,7 @@ DTSTART:20261113T091500Z
 DTEND:20261113T100000Z
 SUMMARY:4-bed flat\, central Glasgow · Pack suitcases
 LOCATION:4-bed flat\, central Glasgow\, Glasgow
+DESCRIPTION:9:15 am UK time
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:4-bed flat\, central Glasgow · Pack suitcases
@@ -931,6 +999,7 @@ DTSTART:20261113T100000Z
 DTEND:20261113T103000Z
 SUMMARY:4-bed flat\, central Glasgow · Check out\, leave bags
 LOCATION:4-bed flat\, central Glasgow\, Glasgow
+DESCRIPTION:10:00 am UK time
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:4-bed flat\, central Glasgow · Check out\, leave bags
@@ -944,6 +1013,7 @@ DTSTART:20261113T110000Z
 DTEND:20261113T113000Z
 SUMMARY:4-bed flat\, central Glasgow · Collect bags
 LOCATION:4-bed flat\, central Glasgow\, Glasgow
+DESCRIPTION:11:00 am UK time
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:4-bed flat\, central Glasgow · Collect bags
@@ -957,6 +1027,7 @@ DTSTART:20261113T113000Z
 DTEND:20261113T114500Z
 SUMMARY:4-bed flat\, central Glasgow → Glasgow Queen Street
 LOCATION:4-bed flat\, central Glasgow\, Glasgow
+DESCRIPTION:11:30 am UK time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-13-change-705-GlasgowQueenStreetFindth@europe-family-trip.app
@@ -965,6 +1036,7 @@ DTSTART:20261113T114500Z
 DTEND:20261113T120000Z
 SUMMARY:Glasgow Queen Street · Find the platform\, board
 LOCATION:Glasgow Queen Street station
+DESCRIPTION:11:45 am UK time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-13-get-770-EdinburghWaverleyLuxuryW@europe-family-trip.app
@@ -973,6 +1045,7 @@ DTSTART:20261113T125000Z
 DTEND:20261113T131500Z
 SUMMARY:Edinburgh Waverley → Luxury Waterfront Retreat for Groups
 LOCATION:Luxury Waterfront Retreat for Groups\, Edinburgh
+DESCRIPTION:12:50 pm UK time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-13-get-795-LuxuryWaterfrontRetreatf@europe-family-trip.app
@@ -981,7 +1054,7 @@ DTSTART:20261113T131500Z
 DTEND:20261113T134500Z
 SUMMARY:Luxury Waterfront Retreat for Groups · Drop bags
 LOCATION:Luxury Waterfront Retreat for Groups\, Edinburgh
-DESCRIPTION:Check in from 3:00 pm
+DESCRIPTION:1:15 pm UK time\nCheck in from 3:00 pm
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-16-get-570-LuxuryWaterfrontRetreatf@europe-family-trip.app
@@ -990,6 +1063,7 @@ DTSTART:20261116T093000Z
 DTEND:20261116T100000Z
 SUMMARY:Luxury Waterfront Retreat for Groups · Check out
 LOCATION:Luxury Waterfront Retreat for Groups\, Edinburgh
+DESCRIPTION:9:30 am UK time
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:Luxury Waterfront Retreat for Groups · Check out
@@ -1003,6 +1077,7 @@ DTSTART:20261116T100000Z
 DTEND:20261116T104500Z
 SUMMARY:Luxury Waterfront Retreat for Groups → Edinburgh Waverley
 LOCATION:Luxury Waterfront Retreat for Groups\, Edinburgh
+DESCRIPTION:10:00 am UK time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-16-change-645-EdinburghWaverleyFindthe@europe-family-trip.app
@@ -1011,6 +1086,7 @@ DTSTART:20261116T104500Z
 DTEND:20261116T110000Z
 SUMMARY:Edinburgh Waverley · Find the platform\, board
 LOCATION:Edinburgh Waverley station
+DESCRIPTION:10:45 am UK time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-16-get-920-LondonKingsCross4bedtown@europe-family-trip.app
@@ -1019,6 +1095,7 @@ DTSTART:20261116T152000Z
 DTEND:20261116T160000Z
 SUMMARY:London King’s Cross → 4-bed townhouse\, Kensington
 LOCATION:4-bed townhouse\, Kensington\, London
+DESCRIPTION:3:20 pm UK time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-16-get-960-4bedtownhouseKensingtonC@europe-family-trip.app
@@ -1027,7 +1104,7 @@ DTSTART:20261116T160000Z
 DTEND:20261116T163000Z
 SUMMARY:4-bed townhouse\, Kensington · Check in
 LOCATION:4-bed townhouse\, Kensington\, London
-DESCRIPTION:Check in from 3:00 pm
+DESCRIPTION:4:00 pm UK time\nCheck in from 3:00 pm
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-19-pack-555-4bedtownhouseKensingtonP@europe-family-trip.app
@@ -1036,6 +1113,7 @@ DTSTART:20261119T091500Z
 DTEND:20261119T100000Z
 SUMMARY:4-bed townhouse\, Kensington · Pack suitcases
 LOCATION:4-bed townhouse\, Kensington\, London
+DESCRIPTION:9:15 am UK time
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:4-bed townhouse\, Kensington · Pack suitcases
@@ -1049,6 +1127,7 @@ DTSTART:20261119T100000Z
 DTEND:20261119T103000Z
 SUMMARY:4-bed townhouse\, Kensington · Check out\, leave bags
 LOCATION:4-bed townhouse\, Kensington\, London
+DESCRIPTION:10:00 am UK time
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:4-bed townhouse\, Kensington · Check out\, leave bags
@@ -1062,6 +1141,7 @@ DTSTART:20261119T110000Z
 DTEND:20261119T113000Z
 SUMMARY:4-bed townhouse\, Kensington · Collect bags
 LOCATION:4-bed townhouse\, Kensington\, London
+DESCRIPTION:11:00 am UK time
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:4-bed townhouse\, Kensington · Collect bags
@@ -1075,6 +1155,7 @@ DTSTART:20261119T113000Z
 DTEND:20261119T122000Z
 SUMMARY:4-bed townhouse\, Kensington → Heathrow
 LOCATION:4-bed townhouse\, Kensington\, London
+DESCRIPTION:11:30 am UK time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-19-change-740-HeathrowBagssecurity@europe-family-trip.app
@@ -1083,6 +1164,7 @@ DTSTART:20261119T122000Z
 DTEND:20261119T145500Z
 SUMMARY:Heathrow · Bags\, security
 LOCATION:London Heathrow Airport
+DESCRIPTION:12:20 pm UK time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-20-change-40-DohaAirportLayover@europe-family-trip.app
@@ -1091,5 +1173,6 @@ DTSTART:20261119T214000Z
 DTEND:20261119T234000Z
 SUMMARY:Doha Airport · Layover
 LOCATION:Doha Airport
+DESCRIPTION:12:40 am Doha time
 END:VEVENT
 END:VCALENDAR
