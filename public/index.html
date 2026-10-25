@@ -858,11 +858,20 @@ const CATS = [
 const catOf = k => CATS.find(c => c.k === k);
 const SAVE_BY = Object.fromEntries(SAVES.map(s => [s.id, s]));
 function anchorFor(iso) { const s = stayOn(iso) || (iso === "2026-11-19" ? STAYS[11] : null); return s && s.lat != null ? s : null; }
-function placesFor(iso, ck, stay) {
+/* where you are right now: only used on today's lists, and only when you're in the same city as the hotel */
+let HERE = null, hereAsked = 0;
+function liveFrom(iso) { const a = anchorFor(iso); return iso === today && a && HERE && Date.now() - HERE.t < 15 * 6e4 && km(a.lat, a.lng, HERE.lat, HERE.lng) < 40 ? HERE : null; }
+function askHere(then) {
+  if (!navigator.geolocation || Date.now() - hereAsked < 6e4) return; hereAsked = Date.now();
+  navigator.geolocation.getCurrentPosition(p => { HERE = { lat: p.coords.latitude, lng: p.coords.longitude, t: Date.now() }; try { localStorage.setItem("here", "1"); } catch (e) {} then && then(); }, () => {}, { enableHighAccuracy: false, maximumAge: 120000, timeout: 15000 });
+}
+try { if (localStorage.getItem("here")) { setTimeout(askHere, 1500); document.addEventListener("visibilitychange", () => { if (!document.hidden) { hereAsked = 0; askHere(); } }); } } catch (e) {}
+const fromTxt = (iso, a) => liveFrom(iso) ? "where you are" : a ? a.hotel : "";
+function placesFor(iso, ck, stay, live) {
   const a = stay || anchorFor(iso); if (!a) return [];
-  const c = catOf(ck);
-  return SAVES.filter(s => s.lat != null && c.m(s)).map(s => ({ s, k: km(a.lat, a.lng, s.lat, s.lng) }))
-    .filter(x => c.far ? x.s.city !== a.city && x.k >= 8 && x.k < 130 : (x.s.city === a.city ? x.k < 40 : x.k < 8))
+  const c = catOf(ck), o = live && !stay && liveFrom(iso);
+  return SAVES.filter(s => s.lat != null && c.m(s)).map(s => { const ka = km(a.lat, a.lng, s.lat, s.lng); return { s, ka, k: o && !c.far ? km(o.lat, o.lng, s.lat, s.lng) : ka }; })
+    .filter(x => c.far ? x.s.city !== a.city && x.ka >= 8 && x.ka < 130 : (x.s.city === a.city ? x.ka < 40 : x.ka < 8))
     .sort((x, y) => (x.k - y.k) - ((x.s.rating || 4.3) - 4.3) * 1.2);
 }
 const planKey = iso => "plan:" + iso;
@@ -1864,16 +1873,16 @@ let PL = { iso: null, cat: "coffee", block: null, n: 12 };
 function plannerSheet() {
   const iso = PL.iso, a = anchorFor(iso), b = PL.block;
   const title = b ? `Free · ${dur(b.e - b.s)}` : `Things to do in ${esc(cityOn(iso))}`;
-  const sub = b ? `${t12(b.s)} – ${t12(b.e)}${b.k === "wait" ? ", after dropping suitcases at the hotel" : ""}${a ? `. From ${esc(a.hotel)}` : ""}` : (a ? `Distances from ${esc(a.hotel)}` : "");
+  const sub = b ? `${t12(b.s)} – ${t12(b.e)}${b.k === "wait" ? ", after dropping suitcases at the hotel" : ""}${a ? `. From ${esc(fromTxt(iso, a))}` : ""}` : (a ? `Distances from ${esc(fromTxt(iso, a))}` : "");
   if (!a || !SAVES.some(s => s.city === cityOn(iso))) {
     const c = cityOn(iso), q = a ? a.hotel + " " + c : c;
     return head(title, sub) + `<div class="ig"><p class="empty-p">You haven’t saved anywhere in ${esc(c)} on mio yet. Search nearby instead:</p>${["coffee", "restaurants", "bars", "shops", "things to do"].map(w => `<a class="place" href="${maps(w + " near " + q)}" target="_blank" rel="noopener"><span class="a">${w.charAt(0).toUpperCase() + w.slice(1)} near ${esc(a ? a.hotel : c)}</span><span class="m" style="color:var(--blue)">Maps ›</span></a>`).join("")}</div>`;
   }
   const counts = Object.fromEntries(CATS.map(c => [c.k, placesFor(iso, c.k).length]));
-  let list = placesFor(iso, PL.cat); const plan = getPlan(iso);
+  let list = placesFor(iso, PL.cat, null, true); const plan = getPlan(iso); const o = liveFrom(iso) || a;
   /* the place the suggestion was showing goes first */
   if (PL.pin && PL.pin.length) {
-    const pins = PL.pin.map(n => list.find(x => x.s.name === n) || (() => { const s = SAVES.find(z => z.name === n); return s ? { s, k: a ? km(a.lat, a.lng, s.lat, s.lng) : 0 } : null; })()).filter(Boolean);
+    const pins = PL.pin.map(n => list.find(x => x.s.name === n) || (() => { const s = SAVES.find(z => z.name === n); return s ? { s, k: o ? km(o.lat, o.lng, s.lat, s.lng) : 0 } : null; })()).filter(Boolean);
     list = [...pins.map(x => ({ ...x, pinned: true })), ...list.filter(x => !pins.some(q => q.s.id === x.s.id))];
   }
   const askRow = hasFree(iso) ? `<div class="ig" style="margin-bottom:10px"><button class="mrow press" data-ask><span><span class="a">${getDay(iso) ? "Change the day’s plan" : "Plan the whole day"}</span><span class="b">A few questions, then a plan</span></span><i class="chev"></i></button></div>` : "";
@@ -1882,7 +1891,7 @@ function plannerSheet() {
     const on = plan.find(p => p.id === s.id);
     return `<div class="place${pinned ? " pinned" : ""}"><span>${pinned ? `<span class="sg">Suggested</span>` : ""}<span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${PL.cat === "trip" ? tripTxt(k) : distTxt(k)}</b></span><span class="links"><a href="${dirs(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video${s.creator ? " · " + esc(s.creator) : ""}</a>` : ""}</span></span><button class="addb${on ? " on" : ""}" data-add="${s.id}">${on ? `✓ ${t12(on.t)}` : "Add"}</button></div>`;
   }).join("");
-  return head(title, sub) + cats + `<div class="ig">${rows || `<p class="empty-p">Nothing saved in this category here.</p>`}${list.length > PL.n ? `<button class="more-btn" data-more>Show ${list.length - PL.n} more</button>` : ""}</div><p class="nt">From your mio saves, nearest to the hotel first. Add puts it on the timetable as a dotted block, saved on this phone.</p>`;
+  return head(title, sub) + cats + `<div class="ig">${rows || `<p class="empty-p">Nothing saved in this category here.</p>`}${list.length > PL.n ? `<button class="more-btn" data-more>Show ${list.length - PL.n} more</button>` : ""}</div><p class="nt">From your mio saves, nearest ${liveFrom(iso) ? "to you" : "to the hotel"} first. Add puts it on the timetable as a dotted block, saved on this phone.</p>`;
 }
 function refreshAll() { if (REFRESH) REFRESH(); content.innerHTML = renderContent(view); renderHeader(false); }
 function openPlanner(iso, cat, block, pin) {
@@ -1890,10 +1899,11 @@ function openPlanner(iso, cat, block, pin) {
   PL = { iso, cat: cat || PL.cat || "coffee", block: block || null, n: 12, pin: pin || [] };
   if (!placesFor(iso, PL.cat).length) { const f = CATS.find(c => placesFor(iso, c.k).length); if (f) PL.cat = f.k; }
   openSheet(plannerSheet());
+  if (iso === today) askHere(() => { if (PL.iso === iso && !sheet.hidden && document.querySelector("#sheet-body .cats")) refreshPlanner(); });
 }
 function refreshPlanner() { const st = sheet.scrollTop; document.getElementById("sheet-body").innerHTML = plannerSheet(); sheet.scrollTop = st; }
 function planItemSheet(ev) {
-  const s = ev.save, a = anchorFor(view), k = a ? km(a.lat, a.lng, s.lat, s.lng) : null;
+  const s = ev.save, a = liveFrom(view) || anchorFor(view), k = a ? km(a.lat, a.lng, s.lat, s.lng) : null;
   return head(esc(s.name), `${catOf(ev.cat).l} · ${t12(ev.s)}${k != null ? ` · ${distTxt(k)}` : ""}`)
     + `<div class="ig">${s.hook ? `<div class="r"><span>${esc(s.hook)}</span><span></span></div>` : ""}${s.rating ? r("Rating", `★ ${s.rating}${s.reviews ? ` (${s.reviews.toLocaleString()})` : ""}`) : ""}${s.address ? r("Address", esc(s.address)) : ""}${s.creator ? r("Saved from", esc(s.creator)) : ""}</div>
     <div class="acts"><a class="btn blue press" href="${dirs(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a class="btn card press" href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a><button class="btn card press" data-later="${ev.pi}">+30 min</button><button class="btn card press" data-remove="${ev.pi}" style="color:var(--red)">Remove</button></div>`;
@@ -1905,19 +1915,19 @@ function placeRow({ s, k }, btn) {
 function mapsFallback(what, iso) { const a = anchorFor(iso), c = cityOn(iso), q = a ? a.hotel + " " + c : c; return `<div class="ig"><p class="empty-p">You haven’t saved ${what} in ${esc(c)} on mio yet.</p><a class="place" href="${maps(what + " near " + q)}" target="_blank" rel="noopener"><span class="a">Find ${what} near ${esc(a ? a.hotel : c)}</span><span class="m" style="color:var(--blue)">Maps ›</span></a></div>`; }
 let SL = null;
 function slotSheet() {
-  const ev = SL, k = ev.slot.k, sd = SLOTDEF[k], iso = view, list = placesFor(iso, sd.cat), cur = pickFor(iso, k);
+  const ev = SL, k = ev.slot.k, sd = SLOTDEF[k], iso = view, list = placesFor(iso, sd.cat, null, true), cur = pickFor(iso, k);
   const body = list.length ? `<div class="ig">${list.slice(0, 8).map(x => placeRow(x, `<button class="addb${cur && cur.s.id === x.s.id ? " on" : ""}" data-choose="${x.s.id}">${cur && cur.s.id === x.s.id ? (cur.chosen ? "✓ Chosen" : "Suggested") : "Choose"}</button>`)).join("")}</div>` : mapsFallback(k === "coffee" ? "coffee" : k === "dinner" ? "restaurants" : "bars", iso);
-  return head(`${sd.l} · ${t12(ev.s)}`, list.length ? "From your mio saves, nearest to the hotel first" : "") + body
+  return head(`${sd.l} · ${t12(ev.s)}`, list.length ? `From your mio saves, nearest ${liveFrom(iso) ? "to you" : "to the hotel"} first` : "") + body
     + `<div class="restore"><button data-skip="${k}">Skip ${k} today</button>${getPick(iso, k) && getPick(iso, k) !== "skip" ? `<button data-unpick="${k}">Go back to suggestion</button>` : ""}</div>`;
 }
 let FR = null;
 function freeSheet2() {
   const ev = FR, iso = view, plan = getPlan(iso);
-  const sec = (title, ck, n) => { const l = placesFor(iso, ck); if (!l.length) return ""; return `<div class="fsec"><b>${title}</b>${l.length > n ? `<button data-seeall="${ck}">See all ${l.length}</button>` : ""}</div><div class="ig">${l.slice(0, n).map(x => { const on = plan.find(q => q.id === x.s.id); return placeRow(x, `<button class="addb${on ? " on" : ""}" data-add="${x.s.id}" data-addcat="${ck}">${on ? `✓ ${t12(on.t)}` : "Add"}</button>`); }).join("")}</div>`; };
+  const sec = (title, ck, n) => { const l = placesFor(iso, ck, null, true); if (!l.length) return ""; return `<div class="fsec"><b>${title}</b>${l.length > n ? `<button data-seeall="${ck}">See all ${l.length}</button>` : ""}</div><div class="ig">${l.slice(0, n).map(x => { const on = plan.find(q => q.id === x.s.id); return placeRow(x, `<button class="addb${on ? " on" : ""}" data-add="${x.s.id}" data-addcat="${ck}">${on ? `✓ ${t12(on.t)}` : "Add"}</button>`); }).join("")}</div>`; };
   const skipped = [];
   const content = hasSaves(iso) ? sec("Coffee", "coffee", 3) + sec("Food", "dinner", 3) + sec("Drinks", "drinks", 3) + sec("Culture", "culture", 3) + sec("Sights", "see", 4) + sec("Shopping", "shop", 3) + sec("Day trip ideas", "trip", 3) : mapsFallback("things to do", iso);
   const a = anchorFor(iso);
-  return head(`Free · ${dur(ev.e - ev.s)}`, `${t12(ev.s)} – ${t12(ev.e)}${ev.k === "wait" ? ", with your bags" : ""}${a ? `. Distances from ${esc(a.hotel)}` : ""}`) + content
+  return head(`Free · ${dur(ev.e - ev.s)}`, `${t12(ev.s)} – ${t12(ev.e)}${ev.k === "wait" ? ", with your bags" : ""}${a ? `. Distances from ${esc(fromTxt(iso, a))}` : ""}`) + content
     + (skipped.length ? `<div class="restore">${skipped.map(k => `<button data-unpick="${k}">Bring back ${k}</button>`).join("")}</div>` : "")
     + `<p class="nt">Added stops show as dotted blocks and are saved on this phone.</p>`;
 }
@@ -1948,7 +1958,7 @@ function startCycle(iso) {
   /* time of day decides the mix: morning leans coffee, midday lunch + sights, afternoon sights + shops, evening dinner then wine */
   const h = iso === today ? new Date().getHours() : 10;
   const mix = h < 11 ? [["coffee", 4], ["see", 2], ["shop", 1]] : h < 14 ? [["dinner", 3], ["see", 3], ["coffee", 1]] : h < 17 ? [["see", 3], ["shop", 3], ["coffee", 1]] : h < 21 ? [["dinner", 4], ["drinks", 2], ["see", 1]] : [["drinks", 4], ["dinner", 2]];
-  let pool = []; mix.forEach(([k, n]) => placesFor(iso, k).slice(0, n).forEach(x => pool.push(x)));
+  let pool = []; mix.forEach(([k, n]) => placesFor(iso, k, null, true).slice(0, n).forEach(x => pool.push(x)));
   if (!pool.length) { ["coffee", "dinner", "see", "shop", "drinks"].forEach(k => placesFor(iso, k).slice(0, 2).forEach(x => pool.push(x))); }
   if (!pool.length) { el.textContent = "Search near the hotel"; return; }
   /* keep the lead category first, shuffle the rest */
