@@ -18,6 +18,7 @@ A phone-only "app-like" website for Alex's 8-person Europe trip (19 Oct – 20 N
 - **Every stay is booked.** Never add "message the hotel" or "register" reminders. The only unbooked thing is the LNER Edinburgh→London train.
 
 ## Working method
+- **Calendar feed (Alex only):** `python3 tools/make_ics.py` rebuilds `public/cal/<token>.ics` from the app's own day logic (`window.__tripICS`). Run it after any change to STAYS / MOVES / EVENTS, then commit. Nothing in the app links to it; Alex subscribes via webcal://europe-family-trip.app/cal/<token>.ics. Times are floating (local), so the phone shows them as the app does.
 - Edit `public/index.html` with small Python patch scripts (exact-string replace with assert). Never rewrite the file.
 - Verify with Playwright (chromium only; WebKit can't install in the sandbox) at 390×844.
   - Fix the clock with an init script that overrides `Date`, and abort Open-Meteo requests.

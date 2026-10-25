@@ -1,0 +1,1095 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Europe Trip//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Europe Trip
+X-APPLE-CALENDAR-COLOR:#FF8A00
+REFRESH-INTERVAL;VALUE=DURATION:PT2H
+X-PUBLISHED-TTL:PT2H
+BEGIN:VEVENT
+UID:move-f1@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261019T224500
+DTEND:20261020T045500
+SUMMARY:✈︎ Perth → Doha
+LOCATION:Perth Airport
+DESCRIPTION:VA6129 · Qatar Airways\nBooking ref: KJCTJU
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:✈︎ Perth → Doha
+TRIGGER:-PT180M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:move-f2@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261020T072500
+DTEND:20261020T122500
+SUMMARY:✈︎ Doha → Athens
+LOCATION:Doha Airport
+DESCRIPTION:VA6036 · Qatar Airways\nBooking ref: KJCTJU
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:✈︎ Doha → Athens
+TRIGGER:-PT180M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:move-f3@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261022T103000
+DTEND:20261022T112500
+SUMMARY:✈︎ Athens → Santorini
+LOCATION:Athens International Airport
+DESCRIPTION:GQ344 · Sky Express\nBooking ref: K41BQD\nBags: 15kg checked\,
+  8kg cabin\, personal item\nOnly 15kg checked plus an 8kg cabin bag. The 
+ big suitcases are already at 11 Enteka.
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:✈︎ Athens → Santorini
+TRIGGER:-PT180M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:move-f4@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261025T145500
+DTEND:20261025T155000
+SUMMARY:✈︎ Santorini → Athens
+LOCATION:Santorini Airport
+DESCRIPTION:GQ349 · Sky Express\nBooking ref: K41BQD\nBags: 15kg checked\,
+  8kg cabin\, personal item
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:✈︎ Santorini → Athens
+TRIGGER:-PT180M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:move-f5@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261027T105500
+DTEND:20261027T120000
+SUMMARY:✈︎ Athens → Rome
+LOCATION:Athens International Airport
+DESCRIPTION:GQ820 · Sky Express\nBooking ref: 2JCREI\nBags: 32kg checked\,
+  cabin bag\, small bag
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:✈︎ Athens → Rome
+TRIGGER:-PT180M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:move-t1@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261030T123000
+DTEND:20261030T141100
+SUMMARY:🚆 Rome → Florence
+LOCATION:Roma Termini
+DESCRIPTION:Frecciarossa 9420 · ItaliaRail\, 1st class\nBooking ref: XG55E
+ N\nThe ticket says 12:36 PM\, but the train now leaves at 12:30 PM. Be on
+  the platform early. Show the PNR to the conductor.
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:🚆 Rome → Florence
+TRIGGER:-PT60M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:move-t2@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261101T122000
+DTEND:20261101T143400
+SUMMARY:🚆 Florence → Venice
+LOCATION:Firenze S.M.N.
+DESCRIPTION:Frecciarossa 9416 · ItaliaRail\, 1st class\nBooking ref: XHFDS
+ N\nShow the PNR to the conductor.
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:🚆 Florence → Venice
+TRIGGER:-PT60M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:move-t3@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261103T071800
+DTEND:20261103T094500
+SUMMARY:🚆 Venice → Milan
+LOCATION:Venezia S. Lucia
+DESCRIPTION:Frecciarossa 9708 · ItaliaRail\, 1st class\nBooking ref: XH6SQ
+ 5\nChange at Milano Centrale: 1h 25m between trains\, same station.
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:🚆 Venice → Milan
+TRIGGER:-PT60M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:move-t4@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261103T111000
+DTEND:20261103T142700
+SUMMARY:🚆 Milan → Zürich
+LOCATION:Milano Centrale
+DESCRIPTION:EuroCity 150 · ItaliaRail\, 1st class\nBooking ref: XH6SJ5
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:🚆 Milan → Zürich
+TRIGGER:-PT60M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:move-f6@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261105T142000
+DTEND:20261105T154500
+SUMMARY:✈︎ Zürich → Berlin
+LOCATION:Zurich Airport
+DESCRIPTION:EW8765 · Eurowings\nBooking ref: GLL3KG\nBags: 32kg checked\, 
+ 8kg cabin\, small bag
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:✈︎ Zürich → Berlin
+TRIGGER:-PT180M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:move-f7@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261108T084500
+DTEND:20261108T104000
+SUMMARY:✈︎ Berlin → Paris
+LOCATION:Berlin Brandenburg Airport
+DESCRIPTION:TO4061 · Transavia\nBooking ref: FGLHWQ\nBags: 30kg checked\, 
+ cabin bag\, small bag\nTj says leave the hotel around 6:15 AM.
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:✈︎ Berlin → Paris
+TRIGGER:-PT180M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:move-f8@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261111T154500
+DTEND:20261111T163500
+SUMMARY:✈︎ Paris → Glasgow
+LOCATION:Paris Charles de Gaulle Terminal 2D
+DESCRIPTION:EZY3124 · easyJet\nBooking ref: KDKM7WL\nBags: 32kg checked\, 
+ large cabin bag\, small bag\nTerminal 2D. Bag drop closes at 2:45 PM. Gla
+ sgow is 1 hour behind Paris.
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:✈︎ Paris → Glasgow
+TRIGGER:-PT180M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:move-g1@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261113T120000
+DTEND:20261113T125000
+SUMMARY:🚆 Glasgow → Edinburgh
+LOCATION:Glasgow Queen Street
+DESCRIPTION:ScotRail · About 50 min\, every 15 min\nWalk-up tickets\nTimes
+  are a guess.\nAny train works and walk-up tickets are fine. Tj + 1 drive
+  a hire car via the Highlands and meet everyone in Edinburgh.
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:🚆 Glasgow → Edinburgh
+TRIGGER:-PT60M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:move-g2@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261116T110000
+DTEND:20261116T152000
+SUMMARY:🚆 Edinburgh → London
+LOCATION:Edinburgh Waverley
+DESCRIPTION:LNER · About 4h to King’s Cross\nNot booked yet\nTimes are a g
+ uess.\nNot booked yet\, so these times are a guess. Aiming for a late-mor
+ ning train.
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:🚆 Edinburgh → London
+TRIGGER:-PT60M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:move-f9@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261119T145500
+DTEND:20261120T004000
+SUMMARY:✈︎ London → Doha
+LOCATION:London Heathrow Airport
+DESCRIPTION:VA6109 · Qatar Airways\nBooking ref: KJCTJU\nLeaves from Heath
+ row. Not on booking KJCTJU? Check your own booking shows these flights.
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:✈︎ London → Doha
+TRIGGER:-PT180M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:move-f10@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261120T024000
+DTEND:20261120T184500
+SUMMARY:✈︎ Doha → Perth
+LOCATION:Doha Airport
+DESCRIPTION:VA6128 · Qatar Airways\nBooking ref: KJCTJU
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:✈︎ Doha → Perth
+TRIGGER:-PT180M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-19-get-1185-HomePerthAirport@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261019T194500
+DTEND:20261019T201500
+SUMMARY:Home → Perth Airport
+LOCATION:Perth Airport
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-19-change-1215-PerthAirportBagssecurity@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261019T201500
+DTEND:20261019T224500
+SUMMARY:Perth Airport · Bags\, security
+LOCATION:Perth Airport
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-20-change-295-DohaAirportLayover@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261020T045500
+DTEND:20261020T072500
+SUMMARY:Doha Airport · Layover
+LOCATION:Doha Airport
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-20-get-745-AthensAirportBellnAthens@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261020T122500
+DTEND:20261020T135500
+SUMMARY:Athens Airport → Bellén Athens Hotel
+LOCATION:Bellén Athens Hotel\, Athens
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-20-get-835-BellnAthensHotelDropbags@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261020T135500
+DTEND:20261020T142500
+SUMMARY:Bellén Athens Hotel · Drop bags
+LOCATION:Bellén Athens Hotel\, Athens
+DESCRIPTION:Check in from 3:00 pm\n24-hour front desk and luggage storage.
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-21-pack-1350-BellnAthensHotelPacksuit@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261021T223000
+DTEND:20261021T230000
+SUMMARY:Bellén Athens Hotel · Pack suitcases
+LOCATION:Bellén Athens Hotel\, Athens
+DESCRIPTION:Leaving 8:15 am tomorrow
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Bellén Athens Hotel · Pack suitcases
+TRIGGER:-PT0M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-22-get-465-BellnAthensHotelCheckout@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261022T074500
+DTEND:20261022T081500
+SUMMARY:Bellén Athens Hotel · Check out
+LOCATION:Bellén Athens Hotel\, Athens
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Bellén Athens Hotel · Check out
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-22-get-495-BellnAthensHotelAthensAi@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261022T081500
+DTEND:20261022T090500
+SUMMARY:Bellén Athens Hotel → Athens Airport
+LOCATION:Bellén Athens Hotel\, Athens
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-22-change-545-AthensAirportBagssecurit@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261022T090500
+DTEND:20261022T103000
+SUMMARY:Athens Airport · Bags\, security
+LOCATION:Athens International Airport
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-22-get-685-SantoriniAirportTheMuseu@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261022T112500
+DTEND:20261022T121500
+SUMMARY:Santorini Airport → The Museum Project Oia
+LOCATION:The Museum Project Oia\, Santorini
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-22-get-735-TheMuseumProjectOiaDropb@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261022T121500
+DTEND:20261022T124500
+SUMMARY:The Museum Project Oia · Drop bags
+LOCATION:The Museum Project Oia\, Santorini
+DESCRIPTION:Check in from 3:00 pm\nCheck in at “The Beauty Shop” in front 
+ of the property. Reception 8:30 AM–9 PM.
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-24-booked-540-TheMuseumProjectOiaAkrot@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261024T090000
+DTEND:20261024T094500
+SUMMARY:The Museum Project Oia → Akrotiri · Drive · about 45 min
+LOCATION:Archaeological Site of Akrotiri
+DESCRIPTION:About 22 km by road\, through Fira. Parking by the entrance.
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:The Museum Project Oia → Akrotiri · Drive · about 45 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-24-booked-585-AkrotiriExploretheruins@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261024T094500
+DTEND:20261024T113000
+SUMMARY:Akrotiri · Explore the ruins
+LOCATION:Archaeological Site of Akrotiri
+DESCRIPTION:Bronze Age town buried by the eruption\, under one big roof. O
+ pen 8 am – 6 pm in late October. Tickets at the gate or on hhticket.gr.
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Akrotiri · Explore the ruins
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-24-booked-690-AkrotiriTheMuseumProject@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261024T113000
+DTEND:20261024T121500
+SUMMARY:Akrotiri → The Museum Project Oia · Drive · about 45 min
+LOCATION:The Museum Project Oia
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Akrotiri → The Museum Project Oia · Drive · about 45 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-24-booked-1020-Sunsetdinner@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261024T170000
+DTEND:20261024T190000
+SUMMARY:Sunset dinner
+DESCRIPTION:Last night in Santorini.
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Sunset dinner
+TRIGGER:-PT60M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-25-pack-615-TheMuseumProjectOiaPacks@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261025T101500
+DTEND:20261025T110000
+SUMMARY:The Museum Project Oia · Pack suitcases
+LOCATION:The Museum Project Oia\, Santorini
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:The Museum Project Oia · Pack suitcases
+TRIGGER:-PT0M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-25-get-660-TheMuseumProjectOiaCheck@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261025T110000
+DTEND:20261025T113000
+SUMMARY:The Museum Project Oia · Check out\, leave bags
+LOCATION:The Museum Project Oia\, Santorini
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:The Museum Project Oia · Check out\, leave bags
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-25-get-765-TheMuseumProjectOiaColle@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261025T124500
+DTEND:20261025T131500
+SUMMARY:The Museum Project Oia · Collect bags
+LOCATION:The Museum Project Oia\, Santorini
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:The Museum Project Oia · Collect bags
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-25-get-795-TheMuseumProjectOiaSanto@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261025T131500
+DTEND:20261025T134500
+SUMMARY:The Museum Project Oia → Santorini Airport
+LOCATION:The Museum Project Oia\, Santorini
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-25-change-825-SantoriniAirportBagssecu@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261025T134500
+DTEND:20261025T145500
+SUMMARY:Santorini Airport · Bags\, security
+LOCATION:Santorini Airport
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-25-get-950-AthensAirport11EntekaAcr@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261025T155000
+DTEND:20261025T170500
+SUMMARY:Athens Airport → 11 Enteka Acropolis Suites
+LOCATION:11 Enteka Acropolis Suites\, Athens
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-25-get-1025-11EntekaAcropolisSuitesC@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261025T170500
+DTEND:20261025T173500
+SUMMARY:11 Enteka Acropolis Suites · Check in
+LOCATION:11 Enteka Acropolis Suites\, Athens
+DESCRIPTION:Check in from 3:00 pm\nReception 8:30 AM–10:30 PM.
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-26-pack-1350-11EntekaAcropolisSuitesP@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261026T223000
+DTEND:20261026T230000
+SUMMARY:11 Enteka Acropolis Suites · Pack suitcases
+LOCATION:11 Enteka Acropolis Suites\, Athens
+DESCRIPTION:Leaving 8:40 am tomorrow
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:11 Enteka Acropolis Suites · Pack suitcases
+TRIGGER:-PT0M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-27-get-490-11EntekaAcropolisSuitesC@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261027T081000
+DTEND:20261027T084000
+SUMMARY:11 Enteka Acropolis Suites · Check out
+LOCATION:11 Enteka Acropolis Suites\, Athens
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:11 Enteka Acropolis Suites · Check out
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-27-get-520-11EntekaAcropolisSuitesA@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261027T084000
+DTEND:20261027T093000
+SUMMARY:11 Enteka Acropolis Suites → Athens Airport
+LOCATION:11 Enteka Acropolis Suites\, Athens
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-27-change-570-AthensAirportBagssecurit@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261027T093000
+DTEND:20261027T105500
+SUMMARY:Athens Airport · Bags\, security
+LOCATION:Athens International Airport
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-27-get-720-RomeFiumicinoSpagnaBouti@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261027T120000
+DTEND:20261027T133000
+SUMMARY:Rome Fiumicino → Spagna Boutique
+LOCATION:Spagna Boutique\, Rome
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-27-get-810-SpagnaBoutiqueDropbags@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261027T133000
+DTEND:20261027T140000
+SUMMARY:Spagna Boutique · Drop bags
+LOCATION:Spagna Boutique\, Rome
+DESCRIPTION:Check in from 2:00 pm\nReception hours aren’t listed; some gue
+ sts mention self check-in.
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-30-pack-585-SpagnaBoutiquePacksuitca@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261030T094500
+DTEND:20261030T103000
+SUMMARY:Spagna Boutique · Pack suitcases
+LOCATION:Spagna Boutique\, Rome
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Spagna Boutique · Pack suitcases
+TRIGGER:-PT0M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-30-get-630-SpagnaBoutiqueCheckout@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261030T103000
+DTEND:20261030T110000
+SUMMARY:Spagna Boutique · Check out
+LOCATION:Spagna Boutique\, Rome
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Spagna Boutique · Check out
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-30-get-660-SpagnaBoutiqueRomaTermin@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261030T110000
+DTEND:20261030T120500
+SUMMARY:Spagna Boutique → Roma Termini
+LOCATION:Spagna Boutique\, Rome
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-30-change-725-RomaTerminiFindtheplatfo@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261030T120500
+DTEND:20261030T123000
+SUMMARY:Roma Termini · Find the platform\, board
+LOCATION:Roma Termini
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-30-get-851-FirenzeSMNNeroneApartmen@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261030T141100
+DTEND:20261030T143100
+SUMMARY:Firenze S.M.N. → Nerone Apartment by Mamo
+LOCATION:Nerone Apartment by Mamo\, Florence
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-10-30-get-871-NeroneApartmentbyMamoChe@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261030T143100
+DTEND:20261030T150000
+SUMMARY:Nerone Apartment by Mamo · Check in
+LOCATION:Nerone Apartment by Mamo\, Florence
+DESCRIPTION:Check in from 3:00 pm\nNo reception. No luggage storage listed
+ .
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-01-pack-555-NeroneApartmentbyMamoPac@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261101T091500
+DTEND:20261101T100000
+SUMMARY:Nerone Apartment by Mamo · Pack suitcases
+LOCATION:Nerone Apartment by Mamo\, Florence
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Nerone Apartment by Mamo · Pack suitcases
+TRIGGER:-PT0M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-01-get-600-NeroneApartmentbyMamoChe@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261101T100000
+DTEND:20261101T103000
+SUMMARY:Nerone Apartment by Mamo · Check out
+LOCATION:Nerone Apartment by Mamo\, Florence
+DESCRIPTION:No luggage storage listed
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Nerone Apartment by Mamo · Check out
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-01-get-700-NeroneApartmentbyMamoFir@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261101T114000
+DTEND:20261101T120000
+SUMMARY:Nerone Apartment by Mamo → Firenze S.M.N.
+LOCATION:Nerone Apartment by Mamo\, Florence
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-01-change-720-FirenzeSMNFindtheplatfor@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261101T120000
+DTEND:20261101T122000
+SUMMARY:Firenze S.M.N. · Find the platform\, board
+LOCATION:Firenze Santa Maria Novella station
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-01-get-874-VeneziaSLuciaCadelaFonte@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261101T143400
+DTEND:20261101T150900
+SUMMARY:Venezia S. Lucia → Ca’ de la Fonte
+LOCATION:Ca’ de la Fonte\, Check in at Hotel Ca’ d’Oro\, Corte Barbaro 460
+ 4\, Venice
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-01-get-909-CadelaFonteCheckin@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261101T150900
+DTEND:20261101T153900
+SUMMARY:Ca’ de la Fonte · Check in
+LOCATION:Ca’ de la Fonte\, Check in at Hotel Ca’ d’Oro\, Corte Barbaro 460
+ 4\, Venice
+DESCRIPTION:Check in from 3:00 pm
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-02-pack-1350-CadelaFontePacksuitcases@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261102T223000
+DTEND:20261102T230000
+SUMMARY:Ca’ de la Fonte · Pack suitcases
+LOCATION:Ca’ de la Fonte\, Check in at Hotel Ca’ d’Oro\, Corte Barbaro 460
+ 4\, Venice
+DESCRIPTION:Leaving 6:40 am tomorrow
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Ca’ de la Fonte · Pack suitcases
+TRIGGER:-PT0M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-03-get-370-CadelaFonteCheckout@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261103T061000
+DTEND:20261103T064000
+SUMMARY:Ca’ de la Fonte · Check out
+LOCATION:Ca’ de la Fonte\, Check in at Hotel Ca’ d’Oro\, Corte Barbaro 460
+ 4\, Venice
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Ca’ de la Fonte · Check out
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-03-get-400-CadelaFonteVeneziaSLucia@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261103T064000
+DTEND:20261103T070500
+SUMMARY:Ca’ de la Fonte → Venezia S. Lucia
+LOCATION:Ca’ de la Fonte\, Check in at Hotel Ca’ d’Oro\, Corte Barbaro 460
+ 4\, Venice
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-03-change-425-VeneziaSLuciaFindtheplat@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261103T070500
+DTEND:20261103T071800
+SUMMARY:Venezia S. Lucia · Find the platform\, board
+LOCATION:Venezia Santa Lucia station
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-03-change-585-MilanoCentraleChangetrai@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261103T094500
+DTEND:20261103T111000
+SUMMARY:Milano Centrale · Change trains
+LOCATION:Milano Centrale
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-03-get-867-ZrichHBSorellHotelRex@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261103T142700
+DTEND:20261103T145200
+SUMMARY:Zürich HB → Sorell Hotel Rex
+LOCATION:Sorell Hotel Rex\, Zürich
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-03-get-892-SorellHotelRexCheckin@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261103T145200
+DTEND:20261103T152200
+SUMMARY:Sorell Hotel Rex · Check in
+LOCATION:Sorell Hotel Rex\, Zürich
+DESCRIPTION:Check in from 3:00 pm\nReception 7 AM–5 PM; after that you get
+  an emailed access code.
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-05-pack-645-SorellHotelRexPacksuitca@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261105T104500
+DTEND:20261105T113000
+SUMMARY:Sorell Hotel Rex · Pack suitcases
+LOCATION:Sorell Hotel Rex\, Zürich
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Sorell Hotel Rex · Pack suitcases
+TRIGGER:-PT0M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-05-get-690-SorellHotelRexCheckout@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261105T113000
+DTEND:20261105T120000
+SUMMARY:Sorell Hotel Rex · Check out
+LOCATION:Sorell Hotel Rex\, Zürich
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Sorell Hotel Rex · Check out
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-05-get-720-SorellHotelRexZrichAirpo@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261105T120000
+DTEND:20261105T124500
+SUMMARY:Sorell Hotel Rex → Zürich Airport
+LOCATION:Sorell Hotel Rex\, Zürich
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-05-change-765-ZrichAirportBagssecurity@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261105T124500
+DTEND:20261105T142000
+SUMMARY:Zürich Airport · Bags\, security
+LOCATION:Zurich Airport
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-05-get-945-BerlinBERSANABerlinHotel@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261105T154500
+DTEND:20261105T170500
+SUMMARY:Berlin BER → SANA Berlin Hotel
+LOCATION:SANA Berlin Hotel\, Nürnberger Str. 33/34\, Berlin
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-05-get-1025-SANABerlinHotelCheckin@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261105T170500
+DTEND:20261105T173500
+SUMMARY:SANA Berlin Hotel · Check in
+LOCATION:SANA Berlin Hotel\, Nürnberger Str. 33/34\, Berlin
+DESCRIPTION:Check in from 3:00 pm\n24-hour front desk and luggage storage.
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-07-pack-1350-SANABerlinHotelPacksuitc@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261107T223000
+DTEND:20261107T230000
+SUMMARY:SANA Berlin Hotel · Pack suitcases
+LOCATION:SANA Berlin Hotel\, Nürnberger Str. 33/34\, Berlin
+DESCRIPTION:Leaving 6:15 am tomorrow
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:SANA Berlin Hotel · Pack suitcases
+TRIGGER:-PT0M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-08-get-345-SANABerlinHotelCheckout@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261108T054500
+DTEND:20261108T061500
+SUMMARY:SANA Berlin Hotel · Check out
+LOCATION:SANA Berlin Hotel\, Nürnberger Str. 33/34\, Berlin
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:SANA Berlin Hotel · Check out
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-08-get-375-SANABerlinHotelBerlinBER@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261108T061500
+DTEND:20261108T070500
+SUMMARY:SANA Berlin Hotel → Berlin BER
+LOCATION:SANA Berlin Hotel\, Nürnberger Str. 33/34\, Berlin
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-08-change-425-BerlinBERBagssecurity@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261108T070500
+DTEND:20261108T084500
+SUMMARY:Berlin BER · Bags\, security
+LOCATION:Berlin Brandenburg Airport
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-08-get-640-ParisOrlySplendidHtel@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261108T104000
+DTEND:20261108T114000
+SUMMARY:Paris Orly → Splendid Hôtel
+LOCATION:Splendid Hôtel\, 54 Rue Fondary\, 15e\, Paris
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-08-get-700-SplendidHtelDropbags@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261108T114000
+DTEND:20261108T121000
+SUMMARY:Splendid Hôtel · Drop bags
+LOCATION:Splendid Hôtel\, 54 Rue Fondary\, 15e\, Paris
+DESCRIPTION:Check in from 3:00 pm\n24-hour front desk and luggage storage.
+  City tax about €5.53 per person per night.
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-11-pack-645-SplendidHtelPacksuitcase@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261111T104500
+DTEND:20261111T113000
+SUMMARY:Splendid Hôtel · Pack suitcases
+LOCATION:Splendid Hôtel\, 54 Rue Fondary\, 15e\, Paris
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Splendid Hôtel · Pack suitcases
+TRIGGER:-PT0M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-11-get-690-SplendidHtelCheckout@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261111T113000
+DTEND:20261111T120000
+SUMMARY:Splendid Hôtel · Check out
+LOCATION:Splendid Hôtel\, 54 Rue Fondary\, 15e\, Paris
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Splendid Hôtel · Check out
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-11-get-720-SplendidHtelParisCDGT2D@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261111T120000
+DTEND:20261111T140000
+SUMMARY:Splendid Hôtel → Paris CDG T2D
+LOCATION:Splendid Hôtel\, 54 Rue Fondary\, 15e\, Paris
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-11-change-840-ParisCDGT2DBagssecurity@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261111T140000
+DTEND:20261111T154500
+SUMMARY:Paris CDG T2D · Bags\, security
+LOCATION:Paris Charles de Gaulle Terminal 2D
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-11-get-995-GlasgowAirport4bedflatce@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261111T163500
+DTEND:20261111T172500
+SUMMARY:Glasgow Airport → 4-bed flat\, central Glasgow
+LOCATION:4-bed flat\, central Glasgow\, Glasgow
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-11-get-1045-4bedflatcentralGlasgowCh@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261111T172500
+DTEND:20261111T175500
+SUMMARY:4-bed flat\, central Glasgow · Check in
+LOCATION:4-bed flat\, central Glasgow\, Glasgow
+DESCRIPTION:Check in from 3:00 pm
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-13-pack-555-4bedflatcentralGlasgowPa@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261113T091500
+DTEND:20261113T100000
+SUMMARY:4-bed flat\, central Glasgow · Pack suitcases
+LOCATION:4-bed flat\, central Glasgow\, Glasgow
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:4-bed flat\, central Glasgow · Pack suitcases
+TRIGGER:-PT0M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-13-get-600-4bedflatcentralGlasgowCh@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261113T100000
+DTEND:20261113T103000
+SUMMARY:4-bed flat\, central Glasgow · Check out\, leave bags
+LOCATION:4-bed flat\, central Glasgow\, Glasgow
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:4-bed flat\, central Glasgow · Check out\, leave bags
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-13-get-660-4bedflatcentralGlasgowCo@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261113T110000
+DTEND:20261113T113000
+SUMMARY:4-bed flat\, central Glasgow · Collect bags
+LOCATION:4-bed flat\, central Glasgow\, Glasgow
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:4-bed flat\, central Glasgow · Collect bags
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-13-get-690-4bedflatcentralGlasgowGl@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261113T113000
+DTEND:20261113T114500
+SUMMARY:4-bed flat\, central Glasgow → Glasgow Queen Street
+LOCATION:4-bed flat\, central Glasgow\, Glasgow
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-13-change-705-GlasgowQueenStreetFindth@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261113T114500
+DTEND:20261113T120000
+SUMMARY:Glasgow Queen Street · Find the platform\, board
+LOCATION:Glasgow Queen Street station
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-13-get-770-EdinburghWaverleyLuxuryW@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261113T125000
+DTEND:20261113T131500
+SUMMARY:Edinburgh Waverley → Luxury Waterfront Retreat for Groups
+LOCATION:Luxury Waterfront Retreat for Groups\, Edinburgh
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-13-get-795-LuxuryWaterfrontRetreatf@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261113T131500
+DTEND:20261113T134500
+SUMMARY:Luxury Waterfront Retreat for Groups · Drop bags
+LOCATION:Luxury Waterfront Retreat for Groups\, Edinburgh
+DESCRIPTION:Check in from 3:00 pm
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-16-get-570-LuxuryWaterfrontRetreatf@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261116T093000
+DTEND:20261116T100000
+SUMMARY:Luxury Waterfront Retreat for Groups · Check out
+LOCATION:Luxury Waterfront Retreat for Groups\, Edinburgh
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Luxury Waterfront Retreat for Groups · Check out
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-16-get-600-LuxuryWaterfrontRetreatf@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261116T100000
+DTEND:20261116T104500
+SUMMARY:Luxury Waterfront Retreat for Groups → Edinburgh Waverley
+LOCATION:Luxury Waterfront Retreat for Groups\, Edinburgh
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-16-change-645-EdinburghWaverleyFindthe@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261116T104500
+DTEND:20261116T110000
+SUMMARY:Edinburgh Waverley · Find the platform\, board
+LOCATION:Edinburgh Waverley station
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-16-get-920-LondonKingsCross4bedtown@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261116T152000
+DTEND:20261116T160000
+SUMMARY:London King’s Cross → 4-bed townhouse\, Kensington
+LOCATION:4-bed townhouse\, Kensington\, London
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-16-get-960-4bedtownhouseKensingtonC@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261116T160000
+DTEND:20261116T163000
+SUMMARY:4-bed townhouse\, Kensington · Check in
+LOCATION:4-bed townhouse\, Kensington\, London
+DESCRIPTION:Check in from 3:00 pm
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-19-pack-555-4bedtownhouseKensingtonP@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261119T091500
+DTEND:20261119T100000
+SUMMARY:4-bed townhouse\, Kensington · Pack suitcases
+LOCATION:4-bed townhouse\, Kensington\, London
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:4-bed townhouse\, Kensington · Pack suitcases
+TRIGGER:-PT0M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-19-get-600-4bedtownhouseKensingtonC@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261119T100000
+DTEND:20261119T103000
+SUMMARY:4-bed townhouse\, Kensington · Check out\, leave bags
+LOCATION:4-bed townhouse\, Kensington\, London
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:4-bed townhouse\, Kensington · Check out\, leave bags
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-19-get-660-4bedtownhouseKensingtonC@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261119T110000
+DTEND:20261119T113000
+SUMMARY:4-bed townhouse\, Kensington · Collect bags
+LOCATION:4-bed townhouse\, Kensington\, London
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:4-bed townhouse\, Kensington · Collect bags
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-19-get-690-4bedtownhouseKensingtonH@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261119T113000
+DTEND:20261119T122000
+SUMMARY:4-bed townhouse\, Kensington → Heathrow
+LOCATION:4-bed townhouse\, Kensington\, London
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-19-change-740-HeathrowBagssecurity@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261119T122000
+DTEND:20261119T145500
+SUMMARY:Heathrow · Bags\, security
+LOCATION:London Heathrow Airport
+END:VEVENT
+BEGIN:VEVENT
+UID:2026-11-20-change-40-DohaAirportLayover@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261120T004000
+DTEND:20261120T024000
+SUMMARY:Doha Airport · Layover
+LOCATION:Doha Airport
+END:VEVENT
+END:VCALENDAR

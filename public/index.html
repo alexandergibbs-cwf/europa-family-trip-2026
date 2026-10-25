@@ -2063,6 +2063,42 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) { ti
     addEventListener("appinstalled", () => { a2.hidden = true; });
   }
 }
+/* calendar feed: the real bookings and travel steps as an .ics, in local (floating) times so the phone shows them as the app does.
+   Built by tools/make_ics.py and published at a private link; nothing in the app links to it. */
+window.__tripICS = () => {
+  const P = n => String(n).padStart(2, "0"), dt = (iso, m) => { const d = addDays(iso, Math.floor(m / 1440)), mm = ((m % 1440) + 1440) % 1440; return d.replace(/-/g, "") + "T" + P(Math.floor(mm / 60)) + P(mm % 60) + "00"; };
+  const esc2 = t => String(t || "").replace(/\\/g, "\\\\").replace(/;/g, "\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+  const fold = l => { const out = []; let x = l; while (x.length > 74) { out.push(x.slice(0, 74)); x = " " + x.slice(74); } out.push(x); return out.join("\r\n"); };
+  const out = [], seen = new Set();
+  const add = (uid, iso, s, e, title, o = {}) => {
+    if (seen.has(uid)) return; seen.add(uid);
+    const L = ["BEGIN:VEVENT", "UID:" + uid + "@europe-family-trip.app", "DTSTAMP:20261025T000000Z", "DTSTART:" + dt(iso, s), "DTEND:" + dt(o.endIso || iso, e), "SUMMARY:" + esc2(title)];
+    if (o.loc) L.push("LOCATION:" + esc2(o.loc));
+    if (o.notes) L.push("DESCRIPTION:" + esc2(o.notes));
+    (o.alarms || []).forEach(a => L.push("BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:" + esc2(title), "TRIGGER:-PT" + a + "M", "END:VALARM"));
+    L.push("END:VEVENT"); out.push(...L);
+  };
+  MOVES.forEach(m => {
+    const notes = [m.code + (m.carrier ? " · " + m.carrier : ""), m.ref ? "Booking ref: " + m.ref : m.todo || "", m.bags ? "Bags: " + m.bags : "", m.guess ? "Times are a guess." : "", m.note || ""].filter(Boolean).join("\n");
+    add("move-" + m.id, m.dep[0], mins(m.d), m.aDate === m.dep[0] ? mins(m.a) : mins(m.a) + 1440 * Math.round((Date.parse(m.aDate) - Date.parse(m.dep[0])) / 864e5),
+      `${m.mode === "Flight" ? "✈︎" : "🚆"} ${m.from} → ${m.to}`, { loc: m.mode === "Train" ? placeFrom(m) : (m.fromQ || placeFrom(m)), notes, alarms: [m.mode === "Flight" ? 180 : 60] });
+  });
+  ALLDAYS.forEach(iso => {
+    const D = buildDay(iso);
+    events(iso, D).forEach(ev => {
+      if (!["get", "change", "pack", "booked"].includes(ev.k)) return;
+      const title = ev.act ? `${ev.tt} · ${ev.act}` : ev.tt;
+      const st = ev.stay || (ev.x && ev.x.from) || null;
+      const loc = ev.k === "booked" ? (ev.x.b.where || "") : st ? `${st.hotel}${st.addr && /\d/.test(st.addr) && !/booking/i.test(st.addr) ? ", " + st.addr : ""}, ${st.city}` : ev.m ? (ev.m.fromQ || placeFrom(ev.m)) : "";
+      const notes = ev.k === "booked" ? (ev.x.b.note || "") : ev.k === "get" && st && (ev.act || "").match(/Check in|Drop bags/) ? `Check in from ${s12(st.ci)}${st.note ? "\n" + st.note : ""}` : ev.sub || "";
+      const notes2 = notes && !title.includes(notes) ? notes : "";
+      const firstOut = ev.k === "get" && (ev.x.coOnly || ev.x.dep) && ev.act && /Check out|Collect/.test(ev.act);
+      const alarms = ev.k === "pack" ? [0] : firstOut ? [30] : ev.k === "booked" ? [ev.x.b.kind === "dinner" ? 60 : 30] : [];
+      add(`${iso}-${ev.k}-${ev.s}-${title.replace(/[^a-z0-9]/gi, "").slice(0, 24)}`, iso, ev.s, Math.max(ev.e, ev.s + 5), title, { loc, notes: notes2, alarms });
+    });
+  });
+  return ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Europe Trip//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "X-WR-CALNAME:Europe Trip", "X-APPLE-CALENDAR-COLOR:#FF8A00", "REFRESH-INTERVAL;VALUE=DURATION:PT2H", "X-PUBLISHED-TTL:PT2H", ...out, "END:VCALENDAR"].map(fold).join("\r\n") + "\r\n";
+};
 /* a short "how it works" the first time the app is opened (from the Home Screen on iPhone, so it isn't stacked on the add-to-home card) */
 const TOUR = [
   { t: "Your trip, day by day", d: "It opens on today: where you’re staying and what’s booked.", p: `<div class="bk tint" style="--c:#ff8a00;top:14px">Hotel<small>Check out · 10:30 am</small></div><div class="bk solid" style="--c:#ff8a00;top:54px;height:40px">Rome → Florence<small>12:30 pm – 2:11 pm</small></div><div class="bk tint" style="--c:#ff8a00;top:104px">Hotel<small>Check in · 2:30 pm</small></div>` },

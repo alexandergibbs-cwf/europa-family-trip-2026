@@ -1,3 +1,8 @@
 /*
   X-Robots-Tag: noindex
   Cache-Control: public, max-age=0, must-revalidate
+
+/cal/*
+  Content-Type: text/calendar; charset=utf-8
+  Cache-Control: public, max-age=0, must-revalidate
+  X-Robots-Tag: noindex
