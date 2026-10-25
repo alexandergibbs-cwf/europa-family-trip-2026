@@ -1933,6 +1933,7 @@ function menuSheet() {
       ${row("stay", s ? esc(s.hotel) : "No hotel tonight", s ? `Check in ${s12(s.ci)} · out ${s12(s.co)}${s.est ? " (usual)" : ""}${s.addr && !/booking/i.test(s.addr) ? " · " + esc(s.addr) : ""}` : (iso === END ? "Landing in Perth" : "Overnight flight"))}
       ${hasFree(iso) ? row("plan", getDay(iso) ? "Day planned" : "Plan the day", getDay(iso) ? "Change or clear it" : "A few questions, then a plan") : ""}
       ${row("ideas", "Things to do", hasSaves(iso) ? `<span class="cyc" id="cyc"></span>` : `Search near the hotel`)}
+      ${row("cal", "Add to my calendar", "Flights, trains and bookings, with alerts")}
       ${row("tour", "How it works", "A quick look at the app")}
       ${row("tasks", open ? `${open} thing${open > 1 ? "s" : ""} to sort` : "Nothing to sort", open ? headsFor(iso).find(h => !h.k || !done(h.k)).t : "No reminders for this day")}
   </div>`;
@@ -2046,7 +2047,7 @@ document.addEventListener("click", e => {
   if (t.closest("#backPill")) { haptic(); return openSide(); }
   if (t.closest("#titlePill")) { haptic(); openSheet(menuSheet()); startCycle(view); return; }
   if (t.closest("[data-today]")) { e.preventDefault(); haptic(); closeSheet(); return selectDay(today); }
-  const mi = t.closest("[data-menu]"); if (mi) { haptic(); const k = mi.dataset.menu; if (k === "stay") { const s = stayOn(view); return openSheet(s ? staySheet(s) : tripSheet()); } if (k === "wx") return openSheet(wxSheet()); if (k === "ideas") { const h = view === today ? new Date().getHours() : 10; return openPlanner(view, h < 11 ? "coffee" : h < 14 ? "dinner" : h < 17 ? "see" : h < 21 ? "dinner" : "drinks", null); } if (k === "tasks") return openSheet(tasksSheet()); if (k === "tour") { closeSheet(); return setTimeout(openTour, 320); } if (k === "plan") return openAsk(view); if (k === "trip") return openSheet(tripSheet()); }
+  const mi = t.closest("[data-menu]"); if (mi) { haptic(); const k = mi.dataset.menu; if (k === "stay") { const s = stayOn(view); return openSheet(s ? staySheet(s) : tripSheet()); } if (k === "wx") return openSheet(wxSheet()); if (k === "ideas") { const h = view === today ? new Date().getHours() : 10; return openPlanner(view, h < 11 ? "coffee" : h < 14 ? "dinner" : h < 17 ? "see" : h < 21 ? "dinner" : "drinks", null); } if (k === "tasks") return openSheet(tasksSheet()); if (k === "tour") { closeSheet(); return setTimeout(openTour, 320); } if (k === "plan") return openAsk(view); if (k === "trip") return openSheet(tripSheet()); if (k === "cal") { const f = "europe-family-trip.app/cal/ed3056321e507c456ba8.ics"; closeSheet(); location.href = /android/i.test(navigator.userAgent) ? "https://calendar.google.com/calendar/r?cid=" + encodeURIComponent("webcal://" + f) : "webcal://" + f; return; } }
   if (t.closest("[data-open-trip]")) { haptic(); return openSheet(tripSheet()); }
 });
 document.addEventListener("keydown", e => {
