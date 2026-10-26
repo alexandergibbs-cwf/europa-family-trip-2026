@@ -577,6 +577,23 @@ DESCRIPTION:1:30 pm Rome time\nCheck in from 2:00 pm\nReception hours aren
  ’t listed; some guests mention self check-in.
 END:VEVENT
 BEGIN:VEVENT
+UID:2026-10-28-booked-1140-RistorantePancraziodal19@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261028T180000Z
+DTEND:20261028T200000Z
+SUMMARY:Ristorante Pancrazio dal 1922 · Dinner booked · 8 people
+LOCATION:Ristorante Pancrazio dal 1922
+DESCRIPTION:7:00 pm Rome time\nBooked under Jessica Seinor\, 7 PM for 8. P
+ iazza del Biscione 92\, by Campo de’ Fiori. Tables in the ancient ruins b
+ elow go first come\, first served\, but you can visit them during the mea
+ l whatever table you get.
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Ristorante Pancrazio dal 1922 · Dinner booked · 8 people
+TRIGGER:-PT60M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
 UID:2026-10-30-pack-585-SpagnaBoutiquePacksuitca@europe-family-trip.app
 DTSTAMP:20261025T000000Z
 DTSTART:20261030T084500Z
