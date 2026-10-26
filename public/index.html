@@ -804,7 +804,7 @@ function buildDay(iso) {
   } else if (s) segs.push({ s: cur, e: DE, k: "free", title: "Free day", sub: `Nothing booked in ${s.city}` });
   /* drop a fixed block into free time */
   const carve = (s, e, obj) => { const keep = []; segs.forEach(x => { if ((x.k === "free" || x.k === "wait") && x.s < e && x.e > s) { if (x.s < s) keep.push({ ...x, e: s }); if (x.e > e) keep.push({ ...x, s: e }); } else keep.push(x); }); segs.length = 0; segs.push(...keep, { s, e, ...obj }); segs.sort((a, c) => a.s - c.s); };
-  EVENTS.filter(b => b.on === iso).forEach(b => { const hm = x => +x.slice(0, 2) * 60 + +x.slice(3, 5); carve(hm(b.s), hm(b.e), { k: "booked", b }); });
+  EVENTS.filter(b => b.on === iso && !b.idea).forEach(b => { const hm = x => +x.slice(0, 2) * 60 + +x.slice(3, 5); carve(hm(b.s), hm(b.e), { k: "booked", b }); });
   /* at the hotel either side of a ride: check out / collect bags before, check in / drop bags after */
   segs.filter(x => x.k === "get" && x.dep && (x.co || x.collect) && x.from).forEach(x => carve(x.s - 30, x.s, { k: "get", coOnly: true, stay: x.from, hact: x.co ? "Check out" : "Collect bags" }));
   segs.filter(x => x.k === "get" && !x.dep && x.at != null && (x.bags || x.checkin)).forEach(x => { const at = Math.min(x.at, x.e), end = x.checkin && x.e >= at + 15 ? x.e : at + 30; x.e = at; carve(at, end, { k: "get", hk: "in", stay: x.stay, hact: x.bags ? "Drop bags" : "Check in", hsub: x.bags ? `Room ready from ${s12(x.stay.ci)}` : "" }); });
@@ -1617,8 +1617,16 @@ const SCN_CACHE = new Map();
 const dk = (a, b) => km(a.lat, a.lng, b.lat, b.lng);
 const walk = k => shortDist(k);
 /* travel days are two half-days: before leaving you're in the old city, after arriving in the new one */
+/* plan -1: a day sketched by hand (the Rome guide), shown as one of the plans that take turns */
+const IDEA_CAT = { day: "see", culture: "culture", shop: "shop", lunch: "dinner", dinner: "dinner", coffee: "coffee", drinks: "drinks" };
+const ideaSave = b => { const n = (b.t || "").toLowerCase(); return SAVES.find(z => z.lat != null && z.kind !== "skip" && (z.name.toLowerCase() === n || (n.length > 5 && z.name.toLowerCase().startsWith(n)))) || null; };
+function ideaScene(iso) {
+  const hm = x => +x.slice(0, 2) * 60 + +x.slice(3, 5);
+  return EVENTS.filter(b => b.on === iso && b.idea).map(b => ({ k: b.k, l: (b.act || "").split(" · ")[0] || b.t, cat: IDEA_CAT[b.k] || "see", s: hm(b.s), e: hm(b.e), idea: b, min: 25 })).sort((a, b) => a.s - b.s);
+}
 function scenePlans(iso, si) {
   const key = iso + "|" + si; if (SCN_CACHE.has(key)) return SCN_CACHE.get(key);
+  if (si < 0) { const sc = sceneFor(iso, si), out = [sc.map(p => { const w = (p.idea.act || "").split(" · ").slice(1).join(" · "); return `${p.idea.t}${w ? " · " + w : ""}\x1f${p.idea.note || ""}`; })]; out.ids = [sc.map(p => { const z = ideaSave(p.idea); return z ? [z.id] : []; })]; SCN_CACHE.set(key, out); return out; }
   const P = planSteps(iso, sceneFor(iso, si)), out = P.txt; out.ids = P.ids;
   SCN_CACHE.set(key, out); return out;
 }
@@ -1763,6 +1771,7 @@ const driveMins = k => Math.max(30, Math.round((k * 1.3 / 75 * 60 + 10) / 30) * 
 function wet(iso) { const w = wxFor(iso); return !!w && !w.typical && ((w.prob != null ? w.prob >= 60 : false) || w.rain >= 4 || /rain|shower|storm/i.test(w.cond)); }
 function sceneFor(iso, si) {
   const key = iso + "|" + si; if (SCF.has(key)) return SCF.get(key);
+  if (si < 0) { const r = ideaScene(iso); SCF.set(key, r); return r; }
   const st = anchorFor(iso) || STAYS.find(s => s.out === iso), M = MEALS[CTRY[st ? st.city : ""] || "IT"];
   let sc = SCENES[si];
   if (wet(iso)) { const hasC = sc.some(p => p.k === "culture"); sc = sc.map(p => p === SC_.seeAM ? (hasC ? SC_.shopAM : SC_.cultAM) : p === SC_.seePM ? (hasC || sc.includes(SC_.cultAM) ? SC_.shopPM : SC_.cultPM) : p); }
@@ -1813,15 +1822,15 @@ function splitArea(steps) {
 function promptsFor(iso, free) {
   const out = [], pl = getPlan(iso), planned = EVENTS.some(b => b.on === iso && b.idea);
   const seen = new Set();
-  SCENES.forEach((_, si) => {
+  /* a hand-made plan for the day goes first, then the usual plans take turns with it */
+  (planned ? [-1] : []).concat(SCENES.map((_, si) => si)).forEach(si => {
     const sc = sceneFor(iso, si), sig = sc.map(p => p.k + p.s + "-" + p.e).join();
-    if (seen.has(sig)) return; seen.add(sig); /* a wet day can turn two plans into the same one */
-    if (SCENES[si].some(p => p.at === "trip") && !sc.some(p => p.dest)) return; /* no day trip without somewhere to go */
+    if (!sc.length || seen.has(sig)) return; seen.add(sig); /* a wet day can turn two plans into the same one */
+    if (si >= 0 && SCENES[si].some(p => p.at === "trip") && !sc.some(p => p.dest)) return; /* no day trip without somewhere to go */
     sc.forEach((pr, step) => free.forEach(f => {
       const s = Math.max(Math.ceil(f.s / 15) * 15, pr.s), e = Math.min(Math.floor(f.e / 15) * 15, pr.e); if (e - s < Math.min(pr.min || 45, pr.e - pr.s)) return;
       if (pl.some(p => p.t < e && p.t + catOf(p.c).dur > s)) return;
       if (iso === today && e <= nowMin()) return; /* no ideas for time that has already gone */
-      if (planned && !["coffee", "lunch", "dinner", "drinks"].includes(pr.k)) return;
       out.push({ k: "prompt", s, e, pr, tt: pr.l, sc: si, step });
     }));
   });
@@ -1983,7 +1992,7 @@ function promptSheet() {
     ? `<div class="ig">${sv.hook ? `<div class="r"><span>${esc(hookOf(sv))}</span><span></span></div>` : ""}${sv.rating ? r("Rating", `★ ${sv.rating}${sv.reviews ? ` (${sv.reviews.toLocaleString()})` : ""}`) : ""}${sv.address ? r("Address", esc(sv.address)) : ""}${o ? r("Distance", `${distTxt(km(o.lat, o.lng, sv.lat, sv.lng))} from ${esc(fromTxt(view, anchorFor(view)))}`) : ""}</div>
       <div class="acts"><a class="btn blue press" href="${dirs(sv.name + " " + (sv.address || sv.city))}" target="_blank" rel="noopener">Directions</a><a class="btn card press" href="${ttq(sv.name, sv.city)}" target="_blank" rel="noopener">TikTok</a>${sv.url ? `<a class="btn card press" href="${esc(sv.url)}" target="_blank" rel="noopener">Video</a>` : ""}</div>`
     : `<div class="ig">${got.map(x => placeRow({ s: x, k: o ? km(o.lat, o.lng, x.lat, x.lng) : null }, "")).join("")}</div>`;
-  return top + body + `<div class="acts"><button class="btn card press" data-pswap>Something else</button><button class="btn blue press" data-padd>Add to the day</button></div><p class="nt">Suggestions are dotted. Add one and it stays on the day.</p>`;
+  return top + body + (i.pr.idea && i.pr.idea.note ? `<p class="nt">${esc(i.pr.idea.note)}</p>` : "") + `<div class="acts"><button class="btn card press" data-pswap>Something else</button><button class="btn blue press" data-padd>Add to the day</button></div><p class="nt">Suggestions are dotted. Add one and it stays on the day.</p>`;
 }
 let PL = { iso: null, cat: "coffee", block: null, n: 12 };
 function plannerSheet() {
@@ -2196,6 +2205,7 @@ document.addEventListener("click", e => {
     const ids = sceneIds(view, i.sc, i.step), alts = sceneAlts(view, i.sc, i.step), n = alts.length ? ((pp.dataset.n != null ? +pp.dataset.n - 1 : +pp.dataset.sc) % alts.length + alts.length) % alts.length : 0;
     const got = (ids[n] || []).map(id => SAVE_BY[id]).filter(Boolean);
     if (got.length && !i.pr.dest) { PS = { i, got, txt: alts[n] || "", shown }; return openSheet(promptSheet()); }
+    if (i.pr.idea) { const b = i.pr.idea; return openSheet(head(esc(b.t), `${esc(i.pr.l)} · ${t12(i.s)} – ${t12(i.e)}`) + (b.note ? `<p class="nt">${esc(b.note)}</p>` : "") + (b.where ? `<div class="acts"><a class="btn blue press" href="${dirs(b.where)}" target="_blank" rel="noopener">Directions</a><a class="btn card press" href="${ttq(b.t, cityOn(view))}" target="_blank" rel="noopener">TikTok</a></div>` : "")); }
     return openPlanner(view, pp.dataset.prompt, { s: i.s, e: i.e, k: "free" }, shown); }
   const na = t.closest("[data-nadd]"); if (na) { haptic("heavy"); const z = SAVE_BY[na.dataset.nadd], p = getPlan(today), j = p.findIndex(x => x.id === z.id), c = { dinner: "dinner", drinks: "drinks", coffee: "coffee", sweet: "sweet", culture: "culture", see: "see", shop: "shop", experience: "experience" }[z.kind] || "see";
     if (j >= 0) p.splice(j, 1); else p.push({ id: z.id, c, t: Math.ceil((nowMin() + 5) / 15) * 15 }); setPlan(today, p); swapSheet(nearSheet()); if (view === today) content.innerHTML = renderContent(view); return; }
