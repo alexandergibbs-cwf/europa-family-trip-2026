@@ -79,7 +79,7 @@ SUMMARY:✈︎ Athens → Rome
 LOCATION:Athens International Airport
 DESCRIPTION:Departs 10:55 am Athens time · lands 12:00 pm Rome time\nGQ820
   · Sky Express\nBooking ref: 2JCREI\nBags: 32kg checked\, cabin bag\, sma
- ll bag
+ ll bag\nCar picks you up at the hotel at 8 AM.
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:✈︎ Athens → Rome
@@ -518,7 +518,7 @@ DTSTART:20261026T203000Z
 DTEND:20261026T210000Z
 SUMMARY:11 Enteka Acropolis Suites · Pack suitcases
 LOCATION:11 Enteka Acropolis Suites\, Kallaischrou 8\, Koukaki\, Athens
-DESCRIPTION:10:30 pm Athens time\nLeaving 8:40 am tomorrow
+DESCRIPTION:10:30 pm Athens time\nLeaving 8:00 am tomorrow
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:11 Enteka Acropolis Suites · Pack suitcases
@@ -526,13 +526,13 @@ TRIGGER:-PT0M
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
-UID:2026-10-27-get-490-11EntekaAcropolisSuitesC@europe-family-trip.app
+UID:2026-10-27-get-450-11EntekaAcropolisSuitesC@europe-family-trip.app
 DTSTAMP:20261025T000000Z
-DTSTART:20261027T061000Z
-DTEND:20261027T064000Z
+DTSTART:20261027T053000Z
+DTEND:20261027T060000Z
 SUMMARY:11 Enteka Acropolis Suites · Check out
 LOCATION:11 Enteka Acropolis Suites\, Kallaischrou 8\, Koukaki\, Athens
-DESCRIPTION:8:10 am Athens time
+DESCRIPTION:7:30 am Athens time
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:11 Enteka Acropolis Suites · Check out
@@ -540,22 +540,22 @@ TRIGGER:-PT30M
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
-UID:2026-10-27-get-520-11EntekaAcropolisSuitesA@europe-family-trip.app
+UID:2026-10-27-get-480-11EntekaAcropolisSuitesA@europe-family-trip.app
 DTSTAMP:20261025T000000Z
-DTSTART:20261027T064000Z
-DTEND:20261027T073000Z
-SUMMARY:11 Enteka Acropolis Suites → Athens Airport
+DTSTART:20261027T060000Z
+DTEND:20261027T065000Z
+SUMMARY:11 Enteka Acropolis Suites → Athens Airport · Car pickup\, booked
 LOCATION:11 Enteka Acropolis Suites\, Kallaischrou 8\, Koukaki\, Athens
-DESCRIPTION:8:40 am Athens time
+DESCRIPTION:8:00 am Athens time
 END:VEVENT
 BEGIN:VEVENT
-UID:2026-10-27-change-570-AthensAirportBagssecurit@europe-family-trip.app
+UID:2026-10-27-change-530-AthensAirportBagssecurit@europe-family-trip.app
 DTSTAMP:20261025T000000Z
-DTSTART:20261027T073000Z
+DTSTART:20261027T065000Z
 DTEND:20261027T085500Z
 SUMMARY:Athens Airport · Bags\, security
 LOCATION:Athens International Airport
-DESCRIPTION:9:30 am Athens time
+DESCRIPTION:8:50 am Athens time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-10-27-get-720-RomeFiumicinoSpagnaBouti@europe-family-trip.app
