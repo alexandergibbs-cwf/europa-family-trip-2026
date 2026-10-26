@@ -724,6 +724,8 @@ const t12 = n => { if (n >= 1440) return "Midnight"; const a = ap(n); return `${
 const s12 = s => t12(mins(s));
 const tBig = n => { const a = ap(n); return `${a.t}<small>${a.p}</small>`; };
 const hourLabel = n => n % 1440 === 0 ? (n ? "Midnight" : "12 AM") : n === 720 ? "Noon" : `${ap(n).h12} ${ap(n).p}`;
+/* how long a block lasts, written out: "1 hr 30 min" */
+const lenTxt = n => { n = Math.round(n); const h = Math.floor(n / 60), m = n % 60; return h && m ? `${h} hr ${m} min` : h ? `${h} hr` : `${m} min`; };
 const dur = n => { const h = Math.floor(n / 60), m = n % 60; return h && m ? `${h}h ${m}m` : h ? `${h}h` : `${m}m`; };
 const stayOn = iso => STAYS.find(s => s.in <= iso && iso < s.out);
 const cityOn = iso => { const s = stayOn(iso); return s ? s.city : iso === "2026-11-19" ? "London" : iso === END || iso === START ? "Perth" : "Athens"; };
@@ -1279,13 +1281,13 @@ function renderDayContent(iso) {
     }
     if (ev.k === "mine") {
       const p = ev.mp, [a1, a2] = (p.txt || "").split("\x1f"), cut = (a1 || "").lastIndexOf(" · "), place = cut > 0 ? a1.slice(0, cut) : a1, lo = liveFrom(iso), sv0 = lo && SAVE_BY[(p.ids || [])[0]], walkT = sv0 ? `${walk(dk(lo, sv0))} from you` : cut > 0 ? a1.slice(cut + 3) : "";
-      html += `<button class="ev mine${short ? " short" : ""}${h >= 58 ? " wrap" : ""} press" data-i="${i}" style="--c:${KCOL[p.k] || "#8e8e93"};top:${top + 12}px;height:${h}px"><span class="tt">${icon(KICON[p.k])}${esc(place || p.l)}</span><span class="tm">${place ? `${esc(p.l)} · ` : ""}${t12(ev.s)} – ${t12(ev.e)}${leaveBy(iso, ev) ? ` · <b class="cd">${leaveBy(iso, ev)}</b>` : walkT && !short ? ` · ${esc(walkT)}` : ""}</span>${a2 && h >= 96 ? `<span class="hk">${esc(a2)}</span>` : ""}</button>`;
+      html += `<button class="ev mine${short ? " short" : ""}${h >= 58 ? " wrap" : ""} press" data-i="${i}" style="--c:${KCOL[p.k] || "#8e8e93"};top:${top + 12}px;height:${h}px"><span class="tt">${icon(KICON[p.k])}${esc(place || p.l)}</span><span class="tm">${place ? `${esc(p.l)} · ` : ""}${t12(ev.s)} – ${t12(ev.e)} · ${lenTxt(ev.e - ev.s)}${leaveBy(iso, ev) ? ` · <b class="cd">${leaveBy(iso, ev)}</b>` : walkT && !short ? ` · ${esc(walkT)}` : ""}</span>${a2 && h >= 96 ? `<span class="hk">${esc(a2)}</span>` : ""}</button>`;
       return;
     }
     if (ev.k === "plan") {
       /* a place someone added: solid, in its category's colour, like the rest of the day */
       const ck = { coffee: "coffee", drinks: "drinks", see: "day", shop: "shop", culture: "culture", trip: "trip" }[ev.cat] || (ev.s < 1020 ? "lunch" : "dinner");
-      html += `<button class="ev mine${short ? " short" : ""}${h >= 58 ? " wrap" : ""} press" data-i="${i}" style="--c:${KCOL[ck]};top:${top + 12}px;height:${h}px"><span class="tt">${icon(KICON[ck])}${esc(ev.save.name)}</span><span class="tm">${esc((catOf(ev.cat) || {}).l || "")} · ${t12(ev.s)} – ${t12(ev.e)}${leaveBy(iso, ev) ? ` · <b class="cd">${leaveBy(iso, ev)}</b>` : ""}</span>${ev.save.hook && h >= 80 ? `<span class="hk">${esc(hookOf(ev.save))}</span>` : ""}</button>`;
+      html += `<button class="ev mine${short ? " short" : ""}${h >= 58 ? " wrap" : ""} press" data-i="${i}" style="--c:${KCOL[ck]};top:${top + 12}px;height:${h}px"><span class="tt">${icon(KICON[ck])}${esc(ev.save.name)}</span><span class="tm">${esc((catOf(ev.cat) || {}).l || "")} · ${t12(ev.s)} – ${t12(ev.e)} · ${lenTxt(ev.e - ev.s)}${leaveBy(iso, ev) ? ` · <b class="cd">${leaveBy(iso, ev)}</b>` : ""}</span>${ev.save.hook && h >= 80 ? `<span class="hk">${esc(hookOf(ev.save))}</span>` : ""}</button>`;
       return;
     }
     if (ev.k === "prompt") {
@@ -1298,7 +1300,7 @@ function renderDayContent(iso) {
       html += `<div class="ev ${ev.k}${short ? " short" : ""}${ev.done ? " done" : ""}" role="button" tabindex="0" data-i="${i}" style="top:${top + 12}px;height:${h}px"><span class="tt">${ev.k === "wait" ? (ev.x.morning ? "Leave bags at hotel after check-out" : ev.x.stay && ev.x.stay.store === false ? "Drop off suitcases (ask host, no storage listed)" : "Drop off suitcases at the hotel") : ""}</span><span class="tm"></span></div>`;
       return;
     }
-    const time = ev.k === "mark" ? t12(ev.s) : ev.x && ev.x.overnight ? `until ${t12(ev.e)}` : `${t12(ev.s)} – ${t12(ev.e)}`;
+    const time = ev.k === "mark" ? t12(ev.s) : ev.x && ev.x.overnight ? `until ${t12(ev.e)}` : `${t12(ev.s)} – ${t12(ev.e)}${ev.k === "travel" ? (ev.m && ev.m.arr ? ` · ${lenTxt((toUTC(ev.m.arr) - toUTC(ev.m.dep)) / 6e4)}` : "") : ev.e - ev.s >= 5 ? ` · ${lenTxt(ev.e - ev.s)}` : ""}`;
     const durTxt = (ev.k === "free" || ev.k === "wait") ? ` · ${dur(ev.e - ev.s)}` : "";
     const modeOf = ev.m || (ev.x && ev.x.arr), isRide = (ev.k === "get" && !ev.x.coOnly) || (ev.k === "booked" && ev.x.b.style === "ride");
     html += `<button class="ev ${ev.k}${ev.k === "booked" && ev.x.b.idea ? " bk-idea c-" + ev.x.b.k : ""}${ev.k === "booked" && ev.x.b.style ? " bk-" + ev.x.b.style : ""}${ev.k === "get" && ev.x.coOnly ? " co" : ""}${isRide ? " ride" : ""}${ev.k === "get" && h >= 58 ? " wrap" : ""}${modeOf && modeOf.mode === "Train" && (ev.k === "travel" || ev.k === "change" || isRide) ? " rail" : ""}${short ? " short stack" : ""}${ev.done ? " done" : ""} press" data-i="${i}" style="${ev.k === "booked" && ev.x.b.idea ? `--c:${KCOL[ev.x.b.k]};` : ""}top:${top + 12}px;height:${h}px"><span class="tt">${icon(ev.k === "travel" || ev.k === "change" ? (ev.m && ev.m.mode === "Flight" ? "fly" : "rail") : isRide ? "car" : (ev.k === "get" || ev.k === "pack") ? "home" : ev.k === "booked" ? (ev.x.b.icon || (ev.x.b.idea ? KICON[ev.x.b.k] : ev.x.b.kind === "dinner" ? "fork" : "pin")) : "")}${esc(ev.tt)}${durTxt}</span><span class="tm">${ev.act ? `${esc(ev.act)} · ` : ""}${time}${ev.cd && !short ? ` · <b class="cd">${countdown(ev.cd)}</b>` : ""}${ev.k === "booked" && leaveBy(iso, ev) ? ` · <b class="cd">${leaveBy(iso, ev)}</b>` : ""}${!short && ev.sub && h >= 60 && h < 80 ? ` · ${esc(ev.sub)}` : ""}</span>${!short && ev.sub && h >= 80 ? `<span class="tm">${esc(ev.sub)}</span>` : ""}${!short && ev.ref && h >= 100 ? `<span class="ref" data-show-ref="${ev.ref}" data-show-l="${esc(ev.m.code)}">${ev.ref} ›</span>` : ""}</button>`;
