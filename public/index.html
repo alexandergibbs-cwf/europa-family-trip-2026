@@ -890,6 +890,8 @@ function askHere(then) {
   /* already allowed: just use it. Not decided yet: ask with our own card first, so it's clear why */
   const go = () => { let had = false; try { had = !!localStorage.getItem("here"); } catch (e) {}
     const fall = () => had ? (hereAsked = 0, askHere()) : ask();
+    /* said yes before: go straight to the phone's own question (iPhone home-screen apps can forget the answer), never our card again */
+    if (had) { hereAsked = 0; return askHere(); }
     try { navigator.permissions.query({ name: "geolocation" }).then(st => st.state === "granted" ? (hereAsked = 0, askHere()) : st.state === "prompt" ? ask() : null).catch(fall); } catch (e) { fall(); } };
   let n = 0; const wait = () => { const busy = !document.getElementById("a2hs").hidden || document.querySelector(".tour:not([hidden])") || !sheet.hidden; if (busy && n++ < 120) return setTimeout(wait, 1000); go(); };
   setTimeout(wait, 1500);
