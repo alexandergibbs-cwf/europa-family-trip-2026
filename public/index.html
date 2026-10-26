@@ -1558,11 +1558,20 @@ sheet.addEventListener("touchmove", e => {
 sheet.addEventListener("touchend", () => { if (!drag) return; const { dy, t, mode } = drag; drag = null; if (mode !== "pull") return; const v = dy / (Date.now() - t); sheet.style.transform = ""; if (dy > 110 || (v > 0.11 && dy > 20)) closeSheet(dy); else sAnim = sheet.animate([{ transform: `translateY(${dy}px)` }, { transform: "translateY(0)" }], { duration: 500, easing: EASE, fill: "forwards" }); });
 sheet.addEventListener("touchcancel", () => { if (drag && drag.mode === "pull") { sheet.style.transform = ""; } drag = null; });
 const r = (k, v, cls = "") => `<div class="r"><span>${k}</span><span class="${cls}">${v}</span></div>`;
+/* "32kg checked, cabin bag, small bag" → a checked-suitcase row and a carry-on row, per person */
+const bagParts = b => { const p = (b || "").split(/,\s*/), i = p.findIndex(x => /checked/i.test(x)); const chk = i >= 0 ? p.splice(i, 1)[0].replace(/\s*checked/i, "").replace(/(\d)kg/i, "$1 kg") : ""; return { chk, carry: p.join(", ").replace(/(\d)kg/gi, "$1 kg") }; };
+function bagRows(m) {
+  if (!m.bags) return r("Suitcase", "Check the booking");
+  const { chk, carry } = bagParts(m.bags);
+  return (chk ? r("Suitcase", `<b>${esc(chk)}</b> each`) : "") + (carry ? r("Carry-on", esc(carry)) : "");
+}
+/* the next flight from this day on, for the suitcase line in the menu */
+const nextFlight = iso => MOVES.filter(m => m.mode === "Flight" && m.dep[0] >= iso).sort((x, y) => (x.dep[0] + x.dep[1]).localeCompare(y.dep[0] + y.dep[1]))[0] || null;
 function moveSheet(m) {
   const legs = m.id === "t3" || m.id === "t4" ? [MOVES.find(x => x.id === "t3"), MOVES.find(x => x.id === "t4")] : [m], a = legs[0], z = legs[legs.length - 1];
   const notes = legs.map(x => x.note).filter(Boolean).join(" ");
   return head(`${esc(a.from)} → ${esc(z.to)}`, `${dDay(a.dep[0])}, ${s12(a.d)} – ${s12(z.a)}${z.aDate !== a.dep[0] ? " next day" : ""}${a.guess ? " (guess)" : ""}`)
-    + `<div class="ig">${legs.map(x => r(`${x.mode} ${esc(x.code)}`, x.ref || esc(x.todo), x.ref ? "code" : "")).join("")}${r("Operator", esc(a.carrier))}${a.bags ? r("Bags each", esc(a.bags)) : ""}${a.fromQ ? r("From", esc(a.fromQ)) : ""}${a.leave ? r("Leave hotel", `${s12(a.leave)}${a.leaveFirm ? "" : " (suggested)"}`) : ""}</div>
+    + `<div class="ig">${legs.map(x => r(`${x.mode} ${esc(x.code)}`, x.ref || esc(x.todo), x.ref ? "code" : "")).join("")}${r("Operator", esc(a.carrier))}${a.mode === "Flight" ? bagRows(a) : ""}${a.fromQ ? r("From", esc(a.fromQ)) : ""}${a.leave ? r("Leave hotel", `${s12(a.leave)}${a.leaveFirm ? "" : " (suggested)"}`) : ""}</div>
     ${notes ? `<p class="nt">${esc(notes)}</p>` : ""}
     <div class="acts">${a.ref ? `<button class="btn blue press" data-show-ref="${a.ref}" data-show-l="${esc(a.code)}">Show ref</button>` : ""}${a.fromQ ? `<a class="btn card press" href="${dirs(a.fromQ)}" target="_blank" rel="noopener">Directions</a>` : ""}</div>`;
 }
@@ -2037,6 +2046,7 @@ function menuSheet() {
   <div class="ig">
       ${row("stay", s ? esc(s.hotel) : "No hotel tonight", s ? `Check in ${s12(s.ci)} · out ${s12(s.co)}${s.est ? " (usual)" : ""}${s.addr && !/booking/i.test(s.addr) ? " · " + esc(s.addr) : ""}` : (iso === END ? "Landing in Perth" : "Overnight flight"))}
       ${hasFree(iso) ? row("plan", getDay(iso) ? "Day planned" : "Plan the day", getDay(iso) ? "Change or clear it" : "A few questions, then a plan") : ""}
+      ${(() => { const f = nextFlight(iso); if (!f) return ""; const { chk, carry } = bagParts(f.bags); return row("bags", f.bags ? `Suitcases: ${esc(chk || carry)} each` : "Suitcases", `${f.dep[0] === iso ? "Today" : wk(f.dep[0])}, ${esc(f.from)} → ${esc(f.to)}${f.bags ? (carry && chk ? ` · plus ${esc(carry)}` : "") : " · check the booking"}`); })()}
       ${row("near", "Near me now", "Saved places closest to you")}
       ${row("ideas", "Things to do", hasSaves(iso) ? `<span class="cyc" id="cyc"></span>` : `Search near the hotel`)}
       ${row("cal", "Add to my calendar", "Flights, trains and bookings, with alerts")}
@@ -2200,7 +2210,7 @@ document.addEventListener("click", e => {
   if (t.closest("#backPill")) { haptic(); return openSide(); }
   if (t.closest("#titlePill")) { haptic(); openSheet(menuSheet()); startCycle(view); return; }
   if (t.closest("[data-today]")) { e.preventDefault(); haptic(); closeSheet(); return selectDay(today); }
-  const mi = t.closest("[data-menu]"); if (mi) { haptic(); const k = mi.dataset.menu; if (k === "stay") { const s = stayOn(view); return openSheet(s ? staySheet(s) : tripSheet()); } if (k === "wx") return openSheet(wxSheet()); if (k === "ideas") { const h = view === today ? new Date().getHours() : 10; return openPlanner(view, h < 11 ? "coffee" : h < 14 ? "dinner" : h < 17 ? "see" : h < 21 ? "dinner" : "drinks", null); } if (k === "tasks") return openSheet(tasksSheet()); if (k === "tour") { closeSheet(); return setTimeout(openTour, 320); } if (k === "plan") return openAsk(view); if (k === "trip") return openSheet(tripSheet()); if (k === "cal") return openSheet(calSheet()); if (k === "near") { openSheet(nearSheet()); hereAsked = 0; return askHere(() => { if (!sheet.hidden && document.getElementById("nearS")) swapSheet(nearSheet()); }); } }
+  const mi = t.closest("[data-menu]"); if (mi) { haptic(); const k = mi.dataset.menu; if (k === "stay") { const s = stayOn(view); return openSheet(s ? staySheet(s) : tripSheet()); } if (k === "wx") return openSheet(wxSheet()); if (k === "ideas") { const h = view === today ? new Date().getHours() : 10; return openPlanner(view, h < 11 ? "coffee" : h < 14 ? "dinner" : h < 17 ? "see" : h < 21 ? "dinner" : "drinks", null); } if (k === "tasks") return openSheet(tasksSheet()); if (k === "tour") { closeSheet(); return setTimeout(openTour, 320); } if (k === "plan") return openAsk(view); if (k === "trip") return openSheet(tripSheet()); if (k === "cal") return openSheet(calSheet()); if (k === "bags") { const f = nextFlight(view); if (f) return openSheet(moveSheet(f)); } if (k === "near") { openSheet(nearSheet()); hereAsked = 0; return askHere(() => { if (!sheet.hidden && document.getElementById("nearS")) swapSheet(nearSheet()); }); } }
   if (t.closest("[data-open-trip]")) { haptic(); return openSheet(tripSheet()); }
 });
 document.addEventListener("keydown", e => {
