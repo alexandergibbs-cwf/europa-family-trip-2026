@@ -930,7 +930,7 @@ const HOOK_FIX = { "Buttercup Farm Park": "farm park on the west edge of edinbur
 const KIND_BY_NAME = {}; Object.entries(KIND_FIX).forEach(([k, ns]) => ns.forEach(n => (KIND_BY_NAME[n] = k)));
 { const seen = new Set(); SAVES.forEach(s => {
   const key = s.name + "|" + s.city;
-  s.kind = seen.has(key) ? "skip" : KIND_BY_NAME[s.name] || (s.cat === "restaurant" ? "dinner" : s.cat === "bar" ? "drinks" : s.cat === "cafe" ? "coffee" : s.cat === "accommodation" ? "skip"
+  s.kind = seen.has(key) ? "skip" : KIND_BY_NAME[s.name] || (s.cat === "restaurant" ? "dinner" : s.cat === "bar" ? "drinks" : s.cat === "cafe" ? "coffee" : s.cat === "sweets" ? "sweet" : s.cat === "accommodation" ? "skip"
     : CULT.test(s.name) ? "culture" : s.cat === "shop" ? "shop" : "see");
   if (HOOK_FIX[s.name]) s.hook = HOOK_FIX[s.name];
   s.name = s.name.replace(/\s*\|\s*/g, " – "); /* "|" separates ideas internally */
