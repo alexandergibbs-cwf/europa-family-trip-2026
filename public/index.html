@@ -313,6 +313,11 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .cat small { font-weight: 500; opacity: .6; margin-left: 4px; }
 .place { display: grid; grid-template-columns: 1fr auto; gap: 3px 12px; padding: 12px 16px; align-items: center; }
 .place + .place { box-shadow: inset 16px .5px 0 var(--card), inset 0 .5px 0 var(--hair); }
+.vidv { position: fixed; inset: 0; z-index: 75; background: #000; display: flex; flex-direction: column; }
+.vidb { flex: 1; display: flex; align-items: center; justify-content: center; padding-top: env(safe-area-inset-top); }
+.vidb iframe { width: min(100vw, 56.25vh); height: 100%; max-height: calc(100vh - 80px - env(safe-area-inset-bottom)); border: 0; background: #000; }
+.vidbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px calc(12px + env(safe-area-inset-bottom)); }
+.vidbar a { color: #fff; opacity: .8; font-size: 15px; text-decoration: none; }
 .mapv { position: fixed; inset: 0; z-index: 65; background: var(--panel); }
 #mapc { position: absolute; inset: 0; }
 .mtop { position: absolute; left: 0; right: 0; top: 0; z-index: 500; display: flex; gap: 8px; align-items: center; padding: max(12px, env(safe-area-inset-top)) 12px 8px; pointer-events: none; }
@@ -627,6 +632,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 </aside>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden><div class="grab"></div><div id="sheet-body"></div></div>
 <div class="show" id="show" role="dialog" aria-modal="true" hidden></div>
+<div class="vidv" id="vidv" role="dialog" aria-modal="true" aria-label="Video" hidden><div class="vidb"><iframe id="vidf" title="Saved video" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe></div><div class="vidbar"><a id="vido" target="_blank" rel="noopener">Open in app</a><button class="mdone press" id="vidx">Done</button></div></div>
 <div class="mapv" id="mapv" role="dialog" aria-modal="true" aria-label="Map" hidden><div id="mapc"></div><div class="mtop"><div class="mchips" id="mchips"></div><button class="mdone press" id="mdone">Done</button></div><button class="mme press" id="mme" aria-label="Where am I"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg></button><div class="mcard" id="mcard" hidden></div></div>
 <div class="sr" aria-live="polite" id="live"></div>
 
@@ -2097,8 +2103,9 @@ function planItemSheet(ev) {
    it came from when that video is about just this place). Missing photos simply don't show. */
 const URLN = {}; SAVES.forEach(z => { if (z.url) URLN[z.url] = (URLN[z.url] || 0) + 1; });
 const photoUrl = z => "/api/photo?" + new URLSearchParams({ id: z.id, n: z.name, c: z.city || "", co: z.country || "", lat: z.lat, lng: z.lng, ...(z.url && /tiktok\.com/.test(z.url) && URLN[z.url] <= 2 ? { u: z.url } : {}) });
-const ph = z => z && z.lat != null ? `<img class="ph" loading="lazy" decoding="async" alt="" src="${esc(photoUrl(z))}" onerror="this.parentNode.classList.remove('hasph');this.remove()">` : "";
-const hero = z => z && z.lat != null ? `<img class="hero" decoding="async" alt="" src="${esc(photoUrl(z))}" onerror="this.remove()">` : "";
+const vidAttr = z => z && z.url && /tiktok\.com|instagram\.com/.test(z.url) ? ` data-vid="${esc(z.url)}"` : "";
+const ph = z => z && z.lat != null ? `<img class="ph"${vidAttr(z)} loading="lazy" decoding="async" alt="" src="${esc(photoUrl(z))}" onerror="this.parentNode.classList.remove('hasph');this.remove()">` : "";
+const hero = z => z && z.lat != null ? `<img class="hero"${vidAttr(z)} decoding="async" alt="" src="${esc(photoUrl(z))}" onerror="this.remove()">` : "";
 function placeRow({ s, k }, btn) {
   return `<div class="place hasph">${ph(s)}<span><span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${k >= 8 && s.city !== (anchorFor(view) || {}).city ? tripTxt(k) : distTxt(k)}</b></span><span class="links"><a href="${dirs(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video</a>` : ""}</span></span>${btn}</div>`;
 }
@@ -2225,7 +2232,7 @@ function mapCard(z) {
   const o = liveFrom(view) || anchorFor(view), k = o ? km(o.lat, o.lng, z.lat, z.lng) : null, on = getPlan(view).some(p => p.id === z.id);
   c.className = "mcard";
   c.innerHTML = `<button class="mx" data-mx aria-label="Close">✕</button><img class="mph" alt="" src="${esc(photoUrl(z))}" onerror="this.parentNode.classList.add('noph');this.remove()"><span class="a">${esc(z.name)}</span><span class="m">${MAPLAB[z.kind] || ""}${z.rating ? ` · ★ ${z.rating}` : ""}${k != null ? ` · <b>${distTxt(k)}</b>` : ""}</span><span class="h">${esc(hookOf(z))}</span>
-    <div class="acts"><a class="btn blue press" href="${dirs(z.name + " " + (z.address || z.city))}" target="_blank" rel="noopener">Directions</a><a class="btn card press" href="${ttq(z.name, z.city)}" target="_blank" rel="noopener">TikTok</a>${view >= START && view <= END ? `<button class="btn card press" data-madd="${z.id}">${on ? "✓ Added" : "Add"}</button>` : ""}</div>`;
+    <div class="acts"><a class="btn blue press" href="${dirs(z.name + " " + (z.address || z.city))}" target="_blank" rel="noopener">Directions</a>${z.url && embedOf(z.url) ? `<a class="btn card press" href="${esc(z.url)}">Video</a>` : `<a class="btn card press" href="${ttq(z.name, z.city)}" target="_blank" rel="noopener">TikTok</a>`}${view >= START && view <= END ? `<button class="btn card press" data-madd="${z.id}">${on ? "✓ Added" : "Add"}</button>` : ""}</div>`;
 }
 mapv.addEventListener("click", e => {
   const t = e.target;
@@ -2281,6 +2288,20 @@ document.addEventListener("click", () => { gCache.clear(); DST.clear(); }, true)
 /* Search a place on TikTok. Web links land on TikTok's website, which can't search without signing in,
    and the app ignores the words in them. So: copy the name here (shown big, so you know it worked),
    then open the app itself with its own link; tap search there and paste. */
+/* the video a place was saved from, played inside the app instead of jumping out to TikTok or Instagram */
+function embedOf(u) {
+  let m = (u || "").match(/tiktok\.com\/@[^/]+\/(?:video|photo)\/(\d+)/); if (m) return `https://www.tiktok.com/embed/v2/${m[1]}`;
+  m = (u || "").match(/instagram\.com\/(?:[^/]+\/)?(reel|p|tv)\/([\w-]+)/); if (m) return `https://www.instagram.com/${m[1] === "tv" ? "p" : m[1]}/${m[2]}/embed/`;
+  return null;
+}
+const vidv = document.getElementById("vidv"), vidf = document.getElementById("vidf");
+function openVid(u) { const e = embedOf(u); if (!e) return false; vidf.src = e; document.getElementById("vido").href = u; vidv.hidden = false; haptic(); return true; }
+document.getElementById("vidx").onclick = () => { vidv.hidden = true; vidf.src = "about:blank"; };
+document.addEventListener("click", e => {
+  const v = e.target.closest && e.target.closest("[data-vid]"); if (v && openVid(v.dataset.vid)) { e.preventDefault(); e.stopPropagation(); return; }
+  const l = e.target.closest && e.target.closest("a[href]"); if (!l || l.id === "vido" || !embedOf(l.href)) return;
+  e.preventDefault(); e.stopPropagation(); openVid(l.href);
+}, true);
 function copyText(q) {
   const old = () => { const ta = document.createElement("textarea"); ta.value = q; ta.setAttribute("readonly", ""); ta.style.cssText = "position:fixed;top:0;opacity:0;font-size:16px"; document.body.appendChild(ta); ta.focus(); ta.setSelectionRange(0, q.length); let ok = false; try { ok = document.execCommand("copy"); } catch (y) {} ta.remove(); return ok; };
   try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(q).catch(old); return true; } } catch (x) {}
