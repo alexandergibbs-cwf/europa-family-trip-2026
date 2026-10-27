@@ -6,8 +6,63 @@ const json = (o, s = 200) => new Response(JSON.stringify(o), { status: s, header
 
 async function load(env) { return (await env.SHARED.get("state", "json")) || {}; }
 
+/* ---------- a photo for a saved place ----------
+   1. Wikipedia: a search for the name and city, kept only if the article sits within ~1.5 km of the place
+      (covers landmarks, museums, churches and some famous restaurants). English first, then the local language.
+   2. The cover of the TikTok it was saved from, but only when that video is about this one place
+      (the app says so with u=). TikTok cover links expire, so the image itself is kept.
+   Results (or "nothing found") are remembered in KV so each place is looked up once. */
+const LANG = { Italy: "it", Switzerland: "de", Germany: "de", France: "fr", Greece: "el" };
+const UA = { "user-agent": "EuropeTripApp/1.0 (family trip planner; europe-family-trip.app)" };
+const kmBetween = (a, b, c, d) => { const R = 6371, p = Math.PI / 180, x = Math.sin((c - a) * p / 2) ** 2 + Math.cos(a * p) * Math.cos(c * p) * Math.sin((d - b) * p / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(x)); };
+const norm = t => String(t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
+async function wikiPhoto(lang, name, city, lat, lng) {
+  const q = new URLSearchParams({ action: "query", format: "json", generator: "search", gsrsearch: `${name} ${city}`, gsrlimit: "4", prop: "pageimages|coordinates", piprop: "thumbnail", pithumbsize: "640", origin: "*" });
+  const r = await fetch(`https://${lang}.wikipedia.org/w/api.php?${q}`, { headers: UA }); if (!r.ok) return null;
+  const pages = Object.values(((await r.json()).query || {}).pages || {}).sort((a, b) => (a.index || 0) - (b.index || 0));
+  const words = norm(name).split(" ").filter(w => w.length > 2);
+  for (const pg of pages) {
+    if (!pg.thumbnail || !pg.coordinates || !pg.coordinates[0]) continue;
+    const d = kmBetween(lat, lng, pg.coordinates[0].lat, pg.coordinates[0].lon), t = norm(pg.title);
+    const hit = words.length ? words.filter(w => t.includes(w)).length / words.length : 0;
+    if (d < 1.5 && (hit >= 0.5 || d < 0.15)) return pg.thumbnail.source;
+  }
+  return null;
+}
+async function tiktokCover(u) {
+  const r = await fetch(`https://www.tiktok.com/oembed?url=${encodeURIComponent(u)}`, { headers: UA }); if (!r.ok) return null;
+  const j = await r.json(); return j.thumbnail_url || null;
+}
+async function photo(url, env, ctx) {
+  const id = (url.searchParams.get("id") || "").slice(0, 60), key = "photo:" + id;
+  if (!/^[\w-]{8,60}$/.test(id)) return new Response("bad id", { status: 400 });
+  const { value: hit, metadata } = await env.SHARED.getWithMetadata(key, "arrayBuffer"), meta = metadata || {};
+  if (hit) {
+    if (meta.none) return new Response("no photo", { status: 404, headers: { "cache-control": "public, max-age=86400" } });
+    if (meta.redirect) return Response.redirect(meta.redirect, 302);
+    return new Response(hit, { headers: { "content-type": meta.type || "image/jpeg", "cache-control": "public, max-age=2592000" } });
+  }
+  const name = url.searchParams.get("n") || "", city = url.searchParams.get("c") || "", country = url.searchParams.get("co") || "";
+  const lat = +url.searchParams.get("lat"), lng = +url.searchParams.get("lng"), tt = url.searchParams.get("u") || "";
+  let src = null;
+  try {
+    for (const lang of ["en", LANG[country]].filter((x, i, a) => x && a.indexOf(x) === i)) { src = await wikiPhoto(lang, name, city === "Other" ? "" : city, lat, lng); if (src) break; }
+  } catch (e) {}
+  if (src) { ctx.waitUntil(env.SHARED.put(key, "1", { metadata: { redirect: src } })); return Response.redirect(src, 302); }
+  if (/^https:\/\/www\.tiktok\.com\//.test(tt)) {
+    try {
+      const cover = await tiktokCover(tt);
+      if (cover) { const img = await fetch(cover, { headers: UA }); if (img.ok) { const buf = await img.arrayBuffer(), type = img.headers.get("content-type") || "image/jpeg";
+        if (buf.byteLength < 2e6) ctx.waitUntil(env.SHARED.put(key, buf, { metadata: { type } }));
+        return new Response(buf, { headers: { "content-type": type, "cache-control": "public, max-age=2592000" } }); } }
+    } catch (e) {}
+  }
+  ctx.waitUntil(env.SHARED.put(key, "0", { metadata: { none: 1 }, expirationTtl: 7 * 86400 }));
+  return new Response("no photo", { status: 404, headers: { "cache-control": "public, max-age=3600" } });
+}
+
 export default {
-  async fetch(req, env) {
+  async fetch(req, env, ctx) {
     const url = new URL(req.url);
     if (url.pathname === "/api/state") {
       if (req.method === "GET") return json(await load(env));
@@ -25,6 +80,7 @@ export default {
       }
       return json({ error: "method" }, 405);
     }
+    if (url.pathname === "/api/photo") return photo(url, env, ctx);
     if (url.pathname === FEED) {
       /* the trip feed, plus the stops people have added */
       const base = await env.ASSETS.fetch(req); let ics = await base.text();

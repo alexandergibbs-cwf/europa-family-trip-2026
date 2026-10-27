@@ -313,6 +313,34 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .cat small { font-weight: 500; opacity: .6; margin-left: 4px; }
 .place { display: grid; grid-template-columns: 1fr auto; gap: 3px 12px; padding: 12px 16px; align-items: center; }
 .place + .place { box-shadow: inset 16px .5px 0 var(--card), inset 0 .5px 0 var(--hair); }
+.mapv { position: fixed; inset: 0; z-index: 65; background: var(--panel); }
+#mapc { position: absolute; inset: 0; }
+.mtop { position: absolute; left: 0; right: 0; top: 0; z-index: 500; display: flex; gap: 8px; align-items: center; padding: max(12px, env(safe-area-inset-top)) 12px 8px; pointer-events: none; }
+.mchips { flex: 1; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; pointer-events: auto; padding: 2px; }
+.mchips::-webkit-scrollbar { display: none; }
+.mchips button, .mdone { flex: none; border: 0; height: 34px; padding: 0 13px; border-radius: 17px; font: 600 14px/1 inherit; font-family: inherit; background: color-mix(in srgb, var(--card) 92%, transparent); color: var(--ink); box-shadow: 0 2px 10px rgba(0,0,0,.15); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); cursor: pointer; }
+.mchips button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.mchips button i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+.mdone { pointer-events: auto; color: var(--blue); }
+.mme { position: absolute; right: 12px; bottom: calc(24px + env(safe-area-inset-bottom)); z-index: 500; width: 44px; height: 44px; border-radius: 22px; border: 0; background: var(--card); color: var(--blue); box-shadow: 0 2px 10px rgba(0,0,0,.2); display: grid; place-items: center; cursor: pointer; }
+.mapv.carded .mme { display: none; }
+.mcard { position: absolute; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 500; max-width: 500px; margin: 0 auto; background: var(--card); border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,.25); padding: 12px; display: grid; grid-template-columns: 84px 1fr; gap: 4px 12px; }
+.mcard .mph { grid-row: span 3; width: 84px; height: 84px; border-radius: 14px; object-fit: cover; background: var(--panel); }
+.mcard.noph { grid-template-columns: 1fr; }
+.mcard .a { font-size: 17px; font-weight: 600; line-height: 1.25; padding-right: 26px; }
+.mcard .m { font-size: 13px; color: var(--sub); } .mcard .m b { color: var(--e-free-ink); font-weight: 600; }
+.mcard .h { font-size: 14px; color: var(--sub); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mcard .acts { grid-column: 1 / -1; display: flex; gap: 8px; margin-top: 8px; padding: 0; }
+.mcard .acts .btn { height: 42px; font-size: 15px; } .mcard .btn.card { background: var(--panel); }
+.mcard .mx { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border: 0; border-radius: 14px; background: var(--panel); color: var(--sub); font-size: 15px; cursor: pointer; }
+.mpin { width: 26px; height: 26px; border-radius: 13px; display: grid; place-items: center; background: #ff8a00; box-shadow: 0 0 0 3px #fff, 0 2px 8px rgba(0,0,0,.3); }
+.mpin svg { width: 15px; height: 15px; }
+.mme-dot { width: 16px; height: 16px; border-radius: 8px; background: #007aff; box-shadow: 0 0 0 3px #fff, 0 0 0 9px rgba(0,122,255,.2); }
+.leaflet-container { font-family: inherit; background: var(--panel); }
+.leaflet-control-attribution { font-size: 10px; }
+.place.hasph { grid-template-columns: 64px 1fr auto; }
+.place .ph { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; background: var(--panel); align-self: start; margin-top: 2px; }
+.hero { display: block; width: 100%; height: 200px; object-fit: cover; border-radius: 18px; margin: 2px 0 12px; background: var(--panel); }
 .place .a { font-size: 16px; font-weight: 600; line-height: 1.25; }
 .place .h { font-size: 14px; color: var(--sub); line-height: 1.35; }
 .place .m { font-size: 13px; color: var(--sub); font-variant-numeric: tabular-nums; }
@@ -599,6 +627,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 </aside>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden><div class="grab"></div><div id="sheet-body"></div></div>
 <div class="show" id="show" role="dialog" aria-modal="true" hidden></div>
+<div class="mapv" id="mapv" role="dialog" aria-modal="true" aria-label="Map" hidden><div id="mapc"></div><div class="mtop"><div class="mchips" id="mchips"></div><button class="mdone press" id="mdone">Done</button></div><button class="mme press" id="mme" aria-label="Where am I"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg></button><div class="mcard" id="mcard" hidden></div></div>
 <div class="sr" aria-live="polite" id="live"></div>
 
 <script>
@@ -1450,7 +1479,7 @@ let vpull = null; const PULL_GO = 120;
 const rubber = d => { const c = innerHeight * 0.8, s = Math.sign(d), a = Math.abs(d); return s * c * (1 - 1 / (a * 0.6 / c + 1)); };
 const pullTarget = () => (MODE === "multi" ? content.querySelector(".mg") : null) || content;
 document.addEventListener("touchstart", e => {
-  if (e.touches.length !== 1 || !sheet.hidden || !side.hidden || !show.hidden || e.target.closest("#top, .sheet, .side")) { vpull = null; return; }
+  if (e.touches.length !== 1 || !sheet.hidden || !side.hidden || !show.hidden || e.target.closest("#top, .sheet, .side, #mapv")) { vpull = null; return; }
   vpull = { y: e.touches[0].clientY, top: scrollY <= 0, bottom: atBottom(), d: 0, on: false, armed: false };
 }, { passive: true });
 document.addEventListener("touchmove", e => {
@@ -2017,7 +2046,7 @@ function mineSheet(ev, iso) {
 let PS = null;
 function promptSheet() {
   const { i, got, txt } = PS, o = liveFrom(view) || anchorFor(view), one = got.length === 1, sv = got[0];
-  const top = head(esc(one ? sv.name : i.pr.l), `${esc(one ? i.pr.l : got.map(x => x.name).join(" → "))} · ${t12(i.s)} – ${t12(i.e)}`);
+  const top = (one ? hero(sv) : "") + head(esc(one ? sv.name : i.pr.l), `${esc(one ? i.pr.l : got.map(x => x.name).join(" → "))} · ${t12(i.s)} – ${t12(i.e)}`);
   const body = one
     ? `<div class="ig">${sv.hook ? `<div class="r"><span>${esc(hookOf(sv))}</span><span></span></div>` : ""}${sv.rating ? r("Rating", `★ ${sv.rating}${sv.reviews ? ` (${sv.reviews.toLocaleString()})` : ""}`) : ""}${sv.address ? r("Address", esc(sv.address)) : ""}${o ? r("Distance", `${distTxt(km(o.lat, o.lng, sv.lat, sv.lng))} from ${esc(fromTxt(view, anchorFor(view)))}`) : ""}</div>
       <div class="acts"><a class="btn blue press" href="${dirs(sv.name + " " + (sv.address || sv.city))}" target="_blank" rel="noopener">Directions</a><a class="btn card press" href="${ttq(sv.name, sv.city)}" target="_blank" rel="noopener">TikTok</a>${sv.url ? `<a class="btn card press" href="${esc(sv.url)}" target="_blank" rel="noopener">Video</a>` : ""}</div>`
@@ -2041,10 +2070,10 @@ function plannerSheet() {
     list = [...pins.map(x => ({ ...x, pinned: true })), ...list.filter(x => !pins.some(q => q.s.id === x.s.id))];
   }
   const askRow = hasFree(iso) ? `<div class="ig" style="margin-bottom:10px"><button class="mrow press" data-ask><span><span class="a">${getDay(iso) ? "Change the day’s plan" : "Plan the whole day"}</span><span class="b">A few questions, then a plan</span></span><i class="chev"></i></button></div>` : "";
-  const cats = askRow + `<div class="cats">${CATS.filter(c => counts[c.k]).map(c => `<button class="cat" data-cat="${c.k}" aria-pressed="${c.k === PL.cat}">${c.l}</button>`).join("")}</div>`;
+  const cats = askRow + `<div class="cats"><button class="cat" data-openmap>Map</button>${CATS.filter(c => counts[c.k]).map(c => `<button class="cat" data-cat="${c.k}" aria-pressed="${c.k === PL.cat}">${c.l}</button>`).join("")}</div>`;
   const rows = list.slice(0, PL.n).map(({ s, k, pinned }) => {
     const on = plan.find(p => p.id === s.id);
-    return `<div class="place${pinned ? " pinned" : ""}"><span>${pinned ? `<span class="sg">Suggested</span>` : ""}<span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${PL.cat === "trip" ? tripTxt(k) : distTxt(k)}</b></span><span class="links"><a href="${dirs(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video${s.creator ? " · " + esc(s.creator) : ""}</a>` : ""}</span></span><button class="addb${on ? " on" : ""}" data-add="${s.id}">${on ? `✓ ${t12(on.t)}` : "Add"}</button></div>`;
+    return `<div class="place hasph${pinned ? " pinned" : ""}">${ph(s)}<span>${pinned ? `<span class="sg">Suggested</span>` : ""}<span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${PL.cat === "trip" ? tripTxt(k) : distTxt(k)}</b></span><span class="links"><a href="${dirs(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video${s.creator ? " · " + esc(s.creator) : ""}</a>` : ""}</span></span><button class="addb${on ? " on" : ""}" data-add="${s.id}">${on ? `✓ ${t12(on.t)}` : "Add"}</button></div>`;
   }).join("");
   return head(title, sub) + cats + `<div class="ig">${rows || `<p class="empty-p">Nothing saved in this category here.</p>`}${list.length > PL.n ? `<button class="more-btn" data-more>Show ${list.length - PL.n} more</button>` : ""}</div><p class="nt">From your mio saves, nearest ${liveFrom(iso) ? "to you" : "to the hotel"} first. Add puts it on the timetable for everyone.</p>`;
 }
@@ -2059,13 +2088,19 @@ function openPlanner(iso, cat, block, pin) {
 function refreshPlanner() { const st = sheet.scrollTop; document.getElementById("sheet-body").innerHTML = plannerSheet(); sheet.scrollTop = st; }
 function planItemSheet(ev) {
   const s = ev.save, a = liveFrom(view) || anchorFor(view), k = a ? km(a.lat, a.lng, s.lat, s.lng) : null;
-  return head(esc(s.name), `${catOf(ev.cat).l} · ${t12(ev.s)}${k != null ? ` · ${distTxt(k)}` : ""}`)
+  return hero(s) + head(esc(s.name), `${catOf(ev.cat).l} · ${t12(ev.s)}${k != null ? ` · ${distTxt(k)}` : ""}`)
     + `<div class="ig">${s.hook ? `<div class="r"><span>${esc(s.hook)}</span><span></span></div>` : ""}${s.rating ? r("Rating", `★ ${s.rating}${s.reviews ? ` (${s.reviews.toLocaleString()})` : ""}`) : ""}${s.address ? r("Address", esc(s.address)) : ""}${s.creator ? r("Saved from", esc(s.creator)) : ""}</div>
     <div class="acts"><a class="btn blue press" href="${dirs(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a class="btn card press" href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a><button class="btn card press" data-later="${ev.pi}">+30 min</button><button class="btn card press" data-remove="${ev.pi}" style="color:var(--red)">Remove</button></div>`;
 }
 
+/* a photo for a saved place, looked up and kept by the trip's server (Wikipedia for landmarks, else the cover of the TikTok
+   it came from when that video is about just this place). Missing photos simply don't show. */
+const URLN = {}; SAVES.forEach(z => { if (z.url) URLN[z.url] = (URLN[z.url] || 0) + 1; });
+const photoUrl = z => "/api/photo?" + new URLSearchParams({ id: z.id, n: z.name, c: z.city || "", co: z.country || "", lat: z.lat, lng: z.lng, ...(z.url && /tiktok\.com/.test(z.url) && URLN[z.url] <= 2 ? { u: z.url } : {}) });
+const ph = z => z && z.lat != null ? `<img class="ph" loading="lazy" decoding="async" alt="" src="${esc(photoUrl(z))}" onerror="this.parentNode.classList.remove('hasph');this.remove()">` : "";
+const hero = z => z && z.lat != null ? `<img class="hero" decoding="async" alt="" src="${esc(photoUrl(z))}" onerror="this.remove()">` : "";
 function placeRow({ s, k }, btn) {
-  return `<div class="place"><span><span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${k >= 8 && s.city !== (anchorFor(view) || {}).city ? tripTxt(k) : distTxt(k)}</b></span><span class="links"><a href="${dirs(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video</a>` : ""}</span></span>${btn}</div>`;
+  return `<div class="place hasph">${ph(s)}<span><span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${k >= 8 && s.city !== (anchorFor(view) || {}).city ? tripTxt(k) : distTxt(k)}</b></span><span class="links"><a href="${dirs(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video</a>` : ""}</span></span>${btn}</div>`;
 }
 function mapsFallback(what, iso) { const a = anchorFor(iso), c = cityOn(iso), q = a ? a.hotel + " " + c : c; return `<div class="ig"><p class="empty-p">You haven’t saved ${what} in ${esc(c)} on mio yet.</p><a class="place" href="${maps(what + " near " + q)}" target="_blank" rel="noopener"><span class="a">Find ${what} near ${esc(a ? a.hotel : c)}</span><span class="m" style="color:var(--blue)">Maps ›</span></a></div>`; }
 let SL = null;
@@ -2090,6 +2125,7 @@ function menuSheet() {
       ${row("stay", s ? esc(s.hotel) : "No hotel tonight", s ? `Check in ${s12(s.ci)} · out ${s12(s.co)}${s.est ? " (usual)" : ""}${s.addr && !/booking/i.test(s.addr) ? " · " + esc(s.addr) : ""}` : (iso === END ? "Landing in Perth" : "Overnight flight"))}
       ${hasFree(iso) ? row("plan", getDay(iso) ? "Day planned" : "Plan the day", getDay(iso) ? "Change or clear it" : "A few questions, then a plan") : ""}
       ${(() => { const f = nextFlight(iso); if (!f) return ""; const { chk, carry } = bagParts(f.bags); return row("bags", f.bags ? `Suitcases: ${esc(chk || carry)} each` : "Suitcases", `${f.dep[0] === iso ? "Today" : wk(f.dep[0])}, ${esc(f.from)} → ${esc(f.to)}${f.bags ? (carry && chk ? ` · plus ${esc(carry)}` : "") : " · check the booking"}`); })()}
+      ${row("map", "Map", "Every saved place here, and what's on today")}
       ${row("near", "Near me now", "Saved places closest to you")}
       ${row("ideas", "Things to do", hasSaves(iso) ? `<span class="cyc" id="cyc"></span>` : `Search near the hotel`)}
       ${row("cal", "Add to my calendar", "Flights, trains and bookings, with alerts")}
@@ -2126,9 +2162,81 @@ function nearSheet() {
   const list = SAVES.filter(z => z.lat != null && lab[z.kind]).map(z => ({ s: z, k: km(HERE.lat, HERE.lng, z.lat, z.lng) })).sort((a, b) => a.k - b.k);
   const near = list.filter(x => x.k < 2).slice(0, 15), rows = (near.length ? near : list.slice(0, 5)).map(({ s: z, k }) => {
     const on = getPlan(today).some(p => p.id === z.id);
-    return `<div class="place"><span><span class="a" style="display:block">${esc(z.name)}</span><span class="h" style="display:block">${esc(lab[z.kind])}${z.hook ? " · " + esc(hookOf(z)) : ""}</span><span class="m" style="display:block">${z.rating ? `★ ${z.rating} · ` : ""}<b>${distTxt(k)}</b></span><span class="links"><a href="${dirs(z.name + " " + (z.address || z.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(z.name, z.city)}" target="_blank" rel="noopener">TikTok</a>${z.url ? `<a href="${esc(z.url)}" target="_blank" rel="noopener">Video</a>` : ""}</span></span>${today >= START && today <= END ? `<button class="addb${on ? " on" : ""}" data-nadd="${z.id}">${on ? "✓ Added" : "Go now"}</button>` : ""}</div>`; }).join("");
+    return `<div class="place hasph">${ph(z)}<span><span class="a" style="display:block">${esc(z.name)}</span><span class="h" style="display:block">${esc(lab[z.kind])}${z.hook ? " · " + esc(hookOf(z)) : ""}</span><span class="m" style="display:block">${z.rating ? `★ ${z.rating} · ` : ""}<b>${distTxt(k)}</b></span><span class="links"><a href="${dirs(z.name + " " + (z.address || z.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(z.name, z.city)}" target="_blank" rel="noopener">TikTok</a>${z.url ? `<a href="${esc(z.url)}" target="_blank" rel="noopener">Video</a>` : ""}</span></span>${today >= START && today <= END ? `<button class="addb${on ? " on" : ""}" data-nadd="${z.id}">${on ? "✓ Added" : "Go now"}</button>` : ""}</div>`; }).join("");
   return `<div id="nearS"></div>` + head("Near me now", near.length ? `${near.length} saved place${near.length > 1 ? "s" : ""} within 2 km` : "Nothing saved within 2 km. The closest:") + `<div class="ig">${rows}</div><p class="nt">Go now puts it on today from the next quarter hour.</p>`;
 }
+/* ---------- map: every saved place around the day's hotel, coloured by kind; the day's added stops stand out ---------- */
+const MAPCOL = { dinner: "#ff2d55", drinks: "#5856d6", coffee: "#a2845e", sweet: "#ff9f0a", culture: "#af52de", see: "#34c759", shop: "#30b0c7", experience: "#00c7be" };
+const MAPLAB = { dinner: "Eat", coffee: "Coffee", sweet: "Sweets", drinks: "Drinks", see: "Sights", culture: "Culture", shop: "Shops", experience: "Experiences" };
+const MAPCAT = { dinner: "dinner", drinks: "drinks", coffee: "coffee", sweet: "sweet", culture: "culture", see: "see", shop: "shop", experience: "experience" };
+let MAP = null, MLAY = null, MCAT = "all", MSEL = null, MLOAD = null;
+const mapv = document.getElementById("mapv");
+function loadLeaflet() {
+  if (window.L) return Promise.resolve(); if (MLOAD) return MLOAD;
+  MLOAD = new Promise((ok, bad) => {
+    const l = document.createElement("link"); l.rel = "stylesheet"; l.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"; document.head.appendChild(l);
+    const sc = document.createElement("script"); sc.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"; sc.onload = ok; sc.onerror = () => { MLOAD = null; bad(); }; document.head.appendChild(sc);
+  });
+  return MLOAD;
+}
+function mapPlaces() {
+  const a = anchorFor(view) || STAYS.find(st => st.out === view && st.lat != null); if (!a) return { a: null, list: [] };
+  const list = SAVES.filter(z => z.lat != null && MAPCOL[z.kind] && (z.city === a.city || km(a.lat, a.lng, z.lat, z.lng) < 15));
+  return { a, list };
+}
+function openMap(focusId) {
+  mapv.hidden = false; haptic();
+  if (!reduce()) mapv.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220 });
+  if (!HERE) { hereAsked = 0; askHere(() => { if (!mapv.hidden && MAP) drawMap(); }); }
+  loadLeaflet().then(() => {
+    if (!MAP) {
+      MAP = L.map("mapc", { zoomControl: false, attributionControl: true });
+      const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+      L.tileLayer(`https://{s}.basemaps.cartocdn.com/${dark ? "dark_all" : "light_all"}/{z}/{x}/{y}{r}.png`, { maxZoom: 19, subdomains: "abcd", attribution: "© OpenStreetMap © CARTO" }).addTo(MAP);
+      MAP.on("click", () => mapCard(null));
+    }
+    setTimeout(() => { MAP.invalidateSize(); drawMap(focusId, true); }, 30);
+  }).catch(() => { document.getElementById("mcard").hidden = false; document.getElementById("mcard").className = "mcard noph"; document.getElementById("mcard").innerHTML = `<span class="a">The map couldn't load</span><span class="h">Check your connection and try again.</span>`; });
+}
+function closeMap() { mapv.hidden = true; mapCard(null); }
+function drawMap(focusId, fit) {
+  const { a, list } = mapPlaces(); if (!a || !MAP) return;
+  const added = new Set(getPlan(view).map(p => p.id).concat(((getDay(view) || {}).steps || []).flatMap(p => p.ids || [])));
+  const kinds = [...new Set(list.map(z => z.kind))].sort((x, y) => Object.keys(MAPLAB).indexOf(x) - Object.keys(MAPLAB).indexOf(y));
+  if (MCAT !== "all" && !kinds.includes(MCAT)) MCAT = "all";
+  document.getElementById("mchips").innerHTML = `<button data-mcat="all" aria-pressed="${MCAT === "all"}">All ${list.length}</button>` + kinds.map(k => `<button data-mcat="${k}" aria-pressed="${MCAT === k}"><i style="background:${MAPCOL[k]}"></i>${MAPLAB[k]}</button>`).join("");
+  if (MLAY) MLAY.remove(); MLAY = L.layerGroup().addTo(MAP);
+  const home = `<svg viewBox="0 0 24 24"><path fill="#fff" d="M12 3 2 11h3v9h5v-6h4v6h5v-9h3z"/></svg>`;
+  L.marker([a.lat, a.lng], { icon: L.divIcon({ className: "", html: `<div class="mpin">${home}</div>`, iconSize: [26, 26], iconAnchor: [13, 13] }), zIndexOffset: 900 }).addTo(MLAY).on("click", e => { L.DomEvent.stopPropagation(e); mapCard({ hotel: a }); });
+  list.filter(z => MCAT === "all" || z.kind === MCAT).sort((x, y) => added.has(x.id) - added.has(y.id)).forEach(z => {
+    const on = added.has(z.id);
+    L.circleMarker([z.lat, z.lng], { radius: on ? 10 : 7, color: on ? "#000" : "#fff", weight: on ? 3 : 2, fillColor: MAPCOL[z.kind], fillOpacity: 1 }).addTo(MLAY).on("click", e => { L.DomEvent.stopPropagation(e); mapCard(z); });
+  });
+  if (HERE && Date.now() - HERE.t < 30 * 6e4) L.marker([HERE.lat, HERE.lng], { icon: L.divIcon({ className: "", html: `<div class="mme-dot"></div>`, iconSize: [16, 16], iconAnchor: [8, 8] }), zIndexOffset: 1000, interactive: false }).addTo(MLAY);
+  const f = focusId && SAVE_BY[focusId];
+  if (f) { MAP.setView([f.lat, f.lng], 16); mapCard(f); }
+  else if (fit) { const me = liveFrom(view); MAP.setView(me ? [me.lat, me.lng] : [a.lat, a.lng], 15); }
+}
+function mapCard(z) {
+  const c = document.getElementById("mcard"); MSEL = z; mapv.classList.toggle("carded", !!z);
+  if (!z) { c.hidden = true; return; }
+  c.hidden = false;
+  if (z.hotel) { const st = z.hotel; c.className = "mcard noph"; c.innerHTML = `<button class="mx" data-mx aria-label="Close">✕</button><span class="a">${esc(st.hotel)}</span><span class="m">Where you're staying · check in ${s12(st.ci)}, out ${s12(st.co)}</span>${st.addr ? `<span class="h">${esc(st.addr)}</span>` : ""}<div class="acts">${st.q ? `<a class="btn blue press" href="${dirs(st.q)}" target="_blank" rel="noopener">Directions</a>` : ""}</div>`; return; }
+  const o = liveFrom(view) || anchorFor(view), k = o ? km(o.lat, o.lng, z.lat, z.lng) : null, on = getPlan(view).some(p => p.id === z.id);
+  c.className = "mcard";
+  c.innerHTML = `<button class="mx" data-mx aria-label="Close">✕</button><img class="mph" alt="" src="${esc(photoUrl(z))}" onerror="this.parentNode.classList.add('noph');this.remove()"><span class="a">${esc(z.name)}</span><span class="m">${MAPLAB[z.kind] || ""}${z.rating ? ` · ★ ${z.rating}` : ""}${k != null ? ` · <b>${distTxt(k)}</b>` : ""}</span><span class="h">${esc(hookOf(z))}</span>
+    <div class="acts"><a class="btn blue press" href="${dirs(z.name + " " + (z.address || z.city))}" target="_blank" rel="noopener">Directions</a><a class="btn card press" href="${ttq(z.name, z.city)}" target="_blank" rel="noopener">TikTok</a>${view >= START && view <= END ? `<button class="btn card press" data-madd="${z.id}">${on ? "✓ Added" : "Add"}</button>` : ""}</div>`;
+}
+mapv.addEventListener("click", e => {
+  const t = e.target;
+  if (t.closest("#mdone")) { e.stopPropagation(); return closeMap(); }
+  if (t.closest("[data-mx]")) { e.stopPropagation(); return mapCard(null); }
+  if (t.closest("#mme")) { e.stopPropagation(); haptic(); hereAsked = 0; askHere(() => { if (MAP && HERE) { drawMap(); MAP.setView([HERE.lat, HERE.lng], 16); } }); if (HERE && MAP) MAP.setView([HERE.lat, HERE.lng], 16); return; }
+  const mc = t.closest("[data-mcat]"); if (mc) { e.stopPropagation(); haptic(); MCAT = mc.dataset.mcat; mapCard(null); return drawMap(); }
+  const ma = t.closest("[data-madd]"); if (ma) { e.stopPropagation(); haptic("heavy"); const z = SAVE_BY[ma.dataset.madd], p = getPlan(view), j = p.findIndex(x => x.id === z.id), c = MAPCAT[z.kind] || "see";
+    if (j >= 0) p.splice(j, 1); else p.push({ id: z.id, c, t: slotFor(view, c) }); setPlan(view, p); content.innerHTML = renderContent(view); drawMap(); mapCard(z); return; }
+  if (t.closest("a")) return; e.stopPropagation();
+});
 function calSheet() {
   const f = "europe-family-trip.app/cal/ed3056321e507c456ba8.ics", href = /android/i.test(navigator.userAgent) ? "https://calendar.google.com/calendar/r?cid=" + encodeURIComponent("webcal://" + f) : "webcal://" + f;
   return `<div class="land"><div class="land-h"><div><h3 id="sheet-title">Add to my calendar</h3><div class="land-sub">Flights, trains, hotels and bookings, with alerts. It updates by itself when the trip changes.</div></div></div></div>
@@ -2239,6 +2347,7 @@ document.addEventListener("click", e => {
     return openPlanner(view, pp.dataset.prompt, { s: i.s, e: i.e, k: "free" }, shown); }
   const na = t.closest("[data-nadd]"); if (na) { haptic("heavy"); const z = SAVE_BY[na.dataset.nadd], p = getPlan(today), j = p.findIndex(x => x.id === z.id), c = { dinner: "dinner", drinks: "drinks", coffee: "coffee", sweet: "sweet", culture: "culture", see: "see", shop: "shop", experience: "experience" }[z.kind] || "see";
     if (j >= 0) p.splice(j, 1); else p.push({ id: z.id, c, t: Math.ceil((nowMin() + 5) / 15) * 15 }); setPlan(today, p); swapSheet(nearSheet()); if (view === today) content.innerHTML = renderContent(view); return; }
+  if (t.closest("[data-openmap]")) { haptic(); closeSheet(); return setTimeout(() => openMap(), 250); }
   if (t.closest("[data-pswap]")) { haptic(); const { i, shown } = PS; closeSheet(); return setTimeout(() => openPlanner(view, i.pr.cat, { s: i.s, e: i.e, k: "free" }, shown), 320); }
   if (t.closest("[data-padd]")) { haptic("heavy"); const { i, got } = PS, p = getPlan(view); got.forEach((sv, j) => { if (!p.some(x => x.id === sv.id)) p.push({ id: sv.id, c: i.pr.cat, t: i.s + Math.round((i.e - i.s) / got.length * j / 15) * 15 }); }); setPlan(view, p); closeSheet(); content.innerHTML = renderContent(view); return; }
   const ev = t.closest("[data-i]"); if (ev) { haptic(); const i = ITEMS[+ev.dataset.i]; if (i.k === "plan") return openSheet(planItemSheet(i)); if (i.k === "mine") return openSheet(mineSheet(i, view));
@@ -2254,7 +2363,7 @@ document.addEventListener("click", e => {
   if (t.closest("#backPill")) { haptic(); return openSide(); }
   if (t.closest("#titlePill")) { haptic(); openSheet(menuSheet()); startCycle(view); return; }
   if (t.closest("[data-today]")) { e.preventDefault(); haptic(); closeSheet(); return selectDay(today); }
-  const mi = t.closest("[data-menu]"); if (mi) { haptic(); const k = mi.dataset.menu; if (k === "stay") { const s = stayOn(view); return openSheet(s ? staySheet(s) : tripSheet()); } if (k === "wx") return openSheet(wxSheet()); if (k === "ideas") { const h = view === today ? new Date().getHours() : 10; return openPlanner(view, h < 11 ? "coffee" : h < 14 ? "dinner" : h < 17 ? "see" : h < 21 ? "dinner" : "drinks", null); } if (k === "tasks") return openSheet(tasksSheet()); if (k === "tour") { closeSheet(); return setTimeout(openTour, 320); } if (k === "plan") return openAsk(view); if (k === "trip") return openSheet(tripSheet()); if (k === "cal") return openSheet(calSheet()); if (k === "bags") { const f = nextFlight(view); if (f) return openSheet(moveSheet(f)); } if (k === "near") { openSheet(nearSheet()); hereAsked = 0; return askHere(() => { if (!sheet.hidden && document.getElementById("nearS")) swapSheet(nearSheet()); }); } }
+  const mi = t.closest("[data-menu]"); if (mi) { haptic(); const k = mi.dataset.menu; if (k === "stay") { const s = stayOn(view); return openSheet(s ? staySheet(s) : tripSheet()); } if (k === "wx") return openSheet(wxSheet()); if (k === "ideas") { const h = view === today ? new Date().getHours() : 10; return openPlanner(view, h < 11 ? "coffee" : h < 14 ? "dinner" : h < 17 ? "see" : h < 21 ? "dinner" : "drinks", null); } if (k === "tasks") return openSheet(tasksSheet()); if (k === "tour") { closeSheet(); return setTimeout(openTour, 320); } if (k === "plan") return openAsk(view); if (k === "trip") return openSheet(tripSheet()); if (k === "cal") return openSheet(calSheet()); if (k === "map") { closeSheet(); return setTimeout(() => openMap(), 250); } if (k === "bags") { const f = nextFlight(view); if (f) return openSheet(moveSheet(f)); } if (k === "near") { openSheet(nearSheet()); hereAsked = 0; return askHere(() => { if (!sheet.hidden && document.getElementById("nearS")) swapSheet(nearSheet()); }); } }
   if (t.closest("[data-open-trip]")) { haptic(); return openSheet(tripSheet()); }
 });
 document.addEventListener("keydown", e => {
