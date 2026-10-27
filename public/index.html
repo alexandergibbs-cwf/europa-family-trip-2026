@@ -313,21 +313,40 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .cat small { font-weight: 500; opacity: .6; margin-left: 4px; }
 .place { display: grid; grid-template-columns: 1fr auto; gap: 3px 12px; padding: 12px 16px; align-items: center; }
 .place + .place { box-shadow: inset 16px .5px 0 var(--card), inset 0 .5px 0 var(--hair); }
-.vidv { position: fixed; inset: 0; z-index: 75; background: #000; display: flex; flex-direction: column; }
-.vidb { flex: 1; display: flex; align-items: center; justify-content: center; padding-top: env(safe-area-inset-top); }
-.vidb iframe { width: min(100vw, 56.25vh); height: 100%; max-height: calc(100vh - 80px - env(safe-area-inset-bottom)); border: 0; background: #000; }
-.vidbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px calc(12px + env(safe-area-inset-bottom)); }
-.vidbar a { color: #fff; opacity: .8; font-size: 15px; text-decoration: none; }
+/* a place, on its own: swipeable photos up top */
+.gal { position: relative; margin: 2px 0 14px; border-radius: 18px; overflow: hidden; background: var(--card); }
+.gtrack { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
+.gtrack::-webkit-scrollbar { display: none; }
+.gtrack img { flex: none; width: 100%; height: 260px; object-fit: cover; scroll-snap-align: center; scroll-snap-stop: always; display: block; background: var(--card); }
+.gdots { position: absolute; left: 0; right: 0; bottom: 10px; display: flex; justify-content: center; gap: 6px; pointer-events: none; }
+.gdots i { width: 6px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.55); box-shadow: 0 0 3px rgba(0,0,0,.3); transition: width 240ms var(--spring-bouncy, ease), background-color 160ms; }
+.gdots i.on { width: 16px; background: #fff; }
+.gvid { position: absolute; right: 10px; top: 10px; border: 0; height: 32px; padding: 0 12px 0 10px; border-radius: 16px; font: 600 14px/1 inherit; font-family: inherit; color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
+.gvid svg { width: 12px; height: 12px; }
+.sback { border: 0; background: none; color: var(--blue); font-size: 17px; padding: 4px 4px 10px; cursor: pointer; font-family: inherit; }
+.pmeta b { color: var(--e-free-ink); font-weight: 600; }
+.place[data-sid] { cursor: pointer; }
+.acts.three .btn { padding: 0 8px; font-size: 16px; }
+.vbox { width: min(100%, calc(62vh * 9 / 16)); aspect-ratio: 9 / 16; margin: 0 auto; border-radius: 18px; overflow: hidden; background: #000; }
+.vbox iframe { width: 100%; height: 100%; border: 0; display: block; }
+body.mapopen .scrim { z-index: 66; } body.mapopen .sheet { z-index: 67; }
 .mapv { position: fixed; inset: 0; z-index: 65; background: var(--panel); }
 #mapc { position: absolute; inset: 0; }
 .mtop { position: absolute; left: 0; right: 0; top: 0; z-index: 500; display: flex; gap: 8px; align-items: center; padding: max(12px, env(safe-area-inset-top)) 12px 8px; pointer-events: none; }
-.mchips { flex: 1; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; pointer-events: auto; padding: 2px; }
+.mchips { flex: 1; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; pointer-events: auto; padding: 8px 6px 18px; margin: -8px -6px -18px; }
+.mchips button, .mdone { box-shadow: 0 2px 10px rgba(0,0,0,.14), inset 0 0 0 .5px var(--glass-edge) !important; }
 .mchips::-webkit-scrollbar { display: none; }
-.mchips button, .mdone { flex: none; border: 0; height: 34px; padding: 0 13px; border-radius: 17px; font: 600 14px/1 inherit; font-family: inherit; background: color-mix(in srgb, var(--card) 92%, transparent); color: var(--ink); box-shadow: 0 2px 10px rgba(0,0,0,.15); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); cursor: pointer; }
+.mchips button, .mdone { flex: none; border: 0; height: 36px; padding: 0 14px; border-radius: 980px; font: 600 14px/1 inherit; font-family: inherit; background: var(--glass); color: var(--ink); box-shadow: var(--glass-shadow), inset 0 0 0 .5px var(--glass-edge); -webkit-backdrop-filter: saturate(1.8) blur(22px); backdrop-filter: saturate(1.8) blur(22px); cursor: pointer; transition: transform 480ms var(--spring-bouncy), background-color 160ms ease, color 160ms ease; }
+.mchips button:active, .mdone:active { transform: scale(.94); }
 .mchips button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
 .mchips button i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
 .mdone { pointer-events: auto; color: var(--blue); }
-.mme { position: absolute; right: 12px; bottom: calc(24px + env(safe-area-inset-bottom)); z-index: 500; width: 44px; height: 44px; border-radius: 22px; border: 0; background: var(--card); color: var(--blue); box-shadow: 0 2px 10px rgba(0,0,0,.2); display: grid; place-items: center; cursor: pointer; }
+.mme { position: absolute; right: 14px; bottom: calc(28px + env(safe-area-inset-bottom)); z-index: 500; width: 48px; height: 48px; border-radius: 24px; border: 0; background: var(--glass); -webkit-backdrop-filter: saturate(1.8) blur(22px); backdrop-filter: saturate(1.8) blur(22px); color: var(--blue); box-shadow: var(--glass-shadow), inset 0 0 0 .5px var(--glass-edge); display: grid; place-items: center; cursor: pointer; }
+.mapv .leaflet-tile-pane { filter: saturate(.55) contrast(.94) brightness(1.03); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .mapv .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) saturate(.4) brightness(.9) contrast(.88); } }
+:root[data-theme="dark"] .mapv .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) saturate(.4) brightness(.9) contrast(.88); }
+.mapv .leaflet-control-attribution { background: var(--glass) !important; color: var(--sub); border-radius: 8px 0 0 0; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+.mapv .leaflet-control-attribution a { color: var(--sub); }
 .mapv.carded .mme { display: none; }
 .mcard { position: absolute; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 500; max-width: 500px; margin: 0 auto; background: var(--card); border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,.25); padding: 12px; display: grid; grid-template-columns: 84px 1fr; gap: 4px 12px; }
 .mcard .mph { grid-row: span 3; width: 84px; height: 84px; border-radius: 14px; object-fit: cover; background: var(--panel); }
@@ -632,7 +651,6 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 </aside>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden><div class="grab"></div><div id="sheet-body"></div></div>
 <div class="show" id="show" role="dialog" aria-modal="true" hidden></div>
-<div class="vidv" id="vidv" role="dialog" aria-modal="true" aria-label="Video" hidden><div class="vidb"><iframe id="vidf" title="Saved video" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe></div><div class="vidbar"><a id="vido" target="_blank" rel="noopener">Open in app</a><button class="mdone press" id="vidx">Done</button></div></div>
 <div class="mapv" id="mapv" role="dialog" aria-modal="true" aria-label="Map" hidden><div id="mapc"></div><div class="mtop"><div class="mchips" id="mchips"></div><button class="mdone press" id="mdone">Done</button></div><button class="mme press" id="mme" aria-label="Where am I"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg></button><div class="mcard" id="mcard" hidden></div></div>
 <div class="sr" aria-live="polite" id="live"></div>
 
@@ -1547,13 +1565,14 @@ pager.addEventListener("pointerup", endDrag); pager.addEventListener("pointercan
 /* ---------- sheets ---------- */
 const sheet = document.getElementById("sheet"), scrim = document.getElementById("scrim"); let sAnim = null, lastFocus = null, scrimT = 0;
 const head = (title, sub) => `<div class="sh-h"><h3 id="sheet-title">${title}</h3></div>${sub ? `<div class="st">${sub}</div>` : `<div style="height:16px"></div>`}`;
+let SBACK = [];
 function openSheet(html) {
-  document.getElementById("sheet-body").innerHTML = html; bindChecks(sheet); lastFocus = document.activeElement;
+  SBACK = []; document.getElementById("sheet-body").innerHTML = html; bindChecks(sheet); lastFocus = document.activeElement;
   sheet.hidden = false; sheet.scrollTop = 0; clearTimeout(scrimT); scrim.hidden = false; void scrim.offsetWidth; scrim.classList.add("open"); sAnim?.cancel();
   sAnim = sheet.animate([{ transform: "translateY(105%)" }, { transform: "translateY(0)" }], { duration: reduce() ? 1 : 620, easing: EASE, fill: "forwards" });
 }
 function closeSheet(from = 0) {
-  if (sheet.hidden) return; scrim.classList.remove("open"); clearTimeout(scrimT); scrimT = setTimeout(() => { if (!scrim.classList.contains("open")) scrim.hidden = true; }, 340); sAnim?.cancel();
+  if (sheet.hidden) return; SBACK = []; sheet.querySelectorAll("iframe").forEach(f => { f.src = "about:blank"; }); scrim.classList.remove("open"); clearTimeout(scrimT); scrimT = setTimeout(() => { if (!scrim.classList.contains("open")) scrim.hidden = true; }, 340); sAnim?.cancel();
   sAnim = sheet.animate([{ transform: `translateY(${from}px)` }, { transform: "translateY(105%)" }], { duration: reduce() ? 1 : 300, easing: "cubic-bezier(0.55, 0, 0.5, 1)", fill: "forwards" });
   const fin = () => { if (!scrim.classList.contains("open")) sheet.hidden = true; }; sAnim.onfinish = fin; setTimeout(fin, 360); lastFocus?.focus?.({ preventScroll: true }); renderHeader(false); clearInterval(cycT);
 }
@@ -2080,7 +2099,7 @@ function plannerSheet() {
   const cats = askRow + `<div class="cats"><button class="cat" data-openmap>Map</button>${CATS.filter(c => counts[c.k]).map(c => `<button class="cat" data-cat="${c.k}" aria-pressed="${c.k === PL.cat}">${c.l}</button>`).join("")}</div>`;
   const rows = list.slice(0, PL.n).map(({ s, k, pinned }) => {
     const on = plan.find(p => p.id === s.id);
-    return `<div class="place hasph${pinned ? " pinned" : ""}">${ph(s)}<span>${pinned ? `<span class="sg">Suggested</span>` : ""}<span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${PL.cat === "trip" ? tripTxt(k) : distTxt(k)}</b></span><span class="links"><a href="${dirs(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a><a href="${pics(s.name, s.city)}" target="_blank" rel="noopener">Photos</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video${s.creator ? " · " + esc(s.creator) : ""}</a>` : ""}</span></span><button class="addb${on ? " on" : ""}" data-add="${s.id}">${on ? `✓ ${t12(on.t)}` : "Add"}</button></div>`;
+    return `<div class="place hasph${pinned ? " pinned" : ""}" data-sid="${s.id}">${ph(s)}<span>${pinned ? `<span class="sg">Suggested</span>` : ""}<span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${PL.cat === "trip" ? tripTxt(k) : distTxt(k)}</b></span><span class="links"><a href="${dirs(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video${s.creator ? " · " + esc(s.creator) : ""}</a>` : ""}</span></span><button class="addb${on ? " on" : ""}" data-add="${s.id}">${on ? `✓ ${t12(on.t)}` : "Add"}</button></div>`;
   }).join("");
   return head(title, sub) + cats + `<div class="ig">${rows || `<p class="empty-p">Nothing saved in this category here.</p>`}${list.length > PL.n ? `<button class="more-btn" data-more>Show ${list.length - PL.n} more</button>` : ""}</div><p class="nt">From your mio saves, nearest ${liveFrom(iso) ? "to you" : "to the hotel"} first. Add puts it on the timetable for everyone.</p>`;
 }
@@ -2103,12 +2122,51 @@ function planItemSheet(ev) {
 /* a photo for a saved place, looked up once and kept by the trip's server: the cover of the TikTok it came from when that
    post is about just this place, else Wikipedia for landmarks, else the share image of the place's own website. */
 const URLN = {}; SAVES.forEach(z => { if (z.url) URLN[z.url] = (URLN[z.url] || 0) + 1; });
-const photoUrl = z => "/api/photo?" + new URLSearchParams({ v: 3, id: z.id, n: z.name, c: z.city || "", co: z.country || "", lat: z.lat, lng: z.lng, ...(z.url && /tiktok\.com/.test(z.url) && URLN[z.url] <= 2 ? { u: z.url } : {}) });
-const vidAttr = z => z && z.url && /tiktok\.com|instagram\.com/.test(z.url) ? ` data-vid="${esc(z.url)}"` : "";
-const ph = z => z && z.lat != null ? `<img class="ph"${vidAttr(z)} loading="lazy" decoding="async" alt="" src="${esc(photoUrl(z))}" onerror="this.parentNode.classList.remove('hasph');this.remove()">` : "";
-const hero = z => z && z.lat != null ? `<img class="hero"${vidAttr(z)} decoding="async" alt="" src="${esc(photoUrl(z))}" onerror="this.remove()">` : "";
+const photoQ = z => new URLSearchParams({ v: 3, id: z.id, n: z.name, c: z.city || "", co: z.country || "", lat: z.lat, lng: z.lng });
+const photoUrl = (z, i) => "/api/photo?" + new URLSearchParams({ v: 3, ...(i ? { i } : {}), id: z.id, n: z.name, c: z.city || "", co: z.country || "", lat: z.lat, lng: z.lng, ...(z.url && /tiktok\.com/.test(z.url) && URLN[z.url] <= 2 ? { u: z.url } : {}) });
+const vidAttr = z => z && z.url && /tiktok\.com|instagram\.com/.test(z.url) ? ` data-vid="${esc(z.url)}" data-vsid="${esc(z.id)}"` : "";
+const ph = z => z && z.lat != null ? `<img class="ph" loading="lazy" decoding="async" alt="" src="${esc(photoUrl(z))}" onerror="this.parentNode.classList.remove('hasph');this.remove()">` : "";
+const PLAY = `<svg viewBox="0 0 12 12" aria-hidden="true"><path fill="currentColor" d="M2.5 1.2v9.6L10.6 6z"/></svg>`;
+/* the first photo straight away; the rest (up to 8, from Google) are added once the server says how many there are */
+const hero = z => z && z.lat != null ? `<div class="gal" data-gal="${esc(z.id)}"><div class="gtrack"><img decoding="async" alt="" src="${esc(photoUrl(z))}" onerror="const g=this.closest('.gal');if(this.parentNode.children.length<2)g.remove();else this.remove()"></div><div class="gdots"></div></div>` : "";
+const GCOUNT = {};
+function loadGalleries(root) {
+  root.querySelectorAll(".gal[data-gal]:not([data-ld])").forEach(g => {
+    g.dataset.ld = 1; const z = SAVE_BY[g.dataset.gal]; if (!z) return;
+    const fill = n => {
+      if (!g.isConnected || n < 2) return; const tr = g.querySelector(".gtrack"), d = g.querySelector(".gdots");
+      for (let i = 1; i < n; i++) { const im = document.createElement("img"); im.loading = "lazy"; im.decoding = "async"; im.alt = ""; im.src = photoUrl(z, i); im.onerror = () => { im.remove(); dots(); }; tr.appendChild(im); }
+      const dots = () => { const k = tr.children.length; d.innerHTML = k > 1 ? "<i></i>".repeat(k) : ""; on(); };
+      const on = () => { const k = Math.round(tr.scrollLeft / Math.max(1, tr.clientWidth)); [...d.children].forEach((x, j) => x.classList.toggle("on", j === k)); };
+      tr.addEventListener("scroll", on, { passive: true }); dots();
+    };
+    if (GCOUNT[z.id] != null) return fill(GCOUNT[z.id]);
+    fetch("/api/photos?" + photoQ(z)).then(r => r.ok ? r.json() : { count: 0 }).then(j => { GCOUNT[z.id] = Math.min(8, j.count || 0); fill(GCOUNT[z.id]); }).catch(() => {});
+  });
+}
+new MutationObserver(() => loadGalleries(sheet)).observe(document.getElementById("sheet-body"), { childList: true });
+/* one place on its own sheet: photos, what it is, how far, and what you can do with it */
+function placeSheet(z) {
+  const o = liveFrom(view) || anchorFor(view), k = o ? km(o.lat, o.lng, z.lat, z.lng) : null, inTrip = view >= START && view <= END, on = getPlan(view).find(p => p.id === z.id);
+  const far = k != null && k >= 8 && z.city !== (anchorFor(view) || {}).city;
+  const meta = [MAPLAB[z.kind] || "", z.rating ? `★ ${z.rating}${z.reviews ? ` (${z.reviews.toLocaleString()})` : ""}` : "", k != null ? `<b>${far ? tripTxt(k) : distTxt(k)}</b>` : ""].filter(Boolean).join(" · ");
+  return (SBACK.length ? `<button class="sback press" data-sback>‹ Back</button>` : "") + hero(z)
+    + head(esc(z.name), `<span class="pmeta">${meta}</span>`)
+    + `<div class="ig">${z.hook ? `<div class="r"><span>${esc(hookOf(z))}</span><span></span></div>` : ""}${z.address ? r("Address", esc(z.address)) : ""}${z.creator ? r("Saved from", esc(z.creator)) : ""}${on ? r("On the day", `${t12(on.t)}`) : ""}</div>
+    <div class="acts"><a class="btn blue press" href="${dirs(z.name + " " + (z.address || z.city))}" target="_blank" rel="noopener">Directions</a>${inTrip ? `<button class="btn card press" data-zadd="${esc(z.id)}">${on ? "✓ Added" : "Add to the day"}</button>` : ""}</div>
+    <div class="acts three">${z.url && embedOf(z.url) ? `<button class="btn card press"${vidAttr(z)}>Video</button>` : ""}<a class="btn card press" href="${ttq(z.name, z.city)}" target="_blank" rel="noopener">TikTok</a><a class="btn card press" href="${pics(z.name, z.city)}" target="_blank" rel="noopener">More photos</a></div>`;
+}
+/* opened over whatever sheet is showing, with a way back to it */
+function pushBack() { if (!sheet.hidden) { SBACK.push({ h: document.getElementById("sheet-body").innerHTML, st: sheet.scrollTop, R: REFRESH }); REFRESH = null; } }
+function openPlace(z) { if (!z) return; haptic(); pushBack(); swapSheet(placeSheet(z)); }
+function goBack() {
+  const b = SBACK.pop(); if (!b) return closeSheet(); sheet.querySelectorAll("iframe").forEach(f => { f.src = "about:blank"; });
+  const body = document.getElementById("sheet-body"); body.innerHTML = b.h; REFRESH = b.R; bindChecks(sheet);
+  if (REFRESH) REFRESH(); else if (body.querySelector(".cats")) refreshPlanner(); else if (body.querySelector("#nearS")) body.innerHTML = nearSheet();
+  sheet.scrollTop = b.st; if (!reduce()) body.animate([{ opacity: 0, transform: "translateX(-10px)" }, { opacity: 1, transform: "none" }], { duration: 280, easing: "cubic-bezier(0.16, 1, 0.3, 1)" });
+}
 function placeRow({ s, k }, btn) {
-  return `<div class="place hasph">${ph(s)}<span><span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${k >= 8 && s.city !== (anchorFor(view) || {}).city ? tripTxt(k) : distTxt(k)}</b></span><span class="links"><a href="${dirs(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a><a href="${pics(s.name, s.city)}" target="_blank" rel="noopener">Photos</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video</a>` : ""}</span></span>${btn}</div>`;
+  return `<div class="place hasph" data-sid="${s.id}">${ph(s)}<span><span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${k >= 8 && s.city !== (anchorFor(view) || {}).city ? tripTxt(k) : distTxt(k)}</b></span><span class="links"><a href="${dirs(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video</a>` : ""}</span></span>${btn}</div>`;
 }
 function mapsFallback(what, iso) { const a = anchorFor(iso), c = cityOn(iso), q = a ? a.hotel + " " + c : c; return `<div class="ig"><p class="empty-p">You haven’t saved ${what} in ${esc(c)} on mio yet.</p><a class="place" href="${maps(what + " near " + q)}" target="_blank" rel="noopener"><span class="a">Find ${what} near ${esc(a ? a.hotel : c)}</span><span class="m" style="color:var(--blue)">Maps ›</span></a></div>`; }
 let SL = null;
@@ -2170,7 +2228,7 @@ function nearSheet() {
   const list = SAVES.filter(z => z.lat != null && lab[z.kind]).map(z => ({ s: z, k: km(HERE.lat, HERE.lng, z.lat, z.lng) })).sort((a, b) => a.k - b.k);
   const near = list.filter(x => x.k < 2).slice(0, 15), rows = (near.length ? near : list.slice(0, 5)).map(({ s: z, k }) => {
     const on = getPlan(today).some(p => p.id === z.id);
-    return `<div class="place hasph">${ph(z)}<span><span class="a" style="display:block">${esc(z.name)}</span><span class="h" style="display:block">${esc(lab[z.kind])}${z.hook ? " · " + esc(hookOf(z)) : ""}</span><span class="m" style="display:block">${z.rating ? `★ ${z.rating} · ` : ""}<b>${distTxt(k)}</b></span><span class="links"><a href="${dirs(z.name + " " + (z.address || z.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(z.name, z.city)}" target="_blank" rel="noopener">TikTok</a><a href="${pics(z.name, z.city)}" target="_blank" rel="noopener">Photos</a>${z.url ? `<a href="${esc(z.url)}" target="_blank" rel="noopener">Video</a>` : ""}</span></span>${today >= START && today <= END ? `<button class="addb${on ? " on" : ""}" data-nadd="${z.id}">${on ? "✓ Added" : "Go now"}</button>` : ""}</div>`; }).join("");
+    return `<div class="place hasph" data-sid="${z.id}">${ph(z)}<span><span class="a" style="display:block">${esc(z.name)}</span><span class="h" style="display:block">${esc(lab[z.kind])}${z.hook ? " · " + esc(hookOf(z)) : ""}</span><span class="m" style="display:block">${z.rating ? `★ ${z.rating} · ` : ""}<b>${distTxt(k)}</b></span><span class="links"><a href="${dirs(z.name + " " + (z.address || z.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(z.name, z.city)}" target="_blank" rel="noopener">TikTok</a>${z.url ? `<a href="${esc(z.url)}" target="_blank" rel="noopener">Video</a>` : ""}</span></span>${today >= START && today <= END ? `<button class="addb${on ? " on" : ""}" data-nadd="${z.id}">${on ? "✓ Added" : "Go now"}</button>` : ""}</div>`; }).join("");
   return `<div id="nearS"></div>` + head("Near me now", near.length ? `${near.length} saved place${near.length > 1 ? "s" : ""} within 2 km` : "Nothing saved within 2 km. The closest:") + `<div class="ig">${rows}</div><p class="nt">Go now puts it on today from the next quarter hour.</p>`;
 }
 /* ---------- map: every saved place around the day's hotel, coloured by kind; the day's added stops stand out ---------- */
@@ -2193,7 +2251,7 @@ function mapPlaces() {
   return { a, list };
 }
 function openMap(focusId) {
-  mapv.hidden = false; haptic();
+  mapv.hidden = false; document.body.classList.add("mapopen"); haptic();
   if (!reduce()) mapv.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220 });
   if (!HERE) { hereAsked = 0; askHere(() => { if (!mapv.hidden && MAP) drawMap(); }); }
   loadLeaflet().then(() => {
@@ -2201,12 +2259,13 @@ function openMap(focusId) {
       MAP = L.map("mapc", { zoomControl: false, attributionControl: true });
       /* free OpenStreetMap tiles, no key needed */
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap contributors" }).addTo(MAP);
-      MAP.on("click", () => mapCard(null));
+      MAP.on("click", () => { mapCard(null); closeSheet(); });
     }
     setTimeout(() => { MAP.invalidateSize(); drawMap(focusId, true); }, 30);
   }).catch(() => { document.getElementById("mcard").hidden = false; document.getElementById("mcard").className = "mcard noph"; document.getElementById("mcard").innerHTML = `<span class="a">The map couldn't load</span><span class="h">Check your connection and try again.</span>`; });
 }
-function closeMap() { mapv.hidden = true; mapCard(null); }
+function mapPlace(z) { SBACK = []; REFRESH = null; swapSheet(placeSheet(z)); }
+function closeMap() { closeSheet(); mapv.hidden = true; document.body.classList.remove("mapopen"); mapCard(null); }
 function drawMap(focusId, fit) {
   const { a, list } = mapPlaces(); if (!a || !MAP) return;
   const added = new Set(getPlan(view).map(p => p.id).concat(((getDay(view) || {}).steps || []).flatMap(p => p.ids || [])));
@@ -2215,14 +2274,14 @@ function drawMap(focusId, fit) {
   document.getElementById("mchips").innerHTML = `<button data-mcat="all" aria-pressed="${MCAT === "all"}">All ${list.length}</button>` + kinds.map(k => `<button data-mcat="${k}" aria-pressed="${MCAT === k}"><i style="background:${MAPCOL[k]}"></i>${MAPLAB[k]}</button>`).join("");
   if (MLAY) MLAY.remove(); MLAY = L.layerGroup().addTo(MAP);
   const home = `<svg viewBox="0 0 24 24"><path fill="#fff" d="M12 3 2 11h3v9h5v-6h4v6h5v-9h3z"/></svg>`;
-  L.marker([a.lat, a.lng], { icon: L.divIcon({ className: "", html: `<div class="mpin">${home}</div>`, iconSize: [26, 26], iconAnchor: [13, 13] }), zIndexOffset: 900 }).addTo(MLAY).on("click", e => { L.DomEvent.stopPropagation(e); mapCard({ hotel: a }); });
+  L.marker([a.lat, a.lng], { icon: L.divIcon({ className: "", html: `<div class="mpin">${home}</div>`, iconSize: [26, 26], iconAnchor: [13, 13] }), zIndexOffset: 900 }).addTo(MLAY).on("click", e => { L.DomEvent.stopPropagation(e); haptic(); openSheet(staySheet(a)); });
   list.filter(z => MCAT === "all" || z.kind === MCAT).sort((x, y) => added.has(x.id) - added.has(y.id)).forEach(z => {
     const on = added.has(z.id);
-    L.circleMarker([z.lat, z.lng], { radius: on ? 10 : 7, color: on ? "#000" : "#fff", weight: on ? 3 : 2, fillColor: MAPCOL[z.kind], fillOpacity: 1 }).addTo(MLAY).on("click", e => { L.DomEvent.stopPropagation(e); mapCard(z); });
+    L.circleMarker([z.lat, z.lng], { radius: on ? 10 : 7, color: on ? "#000" : "#fff", weight: on ? 3 : 2, fillColor: MAPCOL[z.kind], fillOpacity: 1 }).addTo(MLAY).on("click", e => { L.DomEvent.stopPropagation(e); haptic(); mapPlace(z); });
   });
   if (HERE && Date.now() - HERE.t < 30 * 6e4) L.marker([HERE.lat, HERE.lng], { icon: L.divIcon({ className: "", html: `<div class="mme-dot"></div>`, iconSize: [16, 16], iconAnchor: [8, 8] }), zIndexOffset: 1000, interactive: false }).addTo(MLAY);
   const f = focusId && SAVE_BY[focusId];
-  if (f) { MAP.setView([f.lat, f.lng], 16); mapCard(f); }
+  if (f) { MAP.setView([f.lat, f.lng], 16); mapPlace(f); }
   else if (fit) { const me = liveFrom(view); MAP.setView(me ? [me.lat, me.lng] : [a.lat, a.lng], 15); }
 }
 function mapCard(z) {
@@ -2295,13 +2354,18 @@ function embedOf(u) {
   m = (u || "").match(/instagram\.com\/(?:[^/]+\/)?(reel|p|tv)\/([\w-]+)/); if (m) return `https://www.instagram.com/${m[1] === "tv" ? "p" : m[1]}/${m[2]}/embed/`;
   return null;
 }
-const vidv = document.getElementById("vidv"), vidf = document.getElementById("vidf");
-function openVid(u) { const e = embedOf(u); if (!e) return false; vidf.src = e; document.getElementById("vido").href = u; vidv.hidden = false; haptic(); return true; }
-document.getElementById("vidx").onclick = () => { vidv.hidden = true; vidf.src = "about:blank"; };
+function openVid(u, z) {
+  const e = embedOf(u); if (!e) return false; haptic(); pushBack();
+  z = z || SAVES.find(x => x.url === u); const ig = /instagram\.com/.test(u), who = z && z.creator ? z.creator : "";
+  swapSheet((SBACK.length ? `<button class="sback press" data-sback>‹ Back</button>` : "") + head(z ? esc(z.name) : "Video", who ? `Saved from ${esc(who)}` : (ig ? "Instagram" : "TikTok"))
+    + `<div class="vbox"><iframe src="${esc(e)}" title="Saved video" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+    <div class="acts"><a class="btn card press" data-out href="${esc(u)}" target="_blank" rel="noopener">Open in ${ig ? "Instagram" : "TikTok"}</a></div>`);
+  return true;
+}
 document.addEventListener("click", e => {
-  const v = e.target.closest && e.target.closest("[data-vid]"); if (v && openVid(v.dataset.vid)) { e.preventDefault(); e.stopPropagation(); return; }
-  const l = e.target.closest && e.target.closest("a[href]"); if (!l || l.id === "vido" || !embedOf(l.href)) return;
-  e.preventDefault(); e.stopPropagation(); openVid(l.href);
+  const v = e.target.closest && e.target.closest("[data-vid]"); if (v && openVid(v.dataset.vid, SAVE_BY[v.dataset.vsid])) { e.preventDefault(); e.stopPropagation(); return; }
+  const l = e.target.closest && e.target.closest("a[href]"); if (!l || l.hasAttribute("data-out") || !embedOf(l.href)) return;
+  e.preventDefault(); e.stopPropagation(); const rw = l.closest("[data-sid]"); openVid(l.href, rw && SAVE_BY[rw.dataset.sid]);
 }, true);
 function copyText(q) {
   const old = () => { const ta = document.createElement("textarea"); ta.value = q; ta.setAttribute("readonly", ""); ta.style.cssText = "position:fixed;top:0;opacity:0;font-size:16px"; document.body.appendChild(ta); ta.focus(); ta.setSelectionRange(0, q.length); let ok = false; try { ok = document.execCommand("copy"); } catch (y) {} ta.remove(); return ok; };
@@ -2326,6 +2390,12 @@ document.addEventListener("click", e => {
 document.addEventListener("click", e => {
   const t = e.target;
   if (t.closest("[data-close-show]")) { haptic(); return closeShow(); }
+  if (t.closest("[data-sback]")) { haptic(); return goBack(); }
+  const za = t.closest("[data-zadd]"); if (za) { haptic("heavy"); const z = SAVE_BY[za.dataset.zadd], p = getPlan(view), j = p.findIndex(x => x.id === z.id), c = MAPCAT[z.kind] || "see";
+    if (j >= 0) p.splice(j, 1); else p.push({ id: z.id, c, t: slotFor(view, c) }); setPlan(view, p); content.innerHTML = renderContent(view); renderHeader(false);
+    const g = sheet.querySelector(".gal"), st = sheet.scrollTop, body = document.getElementById("sheet-body"); body.innerHTML = placeSheet(z); const g2 = body.querySelector(".gal"); if (g && g2) g2.replaceWith(g); sheet.scrollTop = st;
+    if (!mapv.hidden && MAP) drawMap(); return; }
+  const pr = t.closest(".place[data-sid]"); if (pr && !t.closest("a, button")) return openPlace(SAVE_BY[pr.dataset.sid]);
   if (t.closest("[data-close]")) { haptic(); return closeSheet(); }
   if (t.closest("[data-close-side]")) { haptic(); return closeSide(); }
   const sr = t.closest("[data-show-ref]"); if (sr) { haptic("heavy"); return openShow(`<div class="lbl">Booking ref · ${esc(sr.dataset.showL || "")}</div><div class="big">${esc(sr.dataset.showRef)}</div><div class="sm">Show this at the desk or to the conductor.</div>`); }

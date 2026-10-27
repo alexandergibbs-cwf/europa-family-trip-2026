@@ -59,24 +59,31 @@ async function grab(src) {
   const buf = await img.arrayBuffer(); return buf.byteLength > 8000 && buf.byteLength < 3e6 ? { buf, type } : null;
 }
 /* Google Places (key kept as a Worker secret): the place's first photo, which is usually the one the business chose */
-async function googlePhoto(key, name, city, lat, lng) {
+/* Google Places (key kept as a Worker secret). The place's photo list is looked up once and remembered;
+   photo 0 is usually the one the business chose, the rest are the room, the food and so on. */
+async function googleNames(env, id, name, city, lat, lng) {
+  const k = "gp:" + id, have = await env.SHARED.get(k, "json"); if (have) return have;
+  if (!env.GOOGLE_PLACES_KEY) return [];
   const r = await fetch("https://places.googleapis.com/v1/places:searchText", { method: "POST",
-    headers: { "content-type": "application/json", "X-Goog-Api-Key": key, "X-Goog-FieldMask": "places.displayName,places.location,places.photos" },
+    headers: { "content-type": "application/json", "X-Goog-Api-Key": env.GOOGLE_PLACES_KEY, "X-Goog-FieldMask": "places.displayName,places.location,places.photos" },
     body: JSON.stringify({ textQuery: `${name} ${city}`.trim(), maxResultCount: 3, locationBias: { circle: { center: { latitude: lat, longitude: lng }, radius: 800 } } }) });
-  if (!r.ok) return null;
+  if (!r.ok) return [];
   const places = ((await r.json()).places || []).filter(p => p.photos && p.photos.length && p.location)
     .map(p => ({ p, d: kmBetween(lat, lng, p.location.latitude, p.location.longitude) })).filter(x => x.d < 1.2).sort((a, b) => a.d - b.d);
-  if (!places.length) return null;
-  const m = await fetch(`https://places.googleapis.com/v1/${places[0].p.photos[0].name}/media?maxWidthPx=900&skipHttpRedirect=true&key=${key}`);
-  if (!m.ok) return null;
-  return (await m.json()).photoUri || null;
+  const names = places.length ? places[0].p.photos.slice(0, 8).map(x => x.name) : [];
+  await env.SHARED.put(k, JSON.stringify(names), { expirationTtl: 30 * 86400 });
+  return names;
+}
+async function googleMedia(env, pname) {
+  const m = await fetch(`https://places.googleapis.com/v1/${pname}/media?maxWidthPx=1000&skipHttpRedirect=true&key=${env.GOOGLE_PLACES_KEY}`);
+  if (!m.ok) return null; return (await m.json()).photoUri || null;
 }
 async function tiktokCover(u) {
   const r = await fetch(`https://www.tiktok.com/oembed?url=${encodeURIComponent(u)}`, { headers: UA }); if (!r.ok) return null;
   const j = await r.json(); return j.thumbnail_url || null;
 }
 async function photo(url, env, ctx) {
-  const id = (url.searchParams.get("id") || "").slice(0, 60), key = "photo3:" + id;
+  const id = (url.searchParams.get("id") || "").slice(0, 60), idx = Math.max(0, Math.min(7, +url.searchParams.get("i") || 0)), key = "photo3:" + id + (idx ? ":" + idx : "");
   if (!/^[\w-]{8,60}$/.test(id)) return new Response("bad id", { status: 400 });
   const { value: hit, metadata } = await env.SHARED.getWithMetadata(key, "arrayBuffer"), meta = metadata || {};
   if (hit) {
@@ -87,8 +94,9 @@ async function photo(url, env, ctx) {
   const name = url.searchParams.get("n") || "", city = url.searchParams.get("c") || "", country = url.searchParams.get("co") || "";
   const lat = +url.searchParams.get("lat"), lng = +url.searchParams.get("lng"), tt = url.searchParams.get("u") || "";
   const keep = got => { ctx.waitUntil(env.SHARED.put(key, got.buf, { metadata: { type: got.type } })); return new Response(got.buf, { headers: { "content-type": got.type, "cache-control": "public, max-age=2592000" } }); };
-  /* 0. Google Places, when the key is set */
-  if (env.GOOGLE_PLACES_KEY) { try { const g = await googlePhoto(env.GOOGLE_PLACES_KEY, name, city === "Other" ? "" : city, lat, lng); const got = g && await grab(g); if (got) return keep(got); } catch (e) {} }
+  /* 0. Google Places, when the key is set (the only source for photos after the first) */
+  try { const names = await googleNames(env, id, name, city === "Other" ? "" : city, lat, lng); const g = names[idx] && await googleMedia(env, names[idx]); const got = g && await grab(g); if (got) return keep(got); } catch (e) {}
+  if (idx) return new Response("no photo", { status: 404 });
   /* 1. the post it was saved from, when that post is about this one place */
   if (/^https:\/\/www\.tiktok\.com\//.test(tt)) { try { const cover = await tiktokCover(tt); const got = cover && await grab(cover); if (got) return keep(got); } catch (e) {} }
   /* 2. Wikipedia, for landmarks */
@@ -121,6 +129,11 @@ export default {
       return json({ error: "method" }, 405);
     }
     if (url.pathname === "/api/photo") return photo(url, env, ctx);
+    if (url.pathname === "/api/photos") {
+      const id = (url.searchParams.get("id") || "").slice(0, 60); if (!/^[\w-]{8,60}$/.test(id)) return json({ count: 0 }, 400);
+      let names = []; try { names = await googleNames(env, id, url.searchParams.get("n") || "", (c => c === "Other" ? "" : c)(url.searchParams.get("c") || ""), +url.searchParams.get("lat"), +url.searchParams.get("lng")); } catch (e) {}
+      return new Response(JSON.stringify({ count: names.length }), { headers: { "content-type": "application/json", "cache-control": "public, max-age=86400" } });
+    }
     if (url.pathname === FEED) {
       /* the trip feed, plus the stops people have added */
       const base = await env.ASSETS.fetch(req); let ics = await base.text();
