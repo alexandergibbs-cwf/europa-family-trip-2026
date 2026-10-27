@@ -2191,8 +2191,8 @@ function openMap(focusId) {
   loadLeaflet().then(() => {
     if (!MAP) {
       MAP = L.map("mapc", { zoomControl: false, attributionControl: true });
-      const dark = matchMedia("(prefers-color-scheme: dark)").matches;
-      L.tileLayer(`https://{s}.basemaps.cartocdn.com/${dark ? "dark_all" : "light_all"}/{z}/{x}/{y}{r}.png`, { maxZoom: 19, subdomains: "abcd", attribution: "© OpenStreetMap © CARTO" }).addTo(MAP);
+      /* free OpenStreetMap tiles, no key needed */
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap contributors" }).addTo(MAP);
       MAP.on("click", () => mapCard(null));
     }
     setTimeout(() => { MAP.invalidateSize(); drawMap(focusId, true); }, 30);
