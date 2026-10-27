@@ -2290,7 +2290,7 @@ document.addEventListener("click", () => { gCache.clear(); DST.clear(); }, true)
    then open the app itself with its own link; tap search there and paste. */
 /* the video a place was saved from, played inside the app instead of jumping out to TikTok or Instagram */
 function embedOf(u) {
-  let m = (u || "").match(/tiktok\.com\/@[^/]+\/(?:video|photo)\/(\d+)/); if (m) return `https://www.tiktok.com/embed/v2/${m[1]}`;
+  let m = (u || "").match(/tiktok\.com\/@[^/]+\/(?:video|photo)\/(\d+)/); if (m) return `https://www.tiktok.com/player/v1/${m[1]}?autoplay=1&description=1&rel=0`; /* TikTok's official embed player; the old embed/v2 page rate-limits */
   m = (u || "").match(/instagram\.com\/(?:[^/]+\/)?(reel|p|tv)\/([\w-]+)/); if (m) return `https://www.instagram.com/${m[1] === "tv" ? "p" : m[1]}/${m[2]}/embed/`;
   return null;
 }
