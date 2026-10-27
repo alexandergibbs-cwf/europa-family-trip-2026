@@ -2103,7 +2103,7 @@ function planItemSheet(ev) {
 /* a photo for a saved place, looked up once and kept by the trip's server: the cover of the TikTok it came from when that
    post is about just this place, else Wikipedia for landmarks, else the share image of the place's own website. */
 const URLN = {}; SAVES.forEach(z => { if (z.url) URLN[z.url] = (URLN[z.url] || 0) + 1; });
-const photoUrl = z => "/api/photo?" + new URLSearchParams({ v: 2, id: z.id, n: z.name, c: z.city || "", co: z.country || "", lat: z.lat, lng: z.lng, ...(z.url && /tiktok\.com/.test(z.url) && URLN[z.url] <= 2 ? { u: z.url } : {}) });
+const photoUrl = z => "/api/photo?" + new URLSearchParams({ v: 3, id: z.id, n: z.name, c: z.city || "", co: z.country || "", lat: z.lat, lng: z.lng, ...(z.url && /tiktok\.com/.test(z.url) && URLN[z.url] <= 2 ? { u: z.url } : {}) });
 const vidAttr = z => z && z.url && /tiktok\.com|instagram\.com/.test(z.url) ? ` data-vid="${esc(z.url)}"` : "";
 const ph = z => z && z.lat != null ? `<img class="ph"${vidAttr(z)} loading="lazy" decoding="async" alt="" src="${esc(photoUrl(z))}" onerror="this.parentNode.classList.remove('hasph');this.remove()">` : "";
 const hero = z => z && z.lat != null ? `<img class="hero"${vidAttr(z)} decoding="async" alt="" src="${esc(photoUrl(z))}" onerror="this.remove()">` : "";
