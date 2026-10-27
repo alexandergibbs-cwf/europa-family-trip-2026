@@ -29,12 +29,41 @@ async function wikiPhoto(lang, name, city, lat, lng) {
   }
   return null;
 }
+/* the place's own website, found through OpenStreetMap (free, no key): its share image (og:image) is usually the room or the food */
+async function osmWebsite(name, lat, lng) {
+  const q = `[out:json][timeout:12];nwr(around:90,${lat},${lng})["name"];out tags 40;`;
+  const r = await fetch("https://overpass-api.de/api/interpreter", { method: "POST", body: "data=" + encodeURIComponent(q), headers: { ...UA, "content-type": "application/x-www-form-urlencoded" } });
+  if (!r.ok) return null;
+  const want = norm(name).split(" ").filter(w => w.length > 2 && !["ristorante", "restaurant", "trattoria", "caffe", "cafe", "bar", "the", "roma", "rome"].includes(w));
+  let best = null, bestScore = 0;
+  for (const el of (await r.json()).elements || []) {
+    const t = el.tags || {}, n = norm(t.name), site = t.website || t["contact:website"] || t.url;
+    if (!site) continue;
+    const sc = want.length ? want.filter(w => n.includes(w)).length / want.length : 0;
+    if (sc > bestScore) { best = site; bestScore = sc; }
+  }
+  return bestScore >= 0.5 ? best : null;
+}
+async function siteImage(site) {
+  const u = /^https?:/.test(site) ? site : "https://" + site;
+  const r = await fetch(u, { headers: { ...UA, accept: "text/html" }, redirect: "follow", cf: { cacheTtl: 86400 } }); if (!r.ok) return null;
+  const html = (await r.text()).slice(0, 300000);
+  const m = html.match(/<meta[^>]+(?:property|name)=["'](?:og:image(?::secure_url)?|twitter:image)["'][^>]*>/i);
+  const c = m && m[0].match(/content=["']([^"']+)["']/i); if (!c) return null;
+  const img = new URL(c[1].replace(/&amp;/g, "&"), r.url).href;
+  return /logo|favicon|\.svg(\?|$)|placeholder/i.test(img) ? null : img;
+}
+async function grab(src) {
+  const img = await fetch(src, { headers: UA }); if (!img.ok) return null;
+  const type = img.headers.get("content-type") || "image/jpeg"; if (!/^image\//.test(type)) return null;
+  const buf = await img.arrayBuffer(); return buf.byteLength > 8000 && buf.byteLength < 3e6 ? { buf, type } : null;
+}
 async function tiktokCover(u) {
   const r = await fetch(`https://www.tiktok.com/oembed?url=${encodeURIComponent(u)}`, { headers: UA }); if (!r.ok) return null;
   const j = await r.json(); return j.thumbnail_url || null;
 }
 async function photo(url, env, ctx) {
-  const id = (url.searchParams.get("id") || "").slice(0, 60), key = "photo:" + id;
+  const id = (url.searchParams.get("id") || "").slice(0, 60), key = "photo2:" + id;
   if (!/^[\w-]{8,60}$/.test(id)) return new Response("bad id", { status: 400 });
   const { value: hit, metadata } = await env.SHARED.getWithMetadata(key, "arrayBuffer"), meta = metadata || {};
   if (hit) {
@@ -44,19 +73,15 @@ async function photo(url, env, ctx) {
   }
   const name = url.searchParams.get("n") || "", city = url.searchParams.get("c") || "", country = url.searchParams.get("co") || "";
   const lat = +url.searchParams.get("lat"), lng = +url.searchParams.get("lng"), tt = url.searchParams.get("u") || "";
-  let src = null;
+  const keep = got => { ctx.waitUntil(env.SHARED.put(key, got.buf, { metadata: { type: got.type } })); return new Response(got.buf, { headers: { "content-type": got.type, "cache-control": "public, max-age=2592000" } }); };
+  /* 1. the post it was saved from, when that post is about this one place */
+  if (/^https:\/\/www\.tiktok\.com\//.test(tt)) { try { const cover = await tiktokCover(tt); const got = cover && await grab(cover); if (got) return keep(got); } catch (e) {} }
+  /* 2. Wikipedia, for landmarks */
   try {
-    for (const lang of ["en", LANG[country]].filter((x, i, a) => x && a.indexOf(x) === i)) { src = await wikiPhoto(lang, name, city === "Other" ? "" : city, lat, lng); if (src) break; }
+    for (const lang of ["en", LANG[country]].filter((x, i, a) => x && a.indexOf(x) === i)) { const src = await wikiPhoto(lang, name, city === "Other" ? "" : city, lat, lng); if (src) { ctx.waitUntil(env.SHARED.put(key, "1", { metadata: { redirect: src } })); return Response.redirect(src, 302); } }
   } catch (e) {}
-  if (src) { ctx.waitUntil(env.SHARED.put(key, "1", { metadata: { redirect: src } })); return Response.redirect(src, 302); }
-  if (/^https:\/\/www\.tiktok\.com\//.test(tt)) {
-    try {
-      const cover = await tiktokCover(tt);
-      if (cover) { const img = await fetch(cover, { headers: UA }); if (img.ok) { const buf = await img.arrayBuffer(), type = img.headers.get("content-type") || "image/jpeg";
-        if (buf.byteLength < 2e6) ctx.waitUntil(env.SHARED.put(key, buf, { metadata: { type } }));
-        return new Response(buf, { headers: { "content-type": type, "cache-control": "public, max-age=2592000" } }); } }
-    } catch (e) {}
-  }
+  /* 3. the place's own website */
+  try { const site = await osmWebsite(name, lat, lng); const img = site && await siteImage(site); const got = img && await grab(img); if (got) return keep(got); } catch (e) {}
   ctx.waitUntil(env.SHARED.put(key, "0", { metadata: { none: 1 }, expirationTtl: 7 * 86400 }));
   return new Response("no photo", { status: 404, headers: { "cache-control": "public, max-age=3600" } });
 }
