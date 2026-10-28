@@ -958,7 +958,7 @@ function anchorFor(iso) { const s = stayOn(iso) || (iso === "2026-11-19" ? STAYS
 /* where you are right now: only used on today's lists, and only when you're in the same city as the hotel */
 let HERE = null, hereAsked = 0;
 function liveFrom(iso) { const a = anchorFor(iso); return iso === today && a && HERE && Date.now() - HERE.t < 15 * 6e4 && km(a.lat, a.lng, HERE.lat, HERE.lng) < 40 ? HERE : null; }
-let hereWatch = null, hereDrawn = null, hereDrawT = 0, hereDrawQ = 0;
+let HERE_FRESH = 0, hereWatch = null, hereDrawn = null, hereDrawT = 0, hereDrawQ = 0;
 function stopWatch() { if (hereWatch != null) { try { navigator.geolocation.clearWatch(hereWatch); } catch (e) {} hereWatch = null; } }
 /* once you've allowed location, keep following you while the app is on screen (stops when it's in the background) */
 function startWatch() {
@@ -973,10 +973,13 @@ function gotHere(p) {
 /* walk times everywhere follow you: the day, the open list or place, and your dot on the map. At most every 15 s, and only after you've moved ~40 m */
 function hereRedraw(force) {
   if (!HERE) return; const moved = !hereDrawn || km(hereDrawn.lat, hereDrawn.lng, HERE.lat, HERE.lng) > 0.04;
-  if (!force && !moved) return;
-  const wait = 15000 - (Date.now() - hereDrawT); if (!force && wait > 0) { clearTimeout(hereDrawQ); hereDrawQ = setTimeout(() => hereRedraw(), wait); return; }
-  hereDrawT = Date.now(); const big = !hereDrawn || km(hereDrawn.lat, hereDrawn.lng, HERE.lat, HERE.lng) > 0.12; hereDrawn = { lat: HERE.lat, lng: HERE.lng };
-  if (!liveFrom(view)) return;
+  /* a much sharper fix (the phone going from wifi guess to GPS) counts straight away */
+  const sharper = hereDrawn && ((hereDrawn.acc > 60 && HERE.acc < hereDrawn.acc / 2) || km(hereDrawn.lat, hereDrawn.lng, HERE.lat, HERE.lng) > 0.3);
+  if (!force && !moved && !sharper) return;
+  const wait = 15000 - (Date.now() - hereDrawT); if (!force && !sharper && wait > 0) { clearTimeout(hereDrawQ); hereDrawQ = setTimeout(() => hereRedraw(), wait); return; }
+  hereDrawT = Date.now(); const big = !hereDrawn || km(hereDrawn.lat, hereDrawn.lng, HERE.lat, HERE.lng) > 0.12; hereDrawn = { lat: HERE.lat, lng: HERE.lng, acc: HERE.acc };
+  /* Near me now always follows you, whatever day you're looking at */
+  if (!liveFrom(view)) { if (!sheet.hidden && document.getElementById("nearS")) refreshSheetDist(); return; }
   if (!pd && (big || force)) { SCN_CACHE.clear(); gCache.clear(); content.innerHTML = renderContent(view); }
   refreshSheetDist();
   if (!mapv.hidden && MAP) drawMap();
@@ -986,7 +989,7 @@ function askHere(then) {
   navigator.geolocation.getCurrentPosition(p => {
     gotHere(p); startWatch();
     if (then) then();
-  }, err => { if (err && err.code === 1) try { localStorage.setItem("here-no", String(Date.now())); localStorage.removeItem("here"); } catch (e) {} }, { enableHighAccuracy: true, maximumAge: 30000, timeout: 15000 });
+  }, err => { if (err && err.code === 1) try { localStorage.setItem("here-no", String(Date.now())); localStorage.removeItem("here"); } catch (e) {} }, { enableHighAccuracy: true, maximumAge: HERE_FRESH ? (HERE_FRESH = 0) : 30000, timeout: 15000 });
 }
 /* ask for location as soon as the app opens (after the tour or Add to Home Screen card), not only on Near me now.
    If someone says no, don't ask again for three days. While allowed, keep it fresh every couple of minutes. */
@@ -1010,8 +1013,10 @@ function askHere(then) {
   document.addEventListener("visibilitychange", () => { if (document.hidden) stopWatch(); else { hereAsked = 0; askHere(); } });
 })();
 /* iPhones can be set to share only a rough location (Precise Location off), which puts "you" somewhere in a few-km circle */
-const accTxt = m => m >= 950 ? `${(m / 1000).toFixed(m >= 9500 ? 0 : 1)} km` : `${Math.round(m / 50) * 50} m`;
+const accTxt = m => m < 50 ? `${Math.max(5, Math.round(m / 5) * 5)} m` : m >= 950 ? `${(m / 1000).toFixed(m >= 9500 ? 0 : 1)} km` : `${Math.round(m / 50) * 50} m`;
 const precNote = () => HERE && HERE.acc > 300 && Date.now() - HERE.t < 15 * 6e4 ? `<div class="prec"><b>Your phone is only sharing a rough location</b> (within ${accTxt(HERE.acc)}), so walk times can be off. To fix it: Settings › Privacy &amp; Security › Location Services › Safari Websites › turn on <b>Precise Location</b>, then reopen the app.</div>` : "";
+/* how sure the phone is about where you are, and how fresh that is: "to 15 m, just now" */
+const hereTag = () => { if (!HERE) return ""; const s = Math.round((Date.now() - HERE.t) / 1000); return ` (accurate to ${accTxt(Math.max(5, HERE.acc || 0)).replace(/^0 m$/, "5 m")}, ${s < 45 ? "just now" : s < 3600 ? Math.round(s / 60) + " min ago" : "a while ago"})`; };
 const fromTxt = (iso, a) => liveFrom(iso) ? "where you are" : a ? a.hotel : "";
 /* today, with your location: when to set off for something coming up in the next few hours */
 function coordsOf(ev) {
@@ -2112,7 +2117,7 @@ let PL = { iso: null, cat: "coffee", block: null, n: 12 };
 function plannerSheet() {
   const iso = PL.iso, a = anchorFor(iso), b = PL.block;
   const title = b ? `Free · ${dur(b.e - b.s)}` : `Things to do in ${esc(cityOn(iso))}`;
-  const sub = b ? `${t12(b.s)} – ${t12(b.e)}${b.k === "wait" ? ", after dropping suitcases at the hotel" : ""}${a ? `. From ${esc(fromTxt(iso, a))}` : ""}` : (a ? `Distances from ${esc(fromTxt(iso, a))}` : "");
+  const sub = b ? `${t12(b.s)} – ${t12(b.e)}${b.k === "wait" ? ", after dropping suitcases at the hotel" : ""}${a ? `. From ${esc(fromTxt(iso, a))}` : ""}` : (a ? `Distances from ${esc(fromTxt(iso, a))}${liveFrom(iso) ? hereTag() : ""}` : "");
   if (!a || !SAVES.some(s => s.city === cityOn(iso))) {
     const c = cityOn(iso), q = a ? a.hotel + " " + c : c;
     return head(title, sub) + `<div class="ig"><p class="empty-p">You haven’t saved anywhere in ${esc(c)} on mio yet. Search nearby instead:</p>${["coffee", "restaurants", "bars", "shops", "things to do"].map(w => `<a class="place" href="${maps(w + " near " + q)}" target="_blank" rel="noopener"><span class="a">${w.charAt(0).toUpperCase() + w.slice(1)} near ${esc(a ? a.hotel : c)}</span><span class="m" style="color:var(--blue)">Maps ›</span></a>`).join("")}</div>`;
@@ -2286,7 +2291,7 @@ function nearSheet() {
   const near = list.filter(x => x.k < 2).slice(0, 15), rows = (near.length ? near : list.slice(0, 5)).map(({ s: z, k }) => {
     const on = getPlan(today).some(p => p.id === z.id);
     return `<div class="place hasph" data-sid="${z.id}">${ph(z)}<span><span class="a" style="display:block">${esc(z.name)}</span><span class="h" style="display:block">${esc(lab[z.kind])}${z.hook ? " · " + esc(hookOf(z)) : ""}</span><span class="m" style="display:block">${z.rating ? `★ ${z.rating} · ` : ""}<b>${distTxt(k, walkKm(HERE, z))}</b></span><span class="links"><a href="${dirs(z.name + " " + (z.address || z.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(z.name, z.city)}" target="_blank" rel="noopener">TikTok</a>${z.url ? `<a href="${esc(z.url)}" target="_blank" rel="noopener">Video</a>` : ""}</span></span>${today >= START && today <= END ? `<button class="addb${on ? " on" : ""}" data-nadd="${z.id}">${on ? "✓ Added" : "Go now"}</button>` : ""}</div>`; }).join("");
-  return `<div id="nearS"></div>` + head("Near me now", near.length ? `${near.length} saved place${near.length > 1 ? "s" : ""} within 2 km` : "Nothing saved within 2 km. The closest:") + precNote() + `<div class="ig">${rows}</div><p class="nt">Go now puts it on today from the next quarter hour.</p>`;
+  return `<div id="nearS"></div>` + head("Near me now", (near.length ? `${near.length} saved place${near.length > 1 ? "s" : ""} within 2 km` : "Nothing saved within 2 km. The closest:") + `<br><small>From where you are${hereTag()}</small>`) + precNote() + `<div class="ig">${rows}</div><p class="nt">Go now puts it on today from the next quarter hour.</p>`;
 }
 /* ---------- map: every saved place around the day's hotel, coloured by kind; the day's added stops stand out ---------- */
 const MAPCOL = { dinner: "#ff2d55", drinks: "#5856d6", coffee: "#a2845e", sweet: "#ff9f0a", culture: "#af52de", see: "#34c759", shop: "#30b0c7", experience: "#00c7be" };
@@ -2513,7 +2518,7 @@ document.addEventListener("click", e => {
   if (t.closest("#backPill")) { haptic(); return openSide(); }
   if (t.closest("#titlePill")) { haptic(); openSheet(menuSheet()); startCycle(view); return; }
   if (t.closest("[data-today]")) { e.preventDefault(); haptic(); closeSheet(); return selectDay(today); }
-  const mi = t.closest("[data-menu]"); if (mi) { haptic(); const k = mi.dataset.menu; if (k === "stay") { const s = stayOn(view); return openSheet(s ? staySheet(s) : tripSheet()); } if (k === "wx") return openSheet(wxSheet()); if (k === "ideas") { const h = view === today ? new Date().getHours() : 10; return openPlanner(view, h < 11 ? "coffee" : h < 14 ? "dinner" : h < 17 ? "see" : h < 21 ? "dinner" : "drinks", null); } if (k === "tasks") return openSheet(tasksSheet()); if (k === "tour") { closeSheet(); return setTimeout(openTour, 320); } if (k === "plan") return openAsk(view); if (k === "trip") return openSheet(tripSheet()); if (k === "cal") return openSheet(calSheet()); if (k === "map") { closeSheet(); return setTimeout(() => openMap(), 250); } if (k === "bags") { const f = nextFlight(view); if (f) return openSheet(moveSheet(f)); } if (k === "near") { openSheet(nearSheet()); hereAsked = 0; return askHere(() => { if (!sheet.hidden && document.getElementById("nearS")) swapSheet(nearSheet()); }); } }
+  const mi = t.closest("[data-menu]"); if (mi) { haptic(); const k = mi.dataset.menu; if (k === "stay") { const s = stayOn(view); return openSheet(s ? staySheet(s) : tripSheet()); } if (k === "wx") return openSheet(wxSheet()); if (k === "ideas") { const h = view === today ? new Date().getHours() : 10; return openPlanner(view, h < 11 ? "coffee" : h < 14 ? "dinner" : h < 17 ? "see" : h < 21 ? "dinner" : "drinks", null); } if (k === "tasks") return openSheet(tasksSheet()); if (k === "tour") { closeSheet(); return setTimeout(openTour, 320); } if (k === "plan") return openAsk(view); if (k === "trip") return openSheet(tripSheet()); if (k === "cal") return openSheet(calSheet()); if (k === "map") { closeSheet(); return setTimeout(() => openMap(), 250); } if (k === "bags") { const f = nextFlight(view); if (f) return openSheet(moveSheet(f)); } if (k === "near") { openSheet(nearSheet()); hereAsked = 0; HERE_FRESH = 1; return askHere(() => { if (!sheet.hidden && document.getElementById("nearS")) swapSheet(nearSheet()); }); } }
   if (t.closest("[data-open-trip]")) { haptic(); return openSheet(tripSheet()); }
 });
 document.addEventListener("keydown", e => {
