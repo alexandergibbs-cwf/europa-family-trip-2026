@@ -326,6 +326,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .sback { border: 0; background: none; color: var(--blue); font-size: 17px; padding: 4px 4px 10px; cursor: pointer; font-family: inherit; }
 .pmeta b { color: var(--e-free-ink); font-weight: 600; }
 .place[data-sid] { cursor: pointer; }
+.prec { background: color-mix(in srgb, #ff9500 14%, var(--card)); color: var(--ink); border-radius: 12px; padding: 12px 14px; font-size: 14px; line-height: 1.4; margin: 0 0 12px; }
 .acts.three .btn { padding: 0 8px; font-size: 16px; }
 .vbox { width: min(100%, calc(62vh * 9 / 16)); aspect-ratio: 9 / 16; margin: 0 auto; border-radius: 18px; overflow: hidden; background: #000; }
 .vbox iframe { width: 100%; height: 100%; border: 0; display: block; }
@@ -966,7 +967,7 @@ function startWatch() {
 }
 function gotHere(p) {
   if (p.coords.accuracy > 1500 && HERE && Date.now() - HERE.t < 5 * 6e4) return; /* a rough cell-tower fix shouldn't undo a good one */
-  HERE = { lat: p.coords.latitude, lng: p.coords.longitude, t: Date.now() }; try { localStorage.setItem("here", "1"); localStorage.removeItem("here-no"); } catch (e) {}
+  HERE = { lat: p.coords.latitude, lng: p.coords.longitude, t: Date.now(), acc: p.coords.accuracy || 0 }; try { localStorage.setItem("here", "1"); localStorage.removeItem("here-no"); } catch (e) {}
   hereRedraw();
 }
 /* walk times everywhere follow you: the day, the open list or place, and your dot on the map. At most every 15 s, and only after you've moved ~40 m */
@@ -1008,6 +1009,9 @@ function askHere(then) {
   setInterval(() => { if (!document.hidden && !hereWatch) { hereAsked = 0; askHere(); } }, 150000);
   document.addEventListener("visibilitychange", () => { if (document.hidden) stopWatch(); else { hereAsked = 0; askHere(); } });
 })();
+/* iPhones can be set to share only a rough location (Precise Location off), which puts "you" somewhere in a few-km circle */
+const accTxt = m => m >= 950 ? `${(m / 1000).toFixed(m >= 9500 ? 0 : 1)} km` : `${Math.round(m / 50) * 50} m`;
+const precNote = () => HERE && HERE.acc > 300 && Date.now() - HERE.t < 15 * 6e4 ? `<div class="prec"><b>Your phone is only sharing a rough location</b> (within ${accTxt(HERE.acc)}), so walk times can be off. To fix it: Settings › Privacy &amp; Security › Location Services › Safari Websites › turn on <b>Precise Location</b>, then reopen the app.</div>` : "";
 const fromTxt = (iso, a) => liveFrom(iso) ? "where you are" : a ? a.hotel : "";
 /* today, with your location: when to set off for something coming up in the next few hours */
 function coordsOf(ev) {
@@ -2126,7 +2130,7 @@ function plannerSheet() {
     const on = plan.find(p => p.id === s.id);
     return `<div class="place hasph${pinned ? " pinned" : ""}" data-sid="${s.id}">${ph(s)}<span>${pinned ? `<span class="sg">Suggested</span>` : ""}<span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${PL.cat === "trip" ? tripTxt(k) : distTxt(k, walkKm(o, s))}</b></span><span class="links"><a href="${dirs(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video${s.creator ? " · " + esc(s.creator) : ""}</a>` : ""}</span></span><button class="addb${on ? " on" : ""}" data-add="${s.id}">${on ? `✓ ${t12(on.t)}` : "Add"}</button></div>`;
   }).join("");
-  return head(title, sub) + cats + `<div class="ig">${rows || `<p class="empty-p">Nothing saved in this category here.</p>`}${list.length > PL.n ? `<button class="more-btn" data-more>Show ${list.length - PL.n} more</button>` : ""}</div><p class="nt">From your mio saves, nearest ${liveFrom(iso) ? "to you" : "to the hotel"} first. Add puts it on the timetable for everyone.</p>`;
+  return head(title, sub) + (liveFrom(iso) ? precNote() : "") + cats + `<div class="ig">${rows || `<p class="empty-p">Nothing saved in this category here.</p>`}${list.length > PL.n ? `<button class="more-btn" data-more>Show ${list.length - PL.n} more</button>` : ""}</div><p class="nt">From your mio saves, nearest ${liveFrom(iso) ? "to you" : "to the hotel"} first. Add puts it on the timetable for everyone.</p>`;
 }
 function refreshAll() { if (REFRESH) REFRESH(); content.innerHTML = renderContent(view); renderHeader(false); }
 function openPlanner(iso, cat, block, pin) {
@@ -2282,7 +2286,7 @@ function nearSheet() {
   const near = list.filter(x => x.k < 2).slice(0, 15), rows = (near.length ? near : list.slice(0, 5)).map(({ s: z, k }) => {
     const on = getPlan(today).some(p => p.id === z.id);
     return `<div class="place hasph" data-sid="${z.id}">${ph(z)}<span><span class="a" style="display:block">${esc(z.name)}</span><span class="h" style="display:block">${esc(lab[z.kind])}${z.hook ? " · " + esc(hookOf(z)) : ""}</span><span class="m" style="display:block">${z.rating ? `★ ${z.rating} · ` : ""}<b>${distTxt(k, walkKm(HERE, z))}</b></span><span class="links"><a href="${dirs(z.name + " " + (z.address || z.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(z.name, z.city)}" target="_blank" rel="noopener">TikTok</a>${z.url ? `<a href="${esc(z.url)}" target="_blank" rel="noopener">Video</a>` : ""}</span></span>${today >= START && today <= END ? `<button class="addb${on ? " on" : ""}" data-nadd="${z.id}">${on ? "✓ Added" : "Go now"}</button>` : ""}</div>`; }).join("");
-  return `<div id="nearS"></div>` + head("Near me now", near.length ? `${near.length} saved place${near.length > 1 ? "s" : ""} within 2 km` : "Nothing saved within 2 km. The closest:") + `<div class="ig">${rows}</div><p class="nt">Go now puts it on today from the next quarter hour.</p>`;
+  return `<div id="nearS"></div>` + head("Near me now", near.length ? `${near.length} saved place${near.length > 1 ? "s" : ""} within 2 km` : "Nothing saved within 2 km. The closest:") + precNote() + `<div class="ig">${rows}</div><p class="nt">Go now puts it on today from the next quarter hour.</p>`;
 }
 /* ---------- map: every saved place around the day's hotel, coloured by kind; the day's added stops stand out ---------- */
 const MAPCOL = { dinner: "#ff2d55", drinks: "#5856d6", coffee: "#a2845e", sweet: "#ff9f0a", culture: "#af52de", see: "#34c759", shop: "#30b0c7", experience: "#00c7be" };
@@ -2332,6 +2336,7 @@ function drawMap(focusId, fit) {
     const on = added.has(z.id);
     L.circleMarker([z.lat, z.lng], { radius: on ? 10 : 7, color: on ? "#000" : "#fff", weight: on ? 3 : 2, fillColor: MAPCOL[z.kind], fillOpacity: 1 }).addTo(MLAY).on("click", e => { L.DomEvent.stopPropagation(e); haptic(); mapPlace(z); });
   });
+  if (HERE && Date.now() - HERE.t < 30 * 6e4 && HERE.acc > 40) L.circle([HERE.lat, HERE.lng], { radius: Math.min(HERE.acc, 5000), color: "#007aff", weight: 1, opacity: .4, fillColor: "#007aff", fillOpacity: .1, interactive: false }).addTo(MLAY);
   if (HERE && Date.now() - HERE.t < 30 * 6e4) L.marker([HERE.lat, HERE.lng], { icon: L.divIcon({ className: "", html: `<div class="mme-dot"></div>`, iconSize: [16, 16], iconAnchor: [8, 8] }), zIndexOffset: 1000, interactive: false }).addTo(MLAY);
   const f = focusId && SAVE_BY[focusId];
   if (f) { MAP.setView([f.lat, f.lng], 16); mapPlace(f); }
