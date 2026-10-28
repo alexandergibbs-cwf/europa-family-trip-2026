@@ -2181,16 +2181,17 @@ function loadGalleries(root) {
 /* real walking distances for whatever places the open sheet shows, fetched once per spot and kept */
 const WALK = new Map(), WALKP = new Set();
 const okey = o => o.lat.toFixed(4) + "," + o.lng.toFixed(4);
-function walkKm(o, z) { if (!o || !z) return null; const m = WALK.get(okey(o) + "|" + z.id); return m == null ? null : m / 1000; }
+function walkKm(o, z) { if (!o || !z) return null; const m = WALK.get(okey(o) + "|" + z.id); return m == null || m < 0 ? null : m / 1000; }
 function walkFetch(o, zs) {
   if (!o) return; const ok = okey(o);
   const need = zs.filter(z => z && z.lat != null && !WALK.has(ok + "|" + z.id) && !WALKP.has(ok + "|" + z.id) && km(o.lat, o.lng, z.lat, z.lng) < 3).slice(0, 60);
   if (!need.length) return; need.forEach(z => WALKP.add(ok + "|" + z.id));
   fetch("/api/walk?o=" + ok + "&d=" + need.map(z => z.lat.toFixed(5) + "," + z.lng.toFixed(5)).join(";")).then(r => r.ok ? r.json() : null).then(j => {
-    need.forEach(z => WALKP.delete(ok + "|" + z.id)); if (!j || !Array.isArray(j.d)) return;
-    need.forEach((z, i) => { const m = j.d[i]; if (m != null && m < 15000 && m >= km(o.lat, o.lng, z.lat, z.lng) * 900) WALK.set(ok + "|" + z.id, m); });
-    refreshSheetDist();
-  }).catch(() => need.forEach(z => WALKP.delete(ok + "|" + z.id)));
+    /* every place asked about gets an answer, even "no route" (-1, use the estimate), so it's never asked again in a loop */
+    let got = 0; need.forEach((z, i) => { const m = j && Array.isArray(j.d) ? j.d[i] : null, k = km(o.lat, o.lng, z.lat, z.lng) * 1000;
+      const okm = m != null && m < 15000 && m >= k * 0.9; WALK.set(ok + "|" + z.id, okm ? Math.max(m, k) : -1); if (okm) got++; WALKP.delete(ok + "|" + z.id); });
+    if (got) refreshSheetDist();
+  }).catch(() => need.forEach(z => { WALK.set(ok + "|" + z.id, -1); WALKP.delete(ok + "|" + z.id); }));
 }
 function sheetWalk() {
   if (sheet.hidden) return; const body = document.getElementById("sheet-body");
