@@ -909,7 +909,11 @@ const HKEYS = ["bellen", "oia", "enteka", "spagna", "nerone", "fonte", "rex", "s
 STAYS.forEach((s, i) => { const h = HOTELC[HKEYS[i]]; if (h) { s.lat = h[0]; s.lng = h[1]; } });
 const km = (a, b, c, d) => { const R = 6371, p = Math.PI / 180, x = Math.sin((c - a) * p / 2) ** 2 + Math.cos(a * p) * Math.cos(c * p) * Math.sin((d - b) * p / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(x)); };
 const tripTxt = k => { const m = Math.round(20 + k / 60 * 60), h = Math.floor(m / 60); return `${Math.round(k)} km · ~${h ? `${h}h ${pad(m % 60)}m` : `${m} min`} by train each way`; };
-const distTxt = k => k < 0.06 ? "Right here" : k < 0.95 ? `${Math.round(k * 1000 / 50) * 50} m · ${Math.max(2, Math.round(k * 1.25 / 4.8 * 60))} min walk` : k < 3 ? `${k.toFixed(1)} km · ${Math.round(k * 1.25 / 4.8 * 60)} min walk` : k < 25 ? `${k.toFixed(1)} km · ~${Math.round(8 + k * 3)} min by metro or taxi` : `${Math.round(k)} km · day trip`;
+/* walking: the real distance along the streets when we have it (w, in km), else the straight line plus about a third for corners.
+   At an easy 4.6 km/h, so it doesn't promise a pace you won't keep with bags or a group. */
+const DETOUR = 1.35, PACE = 4.6;
+const walkMin = w => Math.max(2, Math.round(w / PACE * 60));
+const distTxt = (k, w) => { const x = w != null ? w : k * DETOUR; return k < 0.06 ? "Right here" : x < 0.95 ? `${Math.max(50, Math.round(x * 1000 / 50) * 50)} m · ${walkMin(x)} min walk` : x < 3.5 ? `${x.toFixed(1)} km · ${walkMin(x)} min walk` : k < 25 ? `${k.toFixed(1)} km · ~${Math.round(8 + k * 3)} min by metro or taxi` : `${Math.round(k)} km · day trip`; };
 /* museums, galleries, palaces, libraries, theatre: "culture"; everything else you'd wander to is "sightsee" */
 const CULT = /museum|museo|musée|musee|museu|gallery|galleria|galerie|galleries|gallerie|kunst|exhibit|palazzo|palace|palais|biblioth|library|opera|theatre|theater|uffizi|louvre|orangerie|pergamon|vatican|academy|collection|foundation|fondation|fondazione/i;
 /* what each saved place really is, checked by hand (23 Oct): mio's own category is wrong for some, e.g. a bagel café saved as an attraction */
@@ -973,12 +977,7 @@ function hereRedraw(force) {
   hereDrawT = Date.now(); const big = !hereDrawn || km(hereDrawn.lat, hereDrawn.lng, HERE.lat, HERE.lng) > 0.12; hereDrawn = { lat: HERE.lat, lng: HERE.lng };
   if (!liveFrom(view)) return;
   if (!pd && (big || force)) { SCN_CACHE.clear(); gCache.clear(); content.innerHTML = renderContent(view); }
-  if (!sheet.hidden && !(drag && drag.mode === "pull")) {
-    const body = document.getElementById("sheet-body"), pm = body.querySelector(".pmeta[data-pid]");
-    if (pm) { const z = SAVE_BY[pm.dataset.pid]; if (z) pm.innerHTML = placeMeta(z); }
-    else if (body.querySelector("#nearS")) { const st = sheet.scrollTop; body.innerHTML = nearSheet(); sheet.scrollTop = st; }
-    else if (body.querySelector(".cats") && typeof PL !== "undefined" && PL.iso === view) refreshPlanner();
-  }
+  refreshSheetDist();
   if (!mapv.hidden && MAP) drawMap();
 }
 function askHere(then) {
@@ -1022,7 +1021,7 @@ function leaveBy(iso, ev) {
   const nm = nowMin(); if (ev.s <= nm || ev.s - nm > 180) return "";
   const c = coordsOf(ev); if (!c) return "";
   const k = km(HERE.lat, HERE.lng, c.lat, c.lng); if (k < 0.15 || k > 60) return "";
-  const go = k < 2.5 ? Math.round(k * 1.25 / 4.8 * 60) : Math.round(8 + k * 3), at = Math.floor((ev.s - go - 5) / 5) * 5;
+  const go = k < 2.5 ? walkMin(k * DETOUR) : Math.round(8 + k * 3), at = Math.floor((ev.s - go - 5) / 5) * 5;
   return at <= nm ? "Leave now" : `Leave by ${t12(at)}`;
 }
 function placesFor(iso, ck, stay, live) {
@@ -1829,7 +1828,7 @@ function pickFor(iso, k) {
   const top = list.slice(0, Math.min(4, list.length)), x = top[n % top.length];
   return { s: x.s, k: x.k, chosen: false };
 }
-const shortDist = k => k == null ? "" : k < 2.5 ? `${Math.max(2, Math.round(k * 1.25 / 4.8 * 60))} min walk` : `${k.toFixed(1)} km`;
+const shortDist = k => k == null ? "" : k < 2.5 ? `${walkMin(k * DETOUR)} min walk` : `${k.toFixed(1)} km`;
 function freePieces(seg, slots) {
   let pieces = [[seg.s, seg.e]];
   slots.filter(o => o.seg === seg).forEach(o => { pieces = pieces.flatMap(([a, b]) => o.e <= a || o.s >= b ? [[a, b]] : [[a, o.s], [o.e, b]].filter(([x, y]) => y - x > 0)); });
@@ -2100,7 +2099,7 @@ function promptSheet() {
   const { i, got, txt } = PS, o = liveFrom(view) || anchorFor(view), one = got.length === 1, sv = got[0];
   const top = (one ? hero(sv) : "") + head(esc(one ? sv.name : i.pr.l), `${esc(one ? i.pr.l : got.map(x => x.name).join(" → "))} · ${t12(i.s)} – ${t12(i.e)}`);
   const body = one
-    ? `<div class="ig">${sv.hook ? `<div class="r"><span>${esc(hookOf(sv))}</span><span></span></div>` : ""}${sv.rating ? r("Rating", `★ ${sv.rating}${sv.reviews ? ` (${sv.reviews.toLocaleString()})` : ""}`) : ""}${sv.address ? r("Address", esc(sv.address)) : ""}${o ? r("Distance", `${distTxt(km(o.lat, o.lng, sv.lat, sv.lng))} from ${esc(fromTxt(view, anchorFor(view)))}`) : ""}</div>
+    ? `<div class="ig">${sv.hook ? `<div class="r"><span>${esc(hookOf(sv))}</span><span></span></div>` : ""}${sv.rating ? r("Rating", `★ ${sv.rating}${sv.reviews ? ` (${sv.reviews.toLocaleString()})` : ""}`) : ""}${sv.address ? r("Address", esc(sv.address)) : ""}${o ? r("Distance", `${distTxt(km(o.lat, o.lng, sv.lat, sv.lng), walkKm(o, sv))} from ${esc(fromTxt(view, anchorFor(view)))}`) : ""}</div>
       <div class="acts"><a class="btn blue press" href="${dirs(sv.name + " " + (sv.address || sv.city))}" target="_blank" rel="noopener">Directions</a><a class="btn card press" href="${ttq(sv.name, sv.city)}" target="_blank" rel="noopener">TikTok</a>${sv.url ? `<a class="btn card press" href="${esc(sv.url)}" target="_blank" rel="noopener">Video</a>` : ""}</div>`
     : `<div class="ig">${got.map(x => placeRow({ s: x, k: o ? km(o.lat, o.lng, x.lat, x.lng) : null }, "")).join("")}</div>`;
   return top + body + (i.pr.idea && i.pr.idea.note ? `<p class="nt">${esc(i.pr.idea.note)}</p>` : "") + `<div class="acts"><button class="btn card press" data-pswap>Something else</button><button class="btn blue press" data-padd>Add to the day</button></div><p class="nt">Suggestions are dotted. Add one and it stays on the day.</p>`;
@@ -2125,7 +2124,7 @@ function plannerSheet() {
   const cats = askRow + `<div class="cats"><button class="cat" data-openmap>Map</button>${CATS.filter(c => counts[c.k]).map(c => `<button class="cat" data-cat="${c.k}" aria-pressed="${c.k === PL.cat}">${c.l}</button>`).join("")}</div>`;
   const rows = list.slice(0, PL.n).map(({ s, k, pinned }) => {
     const on = plan.find(p => p.id === s.id);
-    return `<div class="place hasph${pinned ? " pinned" : ""}" data-sid="${s.id}">${ph(s)}<span>${pinned ? `<span class="sg">Suggested</span>` : ""}<span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${PL.cat === "trip" ? tripTxt(k) : distTxt(k)}</b></span><span class="links"><a href="${dirs(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video${s.creator ? " · " + esc(s.creator) : ""}</a>` : ""}</span></span><button class="addb${on ? " on" : ""}" data-add="${s.id}">${on ? `✓ ${t12(on.t)}` : "Add"}</button></div>`;
+    return `<div class="place hasph${pinned ? " pinned" : ""}" data-sid="${s.id}">${ph(s)}<span>${pinned ? `<span class="sg">Suggested</span>` : ""}<span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${PL.cat === "trip" ? tripTxt(k) : distTxt(k, walkKm(o, s))}</b></span><span class="links"><a href="${dirs(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video${s.creator ? " · " + esc(s.creator) : ""}</a>` : ""}</span></span><button class="addb${on ? " on" : ""}" data-add="${s.id}">${on ? `✓ ${t12(on.t)}` : "Add"}</button></div>`;
   }).join("");
   return head(title, sub) + cats + `<div class="ig">${rows || `<p class="empty-p">Nothing saved in this category here.</p>`}${list.length > PL.n ? `<button class="more-btn" data-more>Show ${list.length - PL.n} more</button>` : ""}</div><p class="nt">From your mio saves, nearest ${liveFrom(iso) ? "to you" : "to the hotel"} first. Add puts it on the timetable for everyone.</p>`;
 }
@@ -2140,7 +2139,7 @@ function openPlanner(iso, cat, block, pin) {
 function refreshPlanner() { const st = sheet.scrollTop; document.getElementById("sheet-body").innerHTML = plannerSheet(); sheet.scrollTop = st; }
 function planItemSheet(ev) {
   const s = ev.save, a = liveFrom(view) || anchorFor(view), k = a ? km(a.lat, a.lng, s.lat, s.lng) : null;
-  return hero(s) + head(esc(s.name), `${catOf(ev.cat).l} · ${t12(ev.s)}${k != null ? ` · ${distTxt(k)}` : ""}`)
+  return hero(s) + head(esc(s.name), `${catOf(ev.cat).l} · ${t12(ev.s)}${k != null ? ` · ${distTxt(k, walkKm(a, s))}` : ""}`)
     + `<div class="ig">${s.hook ? `<div class="r"><span>${esc(s.hook)}</span><span></span></div>` : ""}${s.rating ? r("Rating", `★ ${s.rating}${s.reviews ? ` (${s.reviews.toLocaleString()})` : ""}`) : ""}${s.address ? r("Address", esc(s.address)) : ""}${s.creator ? r("Saved from", esc(s.creator)) : ""}</div>
     <div class="acts"><a class="btn blue press" href="${dirs(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a class="btn card press" href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a><button class="btn card press" data-later="${ev.pi}">+30 min</button><button class="btn card press" data-remove="${ev.pi}" style="color:var(--red)">Remove</button></div>`;
 }
@@ -2170,11 +2169,37 @@ function loadGalleries(root) {
     fetch("/api/photos?" + photoQ(z)).then(r => r.ok ? r.json() : { count: 0 }).then(j => { GCOUNT[z.id] = Math.min(8, j.count || 0); fill(GCOUNT[z.id]); }).catch(() => {});
   });
 }
-new MutationObserver(() => loadGalleries(sheet)).observe(document.getElementById("sheet-body"), { childList: true });
+/* real walking distances for whatever places the open sheet shows, fetched once per spot and kept */
+const WALK = new Map(), WALKP = new Set();
+const okey = o => o.lat.toFixed(4) + "," + o.lng.toFixed(4);
+function walkKm(o, z) { if (!o || !z) return null; const m = WALK.get(okey(o) + "|" + z.id); return m == null ? null : m / 1000; }
+function walkFetch(o, zs) {
+  if (!o) return; const ok = okey(o);
+  const need = zs.filter(z => z && z.lat != null && !WALK.has(ok + "|" + z.id) && !WALKP.has(ok + "|" + z.id) && km(o.lat, o.lng, z.lat, z.lng) < 3).slice(0, 60);
+  if (!need.length) return; need.forEach(z => WALKP.add(ok + "|" + z.id));
+  fetch("/api/walk?o=" + ok + "&d=" + need.map(z => z.lat.toFixed(5) + "," + z.lng.toFixed(5)).join(";")).then(r => r.ok ? r.json() : null).then(j => {
+    need.forEach(z => WALKP.delete(ok + "|" + z.id)); if (!j || !Array.isArray(j.d)) return;
+    need.forEach((z, i) => { const m = j.d[i]; if (m != null && m < 15000 && m >= km(o.lat, o.lng, z.lat, z.lng) * 900) WALK.set(ok + "|" + z.id, m); });
+    refreshSheetDist();
+  }).catch(() => need.forEach(z => WALKP.delete(ok + "|" + z.id)));
+}
+function sheetWalk() {
+  if (sheet.hidden) return; const body = document.getElementById("sheet-body");
+  const ids = [...body.querySelectorAll("[data-sid], .pmeta[data-pid]")].map(e => SAVE_BY[e.dataset.sid || e.dataset.pid]).filter(Boolean);
+  if (ids.length) walkFetch(body.querySelector("#nearS") ? HERE : liveFrom(view) || anchorFor(view), ids);
+}
+function refreshSheetDist() {
+  if (sheet.hidden || (drag && drag.mode === "pull")) return;
+  const body = document.getElementById("sheet-body"), pm = body.querySelector(".pmeta[data-pid]");
+  if (pm) { const z = SAVE_BY[pm.dataset.pid]; if (z) pm.innerHTML = placeMeta(z); }
+  else if (body.querySelector("#nearS")) { const st = sheet.scrollTop; body.innerHTML = nearSheet(); sheet.scrollTop = st; }
+  else if (body.querySelector(".cats") && PL.iso === view) refreshPlanner();
+}
+new MutationObserver(() => { loadGalleries(sheet); sheetWalk(); }).observe(document.getElementById("sheet-body"), { childList: true });
 /* one place on its own sheet: photos, what it is, how far, and what you can do with it */
 function placeMeta(z) {
   const o = liveFrom(view) || anchorFor(view), k = o ? km(o.lat, o.lng, z.lat, z.lng) : null, far = k != null && k >= 8 && z.city !== (anchorFor(view) || {}).city;
-  return [MAPLAB[z.kind] || "", z.rating ? `★ ${z.rating}${z.reviews ? ` (${z.reviews.toLocaleString()})` : ""}` : "", k != null ? `<b>${far ? tripTxt(k) : distTxt(k)}</b>` : ""].filter(Boolean).join(" · ");
+  return [MAPLAB[z.kind] || "", z.rating ? `★ ${z.rating}${z.reviews ? ` (${z.reviews.toLocaleString()})` : ""}` : "", k != null ? `<b>${far ? tripTxt(k) : distTxt(k, walkKm(o, z))}</b>` : ""].filter(Boolean).join(" · ");
 }
 function placeSheet(z) {
   const inTrip = view >= START && view <= END, on = getPlan(view).find(p => p.id === z.id), meta = placeMeta(z);
@@ -2194,7 +2219,7 @@ function goBack() {
   sheet.scrollTop = b.st; if (!reduce()) body.animate([{ opacity: 0, transform: "translateX(-10px)" }, { opacity: 1, transform: "none" }], { duration: 280, easing: "cubic-bezier(0.16, 1, 0.3, 1)" });
 }
 function placeRow({ s, k }, btn) {
-  return `<div class="place hasph" data-sid="${s.id}">${ph(s)}<span><span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${k >= 8 && s.city !== (anchorFor(view) || {}).city ? tripTxt(k) : distTxt(k)}</b></span><span class="links"><a href="${dirs(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video</a>` : ""}</span></span>${btn}</div>`;
+  return `<div class="place hasph" data-sid="${s.id}">${ph(s)}<span><span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${k >= 8 && s.city !== (anchorFor(view) || {}).city ? tripTxt(k) : distTxt(k, walkKm(liveFrom(view) || anchorFor(view), s))}</b></span><span class="links"><a href="${dirs(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video</a>` : ""}</span></span>${btn}</div>`;
 }
 function mapsFallback(what, iso) { const a = anchorFor(iso), c = cityOn(iso), q = a ? a.hotel + " " + c : c; return `<div class="ig"><p class="empty-p">You haven’t saved ${what} in ${esc(c)} on mio yet.</p><a class="place" href="${maps(what + " near " + q)}" target="_blank" rel="noopener"><span class="a">Find ${what} near ${esc(a ? a.hotel : c)}</span><span class="m" style="color:var(--blue)">Maps ›</span></a></div>`; }
 let SL = null;
@@ -2256,7 +2281,7 @@ function nearSheet() {
   const list = SAVES.filter(z => z.lat != null && lab[z.kind]).map(z => ({ s: z, k: km(HERE.lat, HERE.lng, z.lat, z.lng) })).sort((a, b) => a.k - b.k);
   const near = list.filter(x => x.k < 2).slice(0, 15), rows = (near.length ? near : list.slice(0, 5)).map(({ s: z, k }) => {
     const on = getPlan(today).some(p => p.id === z.id);
-    return `<div class="place hasph" data-sid="${z.id}">${ph(z)}<span><span class="a" style="display:block">${esc(z.name)}</span><span class="h" style="display:block">${esc(lab[z.kind])}${z.hook ? " · " + esc(hookOf(z)) : ""}</span><span class="m" style="display:block">${z.rating ? `★ ${z.rating} · ` : ""}<b>${distTxt(k)}</b></span><span class="links"><a href="${dirs(z.name + " " + (z.address || z.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(z.name, z.city)}" target="_blank" rel="noopener">TikTok</a>${z.url ? `<a href="${esc(z.url)}" target="_blank" rel="noopener">Video</a>` : ""}</span></span>${today >= START && today <= END ? `<button class="addb${on ? " on" : ""}" data-nadd="${z.id}">${on ? "✓ Added" : "Go now"}</button>` : ""}</div>`; }).join("");
+    return `<div class="place hasph" data-sid="${z.id}">${ph(z)}<span><span class="a" style="display:block">${esc(z.name)}</span><span class="h" style="display:block">${esc(lab[z.kind])}${z.hook ? " · " + esc(hookOf(z)) : ""}</span><span class="m" style="display:block">${z.rating ? `★ ${z.rating} · ` : ""}<b>${distTxt(k, walkKm(HERE, z))}</b></span><span class="links"><a href="${dirs(z.name + " " + (z.address || z.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(z.name, z.city)}" target="_blank" rel="noopener">TikTok</a>${z.url ? `<a href="${esc(z.url)}" target="_blank" rel="noopener">Video</a>` : ""}</span></span>${today >= START && today <= END ? `<button class="addb${on ? " on" : ""}" data-nadd="${z.id}">${on ? "✓ Added" : "Go now"}</button>` : ""}</div>`; }).join("");
   return `<div id="nearS"></div>` + head("Near me now", near.length ? `${near.length} saved place${near.length > 1 ? "s" : ""} within 2 km` : "Nothing saved within 2 km. The closest:") + `<div class="ig">${rows}</div><p class="nt">Go now puts it on today from the next quarter hour.</p>`;
 }
 /* ---------- map: every saved place around the day's hotel, coloured by kind; the day's added stops stand out ---------- */
@@ -2319,7 +2344,7 @@ function mapCard(z) {
   if (z.hotel) { const st = z.hotel; c.className = "mcard noph"; c.innerHTML = `<button class="mx" data-mx aria-label="Close">✕</button><span class="a">${esc(st.hotel)}</span><span class="m">Where you're staying · check in ${s12(st.ci)}, out ${s12(st.co)}</span>${st.addr ? `<span class="h">${esc(st.addr)}</span>` : ""}<div class="acts">${st.q ? `<a class="btn blue press" href="${dirs(st.q)}" target="_blank" rel="noopener">Directions</a>` : ""}</div>`; return; }
   const o = liveFrom(view) || anchorFor(view), k = o ? km(o.lat, o.lng, z.lat, z.lng) : null, on = getPlan(view).some(p => p.id === z.id);
   c.className = "mcard";
-  c.innerHTML = `<button class="mx" data-mx aria-label="Close">✕</button><img class="mph" alt="" src="${esc(photoUrl(z))}" onerror="this.parentNode.classList.add('noph');this.remove()"><span class="a">${esc(z.name)}</span><span class="m">${MAPLAB[z.kind] || ""}${z.rating ? ` · ★ ${z.rating}` : ""}${k != null ? ` · <b>${distTxt(k)}</b>` : ""}</span><span class="h">${esc(hookOf(z))}</span>
+  c.innerHTML = `<button class="mx" data-mx aria-label="Close">✕</button><img class="mph" alt="" src="${esc(photoUrl(z))}" onerror="this.parentNode.classList.add('noph');this.remove()"><span class="a">${esc(z.name)}</span><span class="m">${MAPLAB[z.kind] || ""}${z.rating ? ` · ★ ${z.rating}` : ""}${k != null ? ` · <b>${distTxt(k, walkKm(o, z))}</b>` : ""}</span><span class="h">${esc(hookOf(z))}</span>
     <div class="acts"><a class="btn blue press" href="${dirs(z.name + " " + (z.address || z.city))}" target="_blank" rel="noopener">Directions</a>${z.url && embedOf(z.url) ? `<a class="btn card press" href="${esc(z.url)}">Video</a>` : `<a class="btn card press" href="${ttq(z.name, z.city)}" target="_blank" rel="noopener">TikTok</a>`}${view >= START && view <= END ? `<button class="btn card press" data-madd="${z.id}">${on ? "✓ Added" : "Add"}</button>` : ""}</div>`;
 }
 mapv.addEventListener("click", e => {

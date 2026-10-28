@@ -82,6 +82,23 @@ async function tiktokCover(u) {
   const r = await fetch(`https://www.tiktok.com/oembed?url=${encodeURIComponent(u)}`, { headers: UA }); if (!r.ok) return null;
   const j = await r.json(); return j.thumbnail_url || null;
 }
+/* real walking distances along streets (OpenStreetMap foot routing, FOSSGIS) from one spot to up to 60 places */
+async function walk(url, ctx) {
+  const ll = v => { const m = /^(-?\d{1,2}\.\d{1,6}),(-?\d{1,3}\.\d{1,6})$/.exec(v || ""); return m ? [+m[1], +m[2]] : null; };
+  const o = ll(url.searchParams.get("o")), d = (url.searchParams.get("d") || "").split(";").slice(0, 60).map(ll);
+  if (!o || !d.length || d.some(x => !x)) return json({ error: "bad" }, 400);
+  const cache = caches.default, key = new Request("https://walk.cache/" + o.join(",") + "/" + d.map(x => x.join(",")).join(";"));
+  const hit = await cache.match(key); if (hit) return hit;
+  const coords = [o, ...d].map(([a, b]) => b.toFixed(5) + "," + a.toFixed(5)).join(";");
+  let out = null;
+  try {
+    const r = await fetch(`https://routing.openstreetmap.de/routed-foot/table/v1/foot/${coords}?sources=0&annotations=distance`, { headers: { "user-agent": "europe-family-trip.app (family trip planner)" }, cf: { cacheTtl: 604800 } });
+    if (r.ok) { const j = await r.json(); if (j.code === "Ok" && j.distances && j.distances[0]) out = j.distances[0].slice(1).map(x => x == null ? null : Math.round(x)); }
+  } catch (e) {}
+  if (!out) return json({ error: "routing" }, 502);
+  const res = new Response(JSON.stringify({ d: out }), { headers: { "content-type": "application/json", "cache-control": "public, max-age=604800" } });
+  ctx.waitUntil(cache.put(key, res.clone())); return res;
+}
 async function photo(url, env, ctx) {
   const id = (url.searchParams.get("id") || "").slice(0, 60), idx = Math.max(0, Math.min(7, +url.searchParams.get("i") || 0)), key = "photo3:" + id + (idx ? ":" + idx : "");
   if (!/^[\w-]{8,60}$/.test(id)) return new Response("bad id", { status: 400 });
@@ -128,6 +145,7 @@ export default {
       }
       return json({ error: "method" }, 405);
     }
+    if (url.pathname === "/api/walk") return walk(url, ctx);
     if (url.pathname === "/api/photo") return photo(url, env, ctx);
     if (url.pathname === "/api/photos") {
       const id = (url.searchParams.get("id") || "").slice(0, 60); if (!/^[\w-]{8,60}$/.test(id)) return json({ count: 0 }, 400);
