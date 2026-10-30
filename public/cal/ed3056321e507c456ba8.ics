@@ -659,6 +659,19 @@ DESCRIPTION:2:31 pm Rome time\nCheck in from 3:00 pm\nNo reception. No lug
  gage storage listed.
 END:VEVENT
 BEGIN:VEVENT
+UID:2026-10-31-booked-960-CookingclassBooked@europe-family-trip.app
+DTSTAMP:20261025T000000Z
+DTSTART:20261031T150000Z
+DTEND:20261031T170000Z
+SUMMARY:Cooking class · Booked
+DESCRIPTION:4:00 pm Rome time\nCooking class\, 4 – 6 PM.
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Cooking class · Booked
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
 UID:2026-11-01-pack-555-NeroneApartmentbyMamoPac@europe-family-trip.app
 DTSTAMP:20261025T000000Z
 DTSTART:20261101T081500Z
