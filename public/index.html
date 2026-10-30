@@ -932,12 +932,17 @@ const KIND_FIX = {
 };
 /* the saved description was about a graveyard; the place itself is a farm park on the west edge of the city */
 const HOOK_FIX = { "Buttercup Farm Park": "farm park on the west edge of edinburgh" };
+/* shops split into clothes (fashion, vintage, menswear, jackets) and everything else (markets, books, scent, food, homeware) */
+const CLO_RE = /cloth|fashion|vintage|boutique|apparel|menswear|womenswear|streetwear|\bwear\b|jeans|denim|sneaker|shoe|jacket|knit|tailor|designer|thrift|second.?hand|dress|coat|cashmere|outfit|pyjama|prada|gucci|versace|barbour|aimé|archive/i;
+const CLO_YES = ["Clutch Cafe", "Our Legacy Workshop", "The Store X Berlin"];
+const CLO_NO = ["Brupbacherplatz", "Helvetiaplatz Farmers' Market", "Markthalle Neun", "Mauerpark", "RAW-Gelände", "Tron Kirk Market", "The Gently Mad Book Shop & Bookbinder", "Seven Dials Market", "Leadenhall Market", "Camden Town", "Camden Passage, Islington", "Officine Universelle Buly 1803", "Stadthausanlage Market", "Baa Baa Sheep Shop", "Testaccio Market", "Porta Portese", "Flea Market", "Nowkölln Flowmarkt", "Kranoldplatz", "Santo Spirito Market", "il Mercato Centrale Firenze", "Mercato di Sant’Ambrogio", "Scuola del Cuoio S.r.l.", "Brilli Pet Boutique", "Dott. A. Bizzarri", "Maestri di fabbrica", "Liberty London", "King's Rd", "Merci", "Saint Laurent Babylone", "Hirono Store", "Kurfürstendamm", "Bahnhofstrasse", "KaDeWe - Kaufhaus des Westens", "Adrianou Street"];
 const KIND_BY_NAME = {}; Object.entries(KIND_FIX).forEach(([k, ns]) => ns.forEach(n => (KIND_BY_NAME[n] = k)));
 { const seen = new Set(); SAVES.forEach(s => {
   const key = s.name + "|" + s.city;
   s.kind = seen.has(key) ? "skip" : KIND_BY_NAME[s.name] || (s.cat === "restaurant" ? "dinner" : s.cat === "bar" ? "drinks" : s.cat === "cafe" ? "coffee" : s.cat === "sweets" ? "sweet" : s.cat === "accommodation" ? "skip"
     : CULT.test(s.name) ? "culture" : s.cat === "shop" ? "shop" : "see");
   if (HOOK_FIX[s.name]) s.hook = HOOK_FIX[s.name];
+  if (s.kind === "shop") s.clo = CLO_YES.includes(s.name) || (!CLO_NO.includes(s.name) && CLO_RE.test(s.name + " " + (s.hook || "") + " " + (s.vibe || "")));
   s.name = s.name.replace(/\s*\|\s*/g, " – "); /* "|" separates ideas internally */
   seen.add(key); }); }
 const isCulture = s => s.kind === "culture";
@@ -948,7 +953,9 @@ const CATS = [
   { k: "sweet", l: "Gelato & sweets", m: s => s.kind === "sweet", dur: 30 },
   { k: "culture", l: "Culture", m: s => s.kind === "culture", dur: 120 },
   { k: "see", l: "Sightsee", m: s => s.kind === "see", dur: 75 },
-  { k: "shop", l: "Shopping", m: s => s.kind === "shop", dur: 60 },
+  { k: "shop", l: "Shopping", m: s => s.kind === "shop", dur: 60, hide: true },
+  { k: "clothes", l: "Clothes", m: s => s.kind === "shop" && s.clo, dur: 60, as: "shop" },
+  { k: "shops", l: "Other shops", m: s => s.kind === "shop" && !s.clo, dur: 60, as: "shop" },
   { k: "experience", l: "Experiences", m: s => s.kind === "experience", dur: 150 },
   { k: "trip", l: "Day trip", m: s => s.kind === "see" || s.kind === "culture", dur: 300, far: true },
 ];
@@ -2130,10 +2137,10 @@ function plannerSheet() {
     list = [...pins.map(x => ({ ...x, pinned: true })), ...list.filter(x => !pins.some(q => q.s.id === x.s.id))];
   }
   const askRow = hasFree(iso) ? `<div class="ig" style="margin-bottom:10px"><button class="mrow press" data-ask><span><span class="a">${getDay(iso) ? "Change the day’s plan" : "Plan the whole day"}</span><span class="b">A few questions, then a plan</span></span><i class="chev"></i></button></div>` : "";
-  const cats = askRow + `<div class="cats"><button class="cat" data-openmap>Map</button>${CATS.filter(c => counts[c.k]).map(c => `<button class="cat" data-cat="${c.k}" aria-pressed="${c.k === PL.cat}">${c.l}</button>`).join("")}</div>`;
+  const cats = askRow + `<div class="cats"><button class="cat" data-openmap>Map</button>${CATS.filter(c => counts[c.k] && !c.hide).map(c => `<button class="cat" data-cat="${c.k}" aria-pressed="${c.k === PL.cat}">${c.l}</button>`).join("")}</div>`;
   const rows = list.slice(0, PL.n).map(({ s, k, pinned }) => {
     const on = plan.find(p => p.id === s.id);
-    return `<div class="place hasph${pinned ? " pinned" : ""}" data-sid="${s.id}">${ph(s)}<span>${pinned ? `<span class="sg">Suggested</span>` : ""}<span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${PL.cat === "trip" ? tripTxt(k) : distTxt(k, walkKm(o, s))}</b></span><span class="links"><a href="${dirs(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video${s.creator ? " · " + esc(s.creator) : ""}</a>` : ""}</span></span><button class="addb${on ? " on" : ""}" data-add="${s.id}">${on ? `✓ ${t12(on.t)}` : "Add"}</button></div>`;
+    return `<div class="place hasph${pinned ? " pinned" : ""}" data-sid="${s.id}">${ph(s)}<span>${pinned ? `<span class="sg">Suggested</span>` : ""}<span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${PL.cat === "trip" ? tripTxt(k) : distTxt(k, walkKm(o, s))}</b></span><span class="links"><a href="${dirs(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video${s.creator ? " · " + esc(s.creator) : ""}</a>` : ""}</span></span><button class="addb${on ? " on" : ""}" data-add="${s.id}" data-addcat="${(catOf(PL.cat) || {}).as || PL.cat}">${on ? `✓ ${t12(on.t)}` : "Add"}</button></div>`;
   }).join("");
   return head(title, sub) + (liveFrom(iso) ? precNote() : "") + cats + `<div class="ig">${rows || `<p class="empty-p">Nothing saved in this category here.</p>`}${list.length > PL.n ? `<button class="more-btn" data-more>Show ${list.length - PL.n} more</button>` : ""}</div><p class="nt">From your mio saves, nearest ${liveFrom(iso) ? "to you" : "to the hotel"} first. Add puts it on the timetable for everyone.</p>`;
 }
@@ -2141,7 +2148,8 @@ function refreshAll() { if (REFRESH) REFRESH(); content.innerHTML = renderConten
 function openPlanner(iso, cat, block, pin) {
   REFRESH = null;
   PL = { iso, cat: cat || PL.cat || "coffee", block: block || null, n: 12, pin: pin || [] };
-  if (!placesFor(iso, PL.cat).length) { const f = CATS.find(c => placesFor(iso, c.k).length); if (f) PL.cat = f.k; }
+  if (PL.cat === "shop") PL.cat = placesFor(iso, "clothes").length ? "clothes" : "shops";
+  if (!placesFor(iso, PL.cat).length) { const f = CATS.find(c => !c.hide && placesFor(iso, c.k).length); if (f) PL.cat = f.k; }
   openSheet(plannerSheet());
   if (iso === today) askHere(() => { if (PL.iso === iso && !sheet.hidden && document.querySelector("#sheet-body .cats")) refreshPlanner(); });
 }
@@ -2209,7 +2217,7 @@ new MutationObserver(() => { loadGalleries(sheet); sheetWalk(); }).observe(docum
 /* one place on its own sheet: photos, what it is, how far, and what you can do with it */
 function placeMeta(z) {
   const o = liveFrom(view) || anchorFor(view), k = o ? km(o.lat, o.lng, z.lat, z.lng) : null, far = k != null && k >= 8 && z.city !== (anchorFor(view) || {}).city;
-  return [MAPLAB[z.kind] || "", z.rating ? `★ ${z.rating}${z.reviews ? ` (${z.reviews.toLocaleString()})` : ""}` : "", k != null ? `<b>${far ? tripTxt(k) : distTxt(k, walkKm(o, z))}</b>` : ""].filter(Boolean).join(" · ");
+  return [MAPLAB[mk(z)] || "", z.rating ? `★ ${z.rating}${z.reviews ? ` (${z.reviews.toLocaleString()})` : ""}` : "", k != null ? `<b>${far ? tripTxt(k) : distTxt(k, walkKm(o, z))}</b>` : ""].filter(Boolean).join(" · ");
 }
 function placeSheet(z) {
   const inTrip = view >= START && view <= END, on = getPlan(view).find(p => p.id === z.id), meta = placeMeta(z);
@@ -2295,8 +2303,9 @@ function nearSheet() {
   return `<div id="nearS"></div>` + head("Near me now", (near.length ? `${near.length} saved place${near.length > 1 ? "s" : ""} within 2 km` : "Nothing saved within 2 km. The closest:") + `<br><small>From where you are${hereTag()}</small>`) + precNote() + `<div class="ig">${rows}</div><p class="nt">Go now puts it on today from the next quarter hour.</p>`;
 }
 /* ---------- map: every saved place around the day's hotel, coloured by kind; the day's added stops stand out ---------- */
-const MAPCOL = { dinner: "#ff2d55", drinks: "#5856d6", coffee: "#a2845e", sweet: "#ff9f0a", culture: "#af52de", see: "#34c759", shop: "#30b0c7", experience: "#00c7be" };
-const MAPLAB = { dinner: "Eat", coffee: "Coffee", sweet: "Sweets", drinks: "Drinks", see: "Sights", culture: "Culture", shop: "Shops", experience: "Experiences" };
+const MAPCOL = { dinner: "#ff2d55", drinks: "#5856d6", coffee: "#a2845e", sweet: "#ff9f0a", culture: "#af52de", see: "#34c759", shop: "#30b0c7", clothes: "#007aff", experience: "#00c7be" };
+const MAPLAB = { dinner: "Eat", coffee: "Coffee", sweet: "Sweets", drinks: "Drinks", see: "Sights", culture: "Culture", clothes: "Clothes", shop: "Shops", experience: "Experiences" };
+const mk = z => z.kind === "shop" && z.clo ? "clothes" : z.kind;
 const MAPCAT = { dinner: "dinner", drinks: "drinks", coffee: "coffee", sweet: "sweet", culture: "culture", see: "see", shop: "shop", experience: "experience" };
 let MAP = null, MLAY = null, MCAT = "all", MSEL = null, MLOAD = null;
 const mapv = document.getElementById("mapv");
@@ -2332,15 +2341,15 @@ function closeMap() { closeSheet(); mapv.hidden = true; document.body.classList.
 function drawMap(focusId, fit) {
   const { a, list } = mapPlaces(); if (!a || !MAP) return;
   const added = new Set(getPlan(view).map(p => p.id).concat(((getDay(view) || {}).steps || []).flatMap(p => p.ids || [])));
-  const kinds = [...new Set(list.map(z => z.kind))].sort((x, y) => Object.keys(MAPLAB).indexOf(x) - Object.keys(MAPLAB).indexOf(y));
+  const kinds = [...new Set(list.map(mk))].sort((x, y) => Object.keys(MAPLAB).indexOf(x) - Object.keys(MAPLAB).indexOf(y));
   if (MCAT !== "all" && !kinds.includes(MCAT)) MCAT = "all";
   document.getElementById("mchips").innerHTML = `<button data-mcat="all" aria-pressed="${MCAT === "all"}">All ${list.length}</button>` + kinds.map(k => `<button data-mcat="${k}" aria-pressed="${MCAT === k}"><i style="background:${MAPCOL[k]}"></i>${MAPLAB[k]}</button>`).join("");
   if (MLAY) MLAY.remove(); MLAY = L.layerGroup().addTo(MAP);
   const home = `<svg viewBox="0 0 24 24"><path fill="#fff" d="M12 3 2 11h3v9h5v-6h4v6h5v-9h3z"/></svg>`;
   L.marker([a.lat, a.lng], { icon: L.divIcon({ className: "", html: `<div class="mpin">${home}</div>`, iconSize: [26, 26], iconAnchor: [13, 13] }), zIndexOffset: 900 }).addTo(MLAY).on("click", e => { L.DomEvent.stopPropagation(e); haptic(); openSheet(staySheet(a)); });
-  list.filter(z => MCAT === "all" || z.kind === MCAT).sort((x, y) => added.has(x.id) - added.has(y.id)).forEach(z => {
+  list.filter(z => MCAT === "all" || mk(z) === MCAT).sort((x, y) => added.has(x.id) - added.has(y.id)).forEach(z => {
     const on = added.has(z.id);
-    L.circleMarker([z.lat, z.lng], { radius: on ? 10 : 7, color: on ? "#000" : "#fff", weight: on ? 3 : 2, fillColor: MAPCOL[z.kind], fillOpacity: 1 }).addTo(MLAY).on("click", e => { L.DomEvent.stopPropagation(e); haptic(); mapPlace(z); });
+    L.circleMarker([z.lat, z.lng], { radius: on ? 10 : 7, color: on ? "#000" : "#fff", weight: on ? 3 : 2, fillColor: MAPCOL[mk(z)], fillOpacity: 1 }).addTo(MLAY).on("click", e => { L.DomEvent.stopPropagation(e); haptic(); mapPlace(z); });
   });
   if (HERE && Date.now() - HERE.t < 30 * 6e4 && HERE.acc > 40) L.circle([HERE.lat, HERE.lng], { radius: Math.min(HERE.acc, 5000), color: "#007aff", weight: 1, opacity: .4, fillColor: "#007aff", fillOpacity: .1, interactive: false }).addTo(MLAY);
   if (HERE && Date.now() - HERE.t < 30 * 6e4) L.marker([HERE.lat, HERE.lng], { icon: L.divIcon({ className: "", html: `<div class="mme-dot"></div>`, iconSize: [16, 16], iconAnchor: [8, 8] }), zIndexOffset: 1000, interactive: false }).addTo(MLAY);
