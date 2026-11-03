@@ -100,6 +100,7 @@ They sit in free time and play as whole-day ideas ("scenes").
   - Fallbacks: "A café near X", "Somewhere near X", "A bar near X".
 - **Travel days:** steps before departure use the city you're leaving, and steps after use the city you arrive in.
 - **Day trips:** one destination per day from far saves within ~1h45 drive. Three blocks: "Travel to X" (estimated drive, rounded to 30 min, with road km) → "X" → "Travel back" (home by 6 PM).
+- **Hand-made plans (`EVENTS` with `idea: true`):** grouped by `g` ("a" default, then "b", "c"…). Any number of groups per day take turns as scenes before the generated ones (`sceneFor` maps si −1→a, −2→b, …). Wed 4 Nov has five Swiss day trips as groups c–g (Schilthorn, Rigi, Titlis, Pilatus + Lucerne, Jungfraujoch); travel legs use `k: "tripgo"`/`"tripback"`, stops `k: "trip"`.
 - **Tapping a suggestion:** opens the planner with the shown place(s) pinned at the top ("Suggested").
 - **Colours (tinted fill + inset accent bar, Calendar-style):**
 
