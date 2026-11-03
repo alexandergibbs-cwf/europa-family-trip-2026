@@ -1074,7 +1074,8 @@ DTSTAMP:20261025T000000Z
 DTSTART:20261113T125000Z
 DTEND:20261113T131500Z
 SUMMARY:Edinburgh Waverley → Luxury Waterfront Retreat for Groups
-LOCATION:Luxury Waterfront Retreat for Groups\, Edinburgh
+LOCATION:Luxury Waterfront Retreat for Groups\, 221 Granton Road\, Edinbur
+ gh EH5 1HD\, Edinburgh
 DESCRIPTION:12:50 pm UK time
 END:VEVENT
 BEGIN:VEVENT
@@ -1083,17 +1084,19 @@ DTSTAMP:20261025T000000Z
 DTSTART:20261113T131500Z
 DTEND:20261113T134500Z
 SUMMARY:Luxury Waterfront Retreat for Groups · Drop bags
-LOCATION:Luxury Waterfront Retreat for Groups\, Edinburgh
+LOCATION:Luxury Waterfront Retreat for Groups\, 221 Granton Road\, Edinbur
+ gh EH5 1HD\, Edinburgh
 DESCRIPTION:1:15 pm UK time\nCheck in from 3:00 pm
 END:VEVENT
 BEGIN:VEVENT
-UID:2026-11-16-get-570-LuxuryWaterfrontRetreatf@europe-family-trip.app
+UID:2026-11-16-get-590-LuxuryWaterfrontRetreatf@europe-family-trip.app
 DTSTAMP:20261025T000000Z
-DTSTART:20261116T093000Z
-DTEND:20261116T100000Z
+DTSTART:20261116T095000Z
+DTEND:20261116T102000Z
 SUMMARY:Luxury Waterfront Retreat for Groups · Check out
-LOCATION:Luxury Waterfront Retreat for Groups\, Edinburgh
-DESCRIPTION:9:30 am UK time
+LOCATION:Luxury Waterfront Retreat for Groups\, 221 Granton Road\, Edinbur
+ gh EH5 1HD\, Edinburgh
+DESCRIPTION:9:50 am UK time
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:Luxury Waterfront Retreat for Groups · Check out
@@ -1101,13 +1104,14 @@ TRIGGER:-PT30M
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
-UID:2026-11-16-get-600-LuxuryWaterfrontRetreatf@europe-family-trip.app
+UID:2026-11-16-get-620-LuxuryWaterfrontRetreatf@europe-family-trip.app
 DTSTAMP:20261025T000000Z
-DTSTART:20261116T100000Z
+DTSTART:20261116T102000Z
 DTEND:20261116T104500Z
 SUMMARY:Luxury Waterfront Retreat for Groups → Edinburgh Waverley
-LOCATION:Luxury Waterfront Retreat for Groups\, Edinburgh
-DESCRIPTION:10:00 am UK time
+LOCATION:Luxury Waterfront Retreat for Groups\, 221 Granton Road\, Edinbur
+ gh EH5 1HD\, Edinburgh
+DESCRIPTION:10:20 am UK time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-16-change-645-EdinburghWaverleyFindthe@europe-family-trip.app
