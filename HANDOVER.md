@@ -40,7 +40,7 @@ A phone-only "app-like" website for Alex's 8-person Europe trip (19 Oct – 20 N
   - `guess` holds times for the unbooked UK legs.
 - `EVENTS`: fixed bookings that aren't travel. Currently `Sunset dinner`, Sat 24 Oct 5–7 PM, Santorini (end time is a guess). They carve free time, and `kind: "dinner"` suppresses dinner suggestions that day.
 - `HEADS`: dated reminders. Hotel-contact and registration items were removed.
-- `SAVES`: 361 places exported from Alex's mio app (name, cat, city, lat/lng, hook, rating, url, creator). mio live has 362.
+- `SAVES`: 989 places exported from Alex's mio app (name, cat, city, lat/lng, hook, rating, url, creator). Last synced 3 Nov: +33 Zürich (@calmaguide.zurich, @francesco_cristiano) and +3 Paris vintage (@teatinz). Summer-only open-air spots (Rundfunk.fm, Rimini Bar, Barfuessbar) and hotel-type saves are in `KIND_FIX.skip`. mio's "VLS Property Partners" (a mis-resolved Liverpool listing) was left out.
   - No saves at all for Santorini or Glasgow.
   - No bars in Rome, Paris, Venice or Athens.
   - No restaurants in Florence.
