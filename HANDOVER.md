@@ -1,6 +1,6 @@
 # Europe Trip 2026: handover for a new chat
 
-Attach this at the start of a new conversation so Claude can pick up without re-learning everything. Last updated 4 Nov 2026.
+Attach this at the start of a new conversation so Claude can pick up without re-learning everything. Last updated 4 Nov 2026 (tab bar).
 
 ## What this is
 A phone-only "app-like" website for Alex's 8-person Europe trip (19 Oct – 20 Nov 2026). Its core job is to open on the day and show where we are, what's booked, and what we could do. It looks and behaves like Apple Calendar's day view, with flat Calendar-style blocks and no emoji.
@@ -121,6 +121,10 @@ They sit in free time and play as whole-day ideas ("scenes").
   Suggestions are paler than booked items.
 
 ## Navigation and motion
+- **Tab bar (4 Nov, Alex picked option B over an Apple-Maps-style map+sheet):** floating glass capsule `#tabs.tabs` (Explore / Map / Schedule, `data-tab` xp|map|cal) above everything except sheets (z 35; 65 when the map is open, under the map scrim). `curTab()` reads state from `mapv.hidden` / `xp.hidden`; `setTab()` sets `aria-selected` and is called from `showXP`, `openMap`, `closeMap` and on load. Switching tabs keeps the chosen day and category (`showXP(true, true)` skips the jump-to-today). Tapping the active tab scrolls Explore to top / the day to its default time.
+- **Removed switchers:** Explore's Cities button and Map+Schedule capsule, the map's List+Schedule capsule (`#mdone`/`#mcal` gone), the timetable's compass `#xpPill` and cities `#backPill` (both left in the DOM `hidden`), the left-edge swipe that opened the sidebar. The `.side` sidebar code is still there but nothing opens it.
+- **City title → one sheet:** Explore's large title (`.xp-tt[data-trip]`), the map's top pill (`.mtt`, text from `mttSet()`) and the timetable `#titlePill` all open `daySheet()` = `menuSheet()` (minus its old "Map" row) plus a grouped Cities list (`.tripc .crow[data-tripgo]`). Picking a city jumps to its first day (today if current) on whichever tab you're on. (There's an older unused `tripSheet()`; don't confuse them.)
+- Bottom offsets moved up for the bar: `.xp` padding-bottom 110px, map `.mcar`/`.mcard` 84px.
 - **Date wheel:** custom physics.
   - Drag is 1:1. Release glides on a timed ease (no spring overshoot): `wTw` tween, 760 + 380·√dist ms, cubic.
   - Wheel and content drags share the same physics. `wDrive` makes the timetable ride along.
@@ -147,7 +151,7 @@ They sit in free time and play as whole-day ideas ("scenes").
 - **iPhone performance:** avoid `will-change` and `backdrop-filter` on large scrolling ancestors.
 
 ## Alex's standing preferences
-- **Look and feel:** no emoji, AM/PM times, sleek and clean, Apple-style UX, no redundant labels or disclaimers, no bottom tab bar, sidebar for cities.
+- **Look and feel:** no emoji, AM/PM times, sleek and clean, Apple-style UX, no redundant labels or disclaimers. **4 Nov: Alex reversed the old "no bottom tab bar / sidebar for cities" rule** and chose an iOS 26 floating tab bar (see Navigation below).
 - **Free time:** blank, with suggestions drifting in as day ideas.
 - **Durations:** rounded to whole or half hours.
 - **Motion:** smooth, light and airy, not bouncy (except the pull stretch, which should feel springy). Revert quickly if a change looks worse.
