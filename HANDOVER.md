@@ -1,6 +1,6 @@
 # Europe Trip 2026: handover for a new chat
 
-Attach this at the start of a new conversation so Claude can pick up without re-learning everything. Last updated 22 Oct 2026, ~4 PM Athens time.
+Attach this at the start of a new conversation so Claude can pick up without re-learning everything. Last updated 4 Nov 2026.
 
 ## What this is
 A phone-only "app-like" website for Alex's 8-person Europe trip (19 Oct – 20 Nov 2026). Its core job is to open on the day and show where we are, what's booked, and what we could do. It looks and behaves like Apple Calendar's day view, with flat Calendar-style blocks and no emoji.
@@ -162,7 +162,8 @@ They sit in free time and play as whole-day ideas ("scenes").
 ## Explore-first (added 4 Nov)
 - The app now opens on **Explore** (`#xp`, `xpRender`): city, "Near you" or "Around <hotel>", day chips, category chips, then sections in time-of-day order (`xpOrder`) of saves within 3 km, nearest first. The Schedule button switches to the timetable; the compass pill in the timetable switches back. Days with a flight/train departure open on the schedule. Alex said the timetable is mostly used for flights; treat the app as a "what to do and where" guide first.
 - **Place cards:** every row has a 64px thumbnail on the left (`ph()`): a tinted icon tile with the photo layered on top, so there's always a picture.
-- **Emoji:** Alex asked for emoji on the map (pins and category row, `emoOf`, `MCHIP`). List thumbnails without a photo use drawn icons (`ICON`).
+- **Emoji:** map pins keep emoji (`emoOf`). Category chips everywhere, map included, use the drawn icons (`svgI`/`ICON`); `MCHIP` is no longer used. List thumbnails without a photo use drawn icons too.
+- **Map chrome matches Explore (4 Nov, Alex: the map felt like a separate app):** the map's top bar is Explore's `.xp-top` with `.pill.glass` buttons. The list icon (`#mdone`) sits where Explore's map icon is, so the two toggle; it closes the map and calls `showXP(true)`. `#mcal` (Schedule) closes the map and calls `showXP(false)`. No city title or blue Done any more. Category chips are Explore's pills at the top (`#mchips.xp-row.xcats`) and stay visible when a pin is picked; the emoji dock and bottom gradient are gone. `MCAT` and `XCAT` are shared both ways. The locate button is a `.pill.glass.ib`. Card row (`.mc`) uses Explore row sizing (64px thumb). Pin hooks are no longer italic. `#mapc { z-index: 0 }` keeps pins under the controls.
 - **Map:** OpenFreeMap vector tiles (positron, dark at night; free, no key) drawn by native MapLibre GL 4.7.1 (Leaflet removed 4 Nov for smoothness), recoloured in `tintMap`. Pins are MapLibre HTML markers (`mkMarker`) that morph between states; layout reruns during moves (~7/s) and on moveend. CARTO now needs a key, don't go back to it., mio-style decluttered pins (`layoutPins`): up to 14 labelled bubbles, 12 bare bubbles, the rest dots. Closed places fade.
 - **Near here, next** (`nextNear`): bottom of each place sheet, complementary kinds within 1.2 km (`NEXT`).
 - **Opening hours:** removed at Alex's request (Google cost). Don't add paid lookups without asking.
