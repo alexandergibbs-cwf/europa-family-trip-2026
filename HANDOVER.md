@@ -162,6 +162,6 @@ They sit in free time and play as whole-day ideas ("scenes").
 - The app now opens on **Explore** (`#xp`, `xpRender`): city, "Near you" or "Around <hotel>", day chips, category chips, then sections in time-of-day order (`xpOrder`) of saves within 3 km, nearest first. The Schedule button switches to the timetable; the compass pill in the timetable switches back. Days with a flight/train departure open on the schedule. Alex said the timetable is mostly used for flights; treat the app as a "what to do and where" guide first.
 - **Place cards:** every row has a 64px thumbnail on the left (`ph()`): a tinted icon tile with the photo layered on top, so there's always a picture.
 - **Icons:** simple drawn SVG icons (`ICON`, `svgI`, `icoOf`), no emoji. Map pins are white bubbles with the icon in the category colour.
-- **Map:** CARTO Voyager tiles (dark_all at night), mio-style decluttered pins (`layoutPins`): up to 14 labelled bubbles, 12 bare bubbles, the rest dots. Closed places fade.
+- **Map:** OpenFreeMap vector tiles (positron, dark at night; free, no key) drawn by MapLibre inside Leaflet via @maplibre/maplibre-gl-leaflet, recoloured in `tintMap`. CARTO now needs a key, don't go back to it., mio-style decluttered pins (`layoutPins`): up to 14 labelled bubbles, 12 bare bubbles, the rest dots. Closed places fade.
 - **Near here, next** (`nextNear`): bottom of each place sheet, complementary kinds within 1.2 km (`NEXT`).
 - **Opening hours:** removed at Alex's request (Google cost). Don't add paid lookups without asking.

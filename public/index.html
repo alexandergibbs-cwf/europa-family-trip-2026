@@ -2485,7 +2485,21 @@ const mk = z => z.kind === "shop" && z.clo ? "clothes" : z.kind;
 const MAPCAT = { dinner: "dinner", drinks: "drinks", coffee: "coffee", sweet: "sweet", culture: "culture", see: "see", shop: "shop", experience: "experience" };
 let MAP = null, MLAY = null, MCAT = "all", MSEL = null, MLOAD = null, MTILE = null, MLT = 0, MPTS = [], MHOME = null;
 const darkMap = () => { const t = document.documentElement.dataset.theme; return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; };
-function tileUrl() { const u = `https://{s}.basemaps.cartocdn.com/${darkMap() ? "dark_all" : "rastertiles/voyager"}/{z}/{x}/{y}${devicePixelRatio > 1 ? "@2x" : ""}.png`; if (MTILE) MTILE.options._u = u; return u; }
+/* OpenFreeMap (free, no key): the quiet Positron style, recoloured like mio: soft grey land, white streets, blue water, green parks */
+const tileUrl = () => `https://tiles.openfreemap.org/styles/${darkMap() ? "dark" : "positron"}`;
+/* the MapLibre map exists once Leaflet has a view; colour it on every style load */
+function glMap() { const gl = MTILE && MTILE.getMaplibreMap && MTILE.getMaplibreMap(); if (gl && !gl._tint) { gl._tint = 1; gl.on("styledata", () => tintMap(gl)); if (gl.isStyleLoaded()) tintMap(gl); } return gl; }
+function tintMap(gl) {
+  const dk = darkMap(), set = (id, prop, v) => { try { gl.setPaintProperty(id, prop, v); } catch (e) {} };
+  (gl.getStyle().layers || []).forEach(l => {
+    const id = l.id.toLowerCase();
+    if (l.type === "background") set(l.id, "background-color", dk ? "#1c1c1e" : "#f2f2f0");
+    else if (l.type === "fill" && /water|ocean|lake|river/.test(id)) set(l.id, "fill-color", dk ? "#1b3550" : "#a9d3f2");
+    else if (l.type === "line" && /waterway|river|canal/.test(id)) set(l.id, "line-color", dk ? "#1b3550" : "#a9d3f2");
+    else if (l.type === "fill" && /park|wood|forest|grass|cemetery|pitch|garden|landcover|nature/.test(id)) { set(l.id, "fill-color", dk ? "#1f3324" : "#cfe9c6"); set(l.id, "fill-opacity", 1); }
+    else if (l.type === "fill" && /building/.test(id)) set(l.id, "fill-color", dk ? "#2a2a2d" : "#e7e6e3");
+  });
+}
 /* simple drawn icons: one per kind of place, plus a few common sub-kinds read from what it is */
 const ICON = {
   dinner: '<path d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M17 21v-8h-3V9c0-3 1.3-5 3-6z"/>',
@@ -2525,11 +2539,12 @@ const shortHook = z => { let h = (z.hook || "").replace(/[|\x1f]/g, " ").replace
 const pinScore = z => (z.rating || 4.2) * Math.log10((z.reviews || 30) + 10) + (z.url ? .6 : 0);
 const mapv = document.getElementById("mapv");
 function loadLeaflet() {
-  if (window.L) return Promise.resolve(); if (MLOAD) return MLOAD;
-  MLOAD = new Promise((ok, bad) => {
-    const l = document.createElement("link"); l.rel = "stylesheet"; l.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"; document.head.appendChild(l);
-    const sc = document.createElement("script"); sc.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"; sc.onload = ok; sc.onerror = () => { MLOAD = null; bad(); }; document.head.appendChild(sc);
-  });
+  if (window.L && L.maplibreGL) return Promise.resolve(); if (MLOAD) return MLOAD;
+  const css = h => { const l = document.createElement("link"); l.rel = "stylesheet"; l.href = h; document.head.appendChild(l); };
+  const js = src => new Promise((ok, bad) => { const sc = document.createElement("script"); sc.src = src; sc.onload = ok; sc.onerror = bad; document.head.appendChild(sc); });
+  css("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"); css("https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css");
+  MLOAD = Promise.all([js("https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"), js("https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js")])
+    .then(() => js("https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.3/leaflet-maplibre-gl.js")).catch(e => { MLOAD = null; throw e; });
   return MLOAD;
 }
 function mapPlaces() {
@@ -2544,14 +2559,15 @@ function openMap(focusId) {
   loadLeaflet().then(() => {
     if (!MAP) {
       MAP = L.map("mapc", { zoomControl: false, attributionControl: true });
-      /* CARTO Voyager: light, quiet streets, blue water and green parks (dark version at night), no key needed */
-      MTILE = L.tileLayer(tileUrl(), { subdomains: "abcd", maxZoom: 20, detectRetina: false, attribution: "© OpenStreetMap © CARTO" }).addTo(MAP);
+      /* OpenFreeMap vector map drawn by MapLibre inside Leaflet, so the pins and gestures stay the same */
+      MTILE = L.maplibreGL({ style: tileUrl(), attribution: "© OpenFreeMap © OpenMapTiles © OpenStreetMap" }).addTo(MAP); MTILE._u = tileUrl(); MAP.attributionControl.addAttribution('<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>');
+
       MAP.on("click", () => { mapCard(null); closeSheet(); });
       MAP.on("zoomend moveend", () => { clearTimeout(MLT); MLT = setTimeout(layoutPins, 40); });
     }
-    if (MTILE.options._u !== tileUrl()) MTILE.setUrl(tileUrl());
+    if (MTILE._u !== tileUrl() && glMap()) { MTILE._u = tileUrl(); glMap().setStyle(tileUrl()); }
     setTimeout(() => { MAP.invalidateSize(); drawMap(focusId, true); }, 30);
-  }).catch(() => { document.getElementById("mcard").hidden = false; document.getElementById("mcard").className = "mcard noph"; document.getElementById("mcard").innerHTML = `<span class="a">The map couldn't load</span><span class="h">Check your connection and try again.</span>`; });
+  }).catch(e => { console.warn("map", e); document.getElementById("mcard").hidden = false; document.getElementById("mcard").className = "mcard noph"; document.getElementById("mcard").innerHTML = `<span class="a">The map couldn't load</span><span class="h">Check your connection and try again.</span>`; });
 }
 function mapPlace(z) { SBACK = []; REFRESH = null; swapSheet(placeSheet(z)); }
 function closeMap() { closeSheet(); mapv.hidden = true; document.body.classList.remove("mapopen"); mapCard(null); }
@@ -2570,7 +2586,7 @@ function drawMap(focusId, fit) {
 }
 /* like mio: the best places get a picture bubble with name and a few words, others a bubble, and when it's crowded a small dot */
 function layoutPins() {
-  if (!MAP || mapv.hidden || !MAP._loaded) return;
+  if (!MAP || mapv.hidden || !MAP._loaded) return; glMap();
   if (MLAY) MLAY.remove(); MLAY = L.layerGroup().addTo(MAP);
   const sz = MAP.getSize(), boxes = [], hit = (x0, y0, x1, y1) => boxes.some(b => x0 < b[2] && x1 > b[0] && y0 < b[3] && y1 > b[1]);
   const pin = (ll, html, w, cls, z, onTap) => L.marker(ll, { icon: L.divIcon({ className: "", html, iconSize: [40, 40], iconAnchor: [20, 20] }), zIndexOffset: cls }).addTo(MLAY).on("click", e => { L.DomEvent.stopPropagation(e); haptic(); onTap(); });
