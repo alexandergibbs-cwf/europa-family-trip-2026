@@ -408,7 +408,8 @@ body.mapopen .scrim { z-index: 66; } body.mapopen .sheet { z-index: 67; }
 .place.hasph { grid-template-columns: 64px 1fr auto; }
 .place .ph { position: relative; width: 64px; height: 64px; border-radius: 12px; overflow: hidden; align-self: start; margin-top: 2px; display: grid; place-items: center; color: var(--c); background: color-mix(in srgb, var(--c) 13%, var(--card)); }
 .place .ph svg { width: 28px; height: 28px; }
-.place .ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.place .ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 220ms ease; }
+.place .ph img.ld { opacity: 1; }
 .hero { display: block; width: 100%; height: 200px; object-fit: cover; border-radius: 18px; margin: 2px 0 12px; background: var(--panel); }
 .place .a { font-size: 16px; font-weight: 600; line-height: 1.25; }
 .place .h { font-size: 14px; color: var(--sub); line-height: 1.35; }
@@ -2261,7 +2262,7 @@ const URLN = {}; SAVES.forEach(z => { if (z.url) URLN[z.url] = (URLN[z.url] || 0
 const photoQ = z => new URLSearchParams({ v: 3, id: z.id, n: z.name, c: z.city || "", co: z.country || "", lat: z.lat, lng: z.lng });
 const photoUrl = (z, i) => "/api/photo?" + new URLSearchParams({ v: 3, ...(i ? { i } : {}), id: z.id, n: z.name, c: z.city || "", co: z.country || "", lat: z.lat, lng: z.lng, ...(z.url && /tiktok\.com/.test(z.url) && URLN[z.url] <= 2 ? { u: z.url } : {}) });
 const vidAttr = z => z && z.url && /tiktok\.com|instagram\.com/.test(z.url) ? ` data-vid="${esc(z.url)}" data-vsid="${esc(z.id)}"` : "";
-const ph = z => z ? `<span class="ph" style="--c:${MAPCOL[mk(z)] || "#8e8e93"}">${svgI(icoOf(z))}${z.lat != null ? `<img loading="lazy" decoding="async" alt="" src="${esc(photoUrl(z))}" onerror="this.remove()">` : ""}</span>` : "";
+const ph = z => z ? `<span class="ph" style="--c:${MAPCOL[mk(z)] || "#8e8e93"}">${svgI(icoOf(z))}${z.lat != null ? `<img loading="lazy" decoding="async" alt="" src="${esc(photoUrl(z))}" onload="this.classList.add('ld')" onerror="this.remove()">` : ""}</span>` : "";
 const PLAY = `<svg viewBox="0 0 12 12" aria-hidden="true"><path fill="currentColor" d="M2.5 1.2v9.6L10.6 6z"/></svg>`;
 /* the first photo straight away; the rest (up to 8, from Google) are added once the server says how many there are */
 const hero = z => z && z.lat != null ? `<div class="gal" data-gal="${esc(z.id)}"><div class="gtrack"><img decoding="async" alt="" src="${esc(photoUrl(z))}" onerror="const g=this.closest('.gal');if(this.parentNode.children.length<2)g.remove();else this.remove()"></div><div class="gdots"></div></div>` : "";
@@ -2414,7 +2415,7 @@ function nearSheet() {
 }
 /* ---------- Explore: what to do and where, near you (or the hotel), in the order the day goes ---------- */
 const xp = document.getElementById("xp");
-let XCAT = "all", XMORE = {}, XRT = 0;
+let XCAT = "all", XMORE = {}, XRT = 0, XSIG = "";
 const xpShown = () => !xp.hidden;
 const XKINDS = ["dinner", "coffee", "drinks", "sweet", "see", "culture", "clothes", "shop", "experience"];
 /* what comes next at this time of day, and what to call it */
@@ -2436,7 +2437,7 @@ function xpRender(keepScroll) {
   const iso = view, a = anchorFor(iso), me = liveFrom(iso), o = me || a, city = cityOn(iso), isToday = iso === today, st = xp.scrollTop;
   const days = ALLDAYS.filter(d => d >= (today >= START ? today : START) && d <= END).slice(0, 8);
   const dayLab = d => d === today ? "Today" : d === addDays(today, 1) ? "Tomorrow" : fmt(d, { weekday: "short", day: "numeric" });
-  const pool = o ? SAVES.filter(z => z.lat != null && z.kind !== "skip" && XKINDS.includes(mk(z))).map(z => ({ z, k: km(o.lat, o.lng, z.lat, z.lng) })).filter(x => x.k < 3).sort((x, y) => x.k - y.k) : [];
+  const pool = o ? SAVES.filter(z => z.lat != null && z.kind !== "skip" && XKINDS.includes(mk(z))).map(z => ({ z, k: km(o.lat, o.lng, z.lat, z.lng) })).filter(x => x.z.city === city || x.k < 15).sort((x, y) => x.k - y.k) : [];
   walkFetch(o, pool.slice(0, 60).map(x => x.z));
   const kinds = XKINDS.filter(k => pool.some(x => mk(x.z) === k));
   let body = "";
@@ -2444,14 +2445,21 @@ function xpRender(keepScroll) {
   else if (XCAT === "all") {
     body = xpOrder(iso).filter(([k]) => kinds.includes(k)).map(([k, t]) => {
       const all = pool.filter(x => mk(x.z) === k); if (!all.length) return "";
-      const n = XMORE[k] ? 12 : 3;
+      const n = XMORE[k] ? all.length : 3;
       return `<div class="xp-sec"><h2>${t}</h2>${all.length > 3 ? `<button data-xmore="${k}">${XMORE[k] ? "Less" : "See all " + all.length}</button>` : ""}</div><div class="ig">${all.slice(0, n).map(x => xpRow(x.z, x.k, o)).join("")}</div>`;
-    }).join("") || `<p class="xp-empty">Nothing saved within 3 km.</p>`;
+    }).join("") || `<p class="xp-empty">Nothing saved in ${esc(city)} yet.</p>`;
   } else {
     const all = pool.filter(x => mk(x.z) === XCAT);
-    body = all.length ? `<div class="xp-sec"><h2>${MAPLAB[XCAT]}</h2></div><div class="ig">${all.slice(0, 40).map(x => xpRow(x.z, x.k, o)).join("")}</div>` : `<p class="xp-empty">No ${MAPLAB[XCAT].toLowerCase()} saved within 3 km.</p>`;
+    body = all.length ? `<div class="xp-sec"><h2>${MAPLAB[XCAT]}</h2></div><div class="ig">${all.map(x => xpRow(x.z, x.k, o)).join("")}</div>` : `<p class="xp-empty">No ${MAPLAB[XCAT].toLowerCase()} saved in ${esc(city)}.</p>`;
   }
   const where = me ? "Near you" : a ? `Around ${a.hotel}` : "";
+  const sig = [iso, city, where, XCAT, JSON.stringify(XMORE), body.replace(/<span class="m"[^]*?<\/span><\/span><\/div>/g, "")].join("|");
+  if (sig === XSIG && xp.firstChild) {
+    const tmp = document.createElement("div"); tmp.innerHTML = body;
+    tmp.querySelectorAll(".place[data-sid]").forEach(r => { const old = xp.querySelector(`.place[data-sid="${r.dataset.sid}"] .m`), nu = r.querySelector(".m"); if (old && nu && old.innerHTML !== nu.innerHTML) old.innerHTML = nu.innerHTML; });
+    return;
+  }
+  XSIG = sig;
   xp.innerHTML = `<div class="xp-top"><button class="pill glass press ib" data-xside aria-label="Cities"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3.5"/><path d="M9.5 5v14"/><path d="M5.8 8.5h1.4M5.8 11h1.4M5.8 13.5h1.4"/></svg></button><span class="sp"></span>
     <button class="pill glass press ib" data-openmap aria-label="Map"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6z"/><path d="M9 4v14M15 6v14"/></svg></button>
     <button class="pill glass press xp-cal" data-xcal><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Schedule</button></div>
