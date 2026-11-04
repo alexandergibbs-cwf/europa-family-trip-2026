@@ -377,17 +377,17 @@ body.mapopen .sheet { max-height: calc(56vh + 120px); } body.mapopen .scrim { ba
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .mapv { --mtxt: #f2f2f7; --msub: #b8b8c0; --mhalo: rgba(0,0,0,.85); --mbar: rgba(22,22,24,.96); } }
 :root[data-theme="dark"] .mapv { --mtxt: #f2f2f7; --msub: #b8b8c0; --mhalo: rgba(0,0,0,.85); --mbar: rgba(22,22,24,.96); }
 .pinw { width: 40px; height: 40px; }
-.mp { position: absolute; left: 0; top: 0; width: max-content; display: flex; align-items: center; gap: 7px; white-space: nowrap; cursor: pointer; }
+.mp { pointer-events: none; position: absolute; left: 0; top: 0; width: max-content; display: flex; align-items: center; gap: 7px; white-space: nowrap; cursor: pointer; }
 .mp .b { flex: none; position: relative; width: 40px; height: 40px; border-radius: 20px; background: #fff; display: grid; place-items: center; transition: transform 460ms cubic-bezier(.32, 1.28, .6, 1), background-color 240ms ease, box-shadow 300ms ease; transition-delay: var(--d, 0ms); box-shadow: 0 2px 7px rgba(0,0,0,.22), 0 0 0 .5px rgba(0,0,0,.05); transition: transform 380ms var(--spring-bouncy); }
 .mp .b .e { font-style: normal; font-size: 21px; line-height: 1; transition: opacity 200ms ease, transform 460ms cubic-bezier(.32, 1.28, .6, 1); transition-delay: var(--d, 0ms); }
 .mp.sel .b .e { transform: scale(1.06); }
 .mp .t { transition: opacity 260ms ease, transform 460ms cubic-bezier(.22, 1, .36, 1), margin 460ms cubic-bezier(.22, 1, .36, 1); transition-delay: var(--d, 0ms); }
 .mp:not(.s-l) .t { opacity: 0; transform: translateX(-8px) scale(.96); pointer-events: none; } .mp.l:not(.s-l) .t { transform: translateX(8px) scale(.96); }
 .mp.s-d .b { transform: scale(.27); background: var(--c); box-shadow: 0 0 0 5px #fff, 0 2px 8px rgba(0,0,0,.35); } .mp.s-d .b .e { opacity: 0; transform: scale(.4); }
-.mp.s-h { pointer-events: none; } .mp.s-h .b { transform: scale(0); } .mp.s-h .b .e { opacity: 0; }
+.mp .b { pointer-events: auto; } .mp.s-h .b { pointer-events: none; } .mp.s-h .b { transform: scale(0); } .mp.s-h .b .e { opacity: 0; }
 .mp:not(.home) .b:active { transform: scale(.88); }
 .mp.on .b { box-shadow: 0 0 0 3px #007aff, 0 2px 7px rgba(0,0,0,.25); }
-.mp .t { display: flex; flex-direction: column; gap: 1px; max-width: 132px; text-shadow: 0 0 2px var(--mhalo), 0 0 4px var(--mhalo), 0 0 7px var(--mhalo); }
+.mp .t { pointer-events: none; display: flex; flex-direction: column; gap: 1px; max-width: 132px; text-shadow: 0 0 2px var(--mhalo), 0 0 4px var(--mhalo), 0 0 7px var(--mhalo); }
 .mp .t b { font: 600 14.5px/1.15 inherit; font-family: inherit; color: var(--mtxt); overflow: hidden; text-overflow: ellipsis; letter-spacing: -.01em; }
 .mp .t em { font: italic 400 12.5px/1.2 inherit; font-family: inherit; color: var(--msub); white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .mp.home .b { background: #fff; }
@@ -2625,7 +2625,7 @@ function openMap(focusId) {
       MAP.touchZoomRotate.disableRotation(); MTILE = tileUrl();
       MAP.addControl(new maplibregl.AttributionControl({ compact: true, customAttribution: '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>' }), "bottom-left");
       MAP.on("styledata", () => tintMap(MAP));
-      MAP.on("click", () => { if (Date.now() - MTAP < 350) return; mapCard(null); if (!sheet.hidden) return closeSheet(); if (MPICK) { haptic(); mapPick(null); } });
+      MAP.on("click", e => { if (Date.now() - MTAP < 350) return; const lz = labelAt(e.point); if (lz) { MTAP = Date.now(); haptic(); return lz.home ? 0 : pinTap(lz); } mapCard(null); if (!sheet.hidden) return closeSheet(); if (MPICK) { haptic(); mapPick(null); } });
       /* pins re-sort themselves while the map is still moving (a few times a second), and once more when it stops */
       MAP.on("move", () => { const t = performance.now(); if (t - MLAST > 220 && !MRAF) MRAF = requestAnimationFrame(() => { MRAF = 0; MLAST = performance.now(); layoutPins(); }); });
       MAP.on("moveend", () => { clearTimeout(MLT); MLT = setTimeout(layoutPins, 0); });
@@ -2684,9 +2684,18 @@ function mkMarker(lng, lat, html, onTap) {
   if (onTap) w.addEventListener("click", e => { e.stopPropagation(); MTAP = Date.now(); haptic(); onTap(); });
   return new maplibregl.Marker({ element: w, anchor: "center" }).setLngLat([lng, lat]).addTo(MAP);
 }
+/* Name labels never take taps (a pin or dot under the text wins). A tap that hits no pin falls back to the label it landed on. */
+function pinTap(z) { return MPICK && MPICK.id === z.id ? mapPlace(z) : mapPick(z, true); }
+function labelAt(pt) {
+  const c = MAP.getContainer().getBoundingClientRect(), x = pt.x + c.left, y = pt.y + c.top; let best = null, bz = -1e9;
+  PM.forEach(o => { if (o.st !== "l" && o.st !== "sel") return; const t = o.m.getElement().querySelector(".t"); if (!t) return;
+    const r = t.getBoundingClientRect(); if (x >= r.left - 4 && x <= r.right + 4 && y >= r.top - 4 && y <= r.bottom + 4 && (o.zi || 0) > bz) { bz = o.zi || 0; best = o.z; } });
+  if (!best && PHOME) { const r = PHOME.m.getElement().querySelector(".t").getBoundingClientRect(); if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) { openSheet(staySheet(PHOME.a)); return { home: 1 }; } }
+  return best;
+}
 function pinEl(z) {
   const nm = z.name.length > 24 ? z.name.slice(0, 23) + "…" : z.name, hk = shortHook(z);
-  const m = mkMarker(z.lng, z.lat, `<div class="mp s-h" style="--c:${MAPCOL[mk(z)]}"><span class="b"><i class="e">${emoOf(z)}</i></span><span class="t"><b>${esc(nm)}</b>${hk ? `<em>${esc(hk)}</em>` : ""}</span></div>`, () => MPICK && MPICK.id === z.id ? mapPlace(z) : mapPick(z, true));
+  const m = mkMarker(z.lng, z.lat, `<div class="mp s-h" style="--c:${MAPCOL[mk(z)]}"><span class="b"><i class="e">${emoOf(z)}</i></span><span class="t"><b>${esc(nm)}</b>${hk ? `<em>${esc(hk)}</em>` : ""}</span></div>`, () => pinTap(z));
   const o = { m, z, st: "h", lw: Math.min(132, Math.max(nm.length * 7.9, hk.length > 18 ? 118 : hk.length * 6.6)) + 8 }; PM.set(z.id, o); return o;
 }
 function pinSet(o, st, left, zi, delay) {
@@ -2695,7 +2704,7 @@ function pinSet(o, st, left, zi, delay) {
     el.classList.remove("s-l", "s-b", "s-d", "s-h", "sel"); el.classList.add(st === "sel" ? "s-l" : "s-" + st); if (st === "sel") el.classList.add("sel");
     el.classList.toggle("l", !!left); el.style.setProperty("--d", (delay || 0) + "ms"); o.st = st; o.left = left;
   }
-  if (o.zi !== zi) { o.m.getElement().style.zIndex = 2000 + zi; o.zi = zi; }
+  if (o.zi !== zi) { o.m.getElement().style.zIndex = 2000 + zi; o.zi = zi; } o.m.getElement().style.pointerEvents = st === "h" ? "none" : "";
 }
 function layoutPins() {
   if (!MAP || mapv.hidden) return;
