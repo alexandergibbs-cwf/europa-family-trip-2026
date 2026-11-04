@@ -224,6 +224,7 @@ button { font: inherit; color: inherit; letter-spacing: inherit; }
 .side .done { border: 0; background: none; color: var(--blue); width: 44px; height: 44px; margin-right: -8px; padding: 0; display: grid; place-items: center; cursor: pointer; }
 .side-grab-unused { position: fixed; top: 50%; left: calc(min(78vw, 320px) - 6px); width: 5px; height: 44px; margin-top: -22px; border-radius: 3px; background: color-mix(in srgb, var(--sub) 40%, transparent); pointer-events: none; }
 .side .crow { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; width: 100%; min-height: 54px; border: 0; background: none; text-align: left; padding: 9px 10px; border-radius: 12px; cursor: pointer; }
+a.crow { color: inherit; text-decoration: none; }
 .side .crow .a { font-size: 17px; font-weight: 600; line-height: 1.2; }
 .side .crow .b { font-size: 13px; color: var(--sub); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .side .crow .r { font-size: 12px; color: var(--sub); text-align: right; font-variant-numeric: tabular-nums; line-height: 1.3; white-space: nowrap; }
@@ -1666,7 +1667,7 @@ const side = document.getElementById("side"), page = document.getElementById("pa
 const sideW = () => Math.min(innerWidth * 0.82, 340);
 function openSide() {
   const cur = STAYS.find(s => s.in <= view && view < s.out);
-  document.getElementById("side-body").innerHTML = STAYS.filter(s => s.out > today).map(s => `<button class="crow press${s.out <= today ? " past" : ""}${s.in <= today && today < s.out ? " cur" : ""}${s === cur ? " on" : ""}" data-goto="${s.in <= today && today < s.out ? today : s.in}"><span><div class="a">${esc(s.city)}</div><div class="b">${esc(s.hotel)}</div></span><span class="r">${dRange(s.in, s.out)}<br>${nights(s)} nights</span></button>`).join("");
+  document.getElementById("side-body").innerHTML = (today <= "2026-11-04" ? `<a class="crow press" href="/jungfrau.html"><span><div class="a">Jungfrau Day</div><div class="b">Interlaken, Grindelwald, Lauterbrunnen</div></span><span class="r">Wed 4 Nov<br>Map</span></a>` : "") + STAYS.filter(s => s.out > today).map(s => `<button class="crow press${s.out <= today ? " past" : ""}${s.in <= today && today < s.out ? " cur" : ""}${s === cur ? " on" : ""}" data-goto="${s.in <= today && today < s.out ? today : s.in}"><span><div class="a">${esc(s.city)}</div><div class="b">${esc(s.hotel)}</div></span><span class="r">${dRange(s.in, s.out)}<br>${nights(s)} nights</span></button>`).join("");
   document.documentElement.style.setProperty("--side-w", sideW() + "px");
   side.hidden = false;
   const sb = document.getElementById("side-body"); sb.scrollTop = 0; side.classList.remove("scrolled");

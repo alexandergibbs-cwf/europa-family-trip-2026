@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#ffffff">
+<title>Jungfrau Day</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root {
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  --bg: #ffffff; --ink: #000000; --sub: #6e6e73; --panel: #f2f2f7; --card: #ffffff; --hair: #d1d1d6;
+  --blue: #007aff; --green: #34c759; --brown: #a2845e; --orange: #ff9500; --grey: #8e8e93; --red: #ff3b30;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #000000; --ink: #ffffff; --sub: #8d8d93; --panel: #1c1c1e; --card: #2c2c2e; --hair: #38383a; --blue: #0a84ff; --red: #ff453a; }
+}
+:root[data-theme="dark"] { --bg: #000000; --ink: #ffffff; --sub: #8d8d93; --panel: #1c1c1e; --card: #2c2c2e; --hair: #38383a; --blue: #0a84ff; --red: #ff453a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font: 400 17px/1.35 var(--font); letter-spacing: -0.02em; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+button { font: inherit; color: inherit; }
+.top { position: sticky; top: 0; z-index: 1000; background: var(--bg); padding: calc(env(safe-area-inset-top, 0px) + 6px) 16px 10px; }
+.bar { display: flex; align-items: center; justify-content: space-between; height: 44px; }
+.back { display: inline-flex; align-items: center; gap: 2px; color: var(--blue); text-decoration: none; font-size: 17px; margin-left: -6px; padding: 6px; }
+.back svg { width: 12px; height: 20px; }
+h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.03em; margin: 2px 0 2px; }
+.lede { font-size: 14px; color: var(--sub); margin: 0 0 12px; }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--panel); border-radius: 9px; padding: 2px; }
+.seg button { border: 0; background: none; padding: 7px 0; border-radius: 7px; font-size: 14px; font-weight: 500; cursor: pointer; }
+.seg button.on { background: var(--card); box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 0 .5px rgba(0,0,0,.04); font-weight: 600; }
+#map { height: 44vh; min-height: 280px; margin: 0 16px; border-radius: 14px; overflow: hidden; background: var(--panel); }
+.leaflet-container { font: inherit; }
+.pin { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; color: #fff; font: 600 13px/1 var(--font); border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35); }
+.pin.off { opacity: .55; }
+.pin.on { transform: scale(1.25); }
+.meta { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 14px 16px 4px; }
+.meta .t { white-space: nowrap; }
+.meta .r { text-align: right; }
+.meta .t { font-size: 13px; font-weight: 600; color: var(--sub); text-transform: uppercase; letter-spacing: 0; }
+.meta .r { font-size: 13px; color: var(--sub); }
+ol { list-style: none; margin: 0; padding: 0 16px calc(env(safe-area-inset-bottom, 0px) + 28px); }
+li { display: grid; grid-template-columns: 28px 1fr; gap: 12px; padding: 12px 0; border-bottom: .5px solid var(--hair); cursor: pointer; }
+li:last-child { border-bottom: 0; }
+li .n { width: 28px; height: 28px; border-radius: 50%; color: #fff; display: grid; place-items: center; font: 600 13px/1 var(--font); }
+li .a { font-size: 17px; font-weight: 600; line-height: 1.25; }
+li .w { font-size: 13px; color: var(--sub); margin-top: 1px; }
+li .d { font-size: 15px; margin-top: 5px; }
+li .go { display: inline-block; margin-top: 7px; font-size: 15px; color: var(--blue); text-decoration: none; font-weight: 500; }
+li.sel .a { color: var(--blue); }
+.closed { margin: 6px 16px 0; padding: 12px 14px; background: var(--panel); border-radius: 12px; font-size: 14px; color: var(--sub); }
+.closed b { color: var(--ink); font-weight: 600; display: block; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="bar"><a class="back" href="/"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2 2 10l8 8"/></svg>Trip</a></div>
+  <h1>Jungfrau Day</h1>
+  <p class="lede">Wed 4 Nov · the walking route in each stop, in order</p>
+  <div class="seg" id="seg"></div>
+</div>
+<div id="map"></div>
+<div class="meta"><span class="t" id="mt"></span><span class="r" id="mr"></span></div>
+<ol id="list"></ol>
+<div class="closed" id="closed"></div>
+<div style="height: calc(env(safe-area-inset-bottom, 0px) + 24px)"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(() => {
+  const C = { walk: "#34c759", coffee: "#a2845e", food: "#ff9500", see: "#007aff", maybe: "#8e8e93" };
+  /* Stops in walking order. Pins are close, not survey-exact: "Walk here" opens Apple Maps on the real place. */
+  const TOWNS = {
+    interlaken: {
+      name: "Interlaken", time: "About 1 hour (2 if the guide moves time here)",
+      stops: [
+        { t: "Höhematte", w: "Start here", c: "see", ll: [46.68641, 7.85988], q: "Höhematte, Interlaken", d: "The big lawn in the middle of town. Jungfrau straight ahead if the cloud lifts, and the red Grand Tour photo frame." },
+        { t: "Victoria-Jungfrau", w: "2 min · west end of the lawn", c: "see", ll: [46.68575, 7.85805], q: "Victoria-Jungfrau Grand Hotel, Interlaken", d: "The grand hotel on Höheweg. The TikTok drink stop if you have the longer version." },
+        { t: "Höheweg", w: "Walk west along it · about 10 min", c: "walk", ll: [46.68575, 7.8545], q: "Höheweg, Interlaken", d: "Main street towards Interlaken West: shops, watch stores and the Lindt shop." },
+        { t: "Aare river", w: "5 min · by Hotel Central Continental", c: "see", ll: [46.68725, 7.8527], q: "Hotel Central Continental, Interlaken", d: "The turquoise river with the old hotels behind. Cross the bridges for the Unterseen side." }
+      ],
+      route: [[46.68641, 7.85988], [46.68575, 7.85805], [46.68575, 7.8545], [46.6866, 7.8532], [46.68725, 7.8527]],
+      closed: "Harder Kulm funicular (until late Nov), Schynige Platte (season over), Lake Brienz boats on a short winter timetable."
+    },
+    grindelwald: {
+      name: "Grindelwald", time: "About 4 hours on the tour as listed, about 2 if it's cut",
+      stops: [
+        { t: "Grindelwald station", w: "Start · bus 122 leaves here", c: "walk", ll: [46.62431, 8.03433], q: "Grindelwald Bahnhof", d: "Take bus 122 to Gletscherschlucht, about 15 min. Or walk it, about 30 min, downhill there." },
+        { t: "Glacier Canyon", w: "1–1½ hours inside · CHF 19", c: "see", ll: [46.60845, 8.05265], q: "Gletscherschlucht Grindelwald", d: "850 m walkway through the gorge, the spider-web net over the river, the tunnel at the end. Weather permitting in November, so check the sign at the station. Bus 122 back up." },
+        { t: "Coop · Eiger+", w: "By the station", c: "food", ll: [46.62445, 8.0362], q: "Coop Grindelwald", d: "The reliable lunch. Onkel Tom's pizza is most likely closed on a Wednesday." },
+        { t: "Dorfstrasse", w: "Main street east · about 12 min", c: "walk", ll: [46.62455, 8.0395], q: "Dorfstrasse, Grindelwald", d: "Keep looking back over your shoulder: the Eiger sits right above the street." },
+        { t: "EigerBean", w: "Far end of Dorfstrasse · 9 AM–5 PM", c: "coffee", ll: [46.6251, 8.0437], q: "EigerBean, Grindelwald", d: "The coffee both TikToks rate best in Switzerland. Ask for the Spanish latte." },
+        { t: "Lanes above the street", w: "On the way back", c: "see", ll: [46.6262, 8.0405], q: "Grindelwald", d: "Step up into the lanes above Dorfstrasse for the chalets-on-the-hillside shot, then back down to the station." }
+      ],
+      route: [[46.62431, 8.03433], [46.6205, 8.0405], [46.6145, 8.0465], [46.60845, 8.05265], [46.6145, 8.0465], [46.6205, 8.0405], [46.62431, 8.03433], [46.62445, 8.0362], [46.62455, 8.0395], [46.6248, 8.0415], [46.6251, 8.0437], [46.6262, 8.0405], [46.6252, 8.037], [46.62431, 8.03433]],
+      closed: "First gondola, Cliff Walk and Bachalpsee (until 27 Nov), Pfingstegg toboggan (season over), Männlichen (until 11 Dec). Eiger Express runs, but it's a long, pricey detour for this stop."
+    },
+    lauterbrunnen: {
+      name: "Lauterbrunnen", time: "About 1 hour at dusk, 2+ if the guide moves time here",
+      stops: [
+        { t: "Lauterbrunnen station", w: "Start · head south down the main street", c: "walk", ll: [46.59855, 7.9094], q: "Lauterbrunnen Bahnhof", d: "The light goes early in the valley, so do the photo spot first." },
+        { t: "Photo spot", w: "About 10 min", c: "see", ll: [46.5956, 7.9106], q: "Lauterbrunnen viewpoint", d: "On the slope just before the white church: the church-and-falls postcard shot." },
+        { t: "Church", w: "2 min", c: "see", ll: [46.59375, 7.90895], q: "Reformierte Kirche Lauterbrunnen", d: "The white church with the falls behind it." },
+        { t: "Staubbach Falls", w: "5–10 min · free", c: "see", ll: [46.59305, 7.9062], q: "Staubbach Falls, Lauterbrunnen", d: "300 m drop off the cliff beside the village. The path behind the falls may be shut for winter." },
+        { t: "Valley road south", w: "Flat · turn back whenever you like", c: "maybe", ll: [46.5835, 7.9105], q: "Trümmelbach Falls", d: "Only if you have the longer stop: keep going towards Trümmelbach for the wide valley frames. Trümmelbach itself has closed for the season." }
+      ],
+      route: [[46.59855, 7.9094], [46.5972, 7.9098], [46.5956, 7.9106], [46.59375, 7.90895], [46.59305, 7.9062], [46.5925, 7.9078], [46.5885, 7.9095], [46.5835, 7.9105]],
+      closed: "Trümmelbach Falls (season over), Grütschalp cableway to Mürren (until 6 Nov; Mürren is still reachable from Stechelberg)."
+    }
+  };
+  const order = ["interlaken", "grindelwald", "lauterbrunnen"];
+  const map = L.map("map", { zoomControl: false, attributionControl: true });
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap contributors" }).addTo(map);
+  const layer = L.layerGroup().addTo(map);
+  let cur, markers = [];
+  const pick = () => { try { return localStorage.getItem("jf-town"); } catch (e) { return null; } };
+  const keep = k => { try { localStorage.setItem("jf-town", k); } catch (e) {} };
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const seg = document.getElementById("seg");
+  seg.innerHTML = order.map(k => `<button data-k="${k}">${TOWNS[k].name}</button>`).join("");
+  seg.addEventListener("click", e => { const b = e.target.closest("button"); if (b) show(b.dataset.k); });
+  function select(i) {
+    document.querySelectorAll("#list li").forEach((li, j) => li.classList.toggle("sel", j === i));
+    markers.forEach((m, j) => m.getElement() && m.getElement().firstChild.classList.toggle("on", j === i));
+    const s = TOWNS[cur].stops[i]; map.flyTo(s.ll, 16, { duration: 0.6 });
+  }
+  function show(k) {
+    cur = k; keep(k);
+    seg.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.k === k));
+    const T = TOWNS[k]; layer.clearLayers(); markers = [];
+    L.polyline(T.route, { color: "#007aff", weight: 4, opacity: 0.75, dashArray: "1 8", lineCap: "round" }).addTo(layer);
+    T.stops.forEach((s, i) => {
+      const icon = L.divIcon({ className: "", html: `<div class="pin${s.c === "maybe" ? " off" : ""}" style="background:${C[s.c]}">${i + 1}</div>`, iconSize: [28, 28], iconAnchor: [14, 14] });
+      const m = L.marker(s.ll, { icon }).addTo(layer); m.on("click", () => { select(i); document.querySelectorAll("#list li")[i].scrollIntoView({ behavior: "smooth", block: "nearest" }); });
+      markers.push(m);
+    });
+    map.fitBounds(L.latLngBounds(T.route.concat(T.stops.map(s => s.ll))), { padding: [28, 28], maxZoom: 16 });
+    document.getElementById("mt").textContent = T.stops.length + " stops";
+    document.getElementById("mr").textContent = T.time;
+    document.getElementById("list").innerHTML = T.stops.map((s, i) => `<li data-i="${i}"><span class="n" style="background:${C[s.c]}">${i + 1}</span><span><div class="a">${esc(s.t)}</div><div class="w">${esc(s.w)}</div><div class="d">${esc(s.d)}</div><a class="go" href="https://maps.apple.com/?daddr=${encodeURIComponent(s.q)}&dirflg=w">Walk here</a></span></li>`).join("");
+    document.getElementById("closed").innerHTML = `<b>Closed this week</b>${esc(T.closed)}`;
+  }
+  document.getElementById("list").addEventListener("click", e => { if (e.target.closest("a")) return; const li = e.target.closest("li"); if (li) select(+li.dataset.i); });
+  const saved = pick(); show(order.includes(saved) ? saved : "interlaken");
+})();
+</script>
+</body>
+</html>
