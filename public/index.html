@@ -327,6 +327,7 @@ a.crow { color: inherit; text-decoration: none; }
 .sback { border: 0; background: none; color: var(--blue); font-size: 17px; padding: 4px 4px 10px; cursor: pointer; font-family: inherit; }
 .pmeta b { color: var(--e-free-ink); font-weight: 600; }
 .place[data-sid] { cursor: pointer; }
+.nx-h { font-size: 15px; font-weight: 600; margin: 14px 4px 8px; }
 .prec { background: color-mix(in srgb, #ff9500 14%, var(--card)); color: var(--ink); border-radius: 12px; padding: 12px 14px; font-size: 14px; line-height: 1.4; margin: 0 0 12px; }
 .acts.three .btn { padding: 0 8px; font-size: 16px; }
 .vbox { width: min(100%, calc(62vh * 9 / 16)); aspect-ratio: 9 / 16; margin: 0 auto; border-radius: 18px; overflow: hidden; background: #000; }
@@ -334,22 +335,39 @@ a.crow { color: inherit; text-decoration: none; }
 body.mapopen .scrim { z-index: 66; } body.mapopen .sheet { z-index: 67; }
 .mapv { position: fixed; inset: 0; z-index: 65; background: var(--panel); }
 #mapc { position: absolute; inset: 0; }
-.mtop { position: absolute; left: 0; right: 0; top: 0; z-index: 500; display: flex; gap: 8px; align-items: center; padding: max(12px, env(safe-area-inset-top)) 12px 8px; pointer-events: none; }
-.mchips { flex: 1; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; pointer-events: auto; padding: 8px 6px 18px; margin: -8px -6px -18px; }
-.mchips button, .mdone { box-shadow: 0 2px 10px rgba(0,0,0,.14), inset 0 0 0 .5px var(--glass-edge) !important; }
+.mtop { position: absolute; left: 0; right: 0; top: 0; z-index: 500; display: flex; gap: 8px; align-items: center; justify-content: space-between; padding: max(12px, env(safe-area-inset-top)) 12px 8px; pointer-events: none; }
+.mcity { pointer-events: none; font: 700 22px/1.1 inherit; font-family: inherit; letter-spacing: -.02em; color: var(--mtxt); text-shadow: 0 0 3px var(--mhalo), 0 0 6px var(--mhalo), 0 0 10px var(--mhalo); padding-left: 4px; }
+.mdone { flex: none; border: 0; height: 36px; padding: 0 16px; border-radius: 980px; font: 600 15px/1 inherit; font-family: inherit; background: var(--glass); color: var(--blue); box-shadow: 0 2px 10px rgba(0,0,0,.14), inset 0 0 0 .5px var(--glass-edge); -webkit-backdrop-filter: saturate(1.8) blur(22px); backdrop-filter: saturate(1.8) blur(22px); cursor: pointer; pointer-events: auto; transition: transform 480ms var(--spring-bouncy); }
+.mdone:active { transform: scale(.94); }
+.mbar { position: absolute; left: 0; right: 0; bottom: 0; z-index: 500; padding: 26px 0 calc(8px + env(safe-area-inset-bottom)); background: linear-gradient(to top, var(--mbar) 62%, transparent); pointer-events: none; }
+.mchips { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; padding: 0 10px; pointer-events: auto; }
 .mchips::-webkit-scrollbar { display: none; }
-.mchips button, .mdone { flex: none; border: 0; height: 36px; padding: 0 14px; border-radius: 980px; font: 600 14px/1 inherit; font-family: inherit; background: var(--glass); color: var(--ink); box-shadow: var(--glass-shadow), inset 0 0 0 .5px var(--glass-edge); -webkit-backdrop-filter: saturate(1.8) blur(22px); backdrop-filter: saturate(1.8) blur(22px); cursor: pointer; transition: transform 480ms var(--spring-bouncy), background-color 160ms ease, color 160ms ease; }
-.mchips button:active, .mdone:active { transform: scale(.94); }
-.mchips button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
-.mchips button i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
-.mdone { pointer-events: auto; color: var(--blue); }
-.mme { position: absolute; right: 14px; bottom: calc(28px + env(safe-area-inset-bottom)); z-index: 500; width: 48px; height: 48px; border-radius: 24px; border: 0; background: var(--glass); -webkit-backdrop-filter: saturate(1.8) blur(22px); backdrop-filter: saturate(1.8) blur(22px); color: var(--blue); box-shadow: var(--glass-shadow), inset 0 0 0 .5px var(--glass-edge); display: grid; place-items: center; cursor: pointer; }
-.mapv .leaflet-tile-pane { filter: saturate(.55) contrast(.94) brightness(1.03); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .mapv .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) saturate(.4) brightness(.9) contrast(.88); } }
-:root[data-theme="dark"] .mapv .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) saturate(.4) brightness(.9) contrast(.88); }
+.mchips button { flex: none; min-width: 66px; border: 0; background: none; padding: 0 2px; display: flex; flex-direction: column; align-items: center; gap: 3px; font: 600 12.5px/1.1 inherit; font-family: inherit; color: var(--ink); cursor: pointer; }
+.mchips button .mic { width: 50px; height: 50px; border-radius: 16px; display: grid; place-items: center; font-size: 30px; line-height: 1; transition: transform 480ms var(--spring-bouncy), background-color 160ms ease, box-shadow 160ms ease; }
+.mchips button:active .mic { transform: scale(.9); }
+.mchips button[aria-pressed="true"] .mic { background: var(--card); box-shadow: 0 2px 10px rgba(0,0,0,.14); }
+.mchips button[aria-pressed="false"] { color: var(--sub); }
+.mchips button small { font-size: 11px; font-weight: 500; color: var(--sub); }
+.mme { position: absolute; right: 14px; bottom: calc(112px + env(safe-area-inset-bottom)); z-index: 500; width: 48px; height: 48px; border-radius: 24px; border: 0; background: var(--glass); -webkit-backdrop-filter: saturate(1.8) blur(22px); backdrop-filter: saturate(1.8) blur(22px); color: var(--blue); box-shadow: var(--glass-shadow), inset 0 0 0 .5px var(--glass-edge); display: grid; place-items: center; cursor: pointer; }
+.mapv { --mtxt: #1c1c1e; --msub: #5b5b60; --mhalo: rgba(255,255,255,.95); --mbar: rgba(246,246,248,.96); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .mapv { --mtxt: #f2f2f7; --msub: #b8b8c0; --mhalo: rgba(0,0,0,.85); --mbar: rgba(22,22,24,.96); } }
+:root[data-theme="dark"] .mapv { --mtxt: #f2f2f7; --msub: #b8b8c0; --mhalo: rgba(0,0,0,.85); --mbar: rgba(22,22,24,.96); }
+.mp { position: absolute; left: 0; top: 0; width: max-content; display: flex; align-items: center; gap: 7px; white-space: nowrap; cursor: pointer; }
+.mp .b { flex: none; position: relative; width: 40px; height: 40px; border-radius: 20px; background: #fff; display: grid; place-items: center; font-size: 21px; line-height: 1; box-shadow: 0 2px 7px rgba(0,0,0,.22), 0 0 0 .5px rgba(0,0,0,.05); transition: transform 380ms var(--spring-bouncy); }
+.mp:active .b { transform: scale(.9); }
+.mp .b i { position: absolute; top: -1px; right: -1px; width: 13px; height: 13px; border-radius: 7px; border: 2px solid #fff; }
+.mp.on .b { box-shadow: 0 0 0 3px #007aff, 0 2px 7px rgba(0,0,0,.25); }
+.mp .t { display: flex; flex-direction: column; gap: 1px; max-width: 132px; text-shadow: 0 0 2px var(--mhalo), 0 0 4px var(--mhalo), 0 0 7px var(--mhalo); }
+.mp .t b { font: 600 14.5px/1.15 inherit; font-family: inherit; color: var(--mtxt); overflow: hidden; text-overflow: ellipsis; letter-spacing: -.01em; }
+.mp .t em { font: italic 400 12.5px/1.2 inherit; font-family: inherit; color: var(--msub); white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mp.home .b { background: #007aff; font-size: 19px; }
+.mp.l { left: auto; right: 0; flex-direction: row-reverse; } .mp.l .t { text-align: right; align-items: flex-end; }
+.mdot { width: 10px; height: 10px; border-radius: 5px; border: 1.5px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.3); cursor: pointer; }
+.mapv .leaflet-marker-icon { overflow: visible; }
 .mapv .leaflet-control-attribution { background: var(--glass) !important; color: var(--sub); border-radius: 8px 0 0 0; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
 .mapv .leaflet-control-attribution a { color: var(--sub); }
 .mapv.carded .mme { display: none; }
+.mapv .leaflet-bottom { bottom: calc(96px + env(safe-area-inset-bottom)); }
 .mcard { position: absolute; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 500; max-width: 500px; margin: 0 auto; background: var(--card); border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,.25); padding: 12px; display: grid; grid-template-columns: 84px 1fr; gap: 4px 12px; }
 .mcard .mph { grid-row: span 3; width: 84px; height: 84px; border-radius: 14px; object-fit: cover; background: var(--panel); }
 .mcard.noph { grid-template-columns: 1fr; }
@@ -359,7 +377,7 @@ body.mapopen .scrim { z-index: 66; } body.mapopen .sheet { z-index: 67; }
 .mcard .acts { grid-column: 1 / -1; display: flex; gap: 8px; margin-top: 8px; padding: 0; }
 .mcard .acts .btn { height: 42px; font-size: 15px; } .mcard .btn.card { background: var(--panel); }
 .mcard .mx { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border: 0; border-radius: 14px; background: var(--panel); color: var(--sub); font-size: 15px; cursor: pointer; }
-.mpin { width: 26px; height: 26px; border-radius: 13px; display: grid; place-items: center; background: #ff8a00; box-shadow: 0 0 0 3px #fff, 0 2px 8px rgba(0,0,0,.3); }
+.mpin-old { width: 26px; height: 26px; border-radius: 13px; display: grid; place-items: center; background: #ff8a00; box-shadow: 0 0 0 3px #fff, 0 2px 8px rgba(0,0,0,.3); }
 .mpin svg { width: 15px; height: 15px; }
 .mme-dot { width: 16px; height: 16px; border-radius: 8px; background: #007aff; box-shadow: 0 0 0 3px #fff, 0 0 0 9px rgba(0,122,255,.2); }
 .leaflet-container { font-family: inherit; background: var(--panel); }
@@ -653,7 +671,7 @@ body.mapopen .scrim { z-index: 66; } body.mapopen .sheet { z-index: 67; }
 </aside>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden><div class="grab"></div><div id="sheet-body"></div></div>
 <div class="show" id="show" role="dialog" aria-modal="true" hidden></div>
-<div class="mapv" id="mapv" role="dialog" aria-modal="true" aria-label="Map" hidden><div id="mapc"></div><div class="mtop"><div class="mchips" id="mchips"></div><button class="mdone press" id="mdone">Done</button></div><button class="mme press" id="mme" aria-label="Where am I"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg></button><div class="mcard" id="mcard" hidden></div></div>
+<div class="mapv" id="mapv" role="dialog" aria-modal="true" aria-label="Map" hidden><div id="mapc"></div><div class="mtop"><span class="mcity" id="mcity"></span><button class="mdone press" id="mdone">Done</button></div><div class="mbar"><div class="mchips" id="mchips"></div></div><button class="mme press" id="mme" aria-label="Where am I"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg></button><div class="mcard" id="mcard" hidden></div></div>
 <div class="sr" aria-live="polite" id="live"></div>
 
 <script>
@@ -2266,17 +2284,33 @@ function placeMeta(z) {
   const o = liveFrom(view) || anchorFor(view), k = o ? km(o.lat, o.lng, z.lat, z.lng) : null, far = k != null && k >= 8 && z.city !== (anchorFor(view) || {}).city;
   return [MAPLAB[mk(z)] || "", z.rating ? `★ ${z.rating}${z.reviews ? ` (${z.reviews.toLocaleString()})` : ""}` : "", k != null ? `<b>${far ? tripTxt(k) : distTxt(k, walkKm(o, z))}</b>` : ""].filter(Boolean).join(" · ");
 }
+/* what people usually do next after a place like this, from the saves within a short walk of it */
+const NEXT = { dinner: ["drinks", "sweet", "see", "clothes", "shop"], drinks: ["dinner", "drinks", "sweet"], coffee: ["see", "clothes", "culture", "shop", "sweet"], sweet: ["see", "clothes", "shop", "coffee"],
+  culture: ["coffee", "dinner", "see", "clothes"], see: ["coffee", "dinner", "culture", "clothes", "shop"], shop: ["clothes", "shop", "coffee", "dinner"], clothes: ["clothes", "shop", "coffee", "dinner"], experience: ["dinner", "drinks", "coffee"] };
+const NEXTL = { dinner: "Eat", drinks: "Drinks", coffee: "Coffee", sweet: "Something sweet", culture: "Museums and galleries", see: "Things to see", shop: "Shops", clothes: "Clothes shops", experience: "Experiences" };
+function nextNear(z) {
+  if (!z || z.lat == null) return "";
+  const k0 = mk(z), used = new Set([z.id]), out = [];
+  for (const k of NEXT[k0] || NEXT.see) {
+    if (out.length >= 3) break;
+    const near = SAVES.filter(s => s.lat != null && !used.has(s.id) && s.kind !== "skip" && mk(s) === k && !(s.name === z.name))
+      .map(s => ({ s, k: km(z.lat, z.lng, s.lat, s.lng) })).filter(x => x.k < 1.2).sort((x, y) => x.k - y.k).slice(0, 3);
+    if (!near.length) continue; near.forEach(x => used.add(x.s.id));
+    out.push(`<div class="nx-h">${k === k0 ? "More " + NEXTL[k].toLowerCase() : NEXTL[k]} nearby</div><div class="ig">${near.map(({ s, k }) => `<div class="place hasph" data-sid="${s.id}">${ph(s)}<span><span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(hookOf(s))}</span><span class="m" style="display:block"><b>${k < 0.06 ? "Next door" : distTxt(k) + " from here"}</b></span></span></div>`).join("")}</div>`);
+  }
+  return out.length ? `<div class="sec">NEAR HERE, NEXT</div>${out.join("")}` : "";
+}
 function placeSheet(z) {
   const inTrip = view >= START && view <= END, on = getPlan(view).find(p => p.id === z.id), meta = placeMeta(z);
   return (SBACK.length ? `<button class="sback press" data-sback>‹ Back</button>` : "") + hero(z)
     + head(esc(z.name), `<span class="pmeta" data-pid="${esc(z.id)}">${meta}</span>`)
     + `<div class="ig">${z.hook ? `<div class="r"><span>${esc(hookOf(z))}</span><span></span></div>` : ""}${z.address ? r("Address", esc(z.address)) : ""}${z.creator ? r("Saved from", esc(z.creator)) : ""}${on ? r("On the day", `${t12(on.t)}`) : ""}</div>
     <div class="acts"><a class="btn blue press" href="${dirs(z.name + " " + (z.address || z.city))}" target="_blank" rel="noopener">Directions</a>${inTrip ? `<button class="btn card press" data-zadd="${esc(z.id)}">${on ? "✓ Added" : "Add to the day"}</button>` : ""}</div>
-    <div class="acts three">${z.url && embedOf(z.url) ? `<button class="btn card press"${vidAttr(z)}>Video</button>` : ""}<a class="btn card press" href="${ttq(z.name, z.city)}" target="_blank" rel="noopener">TikTok</a><a class="btn card press" href="${pics(z.name, z.city)}" target="_blank" rel="noopener">More photos</a></div>`;
+    <div class="acts three">${z.url && embedOf(z.url) ? `<button class="btn card press"${vidAttr(z)}>Video</button>` : ""}<a class="btn card press" href="${ttq(z.name, z.city)}" target="_blank" rel="noopener">TikTok</a><a class="btn card press" href="${pics(z.name, z.city)}" target="_blank" rel="noopener">More photos</a></div>` + nextNear(z);
 }
 /* opened over whatever sheet is showing, with a way back to it */
 function pushBack() { if (!sheet.hidden) { SBACK.push({ h: document.getElementById("sheet-body").innerHTML, st: sheet.scrollTop, R: REFRESH }); REFRESH = null; } }
-function openPlace(z) { if (!z) return; haptic(); pushBack(); swapSheet(placeSheet(z)); }
+function openPlace(z) { if (!z) return; haptic(); pushBack(); swapSheet(placeSheet(z)); if (!mapv.hidden && MAP && z.lat != null) MAP.panTo([z.lat, z.lng]); }
 function goBack() {
   const b = SBACK.pop(); if (!b) return closeSheet(); sheet.querySelectorAll("iframe").forEach(f => { f.src = "about:blank"; });
   const body = document.getElementById("sheet-body"); body.innerHTML = b.h; REFRESH = b.R; bindChecks(sheet);
@@ -2354,7 +2388,31 @@ const MAPCOL = { dinner: "#ff2d55", drinks: "#5856d6", coffee: "#a2845e", sweet:
 const MAPLAB = { dinner: "Eat", coffee: "Coffee", sweet: "Sweets", drinks: "Drinks", see: "Sights", culture: "Culture", clothes: "Clothes", shop: "Shops", experience: "Experiences" };
 const mk = z => z.kind === "shop" && z.clo ? "clothes" : z.kind;
 const MAPCAT = { dinner: "dinner", drinks: "drinks", coffee: "coffee", sweet: "sweet", culture: "culture", see: "see", shop: "shop", experience: "experience" };
-let MAP = null, MLAY = null, MCAT = "all", MSEL = null, MLOAD = null;
+let MAP = null, MLAY = null, MCAT = "all", MSEL = null, MLOAD = null, MTILE = null, MLT = 0, MPTS = [], MHOME = null;
+const darkMap = () => { const t = document.documentElement.dataset.theme; return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; };
+function tileUrl() { const u = `https://{s}.basemaps.cartocdn.com/${darkMap() ? "dark_all" : "rastertiles/voyager"}/{z}/{x}/{y}${devicePixelRatio > 1 ? "@2x" : ""}.png`; if (MTILE) MTILE.options._u = u; return u; }
+/* one picture per place, read from what it is (pizza, matcha, vintage...) and falling back on its type */
+const EMO = [[/pizz/i, "🍕"], [/burger|smash/i, "🍔"], [/sushi|omakase|japanese/i, "🍣"], [/ramen|noodle|pho\b|udon/i, "🍜"], [/taco|mexican|burrito/i, "🌮"], [/dumpling|dim sum|chinese|asian street/i, "🥟"], [/kebab|gyro|souvlaki|falafel/i, "🥙"],
+  [/croissant|bakery|baker|pastr|viennoiser|boulanger|patisserie|cardamom|cinnamon bun|bun\b|focaccia/i, "🥐"], [/donut|doughnut/i, "🍩"], [/gelato|ice cream|glace|gelateria/i, "🍨"], [/chocolat/i, "🍫"], [/cake|cheesecake|dessert|cookie|sweet/i, "🍰"], [/pancake|waffle/i, "🥞"], [/brunch|breakfast|eggs/i, "🍳"],
+  [/sandwich|sub\b|subs\b|panino|panuozzo|deli/i, "🥪"], [/fondue|raclette|cheese|fromag/i, "🧀"], [/seafood|oyster|fish|mussel/i, "🦪"], [/steak|grill|bbq|smok/i, "🥩"], [/pasta|trattoria|osteria|italian/i, "🍝"], [/matcha/i, "🍵"], [/tea\b|teahouse/i, "🫖"],
+  [/whisk|distiller/i, "🥃"], [/wine|vino|vin\b|enoteca|negroni/i, "🍷"], [/beer|pub\b|brew|guinness|tavern|ale\b|beer hall/i, "🍺"], [/jazz|live music|music/i, "🎷"], [/techno|club|disco|dance/i, "🪩"], [/cocktail|bar\b|speakeasy|aperitivo/i, "🍸"],
+  [/vinyl|record/i, "💿"], [/book/i, "📚"], [/perfume|fragrance|parfum|scent|cosmetic|buly/i, "🧴"], [/vintage|thrift|second.?hand|denim|jeans/i, "🧥"], [/sneaker|shoe/i, "👟"], [/jewel/i, "💍"], [/market|flea|markt|mercato/i, "🧺"], [/flower|florist|garden|botanic/i, "🌷"],
+  [/photo ?booth|photoautomat|film develop/i, "📸"], [/cinema|film|movie/i, "🎬"], [/museum|gallery|galerie|collection|art\b|kunst|mural|street art/i, "🖼️"], [/church|cathedral|chapel|basilica|kirk|abbey|fraum|minster/i, "⛪"], [/castle|palace|palazzo|schloss|chateau|château/i, "🏰"],
+  [/park|woods|forest|meadow/i, "🌳"], [/lake|river|beach|lido|harbour|harbor|canal|swim|pool\b|badi\b/i, "🌊"], [/view|lookout|panorama|hill|summit|mountain|kulm|peak/i, "🏞️"], [/waterfall|falls/i, "💦"], [/bridge|brücke|ponte/i, "🌉"], [/spa|bath|sauna|therm/i, "🧖"], [/zoo|animal|aquarium/i, "🐾"], [/tower|turm/i, "🗼"]];
+const EPLACE = new Set(["🖼️", "⛪", "🏰", "🌳", "🌊", "🏞️", "💦", "🌉", "🧖", "🐾", "🗼", "🌷", "🎬"]);
+const EMOK = { dinner: "🍽️", drinks: "🍸", coffee: "☕", sweet: "🍰", culture: "🏛️", see: "📍", shop: "🛍️", clothes: "👕", experience: "✨" };
+const emoOf = z => { if (z.emo) return z.emo; const k = mk(z), t = z.name + " " + (z.hook || "") + " " + (z.vibe || "");
+  const order = k === "culture" || k === "see" || k === "experience" ? [...EMO.filter(x => EPLACE.has(x[1])), ...EMO.filter(x => !EPLACE.has(x[1]))] : EMO;
+  let e = (k === "coffee" && !/matcha|donut|bakery|baker|croissant|pastr/i.test(t)) ? "☕" : (order.find(([re]) => re.test(t)) || [])[1];
+  if (k === "clothes" && !/🧥|👟|💍/.test(e || "")) e = "👕";
+  if (k === "coffee" && e && !/☕|🍵|🥐|🍩|🍰|🥞|🍳|🥪|🍫|🫖|💿|📚|🌷/.test(e)) e = "☕";
+  return (z.emo = e || EMOK[k] || "📍"); };
+const MCHIP = { all: "🗺️", dinner: "🍽️", coffee: "☕", sweet: "🍰", drinks: "🍸", see: "📍", culture: "🏛️", clothes: "👕", shop: "🛍️", experience: "✨" };
+/* a few words, like "trending techno church": the start of the hook, cut at a natural break */
+const shortHook = z => { let h = (z.hook || "").replace(/[|\x1f]/g, " ").replace(/^[^:]{2,30}:\s*/, "").split(/[,.;!–—(]| - /)[0].trim(); if (!h) return "";
+  if (h.length > 30) { h = h.slice(0, 31).replace(/\s+\S*$/, ""); }
+  h = h.replace(/(\s+(with|and|for|of|a|an|the|in|on|to|at|by|from|&|serving|near|over|under|just|like|that|is))+$/i, ""); return h[0].toLowerCase() + h.slice(1); };
+const pinScore = z => (z.rating || 4.2) * Math.log10((z.reviews || 30) + 10) + (z.url ? .6 : 0);
 const mapv = document.getElementById("mapv");
 function loadLeaflet() {
   if (window.L) return Promise.resolve(); if (MLOAD) return MLOAD;
@@ -2376,10 +2434,12 @@ function openMap(focusId) {
   loadLeaflet().then(() => {
     if (!MAP) {
       MAP = L.map("mapc", { zoomControl: false, attributionControl: true });
-      /* free OpenStreetMap tiles, no key needed */
-      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap contributors" }).addTo(MAP);
+      /* CARTO Voyager: light, quiet streets, blue water and green parks (dark version at night), no key needed */
+      MTILE = L.tileLayer(tileUrl(), { subdomains: "abcd", maxZoom: 20, detectRetina: false, attribution: "© OpenStreetMap © CARTO" }).addTo(MAP);
       MAP.on("click", () => { mapCard(null); closeSheet(); });
+      MAP.on("zoomend moveend", () => { clearTimeout(MLT); MLT = setTimeout(layoutPins, 40); });
     }
+    if (MTILE.options._u !== tileUrl()) MTILE.setUrl(tileUrl());
     setTimeout(() => { MAP.invalidateSize(); drawMap(focusId, true); }, 30);
   }).catch(() => { document.getElementById("mcard").hidden = false; document.getElementById("mcard").className = "mcard noph"; document.getElementById("mcard").innerHTML = `<span class="a">The map couldn't load</span><span class="h">Check your connection and try again.</span>`; });
 }
@@ -2390,19 +2450,42 @@ function drawMap(focusId, fit) {
   const added = new Set(getPlan(view).map(p => p.id).concat(((getDay(view) || {}).steps || []).flatMap(p => p.ids || [])));
   const kinds = [...new Set(list.map(mk))].sort((x, y) => Object.keys(MAPLAB).indexOf(x) - Object.keys(MAPLAB).indexOf(y));
   if (MCAT !== "all" && !kinds.includes(MCAT)) MCAT = "all";
-  document.getElementById("mchips").innerHTML = `<button data-mcat="all" aria-pressed="${MCAT === "all"}">All ${list.length}</button>` + kinds.map(k => `<button data-mcat="${k}" aria-pressed="${MCAT === k}"><i style="background:${MAPCOL[k]}"></i>${MAPLAB[k]}</button>`).join("");
-  if (MLAY) MLAY.remove(); MLAY = L.layerGroup().addTo(MAP);
-  const home = `<svg viewBox="0 0 24 24"><path fill="#fff" d="M12 3 2 11h3v9h5v-6h4v6h5v-9h3z"/></svg>`;
-  L.marker([a.lat, a.lng], { icon: L.divIcon({ className: "", html: `<div class="mpin">${home}</div>`, iconSize: [26, 26], iconAnchor: [13, 13] }), zIndexOffset: 900 }).addTo(MLAY).on("click", e => { L.DomEvent.stopPropagation(e); haptic(); openSheet(staySheet(a)); });
-  list.filter(z => MCAT === "all" || mk(z) === MCAT).sort((x, y) => added.has(x.id) - added.has(y.id)).forEach(z => {
-    const on = added.has(z.id);
-    L.circleMarker([z.lat, z.lng], { radius: on ? 10 : 7, color: on ? "#000" : "#fff", weight: on ? 3 : 2, fillColor: MAPCOL[mk(z)], fillOpacity: 1 }).addTo(MLAY).on("click", e => { L.DomEvent.stopPropagation(e); haptic(); mapPlace(z); });
-  });
-  if (HERE && Date.now() - HERE.t < 30 * 6e4 && HERE.acc > 40) L.circle([HERE.lat, HERE.lng], { radius: Math.min(HERE.acc, 5000), color: "#007aff", weight: 1, opacity: .4, fillColor: "#007aff", fillOpacity: .1, interactive: false }).addTo(MLAY);
-  if (HERE && Date.now() - HERE.t < 30 * 6e4) L.marker([HERE.lat, HERE.lng], { icon: L.divIcon({ className: "", html: `<div class="mme-dot"></div>`, iconSize: [16, 16], iconAnchor: [8, 8] }), zIndexOffset: 1000, interactive: false }).addTo(MLAY);
+  document.getElementById("mchips").innerHTML = ["all", ...kinds].map(k => `<button data-mcat="${k}" aria-pressed="${MCAT === k}"><span class="mic">${MCHIP[k] || "📍"}</span>${k === "all" ? "All" : MAPLAB[k]}</button>`).join("");
+  document.getElementById("mcity").textContent = a.city;
+  MPTS = list.filter(z => MCAT === "all" || mk(z) === MCAT).map(z => ({ z, on: added.has(z.id), sc: (added.has(z.id) ? 100 : 0) + pinScore(z) })).sort((x, y) => y.sc - x.sc);
+  MHOME = a; layoutPins();
   const f = focusId && SAVE_BY[focusId];
   if (f) { MAP.setView([f.lat, f.lng], 16); mapPlace(f); }
   else if (fit) { const me = liveFrom(view); MAP.setView(me ? [me.lat, me.lng] : [a.lat, a.lng], 15); }
+}
+/* like mio: the best places get a picture bubble with name and a few words, others a bubble, and when it's crowded a small dot */
+function layoutPins() {
+  if (!MAP || mapv.hidden || !MAP._loaded) return;
+  if (MLAY) MLAY.remove(); MLAY = L.layerGroup().addTo(MAP);
+  const sz = MAP.getSize(), boxes = [], hit = (x0, y0, x1, y1) => boxes.some(b => x0 < b[2] && x1 > b[0] && y0 < b[3] && y1 > b[1]);
+  const pin = (ll, html, w, cls, z, onTap) => L.marker(ll, { icon: L.divIcon({ className: "", html, iconSize: [40, 40], iconAnchor: [20, 20] }), zIndexOffset: cls }).addTo(MLAY).on("click", e => { L.DomEvent.stopPropagation(e); haptic(); onTap(); });
+  const a = MHOME; boxes.push([-999, -999, sz.x + 999, 62], [-999, sz.y - 112, sz.x + 999, sz.y + 999]);
+  if (a) { const p = MAP.latLngToContainerPoint([a.lat, a.lng]), hl = p.x + 160 > sz.x - 6; boxes.push(hl ? [p.x - 160, p.y - 24, p.x + 22, p.y + 26] : [p.x - 22, p.y - 24, p.x + 160, p.y + 26]);
+    pin([a.lat, a.lng], `<div class="mp home${hl ? " l" : ""}"><span class="b">🏠</span><span class="t"><b>${esc(a.hotel)}</b><em>where you're staying</em></span></div>`, 0, 900, null, () => openSheet(staySheet(a))); }
+  const dots = []; let nl = 0, nb = 0;
+  MPTS.forEach(({ z, on }) => {
+    const p = MAP.latLngToContainerPoint([z.lat, z.lng]);
+    if (p.x < -20 || p.y < -20 || p.x > sz.x + 20 || p.y > sz.y + 20) return;
+    if (p.x < 8 || p.x > sz.x - 8) return dots.push(z);
+    const nm = z.name.length > 22 ? z.name.slice(0, 21) + "…" : z.name, hk = shortHook(z), lw = Math.min(132, Math.max(nm.length * 7.9, hk.length > 18 ? 118 : hk.length * 6.6)) + 8;
+    const col = MAPCOL[mk(z)], badge = `<i style="background:${col}"></i>`, left = p.x + 22 + lw > sz.x - 6;
+    const bx = left ? [p.x - 22 - lw, p.y - 24, p.x + 22, p.y + 26] : [p.x - 22, p.y - 24, p.x + 22 + lw, p.y + 26];
+    if ((nl < 14 || on) && !hit(...bx)) {
+      boxes.push(bx); nl++;
+      pin([z.lat, z.lng], `<div class="mp${on ? " on" : ""}${left ? " l" : ""}"><span class="b">${emoOf(z)}${badge}</span><span class="t"><b>${esc(nm)}</b>${hk ? `<em>${esc(hk)}</em>` : ""}</span></div>`, lw, on ? 800 : 500, z, () => mapPlace(z));
+    } else if (nb < 12 && !hit(p.x - 30, p.y - 30, p.x + 30, p.y + 30)) {
+      boxes.push([p.x - 24, p.y - 24, p.x + 24, p.y + 24]); nb++;
+      pin([z.lat, z.lng], `<div class="mp${on ? " on" : ""}"><span class="b">${emoOf(z)}${badge}</span></div>`, 0, on ? 700 : 300, z, () => mapPlace(z));
+    } else dots.push(z);
+  });
+  dots.forEach(z => L.marker([z.lat, z.lng], { icon: L.divIcon({ className: "", html: `<div class="mdot" style="background:${MAPCOL[mk(z)]}"></div>`, iconSize: [10, 10], iconAnchor: [5, 5] }), zIndexOffset: 0 }).addTo(MLAY).on("click", e => { L.DomEvent.stopPropagation(e); haptic(); mapPlace(z); }));
+  if (HERE && Date.now() - HERE.t < 30 * 6e4 && HERE.acc > 40) L.circle([HERE.lat, HERE.lng], { radius: Math.min(HERE.acc, 5000), color: "#007aff", weight: 1, opacity: .4, fillColor: "#007aff", fillOpacity: .1, interactive: false }).addTo(MLAY);
+  if (HERE && Date.now() - HERE.t < 30 * 6e4) L.marker([HERE.lat, HERE.lng], { icon: L.divIcon({ className: "", html: `<div class="mme-dot"></div>`, iconSize: [16, 16], iconAnchor: [8, 8] }), zIndexOffset: 1000, interactive: false }).addTo(MLAY);
 }
 function mapCard(z) {
   const c = document.getElementById("mcard"); MSEL = z; mapv.classList.toggle("carded", !!z);
