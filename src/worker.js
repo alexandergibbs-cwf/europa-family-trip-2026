@@ -126,30 +126,6 @@ async function photo(url, env, ctx) {
   return new Response("no photo", { status: 404, headers: { "cache-control": "public, max-age=3600" } });
 }
 
-/* opening hours for saved places, from Google Places, looked up once per place and remembered for three weeks.
-   POST [{ id, n, c, lat, lng }] (up to 40) -> { id: { b: businessStatus, p: [[openDay, openMin, closeDay, closeMin], ...] } | null } */
-async function hoursOne(env, x) {
-  const key = "hr:" + x.id, have = await env.SHARED.get(key, "json"); if (have) return have.none ? null : have;
-  if (!env.GOOGLE_PLACES_KEY) return null;
-  const r = await fetch("https://places.googleapis.com/v1/places:searchText", { method: "POST",
-    headers: { "content-type": "application/json", "X-Goog-Api-Key": env.GOOGLE_PLACES_KEY, "X-Goog-FieldMask": "places.location,places.regularOpeningHours,places.businessStatus" },
-    body: JSON.stringify({ textQuery: `${x.n} ${x.c === "Other" ? "" : x.c}`.trim(), maxResultCount: 3, locationBias: { circle: { center: { latitude: +x.lat, longitude: +x.lng }, radius: 800 } } }) });
-  if (!r.ok) return null;
-  const best = ((await r.json()).places || []).filter(p => p.location).map(p => ({ p, d: kmBetween(+x.lat, +x.lng, p.location.latitude, p.location.longitude) })).filter(q => q.d < 0.6).sort((a, b) => a.d - b.d)[0];
-  const oh = best && best.p.regularOpeningHours;
-  const out = best && (oh || best.p.businessStatus !== "OPERATIONAL") ? { b: best.p.businessStatus || "", p: oh && oh.periods ? oh.periods.map(q => [q.open.day, q.open.hour * 60 + (q.open.minute || 0), q.close ? q.close.day : -1, q.close ? q.close.hour * 60 + (q.close.minute || 0) : 0]) : [] } : null;
-  await env.SHARED.put(key, JSON.stringify(out || { none: 1 }), { expirationTtl: (out ? 21 : 7) * 86400 });
-  return out;
-}
-async function hours(req, env) {
-  let list; try { list = JSON.parse(await req.text()); } catch (e) { return json({}, 400); }
-  if (!Array.isArray(list)) return json({}, 400);
-  list = list.filter(x => x && /^[\w-]{8,60}$/.test(x.id) && isFinite(+x.lat) && isFinite(+x.lng)).slice(0, 40);
-  const out = {};
-  for (let i = 0; i < list.length; i += 8) await Promise.all(list.slice(i, i + 8).map(async x => { try { out[x.id] = await hoursOne(env, x); } catch (e) { out[x.id] = null; } }));
-  return json(out);
-}
-
 export default {
   async fetch(req, env, ctx) {
     const url = new URL(req.url);
@@ -170,7 +146,6 @@ export default {
       return json({ error: "method" }, 405);
     }
     if (url.pathname === "/api/walk") return walk(url, ctx);
-    if (url.pathname === "/api/hours" && req.method === "POST") return hours(req, env);
     if (url.pathname === "/api/photo") return photo(url, env, ctx);
     if (url.pathname === "/api/photos") {
       const id = (url.searchParams.get("id") || "").slice(0, 60); if (!/^[\w-]{8,60}$/.test(id)) return json({ count: 0 }, 400);

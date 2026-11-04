@@ -378,7 +378,6 @@ body.mapopen .scrim { z-index: 66; } body.mapopen .sheet { z-index: 67; }
 .mp .b { flex: none; position: relative; width: 40px; height: 40px; border-radius: 20px; background: #fff; display: grid; place-items: center; box-shadow: 0 2px 7px rgba(0,0,0,.22), 0 0 0 .5px rgba(0,0,0,.05); transition: transform 380ms var(--spring-bouncy); }
 .mp:active .b { transform: scale(.9); }
 .mp .b svg { width: 21px; height: 21px; }
-.mp.shut .b { opacity: .55; } .mp.shut .t { opacity: .6; }
 .mp .b i { position: absolute; top: -1px; right: -1px; width: 13px; height: 13px; border-radius: 7px; border: 2px solid #fff; }
 .mp.on .b { box-shadow: 0 0 0 3px #007aff, 0 2px 7px rgba(0,0,0,.25); }
 .mp .t { display: flex; flex-direction: column; gap: 1px; max-width: 132px; text-shadow: 0 0 2px var(--mhalo), 0 0 4px var(--mhalo), 0 0 7px var(--mhalo); }
@@ -415,7 +414,6 @@ body.mapopen .scrim { z-index: 66; } body.mapopen .sheet { z-index: 67; }
 .place .h { font-size: 14px; color: var(--sub); line-height: 1.35; }
 .place .m { font-size: 13px; color: var(--sub); font-variant-numeric: tabular-nums; }
 .place .m b { color: var(--e-free-ink); font-weight: 600; }
-.hr.op { color: var(--e-free-ink); } .hr.cl { color: #ff3b30; } .place.shut { opacity: .55; }
 .ttq { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; border: 0; padding: 18px 16px; margin-bottom: 10px; text-align: center; cursor: pointer; }
 .ttq .ttw { font-size: 20px; font-weight: 600; color: var(--ink); line-height: 1.25; -webkit-user-select: all; user-select: all; }
 .ttq .ttc { font-size: 14px; font-weight: 600; color: #34c759; }
@@ -2282,50 +2280,6 @@ function loadGalleries(root) {
     fetch("/api/photos?" + photoQ(z)).then(r => r.ok ? r.json() : { count: 0 }).then(j => { GCOUNT[z.id] = Math.min(8, j.count || 0); fill(GCOUNT[z.id]); }).catch(() => {});
   });
 }
-/* ---------- opening hours: asked for once per place (the server remembers them), kept on the phone for a few days ---------- */
-let HRS = {}; const HRSP = new Set(); let HRSQ = [], HRST = 0;
-try { const c = JSON.parse(localStorage.getItem("hrs") || "null"); if (c && Date.now() - c.t < 3 * 864e5) HRS = c.h; } catch (e) {}
-function hoursFetch(zs) {
-  zs.forEach(z => { if (z && z.lat != null && !(z.id in HRS) && !HRSP.has(z.id)) { HRSP.add(z.id); HRSQ.push(z); } });
-  clearTimeout(HRST); if (HRSQ.length) HRST = setTimeout(hoursSend, 120);
-}
-function hoursSend() {
-  const batch = HRSQ.splice(0, 40); if (!batch.length) return;
-  fetch("/api/hours", { method: "POST", body: JSON.stringify(batch.map(z => ({ id: z.id, n: z.name, c: z.city || "", lat: z.lat, lng: z.lng }))) }).then(r => r.ok ? r.json() : {}).then(j => {
-    batch.forEach(z => { HRS[z.id] = j && z.id in j ? j[z.id] : null; HRSP.delete(z.id); });
-    try { localStorage.setItem("hrs", JSON.stringify({ t: Date.now(), h: HRS })); } catch (e) {}
-    hoursChanged();
-  }).catch(() => batch.forEach(z => HRSP.delete(z.id)));
-  if (HRSQ.length) setTimeout(hoursSend, 50);
-}
-let HCT = 0; function hoursChanged() { clearTimeout(HCT); HCT = setTimeout(() => { if (typeof xpShown === "function" && xpShown()) xpRender(); if (!mapv.hidden && MAP) layoutPins(); refreshSheetDist(true); }, 150); }
-const tzOf = z => (GEO[z.city] || [])[2] || (GEO[cityOn(view)] || [])[2];
-/* the time at the place: [weekday 0=Sun, minutes since midnight] */
-function localAt(ms, tz) { const f = new Intl.DateTimeFormat("en-GB", { timeZone: tz, weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date(ms)), g = t => (f.find(x => x.type === t) || {}).value;
-  return [["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(g("weekday")), +g("hour") * 60 + +g("minute")]; }
-const mm12 = m => { m = ((m % 1440) + 1440) % 1440; const h = Math.floor(m / 60), mi = m % 60; return `${h % 12 || 12}${mi ? ":" + pad(mi) : ""} ${h < 12 ? "am" : "pm"}`; };
-const DAYN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-/* { o: true | false | null, t: "Open until 10 pm" } for now (on today) or for the day being looked at */
-function hoursOf(z, iso) {
-  const h = HRS[z && z.id]; if (!h) return { o: null, t: "" };
-  if (h.b === "CLOSED_PERMANENTLY") return { o: false, t: "Closed for good" };
-  if (h.b === "CLOSED_TEMPORARILY") return { o: false, t: "Temporarily closed" };
-  const P = h.p || []; if (!P.length) return { o: null, t: "" };
-  if (P.length === 1 && P[0][2] < 0) return { o: true, t: "Open 24 hours" };
-  const W = 10080, spans = P.map(([od, om, cd, cm]) => { const o = od * 1440 + om; let c = cd * 1440 + cm; if (c <= o) c += W; return [o, c]; });
-  if ((iso || view) === today) {
-    const [d, m] = localAt(Date.now(), tzOf(z)), t = d * 1440 + m;
-    const cur = spans.find(([o, c]) => (t >= o && t < c) || (t + W >= o && t + W < c));
-    if (cur) { const left = ((cur[1] - t) % W + W) % W; return { o: true, t: left <= 60 ? `Closes soon · ${mm12(cur[1])}` : `Open until ${mm12(cur[1])}` }; }
-    const next = spans.map(([o]) => ((o - t) % W + W) % W).sort((a, b) => a - b)[0];
-    if (next == null) return { o: false, t: "Closed" };
-    const at = (t + next) % W; return { o: false, t: next < 1440 - m ? `Closed · opens ${mm12(at)}` : `Closed · opens ${DAYN[Math.floor(at / 1440)]} ${mm12(at)}` };
-  }
-  const wd = new Date((iso || view) + "T12:00:00").getDay(), that = spans.filter(([o]) => Math.floor(o / 1440) % 7 === wd).sort((a, b) => a[0] - b[0]);
-  if (!that.length) return { o: false, t: `Closed ${DAYN[wd]}s` };
-  return { o: true, t: that.map(([o, c]) => `${mm12(o)}–${mm12(c)}`).join(", ") };
-}
-const hrsTag = (z, iso) => { const r = hoursOf(z, iso); return r.t ? `<span class="hr ${r.o ? "op" : r.o === false ? "cl" : ""}">${esc(r.t)}</span>` : ""; };
 /* real walking distances for whatever places the open sheet shows, fetched once per spot and kept */
 const WALK = new Map(), WALKP = new Set();
 const okey = o => o.lat.toFixed(4) + "," + o.lng.toFixed(4);
@@ -2344,11 +2298,10 @@ function walkFetch(o, zs) {
 function sheetWalk() {
   if (sheet.hidden) return; const body = document.getElementById("sheet-body");
   const ids = [...body.querySelectorAll("[data-sid], .pmeta[data-pid]")].map(e => SAVE_BY[e.dataset.sid || e.dataset.pid]).filter(Boolean);
-  if (ids.length) { walkFetch(body.querySelector("#nearS") ? HERE : liveFrom(view) || anchorFor(view), ids); hoursFetch(ids); }
+  if (ids.length) walkFetch(body.querySelector("#nearS") ? HERE : liveFrom(view) || anchorFor(view), ids);
 }
-function refreshSheetDist(hrs) {
+function refreshSheetDist() {
   if (sheet.hidden || (drag && drag.mode === "pull")) return;
-  if (hrs) { const nx = document.querySelector("#sheet-body .nxwrap"); if (nx) { const z = SAVE_BY[nx.dataset.of]; if (z) nx.outerHTML = nextNear(z); } }
   const body = document.getElementById("sheet-body"), pm = body.querySelector(".pmeta[data-pid]");
   if (pm) { const z = SAVE_BY[pm.dataset.pid]; if (z) pm.innerHTML = placeMeta(z); }
   else if (body.querySelector("#nearS")) { const st = sheet.scrollTop; body.innerHTML = nearSheet(); sheet.scrollTop = st; }
@@ -2358,7 +2311,7 @@ new MutationObserver(() => { loadGalleries(sheet); sheetWalk(); }).observe(docum
 /* one place on its own sheet: photos, what it is, how far, and what you can do with it */
 function placeMeta(z) {
   const o = liveFrom(view) || anchorFor(view), k = o ? km(o.lat, o.lng, z.lat, z.lng) : null, far = k != null && k >= 8 && z.city !== (anchorFor(view) || {}).city;
-  return [MAPLAB[mk(z)] || "", hrsTag(z), z.rating ? `★ ${z.rating}${z.reviews ? ` (${z.reviews.toLocaleString()})` : ""}` : "", k != null ? `<b>${far ? tripTxt(k) : distTxt(k, walkKm(o, z))}</b>` : ""].filter(Boolean).join(" · ");
+  return [MAPLAB[mk(z)] || "", z.rating ? `★ ${z.rating}${z.reviews ? ` (${z.reviews.toLocaleString()})` : ""}` : "", k != null ? `<b>${far ? tripTxt(k) : distTxt(k, walkKm(o, z))}</b>` : ""].filter(Boolean).join(" · ");
 }
 /* what people usually do next after a place like this, from the saves within a short walk of it */
 const NEXT = { dinner: ["drinks", "sweet", "see", "clothes", "shop"], drinks: ["dinner", "drinks", "sweet"], coffee: ["see", "clothes", "culture", "shop", "sweet"], sweet: ["see", "clothes", "shop", "coffee"],
@@ -2370,9 +2323,9 @@ function nextNear(z) {
   for (const k of NEXT[k0] || NEXT.see) {
     if (out.length >= 3) break;
     const near = SAVES.filter(s => s.lat != null && !used.has(s.id) && s.kind !== "skip" && mk(s) === k && !(s.name === z.name))
-      .map(s => ({ s, k: km(z.lat, z.lng, s.lat, s.lng) })).filter(x => x.k < 1.2).sort((x, y) => (hoursOf(x.s).o === false) - (hoursOf(y.s).o === false) || x.k - y.k).slice(0, 3);
+      .map(s => ({ s, k: km(z.lat, z.lng, s.lat, s.lng) })).filter(x => x.k < 1.2).sort((x, y) => x.k - y.k).slice(0, 3);
     if (!near.length) continue; near.forEach(x => used.add(x.s.id));
-    out.push(`<div class="nx-h">${k === k0 ? "More " + NEXTL[k].toLowerCase() : NEXTL[k]} nearby</div><div class="ig">${near.map(({ s, k }) => `<div class="place hasph" data-sid="${s.id}">${ph(s)}<span><span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(hookOf(s))}</span><span class="m" style="display:block"><b>${k < 0.06 ? "Next door" : distTxt(k) + " from here"}</b>${hoursOf(s).t ? " · " + hrsTag(s) : ""}</span></span></div>`).join("")}</div>`);
+    out.push(`<div class="nx-h">${k === k0 ? "More " + NEXTL[k].toLowerCase() : NEXTL[k]} nearby</div><div class="ig">${near.map(({ s, k }) => `<div class="place hasph" data-sid="${s.id}">${ph(s)}<span><span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(hookOf(s))}</span><span class="m" style="display:block"><b>${k < 0.06 ? "Next door" : distTxt(k) + " from here"}</b></span></span></div>`).join("")}</div>`);
   }
   return out.length ? `<div class="nxwrap" data-of="${esc(z.id)}"><div class="sec">NEAR HERE, NEXT</div>${out.join("")}</div>` : "";
 }
@@ -2394,7 +2347,7 @@ function goBack() {
   sheet.scrollTop = b.st; if (!reduce()) body.animate([{ opacity: 0, transform: "translateX(-10px)" }, { opacity: 1, transform: "none" }], { duration: 280, easing: "cubic-bezier(0.16, 1, 0.3, 1)" });
 }
 function placeRow({ s, k }, btn) {
-  return `<div class="place hasph" data-sid="${s.id}">${ph(s)}<span><span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${k >= 8 && s.city !== (anchorFor(view) || {}).city ? tripTxt(k) : distTxt(k, walkKm(liveFrom(view) || anchorFor(view), s))}</b>${hoursOf(s).t ? " · " + hrsTag(s) : ""}</span><span class="links"><a href="${dirs(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video</a>` : ""}</span></span>${btn}</div>`;
+  return `<div class="place hasph" data-sid="${s.id}">${ph(s)}<span><span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(s.hook || "")}</span><span class="m" style="display:block">${s.rating ? `★ ${s.rating} · ` : ""}<b>${k >= 8 && s.city !== (anchorFor(view) || {}).city ? tripTxt(k) : distTxt(k, walkKm(liveFrom(view) || anchorFor(view), s))}</b></span><span class="links"><a href="${dirs(s.name + " " + (s.address || s.city))}" target="_blank" rel="noopener">Directions</a><a href="${ttq(s.name, s.city)}" target="_blank" rel="noopener">TikTok</a>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">Video</a>` : ""}</span></span>${btn}</div>`;
 }
 function mapsFallback(what, iso) { const a = anchorFor(iso), c = cityOn(iso), q = a ? a.hotel + " " + c : c; return `<div class="ig"><p class="empty-p">You haven’t saved ${what} in ${esc(c)} on mio yet.</p><a class="place" href="${maps(what + " near " + q)}" target="_blank" rel="noopener"><span class="a">Find ${what} near ${esc(a ? a.hotel : c)}</span><span class="m" style="color:var(--blue)">Maps ›</span></a></div>`; }
 let SL = null;
@@ -2461,7 +2414,7 @@ function nearSheet() {
 }
 /* ---------- Explore: what to do and where, near you (or the hotel), in the order the day goes ---------- */
 const xp = document.getElementById("xp");
-let XCAT = "all", XOPEN = true, XMORE = {}, XRT = 0;
+let XCAT = "all", XMORE = {}, XRT = 0;
 const xpShown = () => !xp.hidden;
 const XKINDS = ["dinner", "coffee", "drinks", "sweet", "see", "culture", "clothes", "shop", "experience"];
 /* what comes next at this time of day, and what to call it */
@@ -2475,8 +2428,8 @@ function xpOrder(iso) {
   return [["drinks", "Drinks"], ["sweet", "Late dessert"], ["dinner", "Late dinner"], ["see", "A walk home"]];
 }
 function xpRow(z, k, o) {
-  const hr = hoursOf(z), w = o && walkKm(o, z);
-  return `<div class="place hasph${hr.o === false ? " shut" : ""}" data-sid="${z.id}">${ph(z)}<span><span class="a" style="display:block">${esc(z.name)}</span>${z.hook ? `<span class="h">${esc(hookOf(z))}</span>` : ""}<span class="m" style="display:block"><b>${distTxt(k, w)}</b>${hr.t ? " · " + hrsTag(z) : ""}${z.rating ? ` · ★ ${z.rating}` : ""}</span></span></div>`;
+  const w = o && walkKm(o, z);
+  return `<div class="place hasph" data-sid="${z.id}">${ph(z)}<span><span class="a" style="display:block">${esc(z.name)}</span>${z.hook ? `<span class="h">${esc(hookOf(z))}</span>` : ""}<span class="m" style="display:block"><b>${distTxt(k, w)}</b>${z.rating ? ` · ★ ${z.rating}` : ""}</span></span></div>`;
 }
 function xpRender(keepScroll) {
   if (xp.hidden) return;
@@ -2484,20 +2437,19 @@ function xpRender(keepScroll) {
   const days = ALLDAYS.filter(d => d >= (today >= START ? today : START) && d <= END).slice(0, 8);
   const dayLab = d => d === today ? "Today" : d === addDays(today, 1) ? "Tomorrow" : fmt(d, { weekday: "short", day: "numeric" });
   const pool = o ? SAVES.filter(z => z.lat != null && z.kind !== "skip" && XKINDS.includes(mk(z))).map(z => ({ z, k: km(o.lat, o.lng, z.lat, z.lng) })).filter(x => x.k < 3).sort((x, y) => x.k - y.k) : [];
-  hoursFetch(pool.slice(0, 120).map(x => x.z)); walkFetch(o, pool.slice(0, 60).map(x => x.z));
-  const openOk = x => !(isToday && XOPEN && hoursOf(x.z).o === false);
+  walkFetch(o, pool.slice(0, 60).map(x => x.z));
   const kinds = XKINDS.filter(k => pool.some(x => mk(x.z) === k));
   let body = "";
   if (!o) body = `<p class="xp-empty">No hotel for this day, so there's nothing to show nearby.</p>`;
   else if (XCAT === "all") {
     body = xpOrder(iso).filter(([k]) => kinds.includes(k)).map(([k, t]) => {
-      const all = pool.filter(x => mk(x.z) === k && openOk(x)); if (!all.length) return "";
+      const all = pool.filter(x => mk(x.z) === k); if (!all.length) return "";
       const n = XMORE[k] ? 12 : 3;
       return `<div class="xp-sec"><h2>${t}</h2>${all.length > 3 ? `<button data-xmore="${k}">${XMORE[k] ? "Less" : "See all " + all.length}</button>` : ""}</div><div class="ig">${all.slice(0, n).map(x => xpRow(x.z, x.k, o)).join("")}</div>`;
-    }).join("") || `<p class="xp-empty">Nothing open nearby right now. Turn off Open now to see everything.</p>`;
+    }).join("") || `<p class="xp-empty">Nothing saved within 3 km.</p>`;
   } else {
-    const all = pool.filter(x => mk(x.z) === XCAT && openOk(x));
-    body = all.length ? `<div class="xp-sec"><h2>${MAPLAB[XCAT]}</h2></div><div class="ig">${all.slice(0, 40).map(x => xpRow(x.z, x.k, o)).join("")}</div>` : `<p class="xp-empty">No ${MAPLAB[XCAT].toLowerCase()} saved within 3 km${isToday && XOPEN ? " that are open now" : ""}.</p>`;
+    const all = pool.filter(x => mk(x.z) === XCAT);
+    body = all.length ? `<div class="xp-sec"><h2>${MAPLAB[XCAT]}</h2></div><div class="ig">${all.slice(0, 40).map(x => xpRow(x.z, x.k, o)).join("")}</div>` : `<p class="xp-empty">No ${MAPLAB[XCAT].toLowerCase()} saved within 3 km.</p>`;
   }
   const where = me ? "Near you" : a ? `Around ${a.hotel}` : "";
   xp.innerHTML = `<div class="xp-top"><button class="pill glass press ib" data-xside aria-label="Cities"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3.5"/><path d="M9.5 5v14"/><path d="M5.8 8.5h1.4M5.8 11h1.4M5.8 13.5h1.4"/></svg></button><span class="sp"></span>
@@ -2505,7 +2457,7 @@ function xpRender(keepScroll) {
     <button class="pill glass press xp-cal" data-xcal><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Schedule</button></div>
   <div class="xp-h"><h1>${esc(city)}</h1><p>${esc(where)}${where ? " · " : ""}${dDay(iso)}</p></div>
   <div class="xp-row">${days.map(d => `<button data-xday="${d}" aria-pressed="${d === iso}">${dayLab(d)}</button>`).join("")}</div>
-  <div class="xp-row xcats">${isToday ? `<button data-xopen aria-pressed="${XOPEN}">Open now</button>` : ""}<button data-xcat="all" aria-pressed="${XCAT === "all"}">${svgI("all")}All</button>${kinds.map(k => `<button data-xcat="${k}" aria-pressed="${XCAT === k}">${svgI(k, XCAT === k ? null : MAPCOL[k])}${MAPLAB[k]}</button>`).join("")}</div>
+  <div class="xp-row xcats"><button data-xcat="all" aria-pressed="${XCAT === "all"}">${svgI("all")}All</button>${kinds.map(k => `<button data-xcat="${k}" aria-pressed="${XCAT === k}">${svgI(k, XCAT === k ? null : MAPCOL[k])}${MAPLAB[k]}</button>`).join("")}</div>
   ${body}`;
   if (keepScroll !== false) xp.scrollTop = st;
 }
@@ -2523,7 +2475,6 @@ xp.addEventListener("click", e => {
   if (t.closest("[data-xside]")) { haptic(); return openSide(); }
   if (t.closest("[data-xcal]")) { haptic(); return showXP(false); }
   const d = t.closest("[data-xday]"); if (d) { haptic(); XMORE = {}; xpDay(d.dataset.xday); if (view === today && !HERE) { hereAsked = 0; askHere(() => xpRender()); } xpRender(false); xp.scrollTop = 0; return; }
-  if (t.closest("[data-xopen]")) { haptic(); XOPEN = !XOPEN; return xpRender(); }
   const c = t.closest("[data-xcat]"); if (c) { haptic(); XCAT = c.dataset.xcat; return xpRender(false); }
   const m = t.closest("[data-xmore]"); if (m) { haptic(); XMORE[m.dataset.xmore] = !XMORE[m.dataset.xmore]; return xpRender(); }
 });
@@ -2611,7 +2562,6 @@ function drawMap(focusId, fit) {
   if (MCAT !== "all" && !kinds.includes(MCAT)) MCAT = "all";
   document.getElementById("mchips").innerHTML = ["all", ...kinds].map(k => `<button data-mcat="${k}" aria-pressed="${MCAT === k}"><span class="mic">${svgI(k, k === "all" ? null : MAPCOL[k], 1.8)}</span>${k === "all" ? "All" : MAPLAB[k]}</button>`).join("");
   document.getElementById("mcity").textContent = a.city;
-  hoursFetch(list);
   MPTS = list.filter(z => MCAT === "all" || mk(z) === MCAT).map(z => ({ z, on: added.has(z.id), sc: (added.has(z.id) ? 100 : 0) + pinScore(z) })).sort((x, y) => y.sc - x.sc);
   MHOME = a; layoutPins();
   const f = focusId && SAVE_BY[focusId];
@@ -2628,7 +2578,7 @@ function layoutPins() {
   if (a) { const p = MAP.latLngToContainerPoint([a.lat, a.lng]), hl = p.x + 160 > sz.x - 6; boxes.push(hl ? [p.x - 160, p.y - 24, p.x + 22, p.y + 26] : [p.x - 22, p.y - 24, p.x + 160, p.y + 26]);
     pin([a.lat, a.lng], `<div class="mp home${hl ? " l" : ""}"><span class="b">${svgI("home", "#fff", 2.1)}</span><span class="t"><b>${esc(a.hotel)}</b><em>where you're staying</em></span></div>`, 0, 900, null, () => openSheet(staySheet(a))); }
   const dots = []; let nl = 0, nb = 0;
-  MPTS.map(q => ({ ...q, shut: hoursOf(q.z).o === false })).sort((x, y) => x.shut - y.shut).forEach(({ z, on, shut }) => {
+  MPTS.forEach(({ z, on }) => {
     const p = MAP.latLngToContainerPoint([z.lat, z.lng]);
     if (p.x < -20 || p.y < -20 || p.x > sz.x + 20 || p.y > sz.y + 20) return;
     if (p.x < 8 || p.x > sz.x - 8) return dots.push(z);
@@ -2637,10 +2587,10 @@ function layoutPins() {
     const bx = left ? [p.x - 22 - lw, p.y - 24, p.x + 22, p.y + 26] : [p.x - 22, p.y - 24, p.x + 22 + lw, p.y + 26];
     if ((nl < 14 || on) && !hit(...bx)) {
       boxes.push(bx); nl++;
-      pin([z.lat, z.lng], `<div class="mp${on ? " on" : ""}${shut ? " shut" : ""}${left ? " l" : ""}"><span class="b">${svgI(icoOf(z), col, 2)}</span><span class="t"><b>${esc(nm)}</b>${hk ? `<em>${esc(hk)}</em>` : ""}</span></div>`, lw, on ? 800 : 500, z, () => mapPlace(z));
+      pin([z.lat, z.lng], `<div class="mp${on ? " on" : ""}${left ? " l" : ""}"><span class="b">${svgI(icoOf(z), col, 2)}</span><span class="t"><b>${esc(nm)}</b>${hk ? `<em>${esc(hk)}</em>` : ""}</span></div>`, lw, on ? 800 : 500, z, () => mapPlace(z));
     } else if (nb < 12 && !hit(p.x - 30, p.y - 30, p.x + 30, p.y + 30)) {
       boxes.push([p.x - 24, p.y - 24, p.x + 24, p.y + 24]); nb++;
-      pin([z.lat, z.lng], `<div class="mp${on ? " on" : ""}${shut ? " shut" : ""}"><span class="b">${svgI(icoOf(z), col, 2)}</span></div>`, 0, on ? 700 : 300, z, () => mapPlace(z));
+      pin([z.lat, z.lng], `<div class="mp${on ? " on" : ""}"><span class="b">${svgI(icoOf(z), col, 2)}</span></div>`, 0, on ? 700 : 300, z, () => mapPlace(z));
     } else dots.push(z);
   });
   dots.forEach(z => L.marker([z.lat, z.lng], { icon: L.divIcon({ className: "", html: `<div class="mdot" style="background:${MAPCOL[mk(z)]}"></div>`, iconSize: [10, 10], iconAnchor: [5, 5] }), zIndexOffset: 0 }).addTo(MLAY).on("click", e => { L.DomEvent.stopPropagation(e); haptic(); mapPlace(z); }));
