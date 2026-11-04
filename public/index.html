@@ -802,22 +802,68 @@ body .mapv .maplibregl-ctrl-bottom-left { bottom: calc(90px + env(safe-area-inse
 .tripc .crow.on .a { color: var(--blue); }
 .tripc .crow.cur .a::after { content: "Now"; font-size: 11px; font-weight: 700; color: #fff; background: var(--red); border-radius: 980px; padding: 2px 7px; margin-left: 8px; vertical-align: 2px; }
 
-/* map: pull-up panel of nearby suggestions (Corner-style), peeking above the tab bar */
-.msug { position: absolute; left: 0; right: 0; bottom: 0; z-index: 499; height: calc(100% - 118px - env(safe-area-inset-top, 0px)); display: flex; flex-direction: column; background: var(--bg); border-radius: 22px 22px 0 0; box-shadow: 0 -6px 28px rgba(0, 0, 0, .14); --peek: calc(62px + 84px + env(safe-area-inset-bottom, 0px)); transform: translateY(calc(100% - var(--peek))); transition: transform 560ms var(--glide); }
-.msug.half { transform: translateY(46%); }
-.msug.full { transform: none; }
-.msug.drag { transition: none; }
-.mapv.picked .msug, .mapv.carded .msug { transform: translateY(100%); }
-.msug-h { flex: none; padding: 7px 20px 12px; touch-action: none; cursor: grab; -webkit-tap-highlight-color: transparent; }
-.msug-h i { display: block; width: 36px; height: 5px; border-radius: 3px; background: color-mix(in srgb, var(--sub) 45%, transparent); margin: 0 auto 10px; }
-.msug-h b { display: block; font-size: 20px; font-weight: 700; letter-spacing: -.01em; line-height: 24px; }
-.msug-l { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding-bottom: calc(var(--peek) + 24px); }
-.msug .ig { margin: 0 16px; }
-.msug-l { transition: opacity 300ms ease; }
-.msug:not(.half):not(.full):not(.drag) .msug-l { opacity: 0; pointer-events: none; }
-body .mapv .mme { bottom: calc(158px + env(safe-area-inset-bottom, 0px)); transition: bottom 520ms var(--glide), opacity 240ms ease; }
+/* map, Corner-style: category dock above the tab bar; a category opens a sheet of top-rated + nearest */
+.mapv #mchips { display: none !important; }
+.tabs { transition: opacity 260ms ease, transform 460ms var(--glide); }
+body.mapsug .tabs { opacity: 0; transform: translateX(-50%) translateY(130%); pointer-events: none; }
+.mdock { position: absolute; left: 0; right: 0; bottom: calc(82px + env(safe-area-inset-bottom, 0px)); z-index: 498; display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; padding: 4px 8px 6px; transition: opacity 260ms ease, transform 460ms var(--glide); }
+.mdock::-webkit-scrollbar { display: none; }
+.mdock button { flex: none; width: 66px; border: 0; background: none; padding: 0; font: inherit; color: var(--mtxt); display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.mdock .mic { font-size: 36px; line-height: 46px; height: 46px; filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .22)); transition: transform 160ms var(--glide); }
+.mdock button:active .mic { transform: scale(.86); }
+.mdock small { font-size: 12px; font-weight: 500; text-shadow: 0 0 3px var(--mhalo), 0 0 6px var(--mhalo); white-space: nowrap; }
+.mapv.sugup .mdock, .mapv.picked .mdock, .mapv.carded .mdock { opacity: 0; transform: translateY(18px); pointer-events: none; }
+.mback { position: absolute; z-index: 501; left: 12px; top: max(12px, env(safe-area-inset-top, 0px)); opacity: 0; pointer-events: none; transition: opacity 220ms ease; }
+.mback svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.mapv.sugup .mback { opacity: 1; pointer-events: auto; }
+.mtt { transition: opacity 220ms ease; }
+.mapv.sugup .mtt { opacity: 0; pointer-events: none; }
+body .mapv .mme { bottom: calc(166px + env(safe-area-inset-bottom, 0px)); transition: bottom 520ms var(--glide), opacity 240ms ease; }
 body .mapv.picked .mme { bottom: calc(180px + env(safe-area-inset-bottom, 0px)); }
 body .mapv.sugup .mme { opacity: 0; pointer-events: none; }
+.msug { position: absolute; left: 0; right: 0; bottom: 0; z-index: 499; height: calc(100% - 72px - env(safe-area-inset-top, 0px)); display: flex; flex-direction: column; background: var(--panel); border-radius: 24px 24px 0 0; box-shadow: 0 -6px 28px rgba(0, 0, 0, .14); transform: translateY(105%); transition: transform 560ms var(--glide); }
+.msug.half { transform: translateY(42%); }
+.msug.full { transform: none; }
+.msug.drag { transition: none; }
+.mapv.picked .msug, .mapv.carded .msug { transform: translateY(105%); }
+.msug-h { flex: none; height: 22px; touch-action: none; cursor: grab; display: grid; place-items: center; }
+.msug-h i { width: 36px; height: 5px; border-radius: 3px; background: color-mix(in srgb, var(--sub) 45%, transparent); }
+.msug-l { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 0 12px calc(96px + env(safe-area-inset-bottom, 0px)); }
+.msug-t { margin: 2px 4px 14px; font-size: 26px; font-weight: 800; letter-spacing: -.02em; line-height: 30px; }
+.msug-s { display: flex; align-items: center; gap: 9px; margin: 4px 4px 10px; font-size: 15px; font-weight: 800; letter-spacing: .01em; text-transform: uppercase; }
+.msug-s i { width: 10px; height: 10px; border-radius: 5px; background: #ff9500; }
+.mtps { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; margin: 0 -12px 18px; padding: 0 16px; scroll-snap-type: x mandatory; scroll-padding: 0 16px; }
+.mtps::-webkit-scrollbar { display: none; }
+.mtp { flex: none; width: 166px; scroll-snap-align: start; cursor: pointer; }
+.mtp-p, .mcd-p { position: relative; display: grid; place-items: center; overflow: hidden; border-radius: 6px; color: var(--c); background: color-mix(in srgb, var(--c) 14%, var(--card)); }
+.mtp-p { width: 166px; height: 220px; }
+.mtp-p svg, .mcd-p svg { width: 34px; height: 34px; }
+.mtp-p img, .mcd-p img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 220ms ease; }
+.mtp-p img.ld, .mcd-p img.ld { opacity: 1; }
+.mtp-p i { position: absolute; z-index: 1; top: 8px; right: 8px; font-style: normal; font-size: 12px; font-weight: 800; letter-spacing: .02em; color: #1c1c1e; background: #ffb8de; border-radius: 4px; padding: 2px 6px; }
+.mtp .a { display: block; margin-top: 8px; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mtp .a em, .mcd .h em { font-style: normal; margin-right: 6px; }
+.mtp .h { display: block; font-size: 13px; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mcd { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 14px; background: var(--card); border-radius: 14px; padding: 12px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0, 0, 0, .06); cursor: pointer; }
+.mcd-p { width: 112px; height: 148px; }
+.mcd-p::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 46px; background: linear-gradient(transparent, rgba(0, 0, 0, .35)); }
+.mcd-p b { position: absolute; z-index: 1; left: 8px; bottom: 7px; color: #fff; font-size: 15px; font-weight: 600; text-shadow: 0 1px 4px rgba(0, 0, 0, .6); }
+.mcd-t { display: flex; flex-direction: column; min-width: 0; padding-top: 2px; }
+.mcd .a { font-size: 17px; font-weight: 800; letter-spacing: -.02em; line-height: 1.2; }
+.mcd .h { margin-top: 8px; font-size: 15px; line-height: 1.35; color: color-mix(in srgb, var(--ink) 72%, transparent); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mcd .f { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.mcd .pl { font-size: 13px; color: var(--sub); background: var(--panel); border-radius: 10px; padding: 4px 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mcd .bk { flex: none; width: 36px; height: 36px; margin-right: -6px; border: 0; background: none; color: var(--sub); display: grid; place-items: center; cursor: pointer; }
+.mcd .bk svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
+.mcd .bk.on { color: var(--blue); } .mcd .bk.on svg { fill: currentColor; }
+.msrch { position: absolute; z-index: 502; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); width: 128px; height: 50px; box-sizing: border-box; border-radius: 25px; padding: 0 18px; display: flex; align-items: center; gap: 8px; background: var(--ink); color: var(--bg); box-shadow: 0 8px 24px rgba(0, 0, 0, .25); opacity: 0; pointer-events: none; transform: translate(-50%, 30px); transition: opacity 240ms ease, transform 460ms var(--glide), width 420ms var(--glide); }
+.msrch svg { flex: none; width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.msrch input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; color: inherit; font: inherit; font-size: 17px; font-weight: 600; padding: 0; -webkit-appearance: none; appearance: none; }
+.msrch input::placeholder { color: inherit; opacity: 1; }
+.msrch input::-webkit-search-cancel-button { display: none; }
+.mapv.sugup .msrch { opacity: 1; pointer-events: auto; transform: translate(-50%, 0); }
+.msrch:focus-within, .msrch.q { width: calc(100% - 40px); max-width: 480px; }
+.msrch:focus-within input::placeholder { opacity: .5; }
 .msug .place .h { display: -webkit-box !important; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 </style>
 
@@ -847,7 +893,7 @@ body .mapv.sugup .mme { opacity: 0; pointer-events: none; }
 </aside>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden><div class="grab"></div><div id="sheet-body"></div></div>
 <div class="show" id="show" role="dialog" aria-modal="true" hidden></div>
-<div class="mapv" id="mapv" role="dialog" aria-modal="true" aria-label="Map" hidden><div id="mapc"></div><div class="mtop"><div class="xp-top"><button class="pill glass press mselx" id="mselx"><span></span><i aria-hidden="true">✕</i></button><button class="pill glass press mtt" data-trip><span id="mtt"></span><i class="chr"></i></button><span class="sp"></span></div><div class="xp-row xcats mchips" id="mchips"></div><span class="mcity" id="mcity" hidden></span></div><div class="msug" id="msug" aria-label="Suggestions"><div class="msug-h" id="msugh" role="button" tabindex="0" aria-label="Show suggestions"><i></i><b id="msugt">Nearby</b></div><div class="msug-l" id="msugl"></div></div><div class="mcar" id="mcar"></div><button class="pill glass press ib mme" id="mme" aria-label="Where am I"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg></button><div class="mcard" id="mcard" hidden></div></div>
+<div class="mapv" id="mapv" role="dialog" aria-modal="true" aria-label="Map" hidden><div id="mapc"></div><div class="mtop"><div class="xp-top"><button class="pill glass press mselx" id="mselx"><span></span><i aria-hidden="true">✕</i></button><button class="pill glass press mtt" data-trip><span id="mtt"></span><i class="chr"></i></button><span class="sp"></span></div><div class="xp-row xcats mchips" id="mchips"></div><span class="mcity" id="mcity" hidden></span></div><div class="mdock" id="mdock" role="toolbar" aria-label="Categories"></div><button class="pill glass press ib mback" id="mback" aria-label="Back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div class="msug" id="msug" aria-label="Suggestions"><div class="msug-h" id="msugh" aria-hidden="true"><i></i></div><div class="msug-l" id="msugl"></div></div><label class="msrch" id="msrch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><input id="msq" type="search" placeholder="search" enterkeyhint="search" autocomplete="off" aria-label="Search saved places"></label><div class="mcar" id="mcar"></div><button class="pill glass press ib mme" id="mme" aria-label="Where am I"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg></button><div class="mcard" id="mcard" hidden></div></div>
 <nav class="tabs glass" id="tabs" role="tablist" aria-label="Views"><button role="tab" data-tab="xp" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg><span>Explore</span></button><button role="tab" data-tab="map" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6z"/><path d="M9 4v14M15 6v14"/></svg><span>Map</span></button><button role="tab" data-tab="cal" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Schedule</span></button></nav>
 <div class="sr" aria-live="polite" id="live"></div>
 
@@ -2651,46 +2697,94 @@ xp.addEventListener("click", e => {
   const c = t.closest("[data-xcat]"); if (c) { haptic(); XCAT = c.dataset.xcat; return xpRender(false); }
   const m = t.closest("[data-xmore]"); if (m) { haptic(); XMORE[m.dataset.xmore] = !XMORE[m.dataset.xmore]; return xpRender(); }
 });
-/* ---------- map suggestions panel: peek → half → full, nearest first for the chosen category ---------- */
-const msug = document.getElementById("msug"), msugl = document.getElementById("msugl"); let SUGSIG = "";
-function sugRender() {
-  const { a, list } = mapPlaces(); const o = liveFrom(view) || a;
-  if (!o) { msug.hidden = true; return; } msug.hidden = false;
-  const rows = list.filter(z => MCAT === "all" || mk(z) === MCAT).map(z => ({ z, k: km(o.lat, o.lng, z.lat, z.lng) })).sort((x, y) => x.k - y.k).slice(0, 40);
-  document.getElementById("msugt").textContent = MCAT === "all" ? "Nearby" : MAPLAB[MCAT] + " nearby";
-  const html = rows.length ? `<div class="ig">${rows.map(x => xpRow(x.z, x.k, o)).join("")}</div>` : `<p class="xp-empty">Nothing saved near here.</p>`;
-  const sig = view + "|" + MCAT + "|" + rows.map(x => x.z.id).join(",");
-  if (sig !== SUGSIG) { SUGSIG = sig; msugl.innerHTML = html; msugl.scrollTop = 0; }
-  else msugl.querySelectorAll(".place[data-sid]").forEach(r => { const z = SAVE_BY[r.dataset.sid], x = rows.find(y => y.z === z); if (x) { const nu = document.createElement("div"); nu.innerHTML = xpRow(x.z, x.k, o); const m = nu.querySelector(".m"), old = r.querySelector(".m"); if (m && old && m.innerHTML !== old.innerHTML) old.innerHTML = m.innerHTML; } });
-}
-function sugTo(st) { mapv.classList.toggle("sugup", !!st); msug.classList.remove("half", "full", "drag"); msug.style.transform = ""; if (st) msug.classList.add(st); document.getElementById("msugh").setAttribute("aria-label", st ? "Hide suggestions" : "Show suggestions"); }
+/* ---------- map, Corner-style: dock of categories → sheet (half / full) with top-rated carousel + nearest list, search ---------- */
+const DOCK = [["all", "⭐", "top picks"], ["dinner", "🍽️", "eat"], ["coffee", "☕", "cafes"], ["sweet", "🍦", "sweets"], ["drinks", "🍸", "bars"], ["see", "🏞️", "sights"], ["culture", "🖼️", "culture"], ["shop", "🛍️", "shops"], ["clothes", "👕", "clothes"], ["experience", "🎟️", "experiences"]];
+const TOPN = { all: "top picks", dinner: "top-rated restaurants", coffee: "top-rated cafés", sweet: "top-rated sweets", drinks: "top-rated bars", see: "top-rated sights", culture: "top-rated culture", shop: "top-rated shops", clothes: "top-rated clothes shops", experience: "top-rated experiences" };
+const BKSVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3.5h11v17l-5.5-4-5.5 4z"/></svg>`;
+const msug = document.getElementById("msug"), msugl = document.getElementById("msugl"), mdock = document.getElementById("mdock"), msq = document.getElementById("msq");
+let SUGSIG = "", SUGQ = "";
 const sugState = () => msug.classList.contains("full") ? "full" : msug.classList.contains("half") ? "half" : "";
+const lowHook = z => { const h = (z.hook || "").replace(/[|\x1f]/g, " ").trim(); return h ? h[0].toLowerCase() + h.slice(1) : ""; };
+const sugImg = z => `${svgI(icoOf(z))}<img loading="lazy" decoding="async" alt="" src="${esc(photoUrl(z))}" onload="this.classList.add('ld')" onerror="this.remove()">`;
+function sugTop(z) {
+  return `<div class="mtp" data-sid="${z.id}"><span class="mtp-p" style="--c:${MAPCOL[mk(z)] || "#8e8e93"}">${sugImg(z)}<i>★ ${Number(z.rating).toFixed(1)}</i></span><span class="a"><em>${emoOf(z)}</em>${esc(z.name)}</span><span class="h">${esc(lowHook(z))}</span></div>`;
+}
+function sugCard(z, k, o) {
+  const d = distTxt(k, o && walkKm(o, z)).split(" · "), on = getPlan(view).some(p => p.id === z.id), h = lowHook(z);
+  return `<div class="mcd" data-sid="${z.id}"><span class="mcd-p" style="--c:${MAPCOL[mk(z)] || "#8e8e93"}">${sugImg(z)}<b>${esc(d[0])}</b></span><span class="mcd-t"><span class="a">${esc(z.name)}</span>${h ? `<span class="h"><em>${emoOf(z)}</em>${esc(h)}</span>` : ""}<span class="f"><span class="pl">${z.rating ? `★ ${z.rating} · ` : ""}${esc(d[1] || d[0])}</span><button class="bk${on ? " on" : ""}" data-sbk="${z.id}" aria-label="${on ? "Remove from the day" : "Add to the day"}">${BKSVG}</button></span></span></div>`;
+}
+function sugRender() {
+  const { a, list } = mapPlaces(), o = liveFrom(view) || a;
+  const kinds = XKINDS.filter(k => list.some(z => mk(z) === k));
+  const dock = DOCK.filter(([k]) => k === "all" || kinds.includes(k)).map(([k, e, l]) => `<button data-mdk="${k}"><span class="mic" aria-hidden="true">${e}</span><small>${l}</small></button>`).join("");
+  if (mdock.dataset.sig !== dock) { mdock.dataset.sig = dock; mdock.innerHTML = dock; }
+  if (!o) { msugl.innerHTML = ""; SUGSIG = ""; return; }
+  const q = SUGQ.trim().toLowerCase();
+  const pool = list.filter(z => q ? (z.name + " " + (z.hook || "") + " " + (z.vibe || "")).toLowerCase().includes(q) : MCAT === "all" || mk(z) === MCAT)
+    .map(z => ({ z, k: km(o.lat, o.lng, z.lat, z.lng) })).sort((x, y) => x.k - y.k).slice(0, 40);
+  const top = q ? [] : list.filter(z => z.rating && (MCAT === "all" || mk(z) === MCAT)).map(z => ({ z, k: km(o.lat, o.lng, z.lat, z.lng) })).filter(x => x.k < 3)
+    .sort((x, y) => y.z.rating - x.z.rating || x.k - y.k).slice(0, 8);
+  const lab = (DOCK.find(d => d[0] === MCAT) || DOCK[0])[2];
+  const head = [view, MCAT, q].join("|"), sig = head + "|" + pool.map(x => x.z.id).join(",") + "|" + getPlan(view).map(p => p.id).join(",");
+  if (sig === SUGSIG) {  /* only walk times changed: patch them in place */
+    msugl.querySelectorAll(".mcd[data-sid]").forEach(r => { const x = pool.find(y => y.z.id === r.dataset.sid); if (!x) return; const d = distTxt(x.k, walkKm(o, x.z)).split(" · "), b = r.querySelector(".mcd-p b"), pl = r.querySelector(".pl"); if (b) b.textContent = d[0]; if (pl) pl.textContent = (x.z.rating ? `★ ${x.z.rating} · ` : "") + (d[1] || d[0]); });
+    return;
+  }
+  const keep = SUGSIG.startsWith(head + "|"), st = msugl.scrollTop, tsc = msugl.querySelector(".mtps")?.scrollLeft || 0; SUGSIG = sig;
+  msugl.innerHTML = `<h2 class="msug-t">${q ? "search" : esc(lab)}</h2>`
+    + (top.length >= 3 ? `<h3 class="msug-s"><i></i>${esc(TOPN[MCAT] || "top picks")}</h3><div class="mtps">${top.map(x => sugTop(x.z)).join("")}</div>` : "")
+    + (pool.length ? pool.map(x => sugCard(x.z, x.k, o)).join("") : `<p class="xp-empty">${q ? "Nothing saved matches that." : "Nothing saved near here."}</p>`);
+  if (keep) { msugl.scrollTop = st; const t = msugl.querySelector(".mtps"); if (t) t.scrollLeft = tsc; } else msugl.scrollTop = 0;
+}
+function sugTo(st) {
+  msug.classList.remove("half", "full", "drag"); msug.style.transform = ""; if (st) msug.classList.add(st);
+  mapv.classList.toggle("sugup", !!st); document.body.classList.toggle("mapsug", !!st && !mapv.hidden);
+  if (!st && (SUGQ || msq.value)) { SUGQ = ""; msq.value = ""; msq.blur(); document.getElementById("msrch").classList.remove("q"); }
+}
+function sugOpen(k) {
+  MCAT = XCAT = k; XMORE = {}; mapCard(null); MPICK = null; mapv.classList.remove("picked");
+  SUGSIG = ""; drawMap(); sugTo(sugState() || "half");
+}
+function sugClose() { sugTo(""); if (MCAT !== "all") { MCAT = XCAT = "all"; drawMap(); } }
+mdock.addEventListener("click", e => { const b = e.target.closest("[data-mdk]"); if (!b) return; e.stopPropagation(); haptic(); sugOpen(b.dataset.mdk); });
+document.getElementById("mback").addEventListener("click", e => { e.stopPropagation(); haptic(); sugClose(); });
+msq.addEventListener("input", () => { SUGQ = msq.value; document.getElementById("msrch").classList.toggle("q", !!SUGQ); if (SUGQ && sugState() !== "full") sugTo("full"); sugRender(); });
+msq.addEventListener("keydown", e => { if (e.key === "Enter") msq.blur(); });
+document.getElementById("msrch").addEventListener("click", e => e.stopPropagation());
+/* drag: the grabber anywhere, or the list when it's scrolled to the top and pulled down */
 let sg = null;
-document.getElementById("msugh").addEventListener("pointerdown", e => {
-  const r = msug.getBoundingClientRect(); sg = { y: e.clientY, top: r.top, t: performance.now(), moved: false, H: msug.offsetHeight };
-  msug.setPointerCapture?.(e.pointerId);
-});
-msug.addEventListener("pointermove", e => {
-  if (!sg) return; const dy = e.clientY - sg.y; if (!sg.moved && Math.abs(dy) < 6) return;
+const sgBase = () => { const r = msug.getBoundingClientRect(), pr = mapv.getBoundingClientRect(); return r.top - pr.top - (mapv.offsetHeight - msug.offsetHeight); };
+function sgStart(y) { sg = { y, y0: sgBase(), t: performance.now(), moved: false, H: msug.offsetHeight }; }
+function sgMove(y) {
+  if (!sg) return false; const dy = y - sg.y; if (!sg.moved && Math.abs(dy) < 6) return false;
   if (!sg.moved) { sg.moved = true; msug.classList.add("drag"); }
-  const base = sg.top - msug.parentNode.getBoundingClientRect().top - (msug.parentNode.offsetHeight - sg.H);
-  msug.style.transform = `translateY(${Math.max(0, base + dy)}px)`; sg.last = e.clientY; sg.lt = performance.now();
-});
-const sgEnd = e => {
+  msug.style.transform = `translateY(${Math.max(0, sg.y0 + dy)}px)`; return true;
+}
+function sgEnd(y) {
   if (!sg) return; const g = sg; sg = null;
-  if (!g.moved) { haptic(); return sugTo(sugState() ? "" : "half"); }
-  const H = g.H, top = msug.getBoundingClientRect().top - msug.parentNode.getBoundingClientRect().top - (msug.parentNode.offsetHeight - H);
-  const v = (e.clientY - g.y) / Math.max(1, performance.now() - g.t);  /* px per ms, + is down */
-  const peekY = H - (parseFloat(getComputedStyle(msug).getPropertyValue("--peek")) || 150), stops = [["full", 0], ["half", H * 0.46], ["", peekY]];
-  let to = stops.reduce((b, s) => Math.abs(s[1] - top) < Math.abs(b[1] - top) ? s : b);
-  if (Math.abs(v) > 0.5) { const i = stops.indexOf(to), cur = stops.findIndex(s => s[0] === sugState()); to = stops[Math.max(0, Math.min(2, cur + (v > 0 ? 1 : -1)))]; }
-  haptic(); sugTo(to[0]);
-};
-msug.addEventListener("pointerup", sgEnd); msug.addEventListener("pointercancel", sgEnd);
+  if (!g.moved) return false;
+  const top = Math.max(0, g.y0 + (y - g.y)), v = (y - g.y) / Math.max(1, performance.now() - g.t), H = g.H;
+  const stops = [["full", 0], ["half", H * 0.42], ["", H]];
+  let to = stops.reduce((b, x) => Math.abs(x[1] - top) < Math.abs(b[1] - top) ? x : b);
+  if (Math.abs(v) > 0.45) { const cur = stops.findIndex(x => x[0] === sugState()); to = stops[Math.max(0, Math.min(2, cur + (v > 0 ? 1 : -1)))]; }
+  haptic(); if (to[0]) sugTo(to[0]); else sugClose(); return true;
+}
+const msh = document.getElementById("msugh");
+msh.addEventListener("pointerdown", e => { sgStart(e.clientY); msh.setPointerCapture?.(e.pointerId); });
+msh.addEventListener("pointermove", e => sgMove(e.clientY));
+msh.addEventListener("pointerup", e => { if (sgEnd(e.clientY) === false) { haptic(); sugTo(sugState() === "full" ? "half" : "full"); } });
+msh.addEventListener("pointercancel", e => sgEnd(e.clientY));
+let lt = null;
+msugl.addEventListener("touchstart", e => { lt = e.touches.length === 1 && msugl.scrollTop <= 0 ? e.touches[0].clientY : null; if (lt != null) sgStart(lt); }, { passive: true });
+msugl.addEventListener("touchmove", e => { if (lt == null) return; const y = e.touches[0].clientY; if (y - lt < 0 && !sg?.moved) { lt = null; sg = null; return; } if (msugl.scrollTop <= 0 && sgMove(y)) e.preventDefault(); }, { passive: false });
+msugl.addEventListener("touchend", e => { if (lt == null) return; lt = null; sgEnd(e.changedTouches[0].clientY); });
 msug.addEventListener("click", e => {
-  const r = e.target.closest(".place[data-sid]"); if (!r || e.target.closest("a")) return;
+  const bk = e.target.closest("[data-sbk]"); if (bk) { e.stopPropagation(); haptic("heavy");
+    const z = SAVE_BY[bk.dataset.sbk], p = getPlan(view), j = p.findIndex(x => x.id === z.id), c = MAPCAT[z.kind] || "see";
+    if (j >= 0) p.splice(j, 1); else p.push({ id: z.id, c, t: slotFor(view, c) }); setPlan(view, p); content.innerHTML = renderContent(view); drawMap(); return; }
+  const r = e.target.closest("[data-sid]"); if (!r || e.target.closest("a")) return;
   e.stopPropagation(); const z = SAVE_BY[r.dataset.sid]; if (!z) return; haptic();
-  sugTo(""); mapPick(z); mapAim(z, 0.24); setTimeout(() => mapPlace(z), 120);
+  mapPick(z); mapAim(z, 0.24); setTimeout(() => mapPlace(z), 120);
 });
 /* ---------- tab bar: Explore / Map / Schedule; the day and category carry across ---------- */
 const tabs = document.getElementById("tabs");
@@ -2798,7 +2892,7 @@ function mapPlaces() {
 }
 function openMap(focusId) {
   PFIRST = true; MCAT = XCAT;
-  mapv.hidden = false; document.body.classList.add("mapopen"); haptic(); setTab(); mttSet();
+  mapv.hidden = false; document.body.classList.add("mapopen"); haptic(); setTab(); mttSet(); if (MCAT !== "all") requestAnimationFrame(() => sugTo("half"));
   if (!reduce()) mapv.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220 });
   if (!HERE) { hereAsked = 0; askHere(() => { if (!mapv.hidden && MAP) drawMap(); }); }
   loadGL().then(() => {
@@ -2823,7 +2917,7 @@ let MPICK = null, MCARL = [], MCST = 0, MCLOCK = 0;
 function mapAim(z, frac) { const sz = mSize(); MAP.easeTo({ center: [z.lng, z.lat], offset: [0, -sz.y * (0.5 - (frac || 0.38))], duration: reduce() ? 0 : 950, easing: ease }); }
 function mapFlyHere() { if (reduce()) return MAP.jumpTo({ center: [HERE.lng, HERE.lat], zoom: 15 }); MAP.flyTo({ center: [HERE.lng, HERE.lat], zoom: 15, curve: 1.15, speed: 0.9, maxDuration: 1500, easing: ease }); }
 function mapPick(z, rebuild) {
-  MPICK = z; mapv.classList.toggle("picked", !!z); closeSheet();
+  MPICK = z; mapv.classList.toggle("picked", !!z); document.body.classList.toggle("mapsug", !z && !!sugState() && !mapv.hidden); closeSheet();
   if (!z) { layoutPins(); return; }
   document.querySelector("#mselx span").textContent = z.name;
   if (rebuild || !MCARL.some(x => x.id === z.id)) {
