@@ -23,6 +23,7 @@
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, monospace;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --glide: cubic-bezier(.22, .8, .24, 1);
   --spring: linear(0, 0.006, 0.025 2.8%, 0.101 6.1%, 0.539 18.9%, 0.721 25.3%, 0.849 31.5%, 0.937 38.1%, 0.968 41.8%, 0.991 45.7%, 1.006 50.1%, 1.015 55%, 1.017 63.9%, 1.001 85.9%, 1);
   --spring-bouncy: linear(0, 0.009, 0.037 2.1%, 0.15 4.5%, 0.546 11%, 0.773 15.6%, 0.948 20.3%, 1.06 25.2%, 1.105 29%, 1.12 32.3%, 1.113 35.9%, 1.088 39.9%, 1.016 50.2%, 0.986 57.4%, 0.98 63.3%, 0.99 76.9%, 1.002 90%, 1);
   --hour: 60px;
@@ -425,6 +426,18 @@ body.mapopen .sheet { max-height: calc(56vh + 120px); } body.mapopen .scrim { ba
 .mapv .leaflet-control-attribution a { color: var(--sub); }
 .mapv.carded .mme { display: none; }
 .mapv .maplibregl-ctrl-bottom-left { bottom: calc(96px + env(safe-area-inset-bottom)); }
+.mp .b { transition: transform 520ms var(--glide), background-color 260ms ease, box-shadow 320ms ease; transition-delay: var(--d, 0ms); }
+.mp .b .e { transition: opacity 260ms ease, transform 520ms var(--glide); transition-delay: var(--d, 0ms); }
+.mp .t { transition: opacity 320ms ease, transform 480ms var(--glide), margin 480ms var(--glide); transition-delay: var(--d, 0ms); }
+.mp:not(.s-l) .t { transform: translateX(-4px) scale(.98); } .mp.l:not(.s-l) .t { transform: translateX(4px) scale(.98); }
+.mp.sel .b { transform: scale(1.26) translateY(-3px); }
+.mp:not(.home) .b:active { transform: scale(.94); transition-duration: 160ms; }
+.mp .b::after { transition: transform 360ms var(--glide); }
+.mp .b::before { transition: opacity 260ms ease; }
+.mcar { transform: translateY(14px); transition: opacity 280ms ease, transform 520ms var(--glide); }
+.mapv .mme, .mapv .maplibregl-ctrl-bottom-left { transition: bottom 520ms var(--glide); }
+.mbar { transition: opacity 280ms ease; }
+.mchips button .mic { transition: transform 360ms var(--glide), background-color 200ms ease, box-shadow 200ms ease; }
 .mapv.picked .maplibregl-ctrl-bottom-left { bottom: calc(126px + env(safe-area-inset-bottom)); }
 .mcard { position: absolute; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 500; max-width: 500px; margin: 0 auto; background: var(--card); border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,.25); padding: 12px; display: grid; grid-template-columns: 84px 1fr; gap: 4px 12px; }
 .mcard .mph { grid-row: span 3; width: 84px; height: 84px; border-radius: 14px; object-fit: cover; background: var(--panel); }
@@ -2589,7 +2602,9 @@ function loadGL() {
   MLOAD = new Promise((ok, bad) => { const sc = document.createElement("script"); sc.src = "https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"; sc.onload = ok; sc.onerror = () => { MLOAD = null; bad(); }; document.head.appendChild(sc); });
   return MLOAD;
 }
-const ease = t => 1 - Math.pow(1 - t, 4);
+/* map camera curve: cubic-bezier(.3, 0, .15, 1), a soft start and a long settle (the old quartic snapped off the mark) */
+const ease = (() => { const x1 = .3, y1 = 0, x2 = .15, y2 = 1, B = (t, a, b) => 3 * a * t * (1 - t) * (1 - t) + 3 * b * t * t * (1 - t) + t * t * t;
+  return t => { if (t <= 0) return 0; if (t >= 1) return 1; let lo = 0, hi = 1, m = t; for (let i = 0; i < 22; i++) { m = (lo + hi) / 2; if (B(m, x1, x2) < t) lo = m; else hi = m; } return B(m, y1, y2); }; })();
 const mSize = () => ({ x: MAP.getContainer().clientWidth, y: MAP.getContainer().clientHeight });
 const mPt = z => MAP.project([z.lng, z.lat]);
 let MTAP = 0, MRAF = 0, MLAST = 0;
@@ -2612,7 +2627,7 @@ function openMap(focusId) {
       MAP.on("styledata", () => tintMap(MAP));
       MAP.on("click", () => { if (Date.now() - MTAP < 350) return; mapCard(null); if (!sheet.hidden) return closeSheet(); if (MPICK) { haptic(); mapPick(null); } });
       /* pins re-sort themselves while the map is still moving (a few times a second), and once more when it stops */
-      MAP.on("move", () => { const t = performance.now(); if (t - MLAST > 140 && !MRAF) MRAF = requestAnimationFrame(() => { MRAF = 0; MLAST = performance.now(); layoutPins(); }); });
+      MAP.on("move", () => { const t = performance.now(); if (t - MLAST > 220 && !MRAF) MRAF = requestAnimationFrame(() => { MRAF = 0; MLAST = performance.now(); layoutPins(); }); });
       MAP.on("moveend", () => { clearTimeout(MLT); MLT = setTimeout(layoutPins, 0); });
     }
     if (MTILE !== tileUrl()) { MTILE = tileUrl(); MAP.setStyle(tileUrl()); }
@@ -2623,7 +2638,8 @@ function mapPlace(z) { SBACK = []; REFRESH = null; swapSheet(placeSheet(z)); }
 /* like mio: tapping a pin picks it (bigger, with a stem), slides it into the top of the screen and shows a row of
    cards for it and the places around it; swiping the cards moves the pick and the map follows */
 let MPICK = null, MCARL = [], MCST = 0, MCLOCK = 0;
-function mapAim(z, frac) { const sz = mSize(); MAP.easeTo({ center: [z.lng, z.lat], offset: [0, -sz.y * (0.5 - (frac || 0.38))], duration: reduce() ? 0 : 700, easing: ease }); }
+function mapAim(z, frac) { const sz = mSize(); MAP.easeTo({ center: [z.lng, z.lat], offset: [0, -sz.y * (0.5 - (frac || 0.38))], duration: reduce() ? 0 : 950, easing: ease }); }
+function mapFlyHere() { if (reduce()) return MAP.jumpTo({ center: [HERE.lng, HERE.lat], zoom: 15 }); MAP.flyTo({ center: [HERE.lng, HERE.lat], zoom: 15, curve: 1.15, speed: 0.9, maxDuration: 1500, easing: ease }); }
 function mapPick(z, rebuild) {
   MPICK = z; mapv.classList.toggle("picked", !!z); closeSheet();
   if (!z) { layoutPins(); return; }
@@ -2730,7 +2746,7 @@ mapv.addEventListener("click", e => {
   if (t.closest("[data-mx]")) { e.stopPropagation(); return mapCard(null); }
   if (t.closest("#mselx")) { e.stopPropagation(); haptic(); return mapPick(null); }
   const mcd = t.closest("[data-mc]"); if (mcd && !t.closest("a")) { e.stopPropagation(); const z = SAVE_BY[mcd.dataset.mc]; if (z !== MPICK) mapPick(z); haptic(); mapAim(z, 0.24); return setTimeout(() => mapPlace(z), 120); }
-  if (t.closest("#mme")) { e.stopPropagation(); haptic(); hereAsked = 0; askHere(() => { if (MAP && HERE) { drawMap(); MAP.flyTo({ center: [HERE.lng, HERE.lat], zoom: 15, duration: 900, easing: ease }); } }); if (HERE && MAP) MAP.flyTo({ center: [HERE.lng, HERE.lat], zoom: 15, duration: 900, easing: ease }); return; }
+  if (t.closest("#mme")) { e.stopPropagation(); haptic(); hereAsked = 0; const had = !!HERE; askHere(() => { if (MAP && HERE) { drawMap(); if (!had) mapFlyHere(); } }); if (had && MAP) mapFlyHere(); return; }
   const mc = t.closest("[data-mcat]"); if (mc) { e.stopPropagation(); haptic(); MCAT = mc.dataset.mcat; mapCard(null); MPICK = null; mapv.classList.remove("picked"); return drawMap(); }
   const ma = t.closest("[data-madd]"); if (ma) { e.stopPropagation(); haptic("heavy"); const z = SAVE_BY[ma.dataset.madd], p = getPlan(view), j = p.findIndex(x => x.id === z.id), c = MAPCAT[z.kind] || "see";
     if (j >= 0) p.splice(j, 1); else p.push({ id: z.id, c, t: slotFor(view, c) }); setPlan(view, p); content.innerHTML = renderContent(view); drawMap(); mapCard(z); return; }
