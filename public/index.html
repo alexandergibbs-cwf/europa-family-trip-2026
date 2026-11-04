@@ -2522,11 +2522,7 @@ function menuSheet() {
   <div class="ig">
       ${row("stay", s ? esc(s.hotel) : "No hotel tonight", s ? `Check in ${s12(s.ci)} · out ${s12(s.co)}${s.est ? " (usual)" : ""}${s.addr && !/booking/i.test(s.addr) ? " · " + esc(s.addr) : ""}` : (iso === END ? "Landing in Perth" : "Overnight flight"))}
       ${hasFree(iso) ? row("plan", getDay(iso) ? "Day planned" : "Plan the day", getDay(iso) ? "Change or clear it" : "A few questions, then a plan") : ""}
-      ${(() => { const f = nextFlight(iso); if (!f) return ""; const { chk, carry } = bagParts(f.bags); return row("bags", f.bags ? `Suitcases: ${esc(chk || carry)} each` : "Suitcases", `${f.dep[0] === iso ? "Today" : wk(f.dep[0])}, ${esc(f.from)} → ${esc(f.to)}${f.bags ? (carry && chk ? ` · plus ${esc(carry)}` : "") : " · check the booking"}`); })()}
       ${row("near", "Near me now", "Saved places closest to you")}
-      ${row("ideas", "Things to do", hasSaves(iso) ? `<span class="cyc" id="cyc"></span>` : `Search near the hotel`)}
-      ${row("cal", "Add to my calendar", "Flights, trains and bookings, with alerts")}
-      ${row("tour", "How it works", "A quick look at the app")}
       ${row("tasks", open ? `${open} thing${open > 1 ? "s" : ""} to sort` : "Nothing to sort", open ? headsFor(iso).find(h => !h.k || !done(h.k)).t : "No reminders for this day")}
   </div>`;
 }
@@ -3144,7 +3140,6 @@ const TOUR = [
   { t: "Swipe between days", d: "Swipe the page sideways, or tap a date at the top.", p: `<div class="strip"><span>27</span><span class="c">28</span><span>29</span></div><div class="hand"></div>` },
   { t: "Ideas for free time", d: "Dashed blocks are ideas from your saved places. Tap one for directions, its TikTok, or to add it.", p: `<div class="bk dash" style="--c:#a2845e;top:14px">Coffee<small>Caffè Teichner · 5 min walk</small></div><div class="bk dash" style="--c:#34c759;top:54px">Sightsee<small>Trevi Fountain · 8 min walk</small></div><div class="bk dash" style="--c:#ff2d55;top:94px;height:42px">Food<small>Supplizio · 9 min walk</small></div>` },
   { t: "Plan a whole day", d: "Tap the city name, then Plan the day. A few taps and it’s done.", p: `<div class="pill">Rome</div><div class="menu"><div>Spagna Boutique</div><div class="hl">Plan the day</div></div>` },
-  { t: "Lock-screen alerts", d: "Tap the city name, then Add to my calendar. Flights and bookings show up with alerts.", p: `<div class="pill">Rome</div><div class="menu"><div>Things to do</div><div class="hl">Add to my calendar</div></div>` },
 ];
 let tourAt = 0;
 function tourGo(i) {
