@@ -422,7 +422,7 @@ body.mapopen .sheet { max-height: calc(56vh + 120px); } body.mapopen .scrim { ba
 .mp.sel .t { margin-left: 10px; } .mp.sel.l .t { margin: 0 10px 0 0; } .mp.sel .t b { font-size: 16px; }
 .mselx { pointer-events: auto; display: none; align-items: center; gap: 10px; max-width: calc(100% - 96px); height: 40px; padding: 0 14px 0 16px; border: 0; border-radius: 20px; font: 600 16px/1 inherit; font-family: inherit; color: var(--ink); background: var(--glass); -webkit-backdrop-filter: saturate(1.8) blur(22px); backdrop-filter: saturate(1.8) blur(22px); box-shadow: 0 2px 10px rgba(0,0,0,.16), inset 0 0 0 .5px var(--glass-edge); cursor: pointer; }
 .mselx span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .mselx i { font-style: normal; color: var(--sub); font-size: 14px; }
-.mapv.picked .mselx { display: inline-flex; } .mapv.picked .mcity { display: none; }
+.mapv.picked .mcity { display: none; }
 .mcar { position: absolute; left: 0; right: 0; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 501; display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 6px 24px 8px; scroll-padding: 0 24px; opacity: 0; pointer-events: none; transform: translateY(24px); transition: opacity 200ms ease, transform 420ms var(--spring); }
 .mcar::-webkit-scrollbar { display: none; }
 .mapv.picked .mcar { opacity: 1; pointer-events: auto; transform: none; }
@@ -2698,7 +2698,6 @@ function openMap(focusId) {
       const a = anchorFor(view) || { lat: 47.37, lng: 8.54 };
       MAP = new maplibregl.Map({ container: "mapc", style: tileUrl(), center: [a.lng, a.lat], zoom: 14, attributionControl: false, dragRotate: false, pitchWithRotate: false, touchPitch: false, fadeDuration: 180, maxPitch: 0 });
       MAP.touchZoomRotate.disableRotation(); MTILE = tileUrl();
-      MAP.addControl(new maplibregl.AttributionControl({ compact: true, customAttribution: '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>' }), "bottom-left");
       MAP.on("styledata", () => tintMap(MAP));
       MAP.on("click", e => { if (Date.now() - MTAP < 350) return; const lz = labelAt(e.point); if (lz) { MTAP = Date.now(); haptic(); return lz.home ? 0 : pinTap(lz); } mapCard(null); if (!sheet.hidden) return closeSheet(); if (MPICK) { haptic(); mapPick(null); } });
       /* pins re-sort themselves while the map is still moving (a few times a second), and once more when it stops */
