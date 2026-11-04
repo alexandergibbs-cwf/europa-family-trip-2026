@@ -375,9 +375,15 @@ body.mapopen .sheet { max-height: calc(56vh + 120px); } body.mapopen .scrim { ba
 .mapv { --mtxt: #1c1c1e; --msub: #5b5b60; --mhalo: rgba(255,255,255,.95); --mbar: rgba(246,246,248,.96); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .mapv { --mtxt: #f2f2f7; --msub: #b8b8c0; --mhalo: rgba(0,0,0,.85); --mbar: rgba(22,22,24,.96); } }
 :root[data-theme="dark"] .mapv { --mtxt: #f2f2f7; --msub: #b8b8c0; --mhalo: rgba(0,0,0,.85); --mbar: rgba(22,22,24,.96); }
+.pinw { background: none; border: 0; }
 .mp { position: absolute; left: 0; top: 0; width: max-content; display: flex; align-items: center; gap: 7px; white-space: nowrap; cursor: pointer; }
-.mp .b { flex: none; position: relative; width: 40px; height: 40px; border-radius: 20px; background: #fff; display: grid; place-items: center; box-shadow: 0 2px 7px rgba(0,0,0,.22), 0 0 0 .5px rgba(0,0,0,.05); transition: transform 380ms var(--spring-bouncy); }
-.mp:active .b { transform: scale(.9); }
+.mp .b { flex: none; position: relative; width: 40px; height: 40px; border-radius: 20px; background: #fff; display: grid; place-items: center; transition: transform 520ms cubic-bezier(.34, 1.56, .64, 1), background-color 220ms ease, box-shadow 260ms ease; transition-delay: var(--d, 0ms); will-change: transform; box-shadow: 0 2px 7px rgba(0,0,0,.22), 0 0 0 .5px rgba(0,0,0,.05); transition: transform 380ms var(--spring-bouncy); }
+.mp .b svg { transition: opacity 180ms ease; transition-delay: var(--d, 0ms); }
+.mp .t { transition: opacity 220ms ease, transform 420ms cubic-bezier(.22, 1, .36, 1); transition-delay: var(--d, 0ms); }
+.mp:not(.s-l) .t { opacity: 0; transform: translateX(-8px) scale(.96); pointer-events: none; } .mp.l:not(.s-l) .t { transform: translateX(8px) scale(.96); }
+.mp.s-d .b { transform: scale(.27); background: var(--c); box-shadow: 0 0 0 5px #fff, 0 2px 8px rgba(0,0,0,.35); } .mp.s-d .b svg { opacity: 0; }
+.mp.s-h { pointer-events: none; } .mp.s-h .b { transform: scale(0); } .mp.s-h .b svg { opacity: 0; }
+.mp:not(.home) .b:active { transform: scale(.88); }
 .mp .b svg { width: 21px; height: 21px; }
 .mp .b i { position: absolute; top: -1px; right: -1px; width: 13px; height: 13px; border-radius: 7px; border: 2px solid #fff; }
 .mp.on .b { box-shadow: 0 0 0 3px #007aff, 0 2px 7px rgba(0,0,0,.25); }
@@ -388,11 +394,11 @@ body.mapopen .sheet { max-height: calc(56vh + 120px); } body.mapopen .scrim { ba
 .mp.l { left: auto; right: 0; flex-direction: row-reverse; } .mp.l .t { text-align: right; align-items: flex-end; }
 .mdot { width: 10px; height: 10px; border-radius: 5px; border: 1.5px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.3); cursor: pointer; }
 .mapv .leaflet-marker-icon { overflow: visible; }
-.mp.sel .b { width: 56px; height: 56px; border-radius: 28px; margin: -8px; box-shadow: 0 0 0 3px var(--mtxt), 0 4px 14px rgba(0,0,0,.3); }
-.mp.sel .b svg { width: 28px; height: 28px; }
-.mp.sel .b::after { content: ""; position: absolute; left: 50%; top: 100%; width: 3px; height: 12px; margin-left: -1.5px; background: var(--mtxt); border-radius: 2px; }
-.mp.sel .b::before { content: ""; position: absolute; left: 50%; top: calc(100% + 11px); width: 8px; height: 8px; margin-left: -4px; border-radius: 4px; background: var(--mtxt); }
-.mp.sel .t { margin-left: 8px; } .mp.sel.l .t { margin: 0 8px 0 0; }
+.mp.sel .b { transform: scale(1.38) translateY(-4px); box-shadow: 0 0 0 2.2px var(--mtxt), 0 6px 16px rgba(0,0,0,.3); }
+
+.mp .b::after { content: ""; position: absolute; left: 50%; top: 100%; width: 2.4px; height: 9px; margin-left: -1.2px; background: var(--mtxt); border-radius: 2px; transform: scaleY(0); transform-origin: top; transition: transform 300ms ease; } .mp.sel .b::after { transform: scaleY(1); transition-delay: 120ms; }
+.mp .b::before { content: ""; position: absolute; left: 50%; top: calc(100% + 8px); width: 6px; height: 6px; margin-left: -3px; border-radius: 3px; background: var(--mtxt); opacity: 0; transition: opacity 200ms ease; } .mp.sel .b::before { opacity: 1; transition-delay: 260ms; }
+.mp .t { transition-property: opacity, transform, margin; } .mp.sel .t { margin-left: 10px; } .mp.sel.l .t { margin: 0 10px 0 0; } .mp.sel .t b { font-size: 16px; }
 .mselx { pointer-events: auto; display: none; align-items: center; gap: 10px; max-width: calc(100% - 96px); height: 40px; padding: 0 14px 0 16px; border: 0; border-radius: 20px; font: 600 16px/1 inherit; font-family: inherit; color: var(--ink); background: var(--glass); -webkit-backdrop-filter: saturate(1.8) blur(22px); backdrop-filter: saturate(1.8) blur(22px); box-shadow: 0 2px 10px rgba(0,0,0,.16), inset 0 0 0 .5px var(--glass-edge); cursor: pointer; }
 .mselx span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .mselx i { font-style: normal; color: var(--sub); font-size: 14px; }
 .mapv.picked .mselx { display: inline-flex; } .mapv.picked .mcity { display: none; }
@@ -2529,11 +2535,12 @@ function tintMap(gl) {
   const dk = darkMap(), set = (id, prop, v) => { try { gl.setPaintProperty(id, prop, v); } catch (e) {} };
   (gl.getStyle().layers || []).forEach(l => {
     const id = l.id.toLowerCase();
-    if (l.type === "background") set(l.id, "background-color", dk ? "#1c1c1e" : "#f2f2f0");
-    else if (l.type === "fill" && /water|ocean|lake|river/.test(id)) set(l.id, "fill-color", dk ? "#1b3550" : "#a9d3f2");
-    else if (l.type === "line" && /waterway|river|canal/.test(id)) set(l.id, "line-color", dk ? "#1b3550" : "#a9d3f2");
+    if (l.type === "background") set(l.id, "background-color", dk ? "#1b1e27" : "#f2f2f0");
+    else if (l.type === "fill" && /water|ocean|lake|river/.test(id)) set(l.id, "fill-color", dk ? "#1d3a5e" : "#a9d3f2");
+    else if (l.type === "line" && /waterway|river|canal/.test(id)) set(l.id, "line-color", dk ? "#1d3a5e" : "#a9d3f2");
     else if (l.type === "fill" && /park|wood|forest|grass|cemetery|pitch|garden|landcover|nature/.test(id)) { set(l.id, "fill-color", dk ? "#1f3324" : "#cfe9c6"); set(l.id, "fill-opacity", 1); }
-    else if (l.type === "fill" && /building/.test(id)) set(l.id, "fill-color", dk ? "#2a2a2d" : "#e7e6e3");
+    else if (l.type === "fill" && /building/.test(id)) set(l.id, "fill-color", dk ? "#262a36" : "#e7e6e3");
+    else if (l.type === "line" && /road|street|highway|motorway|primary|secondary|tertiary|minor|service|bridge|tunnel|path|track/.test(id) && !/rail|transit|boundary|admin|casing/.test(id)) set(l.id, "line-color", dk ? "#3b4153" : "#ffffff");
   });
 }
 /* simple drawn icons: one per kind of place, plus a few common sub-kinds read from what it is */
@@ -2589,17 +2596,18 @@ function mapPlaces() {
   return { a, list };
 }
 function openMap(focusId) {
+  PFIRST = true;
   mapv.hidden = false; document.body.classList.add("mapopen"); haptic();
   if (!reduce()) mapv.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220 });
   if (!HERE) { hereAsked = 0; askHere(() => { if (!mapv.hidden && MAP) drawMap(); }); }
   loadLeaflet().then(() => {
     if (!MAP) {
-      MAP = L.map("mapc", { zoomControl: false, attributionControl: true });
+      MAP = L.map("mapc", { zoomControl: false, attributionControl: true, zoomSnap: 0, zoomDelta: .5, wheelPxPerZoomLevel: 90, inertiaDeceleration: 2600, easeLinearity: .18, bounceAtZoomLimits: false });
       /* OpenFreeMap vector map drawn by MapLibre inside Leaflet, so the pins and gestures stay the same */
       MTILE = L.maplibreGL({ style: tileUrl(), attribution: "© OpenFreeMap © OpenMapTiles © OpenStreetMap" }).addTo(MAP); MTILE._u = tileUrl(); MAP.attributionControl.addAttribution('<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>');
 
       MAP.on("click", () => { mapCard(null); if (!sheet.hidden) return closeSheet(); if (MPICK) { haptic(); mapPick(null); } });
-      MAP.on("zoomend moveend", () => { clearTimeout(MLT); MLT = setTimeout(layoutPins, 40); });
+      MAP.on("zoomend moveend", () => { clearTimeout(MLT); MLT = setTimeout(layoutPins, 10); });
     }
     if (MTILE._u !== tileUrl() && glMap()) { MTILE._u = tileUrl(); glMap().setStyle(tileUrl()); }
     setTimeout(() => { MAP.invalidateSize(); drawMap(focusId, true); }, 30);
@@ -2609,7 +2617,7 @@ function mapPlace(z) { SBACK = []; REFRESH = null; swapSheet(placeSheet(z)); }
 /* like mio: tapping a pin picks it (bigger, with a stem), slides it into the top of the screen and shows a row of
    cards for it and the places around it; swiping the cards moves the pick and the map follows */
 let MPICK = null, MCARL = [], MCST = 0, MCLOCK = 0;
-function mapAim(z, frac) { const sz = MAP.getSize(), p = MAP.project([z.lat, z.lng], MAP.getZoom()), off = sz.y * (0.5 - (frac || 0.38)); MAP.panTo(MAP.unproject(p.add([0, off]), MAP.getZoom()), { animate: true, duration: .45 }); }
+function mapAim(z, frac) { const sz = MAP.getSize(), p = MAP.project([z.lat, z.lng], MAP.getZoom()), off = sz.y * (0.5 - (frac || 0.38)); MAP.panTo(MAP.unproject(p.add([0, off]), MAP.getZoom()), { animate: true, duration: .55, easeLinearity: .12 }); }
 function mapPick(z, rebuild) {
   MPICK = z; mapv.classList.toggle("picked", !!z); closeSheet();
   if (!z) { layoutPins(); return; }
@@ -2622,12 +2630,12 @@ function mapPick(z, rebuild) {
       return `<div class="mc" data-mc="${x.id}">${ph(x).replace('class="ph"', 'class="ph"')}<span class="a">${esc(x.name)}</span><span class="h">${esc(hookOf(x))}</span><span class="m">${MAPLAB[mk(x)] || ""}${k != null ? ` · <b>${distTxt(k, walkKm(o, x))}</b>` : ""}</span><a class="go press" href="${dirs(x.name + " " + (x.address || x.city))}" target="_blank" rel="noopener" aria-label="Directions">${arrow}</a></div>`; }).join("");
     MCLOCK = Date.now(); document.getElementById("mcar").scrollLeft = 0;
   } else { const i = MCARL.findIndex(x => x.id === z.id), c = document.getElementById("mcar"), card = c.children[i]; if (card) { MCLOCK = Date.now(); c.scrollTo({ left: card.offsetLeft - 24, behavior: reduce() ? "auto" : "smooth" }); } }
-  mapAim(z, 0.38); setTimeout(layoutPins, 480);
+  layoutPins(); mapAim(z, 0.38);
 }
 document.getElementById("mcar").addEventListener("scroll", e => {
   clearTimeout(MCST); MCST = setTimeout(() => {
     if (Date.now() - MCLOCK < 600) return; const c = e.target, w = (c.firstElementChild || {}).offsetWidth || 1;
-    const z = MCARL[Math.round(c.scrollLeft / (w + 10))]; if (z && z !== MPICK) { haptic(); MPICK = z; document.querySelector("#mselx span").textContent = z.name; mapAim(z, 0.38); setTimeout(layoutPins, 480); }
+    const z = MCARL[Math.round(c.scrollLeft / (w + 10))]; if (z && z !== MPICK) { haptic(); MPICK = z; document.querySelector("#mselx span").textContent = z.name; layoutPins(); mapAim(z, 0.38); }
   }, 110);
 }, { passive: true });
 function closeMap() { closeSheet(); MPICK = null; mapv.classList.remove("picked"); mapv.hidden = true; document.body.classList.remove("mapopen"); mapCard(null); }
@@ -2645,37 +2653,57 @@ function drawMap(focusId, fit) {
   else if (fit) { const me = liveFrom(view); MAP.setView(me ? [me.lat, me.lng] : [a.lat, a.lng], 15); }
 }
 /* like mio: the best places get a picture bubble with name and a few words, others a bubble, and when it's crowded a small dot */
+/* Pins stay on the map and change state in place, with springs, instead of being redrawn:
+   "l" bubble with name and a few words, "b" bubble, "d" small dot, "h" hidden (other category), plus "sel" for the picked one.
+   Leaflet keeps them glued to the map while it pans and zooms, so nothing pops or vanishes mid-gesture. */
+const PM = new Map(); let PHOME = null, PHERE = null, PACC = null, PFIRST = true;
+function pinEl(z) {
+  const col = MAPCOL[mk(z)], nm = z.name.length > 24 ? z.name.slice(0, 23) + "…" : z.name, hk = shortHook(z);
+  const m = L.marker([z.lat, z.lng], { icon: L.divIcon({ className: "pinw", html: `<div class="mp s-h" style="--c:${col}"><span class="b">${svgI(icoOf(z), col, 2)}</span><span class="t"><b>${esc(nm)}</b>${hk ? `<em>${esc(hk)}</em>` : ""}</span></div>`, iconSize: [40, 40], iconAnchor: [20, 20] }), riseOnHover: false });
+  m.on("click", e => { L.DomEvent.stopPropagation(e); haptic(); MPICK && MPICK.id === z.id ? mapPlace(z) : mapPick(z, true); });
+  m.addTo(MAP); const o = { m, z, st: "h", lw: Math.min(132, Math.max(nm.length * 7.9, hk.length > 18 ? 118 : hk.length * 6.6)) + 8 }; PM.set(z.id, o); return o;
+}
+function pinSet(o, st, left, zi, delay) {
+  const el = o.m.getElement() && o.m.getElement().firstElementChild; if (!el) return;
+  if (o.st !== st || o.left !== left) {
+    el.classList.remove("s-l", "s-b", "s-d", "s-h", "sel"); el.classList.add(st === "sel" ? "s-l" : "s-" + st); if (st === "sel") el.classList.add("sel");
+    el.classList.toggle("l", !!left); if (delay != null) el.style.setProperty("--d", delay + "ms"); o.st = st; o.left = left;
+  }
+  if (o.zi !== zi) { o.m.setZIndexOffset(zi); o.zi = zi; }
+}
 function layoutPins() {
   if (!MAP || mapv.hidden || !MAP._loaded) return; glMap();
-  if (MLAY) MLAY.remove(); MLAY = L.layerGroup().addTo(MAP);
-  const sz = MAP.getSize(), boxes = [], hit = (x0, y0, x1, y1) => boxes.some(b => x0 < b[2] && x1 > b[0] && y0 < b[3] && y1 > b[1]);
-  const pin = (ll, html, w, cls, z, onTap) => L.marker(ll, { icon: L.divIcon({ className: "", html, iconSize: [40, 40], iconAnchor: [20, 20] }), zIndexOffset: cls }).addTo(MLAY).on("click", e => { L.DomEvent.stopPropagation(e); haptic(); onTap(); });
-  const a = MHOME; boxes.push([-999, -999, sz.x + 999, 62], [-999, sz.y - 112, sz.x + 999, sz.y + 999]);
-  if (a) { const p = MAP.latLngToContainerPoint([a.lat, a.lng]), hl = p.x + 160 > sz.x - 6; boxes.push(hl ? [p.x - 160, p.y - 24, p.x + 22, p.y + 26] : [p.x - 22, p.y - 24, p.x + 160, p.y + 26]);
-    pin([a.lat, a.lng], `<div class="mp home${hl ? " l" : ""}"><span class="b">${svgI("home", "#fff", 2.1)}</span><span class="t"><b>${esc(a.hotel)}</b><em>where you're staying</em></span></div>`, 0, 900, null, () => openSheet(staySheet(a))); }
-  const dots = []; let nl = 0, nb = 0;
-  if (MPICK) { const z = MPICK, p = MAP.latLngToContainerPoint([z.lat, z.lng]), nm = z.name.length > 24 ? z.name.slice(0, 23) + "…" : z.name, left = p.x + 180 > sz.x - 6;
-    boxes.push(left ? [p.x - 190, p.y - 34, p.x + 34, p.y + 40] : [p.x - 34, p.y - 34, p.x + 190, p.y + 40]);
-    pin([z.lat, z.lng], `<div class="mp sel${left ? " l" : ""}"><span class="b">${svgI(icoOf(z), MAPCOL[mk(z)], 2)}</span><span class="t"><b>${esc(nm)}</b><em>${esc(shortHook(z))}</em></span></div>`, 0, 1200, z, () => mapPlace(z)); }
-  MPTS.forEach(({ z, on }) => {
-    if (MPICK && z.id === MPICK.id) return;
-    const p = MAP.latLngToContainerPoint([z.lat, z.lng]);
-    if (p.x < -20 || p.y < -20 || p.x > sz.x + 20 || p.y > sz.y + 20) return;
-    if (p.x < 8 || p.x > sz.x - 8) return dots.push(z);
-    const nm = z.name.length > 22 ? z.name.slice(0, 21) + "…" : z.name, hk = shortHook(z), lw = Math.min(132, Math.max(nm.length * 7.9, hk.length > 18 ? 118 : hk.length * 6.6)) + 8;
-    const col = MAPCOL[mk(z)], badge = `<i style="background:${col}"></i>`, left = p.x + 22 + lw > sz.x - 6;
-    const bx = left ? [p.x - 22 - lw, p.y - 24, p.x + 22, p.y + 26] : [p.x - 22, p.y - 24, p.x + 22 + lw, p.y + 26];
-    if ((nl < 14 || on) && !hit(...bx)) {
-      boxes.push(bx); nl++;
-      pin([z.lat, z.lng], `<div class="mp${on ? " on" : ""}${left ? " l" : ""}"><span class="b">${svgI(icoOf(z), col, 2)}</span><span class="t"><b>${esc(nm)}</b>${hk ? `<em>${esc(hk)}</em>` : ""}</span></div>`, lw, on ? 800 : 500, z, () => mapPick(z, true));
-    } else if (nb < 12 && !hit(p.x - 30, p.y - 30, p.x + 30, p.y + 30)) {
-      boxes.push([p.x - 24, p.y - 24, p.x + 24, p.y + 24]); nb++;
-      pin([z.lat, z.lng], `<div class="mp${on ? " on" : ""}"><span class="b">${svgI(icoOf(z), col, 2)}</span></div>`, 0, on ? 700 : 300, z, () => mapPick(z, true));
-    } else dots.push(z);
+  const sz = MAP.getSize(), boxes = [[-999, -999, sz.x + 999, 62], [-999, sz.y - (MPICK ? 140 : 112), sz.x + 999, sz.y + 999]], hit = (x0, y0, x1, y1) => boxes.some(b => x0 < b[2] && x1 > b[0] && y0 < b[3] && y1 > b[1]);
+  const a = MHOME;
+  if (a) {
+    if (!PHOME || PHOME.a !== a) { if (PHOME) PHOME.m.remove();
+      const m = L.marker([a.lat, a.lng], { icon: L.divIcon({ className: "pinw", html: `<div class="mp home s-l"><span class="b">${svgI("home", "#fff", 2.1)}</span><span class="t"><b>${esc(a.hotel)}</b><em>where you're staying</em></span></div>`, iconSize: [40, 40], iconAnchor: [20, 20] }), zIndexOffset: 900 }).addTo(MAP);
+      m.on("click", e => { L.DomEvent.stopPropagation(e); haptic(); openSheet(staySheet(a)); }); PHOME = { m, a }; }
+    const p = MAP.latLngToContainerPoint([a.lat, a.lng]), hl = p.x + 160 > sz.x - 6; boxes.push(hl ? [p.x - 160, p.y - 24, p.x + 22, p.y + 26] : [p.x - 22, p.y - 24, p.x + 160, p.y + 26]);
+    const he = PHOME.m.getElement() && PHOME.m.getElement().firstElementChild; if (he) he.classList.toggle("l", hl);
+  }
+  const want = new Map(); let nl = 0, nb = 0;
+  const order = MPICK ? [{ z: MPICK, on: false }, ...MPTS.filter(q => q.z.id !== MPICK.id)] : MPTS;
+  order.forEach(({ z, on }, i) => {
+    const o = PM.get(z.id) || pinEl(z), p = MAP.latLngToContainerPoint([z.lat, z.lng]);
+    const off = p.x < -40 || p.y < -40 || p.x > sz.x + 40 || p.y > sz.y + 40;
+    if (MPICK && z.id === MPICK.id) { const left = p.x + 190 > sz.x - 6; boxes.push(left ? [p.x - 196, p.y - 34, p.x + 34, p.y + 44] : [p.x - 34, p.y - 34, p.x + 196, p.y + 44]); want.set(z.id, ["sel", left, 1200]); return; }
+    if (off) return want.set(z.id, ["d", false, 0]);
+    const left = p.x + 22 + o.lw > sz.x - 6, bx = left ? [p.x - 22 - o.lw, p.y - 24, p.x + 22, p.y + 26] : [p.x - 22, p.y - 24, p.x + 22 + o.lw, p.y + 26];
+    if ((nl < 14 || on) && p.x > 8 && p.x < sz.x - 8 && !hit(...bx)) { boxes.push(bx); nl++; want.set(z.id, ["l", left, on ? 800 : 500 - i]); }
+    else if (nb < 14 && !hit(p.x - 28, p.y - 28, p.x + 28, p.y + 28)) { boxes.push([p.x - 23, p.y - 23, p.x + 23, p.y + 23]); nb++; want.set(z.id, ["b", false, 300 - i]); }
+    else want.set(z.id, ["d", false, 0]);
   });
-  dots.forEach(z => L.marker([z.lat, z.lng], { icon: L.divIcon({ className: "", html: `<div class="mdot" style="background:${MAPCOL[mk(z)]}"></div>`, iconSize: [10, 10], iconAnchor: [5, 5] }), zIndexOffset: 0 }).addTo(MLAY).on("click", e => { L.DomEvent.stopPropagation(e); haptic(); mapPick(z, true); }));
-  if (HERE && Date.now() - HERE.t < 30 * 6e4 && HERE.acc > 40) L.circle([HERE.lat, HERE.lng], { radius: Math.min(HERE.acc, 5000), color: "#007aff", weight: 1, opacity: .4, fillColor: "#007aff", fillOpacity: .1, interactive: false }).addTo(MLAY);
-  if (HERE && Date.now() - HERE.t < 30 * 6e4) L.marker([HERE.lat, HERE.lng], { icon: L.divIcon({ className: "", html: `<div class="mme-dot"></div>`, iconSize: [16, 16], iconAnchor: [8, 8] }), zIndexOffset: 1000, interactive: false }).addTo(MLAY);
+  const ids = new Set(MPTS.map(q => q.z.id)); let k = 0;
+  PM.forEach((o, id) => {
+    const w = want.get(id);
+    if (w) pinSet(o, w[0], w[1], w[2], PFIRST ? Math.min(400, (k++) * 12) : 0);
+    else if (!ids.has(id) && !(MPICK && MPICK.id === id)) { pinSet(o, "h", false, -100); if (!(mapPlaces().list || []).some(z => z.id === id)) { PM.delete(id); setTimeout(() => o.m.remove(), 400); } }
+  });
+  PFIRST = false;
+  const fresh = HERE && Date.now() - HERE.t < 30 * 6e4;
+  if (fresh) { if (!PHERE) PHERE = L.marker([HERE.lat, HERE.lng], { icon: L.divIcon({ className: "", html: `<div class="mme-dot"></div>`, iconSize: [16, 16], iconAnchor: [8, 8] }), zIndexOffset: 1000, interactive: false }).addTo(MAP); else PHERE.setLatLng([HERE.lat, HERE.lng]);
+    if (HERE.acc > 40) { if (!PACC) PACC = L.circle([HERE.lat, HERE.lng], { radius: Math.min(HERE.acc, 5000), color: "#007aff", weight: 1, opacity: .4, fillColor: "#007aff", fillOpacity: .1, interactive: false }).addTo(MAP); else { PACC.setLatLng([HERE.lat, HERE.lng]); PACC.setRadius(Math.min(HERE.acc, 5000)); } } }
 }
 function mapCard(z) {
   const c = document.getElementById("mcard"); MSEL = z; mapv.classList.toggle("carded", !!z);
