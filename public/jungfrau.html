@@ -5,144 +5,207 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#ffffff">
 <title>Jungfrau Day</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 :root {
-  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-  --bg: #ffffff; --ink: #000000; --sub: #6e6e73; --panel: #f2f2f7; --card: #ffffff; --hair: #d1d1d6;
-  --blue: #007aff; --green: #34c759; --brown: #a2845e; --orange: #ff9500; --grey: #8e8e93; --red: #ff3b30;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --bg: #ffffff; --ink: #000000; --sub: #6e6e73; --panel: #f2f2f7; --card: #ffffff; --hair: #d1d1d6; --blue: #007aff;
+  --glass: rgba(249, 249, 251, 0.72); --glass-edge: rgba(0, 0, 0, 0.06); --glass-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+  --e-free-ink: #1b6e34;
+  --spring-bouncy: linear(0, 0.009, 0.037 2.1%, 0.15 4.5%, 0.546 11%, 0.773 15.6%, 0.948 20.3%, 1.06 25.2%, 1.105 29%, 1.12 32.3%, 1.113 35.9%, 1.088 39.9%, 1.016 50.2%, 0.986 57.4%, 0.98 63.3%, 0.99 76.9%, 1.002 90%, 1);
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --bg: #000000; --ink: #ffffff; --sub: #8d8d93; --panel: #1c1c1e; --card: #2c2c2e; --hair: #38383a; --blue: #0a84ff; --red: #ff453a; }
-}
-:root[data-theme="dark"] { --bg: #000000; --ink: #ffffff; --sub: #8d8d93; --panel: #1c1c1e; --card: #2c2c2e; --hair: #38383a; --blue: #0a84ff; --red: #ff453a; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #000000; --ink: #ffffff; --sub: #8d8d93; --panel: #1c1c1e; --card: #2c2c2e; --hair: #38383a; --blue: #0a84ff;
+  --glass: rgba(44, 44, 46, 0.68); --glass-edge: rgba(255, 255, 255, 0.10); --glass-shadow: 0 6px 24px rgba(0, 0, 0, 0.5); --e-free-ink: #7ce095; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #000000; --ink: #ffffff; --sub: #8d8d93; --panel: #1c1c1e; --card: #2c2c2e; --hair: #38383a; --blue: #0a84ff;
+  --glass: rgba(44, 44, 46, 0.68); --glass-edge: rgba(255, 255, 255, 0.10); --glass-shadow: 0 6px 24px rgba(0, 0, 0, 0.5); --e-free-ink: #7ce095; color-scheme: dark; }
 * { box-sizing: border-box; }
-html, body { margin: 0; background: var(--bg); color: var(--ink); font: 400 17px/1.35 var(--font); letter-spacing: -0.02em; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
-button { font: inherit; color: inherit; }
-.top { position: sticky; top: 0; z-index: 1000; background: var(--bg); padding: calc(env(safe-area-inset-top, 0px) + 6px) 16px 10px; }
-.bar { display: flex; align-items: center; justify-content: space-between; height: 44px; }
-.back { display: inline-flex; align-items: center; gap: 2px; color: var(--blue); text-decoration: none; font-size: 17px; margin-left: -6px; padding: 6px; }
-.back svg { width: 12px; height: 20px; }
-h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.03em; margin: 2px 0 2px; }
-.lede { font-size: 14px; color: var(--sub); margin: 0 0 12px; }
-.seg { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--panel); border-radius: 9px; padding: 2px; }
-.seg button { border: 0; background: none; padding: 7px 0; border-radius: 7px; font-size: 14px; font-weight: 500; cursor: pointer; }
-.seg button.on { background: var(--card); box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 0 .5px rgba(0,0,0,.04); font-weight: 600; }
-#map { height: 44vh; min-height: 280px; margin: 0 16px; border-radius: 14px; overflow: hidden; background: var(--panel); }
-.leaflet-container { font: inherit; }
-.pin { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; color: #fff; font: 600 13px/1 var(--font); border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35); }
-.pin.off { opacity: .55; }
-.pin.on { transform: scale(1.25); }
-.meta { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 14px 16px 4px; }
-.meta .t { white-space: nowrap; }
-.meta .r { text-align: right; }
-.meta .t { font-size: 13px; font-weight: 600; color: var(--sub); text-transform: uppercase; letter-spacing: 0; }
-.meta .r { font-size: 13px; color: var(--sub); }
-ol { list-style: none; margin: 0; padding: 0 16px calc(env(safe-area-inset-bottom, 0px) + 28px); }
-li { display: grid; grid-template-columns: 28px 1fr; gap: 12px; padding: 12px 0; border-bottom: .5px solid var(--hair); cursor: pointer; }
-li:last-child { border-bottom: 0; }
-li .n { width: 28px; height: 28px; border-radius: 50%; color: #fff; display: grid; place-items: center; font: 600 13px/1 var(--font); }
-li .a { font-size: 17px; font-weight: 600; line-height: 1.25; }
-li .w { font-size: 13px; color: var(--sub); margin-top: 1px; }
-li .d { font-size: 15px; margin-top: 5px; }
-li .go { display: inline-block; margin-top: 7px; font-size: 15px; color: var(--blue); text-decoration: none; font-weight: 500; }
-li.sel .a { color: var(--blue); }
-.closed { margin: 6px 16px 0; padding: 12px 14px; background: var(--panel); border-radius: 12px; font-size: 14px; color: var(--sub); }
-.closed b { color: var(--ink); font-weight: 600; display: block; margin-bottom: 2px; }
+[hidden] { display: none !important; }
+html, body { margin: 0; height: 100%; background: var(--panel); color: var(--ink); font: 400 17px/1.35 var(--font); letter-spacing: -0.02em; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; overflow: hidden; }
+button { font-family: inherit; }
+.press { transition: transform 500ms var(--spring-bouncy); }
+.press:active { transform: scale(0.95); transition: transform 90ms cubic-bezier(0.22, 1, 0.36, 1); }
+#mapc { position: fixed; inset: 0; }
+.mtop { position: fixed; left: 0; right: 0; top: 0; z-index: 500; display: flex; gap: 8px; align-items: center; padding: max(12px, env(safe-area-inset-top)) 12px 8px; pointer-events: none; }
+.mchips { flex: 1; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; pointer-events: auto; padding: 8px 6px 18px; margin: -8px -6px -18px; }
+.mchips::-webkit-scrollbar { display: none; }
+.mchips button, .mdone { flex: none; border: 0; height: 36px; padding: 0 14px; border-radius: 980px; font: 600 14px/1 var(--font); background: var(--glass); color: var(--ink); box-shadow: 0 2px 10px rgba(0,0,0,.14), inset 0 0 0 .5px var(--glass-edge); -webkit-backdrop-filter: saturate(1.8) blur(22px); backdrop-filter: saturate(1.8) blur(22px); cursor: pointer; transition: transform 480ms var(--spring-bouncy), background-color 160ms ease, color 160ms ease; text-decoration: none; display: inline-flex; align-items: center; }
+.mchips button:active, .mdone:active { transform: scale(.94); }
+.mchips button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.mdone { pointer-events: auto; color: var(--blue); }
+.mme { position: fixed; right: 14px; bottom: calc(28px + env(safe-area-inset-bottom)); z-index: 500; width: 48px; height: 48px; border-radius: 24px; border: 0; background: var(--glass); -webkit-backdrop-filter: saturate(1.8) blur(22px); backdrop-filter: saturate(1.8) blur(22px); color: var(--blue); box-shadow: var(--glass-shadow), inset 0 0 0 .5px var(--glass-edge); display: grid; place-items: center; cursor: pointer; }
+body.carded .mme { display: none; }
+.leaflet-container { font-family: inherit; background: var(--panel); }
+.leaflet-tile-pane { filter: saturate(.55) contrast(.94) brightness(1.03); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) saturate(.4) brightness(.9) contrast(.88); } }
+:root[data-theme="dark"] .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) saturate(.4) brightness(.9) contrast(.88); }
+.leaflet-control-attribution { font-size: 10px; background: var(--glass) !important; color: var(--sub); border-radius: 8px 0 0 0; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+.leaflet-control-attribution a { color: var(--sub); }
+.npin { width: 26px; height: 26px; border-radius: 13px; display: grid; place-items: center; color: #fff; font: 700 13px/1 var(--font); box-shadow: 0 0 0 3px #fff, 0 2px 8px rgba(0,0,0,.3); transition: transform 300ms var(--spring-bouncy); }
+.npin.on { transform: scale(1.3); }
+.mme-dot { width: 16px; height: 16px; border-radius: 8px; background: #007aff; box-shadow: 0 0 0 3px #fff, 0 0 0 9px rgba(0,122,255,.2); }
+.mcard { position: fixed; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 500; max-width: 500px; margin: 0 auto; background: var(--card); border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,.25); padding: 14px; display: grid; gap: 4px; }
+.mcard .a { font-size: 17px; font-weight: 600; line-height: 1.25; padding-right: 30px; }
+.mcard .m { font-size: 13px; color: var(--sub); } .mcard .m b { color: var(--e-free-ink); font-weight: 600; }
+.mcard .h { font-size: 14px; color: var(--sub); line-height: 1.35; }
+.mcard .acts { display: flex; gap: 8px; margin-top: 8px; }
+.btn { border: 0; height: 42px; padding: 0 14px; border-radius: 14px; font-size: 15px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; flex: 1; white-space: nowrap; text-decoration: none; }
+.btn.blue { background: var(--blue); color: #fff; }
+.btn.card { background: var(--panel); color: var(--blue); }
+.mcard .mx { position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; border: 0; border-radius: 14px; background: var(--panel); color: var(--sub); font-size: 15px; cursor: pointer; }
+.mcard.closedc .a { color: var(--sub); }
 </style>
 </head>
 <body>
-<div class="top">
-  <div class="bar"><a class="back" href="/"><svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2 2 10l8 8"/></svg>Trip</a></div>
-  <h1>Jungfrau Day</h1>
-  <p class="lede">Wed 4 Nov · the walking route in each stop, in order</p>
-  <div class="seg" id="seg"></div>
-</div>
-<div id="map"></div>
-<div class="meta"><span class="t" id="mt"></span><span class="r" id="mr"></span></div>
-<ol id="list"></ol>
-<div class="closed" id="closed"></div>
-<div style="height: calc(env(safe-area-inset-bottom, 0px) + 24px)"></div>
+<div id="mapc"></div>
+<div class="mtop"><div class="mchips" id="mchips"></div><a class="mdone press" href="/">Done</a></div>
+<button class="mme press" id="mme" aria-label="Where am I"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg></button>
+<div class="mcard" id="mcard" hidden></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 (() => {
-  const C = { walk: "#34c759", coffee: "#a2845e", food: "#ff9500", see: "#007aff", maybe: "#8e8e93" };
-  /* Stops in walking order. Pins are close, not survey-exact: "Walk here" opens Apple Maps on the real place. */
+  const COL = { see: "#34c759", coffee: "#a2845e", food: "#ff2d55", walk: "#007aff", maybe: "#8e8e93", closed: "#8e8e93", extra: "#00c7be" };
+  /* Numbered stops are the walking order. Small dots are other things nearby: grey ones are closed this week.
+     Pins are close, not survey-exact; Directions opens the real place. */
   const TOWNS = {
     interlaken: {
-      name: "Interlaken", time: "About 1 hour (2 if the guide moves time here)",
+      name: "Interlaken", c: [46.6866, 7.8565], z: 15,
       stops: [
-        { t: "Höhematte", w: "Start here", c: "see", ll: [46.68641, 7.85988], q: "Höhematte, Interlaken", d: "The big lawn in the middle of town. Jungfrau straight ahead if the cloud lifts, and the red Grand Tour photo frame." },
-        { t: "Victoria-Jungfrau", w: "2 min · west end of the lawn", c: "see", ll: [46.68575, 7.85805], q: "Victoria-Jungfrau Grand Hotel, Interlaken", d: "The grand hotel on Höheweg. The TikTok drink stop if you have the longer version." },
-        { t: "Höheweg", w: "Walk west along it · about 10 min", c: "walk", ll: [46.68575, 7.8545], q: "Höheweg, Interlaken", d: "Main street towards Interlaken West: shops, watch stores and the Lindt shop." },
-        { t: "Aare river", w: "5 min · by Hotel Central Continental", c: "see", ll: [46.68725, 7.8527], q: "Hotel Central Continental, Interlaken", d: "The turquoise river with the old hotels behind. Cross the bridges for the Unterseen side." }
+        { t: "Höhematte", w: "Start here", c: "see", ll: [46.68641, 7.85988], q: "Höhematte Interlaken", d: "The big lawn in the middle of town. Jungfrau straight ahead if the cloud lifts, and the red Grand Tour photo frame." },
+        { t: "Victoria-Jungfrau", w: "West end of the lawn", c: "see", ll: [46.68575, 7.85805], q: "Victoria-Jungfrau Grand Hotel Interlaken", d: "The grand hotel on Höheweg. The TikTok drink stop if you have the longer version." },
+        { t: "Höheweg", w: "Walk west along it", c: "walk", ll: [46.68575, 7.8545], q: "Höheweg Interlaken", d: "Main street towards Interlaken West: shops, watch stores and the Lindt shop." },
+        { t: "Aare river", w: "By Hotel Central Continental", c: "see", ll: [46.68725, 7.8527], q: "Hotel Central Continental Interlaken", d: "The turquoise river with the old hotels behind. Cross the bridges for the Unterseen side." }
       ],
       route: [[46.68641, 7.85988], [46.68575, 7.85805], [46.68575, 7.8545], [46.6866, 7.8532], [46.68725, 7.8527]],
-      closed: "Harder Kulm funicular (until late Nov), Schynige Platte (season over), Lake Brienz boats on a short winter timetable."
+      extra: [
+        { t: "Interlaken Ost station", w: "Trains to Grindelwald and Lauterbrunnen", c: "extra", ll: [46.6904, 7.8694], q: "Interlaken Ost" },
+        { t: "Interlaken West station", w: "Station", c: "extra", ll: [46.6831, 7.8513], q: "Interlaken West" },
+        { t: "Harder Kulm funicular", w: "Closed until late November", c: "closed", ll: [46.6918, 7.8642], q: "Harderbahn Interlaken", d: "The Two Lakes Bridge viewpoint from the TikTok. Shut for the season." }
+      ]
     },
     grindelwald: {
-      name: "Grindelwald", time: "About 4 hours on the tour as listed, about 2 if it's cut",
+      name: "Grindelwald", c: [46.6185, 8.0425], z: 14,
       stops: [
-        { t: "Grindelwald station", w: "Start · bus 122 leaves here", c: "walk", ll: [46.62431, 8.03433], q: "Grindelwald Bahnhof", d: "Take bus 122 to Gletscherschlucht, about 15 min. Or walk it, about 30 min, downhill there." },
-        { t: "Glacier Canyon", w: "1–1½ hours inside · CHF 19", c: "see", ll: [46.60845, 8.05265], q: "Gletscherschlucht Grindelwald", d: "850 m walkway through the gorge, the spider-web net over the river, the tunnel at the end. Weather permitting in November, so check the sign at the station. Bus 122 back up." },
-        { t: "Coop · Eiger+", w: "By the station", c: "food", ll: [46.62445, 8.0362], q: "Coop Grindelwald", d: "The reliable lunch. Onkel Tom's pizza is most likely closed on a Wednesday." },
-        { t: "Dorfstrasse", w: "Main street east · about 12 min", c: "walk", ll: [46.62455, 8.0395], q: "Dorfstrasse, Grindelwald", d: "Keep looking back over your shoulder: the Eiger sits right above the street." },
-        { t: "EigerBean", w: "Far end of Dorfstrasse · 9 AM–5 PM", c: "coffee", ll: [46.6251, 8.0437], q: "EigerBean, Grindelwald", d: "The coffee both TikToks rate best in Switzerland. Ask for the Spanish latte." },
+        { t: "Grindelwald station", w: "Start · bus 122 leaves here", c: "walk", ll: [46.62431, 8.03433], q: "Grindelwald Bahnhof", d: "Bus 122 to Gletscherschlucht, about 15 min. Or walk it, about 30 min, downhill there." },
+        { t: "Glacier Canyon", w: "1–1½ hours inside · CHF 19", c: "see", ll: [46.60845, 8.05265], q: "Gletscherschlucht Grindelwald", d: "850 m walkway through the gorge, the spider-web net over the river, the tunnel at the end. Weather permitting in November. Bus 122 back up." },
+        { t: "Coop · Eiger+", w: "Lunch by the station", c: "food", ll: [46.62445, 8.0362], q: "Coop Grindelwald", d: "The reliable lunch stop." },
+        { t: "Dorfstrasse", w: "Main street east · about 12 min", c: "walk", ll: [46.62455, 8.0395], q: "Dorfstrasse Grindelwald", d: "Keep looking back over your shoulder: the Eiger sits right above the street." },
+        { t: "EigerBean", w: "Far end of Dorfstrasse · 9 AM – 5 PM", c: "coffee", ll: [46.6251, 8.0437], q: "EigerBean Grindelwald", d: "The coffee both TikToks rate best in Switzerland. Ask for the Spanish latte." },
         { t: "Lanes above the street", w: "On the way back", c: "see", ll: [46.6262, 8.0405], q: "Grindelwald", d: "Step up into the lanes above Dorfstrasse for the chalets-on-the-hillside shot, then back down to the station." }
       ],
       route: [[46.62431, 8.03433], [46.6205, 8.0405], [46.6145, 8.0465], [46.60845, 8.05265], [46.6145, 8.0465], [46.6205, 8.0405], [46.62431, 8.03433], [46.62445, 8.0362], [46.62455, 8.0395], [46.6248, 8.0415], [46.6251, 8.0437], [46.6262, 8.0405], [46.6252, 8.037], [46.62431, 8.03433]],
-      closed: "First gondola, Cliff Walk and Bachalpsee (until 27 Nov), Pfingstegg toboggan (season over), Männlichen (until 11 Dec). Eiger Express runs, but it's a long, pricey detour for this stop."
+      extra: [
+        { t: "Onkel Tom's", w: "Pizza · probably closed today", c: "closed", ll: [46.62495, 8.0432], q: "Onkel Tom's Hütte Grindelwald", d: "The TikTok pizza place. Its listed hours skip Wednesdays." },
+        { t: "First gondola", w: "Closed until 27 November", c: "closed", ll: [46.6247, 8.0413], q: "Firstbahn Grindelwald", d: "Cliff Walk and Bachalpsee are up here. Shut for maintenance." },
+        { t: "Pfingstegg", w: "Closed for the season", c: "closed", ll: [46.6228, 8.0497], q: "Pfingstegg Grindelwald", d: "The toboggan run from the TikTok. Season ended 25 October." },
+        { t: "Eiger Express", w: "Running · Grindelwald Terminal", c: "extra", ll: [46.6215, 8.0267], q: "Grindelwald Terminal", d: "Gondola to Eigergletscher, close under the Eiger. Runs until 9 Nov. Pricey, and a long detour for this stop." }
+      ]
     },
     lauterbrunnen: {
-      name: "Lauterbrunnen", time: "About 1 hour at dusk, 2+ if the guide moves time here",
+      name: "Lauterbrunnen", c: [46.5935, 7.9085], z: 15,
       stops: [
-        { t: "Lauterbrunnen station", w: "Start · head south down the main street", c: "walk", ll: [46.59855, 7.9094], q: "Lauterbrunnen Bahnhof", d: "The light goes early in the valley, so do the photo spot first." },
+        { t: "Lauterbrunnen station", w: "Start · head south", c: "walk", ll: [46.59855, 7.9094], q: "Lauterbrunnen Bahnhof", d: "The light goes early in the valley, so do the photo spot first." },
         { t: "Photo spot", w: "About 10 min", c: "see", ll: [46.5956, 7.9106], q: "Lauterbrunnen viewpoint", d: "On the slope just before the white church: the church-and-falls postcard shot." },
         { t: "Church", w: "2 min", c: "see", ll: [46.59375, 7.90895], q: "Reformierte Kirche Lauterbrunnen", d: "The white church with the falls behind it." },
-        { t: "Staubbach Falls", w: "5–10 min · free", c: "see", ll: [46.59305, 7.9062], q: "Staubbach Falls, Lauterbrunnen", d: "300 m drop off the cliff beside the village. The path behind the falls may be shut for winter." },
-        { t: "Valley road south", w: "Flat · turn back whenever you like", c: "maybe", ll: [46.5835, 7.9105], q: "Trümmelbach Falls", d: "Only if you have the longer stop: keep going towards Trümmelbach for the wide valley frames. Trümmelbach itself has closed for the season." }
+        { t: "Staubbach Falls", w: "5–10 min · free", c: "see", ll: [46.59305, 7.9062], q: "Staubbach Falls Lauterbrunnen", d: "A 300 m drop off the cliff beside the village. The path behind the falls may be shut for winter." },
+        { t: "Valley road south", w: "Only with the longer stop", c: "maybe", ll: [46.5835, 7.9105], q: "Lauterbrunnen", d: "Keep going on the flat road towards Trümmelbach for the wide valley frames. Turn back whenever you like." }
       ],
       route: [[46.59855, 7.9094], [46.5972, 7.9098], [46.5956, 7.9106], [46.59375, 7.90895], [46.59305, 7.9062], [46.5925, 7.9078], [46.5885, 7.9095], [46.5835, 7.9105]],
-      closed: "Trümmelbach Falls (season over), Grütschalp cableway to Mürren (until 6 Nov; Mürren is still reachable from Stechelberg)."
+      extra: [
+        { t: "Trümmelbach Falls", w: "Closed for the season", c: "closed", ll: [46.5664, 7.9136], q: "Trümmelbach Falls", d: "The waterfalls inside the mountain. Shut until spring." },
+        { t: "Grütschalp cableway", w: "Closed until 6 November", c: "closed", ll: [46.5987, 7.9083], q: "Lauterbrunnen Grütschalp", d: "The usual way up to Mürren. Use Stechelberg instead." },
+        { t: "Stechelberg cable car", w: "Running · bus 141 from the station", c: "extra", ll: [46.5543, 7.8997], q: "Schilthornbahn Stechelberg", d: "Up to Gimmelwald and Mürren. Only with plenty of time." },
+        { t: "Mürren", w: "Car-free cliff village", c: "extra", ll: [46.55944, 7.89267], q: "Mürren", d: "Eiger, Mönch and Jungfrau across the valley. Via Stechelberg this week." }
+      ]
     }
   };
-  const order = ["interlaken", "grindelwald", "lauterbrunnen"];
-  const map = L.map("map", { zoomControl: false, attributionControl: true });
+  const ORDER = ["interlaken", "grindelwald", "lauterbrunnen"];
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const km = (a, b, c, d) => { const R = 6371, p = Math.PI / 180, x = Math.sin((c - a) * p / 2) ** 2 + Math.cos(a * p) * Math.cos(c * p) * Math.sin((d - b) * p / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(x)); };
+  const dist = k => { const m = k * 1.25; /* streets aren't straight */ return (m < 1 ? Math.round(m * 1000 / 10) * 10 + " m" : m.toFixed(1) + " km") + " · " + Math.max(1, Math.round(m / 4.8 * 60)) + " min walk"; };
+  const dirs = q => "https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=" + encodeURIComponent(q);
+  const ttq = q => "https://www.tiktok.com/search?q=" + encodeURIComponent(q);
+  const haptic = () => { try { navigator.vibrate && navigator.vibrate(8); } catch (e) {} };
+  const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+
+  const map = L.map("mapc", { zoomControl: false, attributionControl: true });
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap contributors" }).addTo(map);
-  const layer = L.layerGroup().addTo(map);
-  let cur, markers = [];
-  const pick = () => { try { return localStorage.getItem("jf-town"); } catch (e) { return null; } };
-  const keep = k => { try { localStorage.setItem("jf-town", k); } catch (e) {} };
-  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-  const seg = document.getElementById("seg");
-  seg.innerHTML = order.map(k => `<button data-k="${k}">${TOWNS[k].name}</button>`).join("");
-  seg.addEventListener("click", e => { const b = e.target.closest("button"); if (b) show(b.dataset.k); });
-  function select(i) {
-    document.querySelectorAll("#list li").forEach((li, j) => li.classList.toggle("sel", j === i));
-    markers.forEach((m, j) => m.getElement() && m.getElement().firstChild.classList.toggle("on", j === i));
-    const s = TOWNS[cur].stops[i]; map.flyTo(s.ll, 16, { duration: 0.6 });
-  }
-  function show(k) {
-    cur = k; keep(k);
-    seg.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.k === k));
-    const T = TOWNS[k]; layer.clearLayers(); markers = [];
-    L.polyline(T.route, { color: "#007aff", weight: 4, opacity: 0.75, dashArray: "1 8", lineCap: "round" }).addTo(layer);
-    T.stops.forEach((s, i) => {
-      const icon = L.divIcon({ className: "", html: `<div class="pin${s.c === "maybe" ? " off" : ""}" style="background:${C[s.c]}">${i + 1}</div>`, iconSize: [28, 28], iconAnchor: [14, 14] });
-      const m = L.marker(s.ll, { icon }).addTo(layer); m.on("click", () => { select(i); document.querySelectorAll("#list li")[i].scrollIntoView({ behavior: "smooth", block: "nearest" }); });
-      markers.push(m);
+  map.on("click", () => card(null));
+  let town, LAY, HERE = null, sel = null, pins = [];
+
+  const chips = document.getElementById("mchips");
+  function drawChips() { chips.innerHTML = ORDER.map(k => `<button data-k="${k}" aria-pressed="${k === town}">${TOWNS[k].name}</button>`).join(""); }
+  chips.addEventListener("click", e => { const b = e.target.closest("[data-k]"); if (!b) return; haptic(); show(b.dataset.k, true); });
+
+  function show(k, fit) {
+    town = k; store.set("jf-town", k); drawChips(); card(null);
+    const T = TOWNS[k];
+    if (LAY) LAY.remove(); LAY = L.layerGroup().addTo(map); pins = [];
+    L.polyline(T.route, { color: "#007aff", weight: 4, opacity: .7, dashArray: "1 8", lineCap: "round", interactive: false }).addTo(LAY);
+    T.extra.forEach(z => L.circleMarker(z.ll, { radius: 7, color: "#fff", weight: 2, fillColor: COL[z.c], fillOpacity: z.c === "closed" ? .7 : 1 }).addTo(LAY).on("click", e => { L.DomEvent.stopPropagation(e); haptic(); card(z); }));
+    T.stops.forEach((z, i) => {
+      const m = L.marker(z.ll, { icon: L.divIcon({ className: "", html: `<div class="npin" style="background:${COL[z.c]}">${i + 1}</div>`, iconSize: [26, 26], iconAnchor: [13, 13] }), zIndexOffset: 800 }).addTo(LAY);
+      m.on("click", e => { L.DomEvent.stopPropagation(e); haptic(); card(z, i); });
+      pins.push(m);
     });
-    map.fitBounds(L.latLngBounds(T.route.concat(T.stops.map(s => s.ll))), { padding: [28, 28], maxZoom: 16 });
-    document.getElementById("mt").textContent = T.stops.length + " stops";
-    document.getElementById("mr").textContent = T.time;
-    document.getElementById("list").innerHTML = T.stops.map((s, i) => `<li data-i="${i}"><span class="n" style="background:${C[s.c]}">${i + 1}</span><span><div class="a">${esc(s.t)}</div><div class="w">${esc(s.w)}</div><div class="d">${esc(s.d)}</div><a class="go" href="https://maps.apple.com/?daddr=${encodeURIComponent(s.q)}&dirflg=w">Walk here</a></span></li>`).join("");
-    document.getElementById("closed").innerHTML = `<b>Closed this week</b>${esc(T.closed)}`;
+    drawMe();
+    if (fit) map.fitBounds(L.latLngBounds(T.route.concat(T.stops.map(s => s.ll))), { padding: [70, 40], maxZoom: 16 });
   }
-  document.getElementById("list").addEventListener("click", e => { if (e.target.closest("a")) return; const li = e.target.closest("li"); if (li) select(+li.dataset.i); });
-  const saved = pick(); show(order.includes(saved) ? saved : "interlaken");
+  let meLay;
+  function drawMe() {
+    if (meLay) meLay.remove(); meLay = L.layerGroup().addTo(map); if (!HERE) return;
+    if (HERE.acc > 40) L.circle([HERE.lat, HERE.lng], { radius: Math.min(HERE.acc, 5000), color: "#007aff", weight: 1, opacity: .4, fillColor: "#007aff", fillOpacity: .1, interactive: false }).addTo(meLay);
+    L.marker([HERE.lat, HERE.lng], { icon: L.divIcon({ className: "", html: `<div class="mme-dot"></div>`, iconSize: [16, 16], iconAnchor: [8, 8] }), zIndexOffset: 1000, interactive: false }).addTo(meLay);
+  }
+  const cardEl = document.getElementById("mcard");
+  function card(z, i) {
+    sel = z ? { z, i } : null;
+    pins.forEach((m, j) => { const el = m.getElement(); if (el && el.firstChild) el.firstChild.classList.toggle("on", z && j === i); });
+    document.body.classList.toggle("carded", !!z);
+    if (!z) { cardEl.hidden = true; return; }
+    const T = TOWNS[town], isStop = i != null;
+    const from = HERE && km(HERE.lat, HERE.lng, z.ll[0], z.ll[1]) < 30 ? HERE : null;
+    const kk = from ? km(from.lat, from.lng, z.ll[0], z.ll[1]) : null;
+    const meta = [isStop ? `Stop ${i + 1} of ${T.stops.length}` : null, z.w, kk != null ? `<b>${dist(kk)}</b>` : null].filter(Boolean).join(" · ");
+    cardEl.className = "mcard" + (z.c === "closed" ? " closedc" : "");
+    cardEl.innerHTML = `<button class="mx" data-mx aria-label="Close">✕</button><span class="a">${esc(z.t)}</span><span class="m">${meta}</span>${z.d ? `<span class="h">${esc(z.d)}</span>` : ""}
+      <div class="acts"><a class="btn blue press" href="${dirs(z.q)}" target="_blank" rel="noopener">Directions</a><a class="btn card press" href="${ttq(z.q)}" target="_blank" rel="noopener">TikTok</a>${isStop && i < T.stops.length - 1 ? `<button class="btn card press" data-next>Next stop</button>` : ""}</div>`;
+    cardEl.hidden = false;
+    map.panTo(z.ll, { animate: true });
+  }
+  cardEl.addEventListener("click", e => {
+    if (e.target.closest("[data-mx]")) { haptic(); return card(null); }
+    if (e.target.closest("[data-next]") && sel) { haptic(); const n = sel.i + 1; return card(TOWNS[town].stops[n], n); }
+  });
+
+  /* where you are: same as the trip app, a blue dot that follows you while the page is open */
+  let watch = null;
+  function got(p) {
+    if (p.coords.accuracy > 1500 && HERE && Date.now() - HERE.t < 5 * 6e4) return;
+    HERE = { lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy || 0, t: Date.now() };
+    drawMe(); if (sel) card(sel.z, sel.i);
+  }
+  function startWatch() { if (watch != null || !navigator.geolocation || document.hidden) return; watch = navigator.geolocation.watchPosition(got, () => {}, { enableHighAccuracy: true, maximumAge: 10000, timeout: 30000 }); }
+  function stopWatch() { if (watch != null) { try { navigator.geolocation.clearWatch(watch); } catch (e) {} watch = null; } }
+  document.addEventListener("visibilitychange", () => document.hidden ? stopWatch() : startWatch());
+  document.getElementById("mme").addEventListener("click", () => {
+    haptic();
+    if (HERE) { const near = ORDER.find(k => km(HERE.lat, HERE.lng, TOWNS[k].c[0], TOWNS[k].c[1]) < 4); if (near && near !== town) show(near, false); map.flyTo([HERE.lat, HERE.lng], 16, { duration: .6 }); return; }
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(p => { got(p); startWatch(); map.flyTo([HERE.lat, HERE.lng], 16, { duration: .6 }); }, () => {}, { enableHighAccuracy: true, timeout: 15000 });
+  });
+
+  /* open on the town you're in, else the last one you looked at, else Interlaken */
+  const last = store.get("jf-town");
+  show(ORDER.includes(last) ? last : "interlaken", true);
+  if (navigator.geolocation) navigator.geolocation.getCurrentPosition(p => {
+    got(p); startWatch();
+    const near = ORDER.find(k => km(HERE.lat, HERE.lng, TOWNS[k].c[0], TOWNS[k].c[1]) < 4);
+    if (near && near !== town) show(near, true);
+  }, () => {}, { enableHighAccuracy: true, maximumAge: 30000, timeout: 15000 });
 })();
 </script>
 </body>
