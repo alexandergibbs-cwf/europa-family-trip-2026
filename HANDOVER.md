@@ -157,3 +157,11 @@ They sit in free time and play as whole-day ideas ("scenes").
 - `src/worker.js` runs before assets for `/api/*` and `/cal/*` (see `wrangler.jsonc`). KV namespace `europa-trip-shared` (binding `SHARED`) holds one value `state` = `{ key: { v, ts } }`, newest change wins.
 - Shared keys: `plan:<iso>` (added stops), `dayplan:<iso>` (Plan the day), `pick:<iso>:<k>`, `cal:<iso>` (calendar lines worked out in the app), `uk-eta`. The app writes through `put()`, pulls on open, every minute and when it comes back to the front.
 - The calendar feed is served by the worker: the static `public/cal/<token>.ics` plus the `cal:*` entries. Still rerun `python3 tools/make_ics.py` after changing STAYS, MOVES or EVENTS.
+
+## Explore-first (added 4 Nov)
+- The app now opens on **Explore** (`#xp`, `xpRender`): city, "Near you" or "Around <hotel>", day chips, an Open now toggle, category chips, then sections in time-of-day order (`xpOrder`) of saves within 3 km, nearest first. The Schedule button switches to the timetable; the compass pill in the timetable switches back. Days with a flight/train departure open on the schedule. Alex said the timetable is mostly used for flights; treat the app as a "what to do and where" guide first.
+- **Place cards:** every row has a 64px thumbnail on the left (`ph()`): a tinted icon tile with the photo layered on top, so there's always a picture.
+- **Icons:** simple drawn SVG icons (`ICON`, `svgI`, `icoOf`), no emoji. Map pins are white bubbles with the icon in the category colour.
+- **Map:** CARTO Voyager tiles (dark_all at night), mio-style decluttered pins (`layoutPins`): up to 14 labelled bubbles, 12 bare bubbles, the rest dots. Closed places fade.
+- **Near here, next** (`nextNear`): bottom of each place sheet, complementary kinds within 1.2 km (`NEXT`).
+- **Opening hours:** `POST /api/hours` in the worker looks places up on Google Places (searchText with regularOpeningHours) once and caches them in KV `hr:<id>` for 21 days. The client (`hoursFetch`, `hoursOf`) shows "Open until 10 pm" / "Closed · opens 9 am", hides closed places when Open now is on, and sinks them elsewhere.
