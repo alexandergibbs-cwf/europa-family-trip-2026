@@ -452,9 +452,9 @@ body.mapopen .sheet { max-height: calc(56vh + 120px); } body.mapopen .scrim { ba
 .mapv.picked .mcity { display: none; }
 .mcar { position: absolute; left: 0; right: 0; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 501; display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 6px 24px 8px; scroll-padding: 0 24px; opacity: 0; pointer-events: none; transform: translateY(24px); transition: opacity 200ms ease, transform 420ms var(--spring); }
 .mcar::-webkit-scrollbar { display: none; }
-.mapv.picked .mcar { opacity: 1; pointer-events: auto; transform: none; }
-.mapv.picked .mbar { opacity: 0; pointer-events: none; } .mbar { transition: opacity 200ms ease; }
-.mapv.picked .mme { bottom: calc(138px + env(safe-area-inset-bottom)); }
+.mapv.picked .mcar, .mapv.cars .mcar { opacity: 1; pointer-events: auto; transform: none; }
+.mapv.picked .mbar, .mapv.cars .mbar { opacity: 0; pointer-events: none; } .mbar { transition: opacity 200ms ease; }
+.mapv.picked .mme, .mapv.cars .mme { bottom: calc(138px + env(safe-area-inset-bottom)); }
 .mc { flex: none; width: calc(100vw - 58px); max-width: 420px; scroll-snap-align: start; display: grid; grid-template-columns: 76px 1fr 36px; gap: 2px 12px; align-items: center; padding: 10px; border-radius: 18px; background: var(--card); box-shadow: 0 6px 22px rgba(0,0,0,.18); cursor: pointer; text-align: left; }
 .mc .ph { position: relative; grid-row: span 3; width: 76px; height: 76px; border-radius: 12px; overflow: hidden; display: grid; place-items: center; color: var(--c); background: color-mix(in srgb, var(--c) 13%, var(--card)); }
 .mc .ph svg { width: 30px; height: 30px; } .mc .ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 220ms ease; } .mc .ph img.ld { opacity: 1; }
@@ -507,7 +507,7 @@ body.mapopen .sheet { max-height: calc(56vh + 120px); } body.mapopen .scrim { ba
 .mapv .mme, .mapv .maplibregl-ctrl-bottom-left { transition: bottom 520ms var(--glide); }
 .mbar { transition: opacity 280ms ease; }
 .mchips button .mic { transition: transform 360ms var(--glide), background-color 200ms ease, box-shadow 200ms ease; }
-.mapv.picked .maplibregl-ctrl-bottom-left { bottom: calc(126px + env(safe-area-inset-bottom)); }
+.mapv.picked .maplibregl-ctrl-bottom-left, .mapv.cars .maplibregl-ctrl-bottom-left { bottom: calc(126px + env(safe-area-inset-bottom)); }
 .mcard { position: absolute; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 500; max-width: 500px; margin: 0 auto; background: var(--card); border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,.25); padding: 12px; display: grid; grid-template-columns: 84px 1fr; gap: 4px 12px; }
 .mcard .mph { grid-row: span 3; width: 84px; height: 84px; border-radius: 14px; object-fit: cover; background: var(--panel); }
 .mcard.noph { grid-template-columns: 1fr; }
@@ -533,9 +533,9 @@ body.mapopen .sheet { max-height: calc(56vh + 120px); } body.mapopen .scrim { ba
 .mselx i { font-style: normal; color: var(--sub); font-size: 14px; }
 .mme { position: absolute; right: 16px; bottom: calc(24px + env(safe-area-inset-bottom)); z-index: 500; color: var(--blue); }
 .mme svg { width: 20px; height: 20px; }
-.mapv.picked .mme { bottom: calc(132px + env(safe-area-inset-bottom)); }
+.mapv.picked .mme, .mapv.cars .mme { bottom: calc(132px + env(safe-area-inset-bottom)); }
 .mapv .maplibregl-ctrl-bottom-left { bottom: calc(14px + env(safe-area-inset-bottom)); }
-.mapv.picked .maplibregl-ctrl-bottom-left { bottom: calc(126px + env(safe-area-inset-bottom)); }
+.mapv.picked .maplibregl-ctrl-bottom-left, .mapv.cars .maplibregl-ctrl-bottom-left { bottom: calc(126px + env(safe-area-inset-bottom)); }
 .mapv .maplibregl-ctrl-attrib { color: var(--sub); }
 .mp .t em { font-style: normal; font-weight: 400; }
 .mcar { padding: 6px 16px 8px; scroll-padding: 0 16px; gap: 8px; }
@@ -866,12 +866,12 @@ body .mapv .mme { top: max(12px, env(safe-area-inset-top, 0px)); bottom: auto !i
 .mhd { position: absolute; z-index: 501; left: 16px; bottom: calc(298px + env(safe-area-inset-bottom, 0px)); height: 34px; border: 0; border-radius: 17px; padding: 0 12px 0 14px; display: none; align-items: center; gap: 6px; font: 600 14px/1 var(--font); color: var(--ink); cursor: pointer; transition: opacity 220ms ease; }
 .mhd span { color: var(--sub); font-weight: 500; }
 .mhd svg { width: 12px; height: 12px; fill: none; stroke: var(--sub); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
-.mapv.picked .mhd { display: flex; }
+.mapv.picked .mhd, .mapv.cars .mhd { display: flex; }
 .mhdr { position: absolute; z-index: 501; left: 0; right: 0; bottom: calc(298px + env(safe-area-inset-bottom, 0px)); display: none; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 4px 16px; transition: opacity 220ms ease; }
 .mhdr::-webkit-scrollbar { display: none; }
-.mapv.picked .mhdr { display: flex; }
+.mapv.picked .mhdr, .mapv.cars .mhdr { display: flex; }
 .mgrab { position: absolute; z-index: 501; left: 50%; width: 36px; height: 5px; margin-left: -18px; bottom: calc(291px + env(safe-area-inset-bottom, 0px)); border-radius: 3px; background: color-mix(in srgb, var(--sub) 55%, transparent); display: none; pointer-events: none; }
-.mapv.picked .mgrab { display: block; } .mapv.lon .mgrab { display: none; }
+.mapv.picked .mgrab, .mapv.cars .mgrab { display: block; } .mapv.lon .mgrab { display: none; }
 .mapv.lon .mhdr { opacity: 0; pointer-events: none; }
 .mhdr .mhd { position: static; display: flex; flex: none; }
 .msub { flex: none; height: 34px; border: 0; border-radius: 17px; padding: 0 14px; font: 500 14px/1 var(--font); color: var(--ink); cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background-color 200ms ease, color 200ms ease; }
@@ -996,7 +996,7 @@ body .mapv .maplibregl-ctrl-bottom-left { bottom: calc(66px + env(safe-area-inse
 /* the grabber is the way into the list: above the cards, or above the row when there are none */
 .mapv .mgrab { display: block; border: 0; padding: 0; cursor: pointer; pointer-events: auto; bottom: calc(66px + env(safe-area-inset-bottom, 0px)); width: 40px; margin-left: -20px; transition: bottom 520ms var(--glide), opacity 200ms ease; -webkit-tap-highlight-color: transparent; }
 .mapv .mgrab::before { content: ""; position: absolute; inset: -16px -48px; }
-.mapv.picked .mgrab { bottom: calc(190px + env(safe-area-inset-bottom, 0px)); }
+.mapv.picked .mgrab, .mapv.cars .mgrab { bottom: calc(190px + env(safe-area-inset-bottom, 0px)); }
 .mapv.lon .mgrab, .mapv.pmode .mgrab, .mapv.qon .mgrab { opacity: 0; pointer-events: none; }
 /* the picked category's ✕ */
 .mapv .mdock .mx { width: 13px; height: 13px; margin-left: 1px; fill: none; stroke: currentColor; stroke-width: 2.8; stroke-linecap: round; opacity: .85; }
@@ -1013,14 +1013,14 @@ body .mapv .maplibregl-ctrl-bottom-left { bottom: calc(66px + env(safe-area-inse
 /* 5 Nov, latest: bottom up = cards, categories, then a "45 places to eat ⌃" pill that opens the list */
 body .mapv .mcar { bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
 .mapv .mdock { transition: bottom 520ms var(--glide), transform 420ms var(--glide), opacity 240ms ease, background-color 280ms ease; }
-.mapv.picked .mdock { bottom: calc(122px + env(safe-area-inset-bottom, 0px)); }
+.mapv.picked .mdock, .mapv.cars .mdock { bottom: calc(122px + env(safe-area-inset-bottom, 0px)); }
 .mapv.lon .mdock { bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
 .mapv .mgrab { width: auto; height: 30px; margin: 0; left: 50%; transform: translateX(-50%); border-radius: 15px; padding: 0 10px 0 13px; display: flex !important; align-items: center; gap: 5px; white-space: nowrap; max-width: calc(100vw - 48px); font: 600 13px/1 var(--font); color: var(--ink); background: var(--glass); -webkit-backdrop-filter: saturate(1.8) blur(20px); backdrop-filter: saturate(1.8) blur(20px); box-shadow: 0 1px 6px rgba(0, 0, 0, .14); bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
 .mapv .mgrab[hidden] { display: none !important; }
 .mapv .mgrab span { overflow: hidden; text-overflow: ellipsis; }
 .mapv .mgrab svg { flex: none; width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; opacity: .7; }
 .mapv .mgrab:active { transform: translateX(-50%) scale(.94); }
-.mapv.picked .mgrab { bottom: calc(176px + env(safe-area-inset-bottom, 0px)); }
+.mapv.picked .mgrab, .mapv.cars .mgrab { bottom: calc(176px + env(safe-area-inset-bottom, 0px)); }
 
 /* 5 Nov, latest: a place opens as a floating card, same family as the place cards and pills (inset, rounded all round, card fill) */
 .mlist { transition: transform 520ms var(--glide), top 460ms var(--glide), left 460ms var(--glide), right 460ms var(--glide), bottom 460ms var(--glide), border-radius 460ms var(--glide); }
@@ -1035,7 +1035,7 @@ body .mapv .mcar { bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
 
 /* 5 Nov, latest: search and home sit either side of the count pill; the picked category leads the row and stays put */
 .mtool { position: absolute; z-index: 501; left: 0; right: 0; height: 36px; bottom: calc(61px + env(safe-area-inset-bottom, 0px)); padding: 0 16px; display: flex; justify-content: space-between; pointer-events: none; transition: bottom 520ms var(--glide), opacity 200ms ease; }
-.mapv.picked .mtool { bottom: calc(173px + env(safe-area-inset-bottom, 0px)); }
+.mapv.picked .mtool, .mapv.cars .mtool { bottom: calc(173px + env(safe-area-inset-bottom, 0px)); }
 .mapv.lon .mtool, .mapv.pmode .mtool, .mapv.qon .mtool { opacity: 0; }
 .mapv.lon .mtool .mtb, .mapv.pmode .mtool .mtb, .mapv.qon .mtool .mtb { pointer-events: none; }
 .mtb { pointer-events: auto; width: 36px; height: 36px; border: 0; padding: 0; border-radius: 18px; display: grid; place-items: center; cursor: pointer; color: var(--ink); background: var(--glass); -webkit-backdrop-filter: saturate(1.8) blur(20px); backdrop-filter: saturate(1.8) blur(20px); box-shadow: 0 1px 6px rgba(0, 0, 0, .14); font-size: 19px; line-height: 1; -webkit-tap-highlight-color: transparent; transition: transform 160ms var(--glide); }
@@ -3137,7 +3137,8 @@ document.getElementById("mgrab").addEventListener("click", e => { e.stopPropagat
   el.addEventListener("touchstart", e => { const t = e.touches[0]; v = !MLOPEN && !MPS.length ? { x: t.clientX, y: t.clientY, up: null } : null; }, { passive: true });
   el.addEventListener("touchmove", e => { if (!v) return; const t = e.touches[0], dx = t.clientX - v.x, dy = t.clientY - v.y;
     if (v.up == null && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) v.up = dy < 0 && Math.abs(dy) > Math.abs(dx) * 1.2;
-    if (v.up && dy < -36) { v = null; haptic(); listOpen(); } }, { passive: true });
+    if (v.up && dy < -36) { v = null; haptic(); listOpen(); }
+    else if (v.up === false && id === "mcar" && dy > 40 && Math.abs(dy) > Math.abs(dx) * 1.2) { v = null; haptic(); MCHID = true; if (MPICK) mapPick(null); else layoutPins(); } }, { passive: true });
   el.addEventListener("touchend", () => { v = null; }, { passive: true }); });
 /* drag the list down (by its header, or from the top of the list) to go back to the cards */
 { let d = null;
@@ -3315,7 +3316,7 @@ function mapPlaces() {
   return { a, list };
 }
 function openMap(focusId, quiet) {
-  PFIRST = true; MCAT = KGRP[XCAT] || XCAT; MSUB = "";
+  PFIRST = true; MCHID = false; MCAT = KGRP[XCAT] || XCAT; MSUB = "";
   mapv.hidden = false; document.body.classList.add("mapopen"); if (!quiet) haptic(); setTab(); mttSet();
   if (!reduce()) mapv.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220 });
   MUSER = false; hereAsked = 0;
@@ -3566,9 +3567,20 @@ function pinSet(o, st, left, zi, delay) {
 /* zoom tiers: street = names + one-liners; neighbourhood = a few names; city = no names, a few icons where there's room, every other place a small dot in its colour */
 const Z_CITY = 13, Z_STREET = 14.5;
 window.__tripMap = () => MAP;  /* for tests only */
+/* nothing picked: the card row rests on the places nearest you (Alex, 5 Nov); no pin is picked and the map stays put.
+   Swipe the row down to hide it (MCHID) until the map is opened again */
+let MCARS = "", MCHID = false;
+const MCROW = () => mapv.classList.contains("picked") || mapv.classList.contains("cars");
+function carsSync() {
+  const on = !MCHID && MCAT === "all" && !MQON && !MQ && !MLOPEN && !MPS.length && !mapv.classList.contains("picked") && MPTS.length > 0;
+  mapv.classList.toggle("cars", on); if (!on) { MCARS = ""; return; }
+  const o = mapHere() || mapStay(); if (!o) return;
+  const key = (mapStay() || {}).city + ":" + o.lat.toFixed(3) + "," + o.lng.toFixed(3); if (MCARS === key) return; MCARS = key;
+  mcarFill(MPTS.map(q => q.z).filter(z => z.lat != null).map(z => ({ z, k: km(o.lat, o.lng, z.lat, z.lng) })).sort((a, b) => a.k - b.k).slice(0, 25).map(q => q.z));
+}
 function layoutPins() {
-  if (!MAP || mapv.hidden) return;
-  const sz = mSize(), boxes = [[-999, -999, sz.x + 999, 62], [-999, (MPS.length && PTOP ? Math.min(PTOP, sz.y - (MPICK ? 216 : 104)) : sz.y - (MPICK ? 216 : 104)) - KB(), sz.x + 999, sz.y + 999]], hit = (x0, y0, x1, y1) => boxes.some(b => x0 < b[2] && x1 > b[0] && y0 < b[3] && y1 > b[1]);
+  if (!MAP || mapv.hidden) return; carsSync();
+  const sz = mSize(), boxes = [[-999, -999, sz.x + 999, 62], [-999, (MPS.length && PTOP ? Math.min(PTOP, sz.y - (MCROW() ? 216 : 104)) : sz.y - (MCROW() ? 216 : 104)) - KB(), sz.x + 999, sz.y + 999]], hit = (x0, y0, x1, y1) => boxes.some(b => x0 < b[2] && x1 > b[0] && y0 < b[3] && y1 > b[1]);
   const a = MHOME;
   if (a) {
     if (!PHOME || PHOME.a !== a) { if (PHOME) PHOME.m.remove();
