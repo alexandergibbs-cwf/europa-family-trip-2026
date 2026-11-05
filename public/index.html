@@ -1054,6 +1054,8 @@ body .mapv .mcar { bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
 .mlist:not(.pm) .mlist-h { background: var(--card); }
 .mlist:not(.pm) .mlist-l { padding-bottom: 24px; }
 .mlist:not(.pm) .mlg { background: none; }
+
+.mlist.pm:not(.pfull) .mpl { overflow-y: hidden; touch-action: pan-x; }
 </style>
 
 <div class="page" id="page">
@@ -3268,7 +3270,7 @@ let MPS = [];
 const mpl = document.getElementById("mpl");
 function panelSync() { const p = MPS.length > 0; mapv.classList.toggle("lon", MLOPEN || p); mapv.classList.toggle("pmode", p); mlist.classList.toggle("pm", p); if (!p) mlist.classList.remove("pfull"); }
 /* scrolling a place expands the panel to full height, like Apple Maps */
-mpl.addEventListener("scroll", () => { if (mpl.scrollTop > 16 && !mlist.classList.contains("pfull")) mlist.classList.add("pfull"); }, { passive: true });
+/* half height doesn't scroll: a swipe up grows the card first (the old scroll-to-expand moved the card under your finger mid-scroll) */
 function plRender(dir) {
   const it = MPS[MPS.length - 1], prev = MPS[MPS.length - 2];
   const back = prev ? (prev.stay ? prev.stay.hotel : prev.name) : MLOPEN ? document.getElementById("mlistt").textContent.replace(/ nearby$/, "") : "";
@@ -3298,7 +3300,7 @@ mpl.addEventListener("click", e => { if (e.target.closest("[data-mpb]")) { e.sto
   mpl.addEventListener("pointerup", e => { if (d && !d.touch) end(e.clientY); });
   let lt = null;
   mpl.addEventListener("touchstart", e => { if (e.target.closest(".mpl-h")) return; lt = e.touches.length === 1 && mpl.scrollTop <= 0 ? e.touches[0].clientY : null; if (lt != null) { start(lt); d.touch = true; } }, { passive: true });
-  mpl.addEventListener("touchmove", e => { if (lt == null) return; const y = e.touches[0].clientY; if (y < lt && !d?.moved) { lt = null; d = null; return; } if (mpl.scrollTop <= 0 && move(y)) e.preventDefault(); }, { passive: false });
+  mpl.addEventListener("touchmove", e => { if (lt == null) return; const y = e.touches[0].clientY; if (y < lt && !d?.moved && mlist.classList.contains("pfull")) { lt = null; d = null; return; } if (mpl.scrollTop <= 0 && move(y)) e.preventDefault(); }, { passive: false });
   mpl.addEventListener("touchend", e => { if (lt == null) return; lt = null; end(e.changedTouches[0].clientY); }); }
 /* like mio: tapping a pin picks it (bigger, with a stem), slides it into the top of the screen and shows a row of
    cards for it and the places around it; swiping the cards moves the pick and the map follows */
