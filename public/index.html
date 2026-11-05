@@ -1158,9 +1158,15 @@ const pics = (n, c) => "https://www.google.com/search?tbm=isch&q=" + encodeURICo
 const gq = (n, c) => "https://www.google.com/search?q=" + encodeURIComponent((n + (c && c !== "Other" && !n.includes(c) ? " " + c : "")).trim());
 const ttq = (n, c) => "https://www.tiktok.com/search?q=" + encodeURIComponent((n + (c && c !== "Other" && !n.includes(c) ? " " + c : "")).trim());
 const dirs = q => "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(q);
+/* place to place (5 Nov, Alex): opened from another place, Directions run from that place, not from you */
+const dirQ = p => p.stay ? (p.stay.q || p.stay.hotel + " " + (p.stay.addr && !/booking/i.test(p.stay.addr) ? p.stay.addr : p.stay.city || "")) : p.name + " " + (p.address || p.city);
+const dirPt = p => p.stay ? p.stay : p;
+function dirFrom(fr, to) { const a = dirPt(fr), b = dirPt(to); if (!fr || a.lat == null || b.lat == null) return null;
+  const k = km(a.lat, a.lng, b.lat, b.lng), t = distTxt(k).split(" · "), w = /walk/.test(t[1] || ""), d = k < 0.06 ? "Next door" : w ? t[1] : k >= 25 ? `${Math.round(k)} km` : (t[1] || t[0]).replace(/^~/, "").replace(" or taxi", "");
+  return { href: dirs(dirQ(to)) + "&origin=" + encodeURIComponent(dirQ(fr)) + (w ? "&travelmode=walking" : ""), d, name: fr.stay ? fr.stay.hotel : fr.name }; }
 /* Directions start from where you are (Alex, 5 Nov: Google didn't fill in your position). Added when tapped, so it's never stale */
 document.addEventListener("click", e => { const l = e.target.closest && e.target.closest('a[href^="https://www.google.com/maps/dir/"]'); if (!l) return;
-  try { const u = new URL(l.href); if (typeof HERE !== "undefined" && HERE && Date.now() - HERE.t < 20 * 6e4) { u.searchParams.set("origin", HERE.lat.toFixed(6) + "," + HERE.lng.toFixed(6)); l.href = u.toString(); } } catch (x) {} }, true);
+  try { const u = new URL(l.href); if (u.searchParams.has("origin")) return; if (typeof HERE !== "undefined" && HERE && Date.now() - HERE.t < 20 * 6e4) { u.searchParams.set("origin", HERE.lat.toFixed(6) + "," + HERE.lng.toFixed(6)); l.href = u.toString(); } } catch (x) {} }, true);
 const maps = q => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
 const wxLink = c => "https://www.google.com/search?q=" + encodeURIComponent("weather " + c);
 
@@ -2251,13 +2257,13 @@ function moveSheet(m) {
     ${notes ? `<p class="nt">${esc(notes)}</p>` : ""}
     <div class="acts">${a.ref ? `<button class="btn blue press" data-show-ref="${a.ref}" data-show-l="${esc(a.code)}">Show ref</button>` : ""}${a.fromQ ? `<a class="btn card press" href="${dirs(a.fromQ)}" target="_blank" rel="noopener">Directions</a>` : ""}</div>`;
 }
-function staySheet(s, split) {
+function staySheet(s, split, from) {
   const n = view >= s.in && view < s.out ? Math.round((Date.parse(view) - Date.parse(s.in)) / 864e5) + 1 : 0, me = HERE && Date.now() - HERE.t < 30 * 6e4 ? HERE : null;
   const k = me && s.lat != null ? km(me.lat, me.lng, s.lat, s.lng) : null, d = k == null ? "Directions" : k > 25 ? `${Math.round(k)} km away` : (t => /walk/.test(t[1] || "") ? t[1] : (t[1] || t[0]).replace(/^~/, "").replace(" or taxi", ""))(distTxt(k).split(" · "));
   /* laid out like any other place (5 Nov, Alex): name, night, Directions; check in / check out side by side; Nearby below in the panel */
   const sh = s.addr && !/booking/i.test(s.addr) ? s.addr : "", f = x => split ? `<div class="pcl"><div>${x}</div></div>` : x, day = iso => dDay(iso).replace(",", "");
   return `<div class="ph-top"><div class="ph-t"><h3 id="sheet-title">${esc(s.hotel)}</h3><span class="pmeta">${n ? `Night ${n} of ${nights(s)}` : `${dRange(s.in, s.out)}`}${sh ? ` · ${esc(sh)}` : ""}</span></div>`
-    + (s.q || sh ? `<a class="pgo press" href="${dirs(s.q || s.hotel + " " + sh)}" target="_blank" rel="noopener" aria-label="Directions">${pI("go")}<span>${esc(d)}</span></a>` : "") + `</div>`
+    + (s.q || sh ? (o => `<a class="pgo press" href="${o ? o.href : dirs(s.q || s.hotel + " " + sh)}" target="_blank" rel="noopener" aria-label="Directions${o ? " from " + esc(o.name) : ""}">${pI("go")}<span>${esc(o ? o.d : d)}</span></a>`)(from && dirFrom(from, { stay: s })) : "") + `</div>`
     + f(`<div class="stio"><div><small>Check in</small><b>${s12(s.ci)}${s.ciEnd ? `–${s12(s.ciEnd)}` : ""}</b><span>${day(s.in)}</span></div><div><small>Check out</small><b>${s12(s.co)}</b><span>${day(s.out)}</span></div></div>`
     + (s.note ? `<p class="stnt">${esc(s.note)}</p>` : ""));
 }
@@ -2820,11 +2826,12 @@ document.addEventListener("click", e => {
   const l = w.querySelector(".nxl"); if (l) l.scrollTop = 0;
   if (w.closest(".pnear")) { mlist.classList.add("pfull"); panelFit(); nearSync(); }
 }, true);
-function placeSheet(z, split) {
+function placeSheet(z, split, from) {
+  const o = from && dirFrom(from, z);
   const on = getPlan(view).find(p => p.id === z.id), meta = placeMeta(z), d = placeDist(z), f = h => split ? `<div class="pcl"><div>${h}</div></div>` : h;
   return (SBACK.length ? `<button class="sback press" data-sback>‹ Back</button>` : "") + f(hero(z))
     + `<div class="ph-top"><div class="ph-t"><h3 id="sheet-title">${esc(z.name)}</h3><span class="pmeta" data-pid="${esc(z.id)}">${meta}${on ? `${meta ? " · " : ""}<span class="pon">On the day, ${t12(on.t)}</span>` : ""}</span></div>`
-    + `<a class="pgo press" href="${dirs(z.name + " " + (z.address || z.city))}" target="_blank" rel="noopener" aria-label="Directions">${pI("go")}<span class="pdist">${esc(d || "Go")}</span></a></div>`
+    + `<a class="pgo press" href="${o ? o.href : dirs(z.name + " " + (z.address || z.city))}" target="_blank" rel="noopener" aria-label="Directions${o ? " from " + esc(o.name) : ""}">${pI("go")}<span${o ? "" : ' class="pdist"'}>${esc(o ? o.d : d || "Go")}</span></a></div>`
     + f((z.hook ? `<p class="pl-tl">${esc(hookOf(z))}</p>` : "")
     + `<div class="pmini">${z.url && embedOf(z.url) ? `<button class="pchip press"${vidAttr(z)}>${pI("vid")}Video</button>` : ""}`
     + `<button class="pchip press" data-pshare="${esc(z.id)}">${pI("share")}Share</button>`
@@ -3366,7 +3373,7 @@ function plRender(dir) {
   SBACK = []; REFRESH = null;
   const hd = `<div class="mpl-h" id="mplh"><i></i>${back ? `<button class="mpb" data-mpb>‹ ${esc(back)}</button>` : ""}</div>`, nr = nextNear(it.stay ? stayZ(it.stay) : it, it.nk);
   mlist.classList.remove("pfull"); mlist.classList.toggle("nx", !!nr);
-  mpl.innerHTML = `<div class="pdet${it.stay && !nr ? " pst" : ""}">${hd}${it.stay ? staySheet(it.stay, !!nr) : placeSheet(it, true)}</div>` + (nr ? `<div class="pnear">${nr}</div>` : "");
+  mpl.innerHTML = `<div class="pdet${it.stay && !nr ? " pst" : ""}">${hd}${it.stay ? staySheet(it.stay, !!nr, prev) : placeSheet(it, true, prev)}</div>` + (nr ? `<div class="pnear">${nr}</div>` : "");
   mpl.scrollTop = 0; loadGalleries(mpl); panelFit();
   const ids = [...mpl.querySelectorAll("[data-sid]")].map(e => SAVE_BY[e.dataset.sid]).filter(Boolean); if (ids.length) walkFetch(it.stay || it, ids);
   if (it.full && nr) { mlist.classList.add("pfull"); panelFit(); } delete it.full; nearSync();
