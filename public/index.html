@@ -1117,6 +1117,8 @@ body .mapv .mcar { bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
 .nx-chips .mdc[aria-pressed="true"] { background: var(--c); color: #fff; }
 .nx-chips .mdc[aria-pressed="true"] small { font-weight: 700; }
 .nx-chips .mdc[aria-pressed="true"] .lg { display: none; }
+.nx-chips .mdc .nxn { margin-left: 6px; font-weight: 600; color: var(--sub); font-variant-numeric: tabular-nums; }
+.nx-chips .mdc[aria-pressed="true"] .nxn { color: rgba(255, 255, 255, .8); }
 </style>
 
 <div class="page" id="page">
@@ -2803,8 +2805,8 @@ function nextNear(z, nk) {
     .map(s => { const d = km(z.lat, z.lng, s.lat, s.lng); return { s, k: d, w: walkMin(d * DETOUR) }; }).filter(x => x.w <= 25).sort((x, y) => x.k - y.k).slice(0, 12);
   if (groups.length > 1) groups.unshift(["all", allL, allL[0].w]);
   const sel = groups.some(g => g[0] === nk) ? nk : groups[0][0];
-  const cap = (k, i) => { const d = k === "all" ? ["all", "🗺️", "all"] : DOCK.find(x => x[0] === k) || [k, "", NXC[k] || k]; return `<button class="mdc" data-nxk="${k}" style="--c:${MAPCOL[k] || "#8e8e93"}" aria-pressed="${k === sel}"><span class="mic" aria-hidden="true"><span>${d[1]}</span></span><small><i class="lg"></i>${d[2]}</small></button>`; };
-  return `<div class="nxwrap" data-of="${esc(z.id)}"><div class="nx-top"><div class="nx-h" data-nxo>Nearby<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></div><div class="nx-chips">${groups.map(([k], i) => cap(k, i)).join("")}</div></div><div class="nxl">`
+  const cap = (k, n) => { const d = k === "all" ? ["all", "🗺️", "all"] : DOCK.find(x => x[0] === k) || [k, "", NXC[k] || k]; return `<button class="mdc" data-nxk="${k}" style="--c:${MAPCOL[k] || "#8e8e93"}" aria-pressed="${k === sel}" aria-label="${esc(d[2])}, ${n}"><span class="mic" aria-hidden="true"><span>${d[1]}</span></span><small><i class="lg"></i>${d[2]}<b class="nxn">${n}</b></small></button>`; };
+  return `<div class="nxwrap" data-of="${esc(z.id)}"><div class="nx-top"><div class="nx-h" data-nxo>Nearby<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></div><div class="nx-chips">${groups.map(([k, near]) => cap(k, near.length)).join("")}</div></div><div class="nxl">`
     + groups.map(([k, near], i) => { const rows = list => `<div class="ig">${list.map(({ s, k }) => `<div class="place hasph" data-sid="${s.id}">${ph(s)}<span><span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(hookOf(s))}</span><span class="m" style="display:block"><b>${k < 0.06 ? "Next door" : distTxt(k) + " from here"}</b></span></span></div>`).join("")}</div>`;
       return `<div class="nxp" data-nxp="${k}"${k !== sel ? " hidden" : ""}>${rows(near)}</div>`; }).join("") + `</div></div>`;
 }
