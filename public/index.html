@@ -3480,7 +3480,11 @@ let MPICK = null, MCARL = [], MCST = 0, MCLOCK = 0;
 function mapAim(z, frac) { const sz = mSize();
   if (SEEN) { const p = mPt(z); if (p.x > 24 && p.x < sz.x - 24 && p.y > 80 && p.y < sz.y - 370) return layoutPins(); return MAP.easeTo({ center: [z.lng, z.lat], offset: [0, -sz.y * 0.12], duration: reduce() ? 0 : 700, easing: ease }); }
   MAP.easeTo({ center: [z.lng, z.lat], zoom: Math.max(MAP.getZoom(), Z_STREET), offset: [0, -sz.y * (0.5 - (frac || 0.38))], duration: reduce() ? 0 : 950, easing: ease }); }
-function mapFlyHere() { if (reduce()) return MAP.jumpTo({ center: [HERE.lng, HERE.lat], zoom: 15 }); MAP.flyTo({ center: [HERE.lng, HERE.lat], zoom: 15, curve: 1.15, speed: 0.9, maxDuration: 1500, easing: ease }); }
+/* glide to you like picking a place does; far away = a gentle zoom-out-and-in. Fixed durations, so it never skips (flyTo's maxDuration made long trips jump, Alex 5 Nov) */
+function mapFlyHere() { if (reduce()) return MAP.jumpTo({ center: [HERE.lng, HERE.lat], zoom: 15 });
+  const sz = mSize(), p = MAP.project([HERE.lng, HERE.lat]), far = Math.hypot(p.x - sz.x / 2, p.y - sz.y / 2) / Math.max(sz.x, sz.y), z = Math.max(MAP.getZoom(), 15);
+  if (far < 2.5) return MAP.easeTo({ center: [HERE.lng, HERE.lat], zoom: z, duration: Math.round(700 + 300 * Math.min(1, far)), easing: ease });
+  MAP.flyTo({ center: [HERE.lng, HERE.lat], zoom: 15, curve: 1.2, duration: 1500, easing: ease }); }
 function mcarFill(list) {
   MCARL = list; const o = mapHere() || mapStay();
     document.getElementById("mcar").innerHTML = list.map(x => mcHTML(x, o)).join("");
