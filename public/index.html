@@ -867,6 +867,7 @@ body .mapv .mme { top: max(12px, env(safe-area-inset-top, 0px)); bottom: auto !i
 .mapv.zmid .mp .t em { display: none; }
 .mapv.zfar .mp.home .t { display: none; }
 .mapv.zfar .mp.s-d .b { transform: scale(.22); }
+.mqnone { position: absolute; z-index: 501; left: 16px; right: 16px; bottom: calc(176px + env(safe-area-inset-bottom, 0px)); padding: 12px 16px; border-radius: 16px; font-size: 15px; line-height: 1.35; color: var(--ink); text-align: center; }
 .mqbar { position: absolute; z-index: 502; top: max(12px, env(safe-area-inset-top, 0px)); left: 12px; right: 12px; height: 44px; border-radius: 22px; display: none; align-items: center; gap: 8px; padding: 0 4px 0 14px; }
 .mapv.qon .mqbar { display: flex; }
 .mapv.qon .mtt, .mapv.qon .mme { visibility: hidden; }
@@ -905,7 +906,7 @@ body .mapv .mcard { bottom: calc(158px + env(safe-area-inset-bottom, 0px)); }
 </aside>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden><div class="grab"></div><div id="sheet-body"></div></div>
 <div class="show" id="show" role="dialog" aria-modal="true" hidden></div>
-<div class="mapv" id="mapv" role="dialog" aria-modal="true" aria-label="Map" hidden><div id="mapc"></div><div class="mtop"><div class="xp-top"><button class="pill glass press mselx" id="mselx"><span></span><i aria-hidden="true">✕</i></button><button class="pill glass press mtt" data-trip><span id="mtt"></span><i class="chr"></i></button><span class="sp"></span></div><div class="xp-row xcats mchips" id="mchips"></div><span class="mcity" id="mcity" hidden></span></div><div class="mdock" id="mdock" role="toolbar" aria-label="Categories"></div><label class="mqbar glass" id="mqbar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><input id="mqi" type="search" placeholder="Search your saves" enterkeyhint="search" autocomplete="off" aria-label="Search saved places"><button id="mqx" type="button">Cancel</button></label><div class="mlist" id="mlist" aria-label="All places"><div class="mlist-h" id="mlisth"><i></i><b id="mlistt"></b><div class="mlsubs" id="mlsubs"></div></div><div class="mlist-l" id="mlistl"></div></div><div class="mhdr" id="mhdr"><button class="mhd glass press" id="mhd"><b id="mhdt"></b><span id="mhdn"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></button><span id="msubs" style="display:contents"></span></div><div class="mcar" id="mcar"></div><button class="pill glass press ib mme" id="mme" aria-label="Where am I"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg></button><div class="mcard" id="mcard" hidden></div></div>
+<div class="mapv" id="mapv" role="dialog" aria-modal="true" aria-label="Map" hidden><div id="mapc"></div><div class="mtop"><div class="xp-top"><button class="pill glass press mselx" id="mselx"><span></span><i aria-hidden="true">✕</i></button><button class="pill glass press mtt" data-trip><span id="mtt"></span><i class="chr"></i></button><span class="sp"></span></div><div class="xp-row xcats mchips" id="mchips"></div><span class="mcity" id="mcity" hidden></span></div><div class="mdock" id="mdock" role="toolbar" aria-label="Categories"></div><div class="mqnone glass" id="mqnone" hidden></div><label class="mqbar glass" id="mqbar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><input id="mqi" type="search" placeholder="burger, brunch, vintage…" enterkeyhint="search" autocomplete="off" aria-label="Search saved places"><button id="mqx" type="button">Cancel</button></label><div class="mlist" id="mlist" aria-label="All places"><div class="mlist-h" id="mlisth"><i></i><b id="mlistt"></b><div class="mlsubs" id="mlsubs"></div></div><div class="mlist-l" id="mlistl"></div></div><div class="mhdr" id="mhdr"><button class="mhd glass press" id="mhd"><b id="mhdt"></b><span id="mhdn"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></button><span id="msubs" style="display:contents"></span></div><div class="mcar" id="mcar"></div><button class="pill glass press ib mme" id="mme" aria-label="Where am I"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg></button><div class="mcard" id="mcard" hidden></div></div>
 <nav class="tabs glass" id="tabs" role="tablist" aria-label="Views"><button role="tab" data-tab="xp" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg><span>Explore</span></button><button role="tab" data-tab="map" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6z"/><path d="M9 4v14M15 6v14"/></svg><span>Map</span></button><button role="tab" data-tab="cal" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Schedule</span></button></nav>
 <div class="sr" aria-live="polite" id="live"></div>
 
@@ -2753,6 +2754,29 @@ const GRP = {
   experience: { kinds: ["experience"], n: "experiences", subs: [] }
 };
 const KGRP = { see: "culture", clothes: "shop" };
+/* search by keyword: every word has to fit. A word fits if it's in the name / one-liner / vibe, or it names a kind ("food", "coffee",
+   "museum", "shopping") or one of the sub-chip ideas ("brunch", "vintage", "cocktails"). Plurals and accents don't matter. */
+const qn = t => t.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+const isK = (...ks) => z => ks.includes(mk(z)), rxK = (rx, ...ks) => z => (!ks.length || ks.includes(mk(z))) && rx.test(ztxt(z));
+const QKW = {
+  food: isK("dinner"), eat: isK("dinner"), restaurant: isK("dinner"), meal: isK("dinner"), dinner: isK("dinner"),
+  breakfast: rxK(RX.brk, "dinner", "coffee"), brunch: rxK(RX.brk, "dinner", "coffee"), lunch: z => mk(z) === "dinner" && GRP.dinner.subs[1].t(z),
+  coffee: isK("coffee"), cafe: isK("coffee"), espresso: isK("coffee"),
+  drink: isK("drinks"), bar: isK("drinks"), pub: isK("drinks"), nightlife: isK("drinks"), cocktail: rxK(RX.cock), wine: rxK(RX.wine), beer: rxK(RX.beer),
+  sweet: isK("sweet"), dessert: isK("sweet"), cake: isK("sweet"), "ice cream": isK("sweet"), gelato: isK("sweet"),
+  museum: isK("culture"), gallery: isK("culture"), galleries: isK("culture"), art: isK("culture"), culture: isK("culture"),
+  sight: isK("see"), sightseeing: isK("see"), view: rxK(RX.view), viewpoint: rxK(RX.view), park: rxK(RX.park), nature: rxK(RX.park),
+  shop: isK("shop", "clothes"), shopping: isK("shop", "clothes"), store: isK("shop", "clothes"), clothes: isK("clothes"), fashion: isK("clothes"),
+  vintage: rxK(RX.vint), secondhand: rxK(RX.vint), thrift: rxK(RX.vint), design: rxK(RX.des, "shop", "clothes"), book: rxK(RX.book), record: rxK(RX.book), market: rxK(RX.food),
+  experience: isK("experience"), activity: isK("experience"), "things to do": isK("experience", "see")
+};
+function qHit(z, q) {
+  const t = qn(ztxt(z) + " " + (MAPLAB[mk(z)] || "")), raw = qn(q).trim(); if (!raw) return true;
+  if (QKW[raw] && QKW[raw](z)) return true;  /* two-word keywords like "ice cream" */
+  const at = w => new RegExp("(^|[^a-z0-9])" + w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).test(t);  /* from the start of a word: "burger" not "Brandenburger" */
+  return raw.split(/\s+/).every(w => { const st = w.length > 3 && w.endsWith("s") ? w.slice(0, -1) : w, f = QKW[w] || QKW[st];
+    return at(st) || (f ? f(z) : false); });
+}
 let MSUB = "";
 const subOf = () => { const g = GRP[MCAT]; return g && MSUB ? g.subs.find(x => x.k === MSUB) : null; };
 const inGrp = (z, k) => { const g = GRP[k]; return g ? g.kinds.includes(mk(z)) : mk(z) === k; };
@@ -2765,7 +2789,7 @@ const QSVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="
 const mdock = document.getElementById("mdock"), mqi = document.getElementById("mqi");
 let MQ = "", MQON = false, MQT = 0;
 function mapFilter(z) {
-  if (MQ) { const q = MQ.toLowerCase(); return (z.name + " " + (z.hook || "") + " " + (z.vibe || "")).toLowerCase().includes(q); }
+  if (MQ) return qHit(z, MQ);
   if (MCAT === "all") return true;
   const g = GRP[MCAT], sb = subOf(); if (!g) return mk(z) === MCAT;
   return sb ? (sb.kinds || g.kinds).includes(mk(z)) && sb.t(z) : g.kinds.includes(mk(z));
@@ -2862,10 +2886,10 @@ mdock.addEventListener("click", e => {
 });
 function mqOpen() { MQON = true; mapv.classList.add("qon"); clearPick(); layoutPins(); dockRender(); mqi.value = ""; mqi.focus({ preventScroll: true }); }
 function mqClose(quiet) {
-  const had = !!MQ; MQON = false; MQ = ""; mqi.value = ""; mqi.blur(); mapv.classList.remove("qon"); clearTimeout(MQT);
+  const had = !!MQ; MQON = false; MQ = ""; document.getElementById("mqnone").hidden = true; mqi.value = ""; mqi.blur(); mapv.classList.remove("qon"); clearTimeout(MQT);
   if (quiet) return; clearPick(); if (had) drawMap(); else { layoutPins(); dockRender(); }
 }
-mqi.addEventListener("input", () => { clearTimeout(MQT); MQT = setTimeout(() => { MQ = mqi.value.trim(); clearPick(); drawMap(); if (MQ) carShow(railList()); else listClose(); }, 180); });
+mqi.addEventListener("input", () => { clearTimeout(MQT); MQT = setTimeout(() => { MQ = mqi.value.trim(); clearPick(); drawMap(); const none = document.getElementById("mqnone"); none.hidden = !MQ || MPTS.length > 0; if (!none.hidden) none.textContent = `Nothing saved in ${cityOn(view)} for “${MQ}”`; if (MQ) carShow(railList()); else listClose(); }, 180); });
 mqi.addEventListener("keydown", e => { if (e.key === "Enter") mqi.blur(); });
 document.getElementById("mqx").addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); haptic(); mqClose(); });
 document.getElementById("mqbar").addEventListener("click", e => e.stopPropagation());
