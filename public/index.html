@@ -2011,11 +2011,12 @@ function moveSheet(m) {
     <div class="acts">${a.ref ? `<button class="btn blue press" data-show-ref="${a.ref}" data-show-l="${esc(a.code)}">Show ref</button>` : ""}${a.fromQ ? `<a class="btn card press" href="${dirs(a.fromQ)}" target="_blank" rel="noopener">Directions</a>` : ""}</div>`;
 }
 function staySheet(s) {
-  const n = view >= s.in && view < s.out ? Math.round((Date.parse(view) - Date.parse(s.in)) / 864e5) + 1 : 0;
-  return head(esc(s.hotel), `${esc(s.city)}, ${dShort(s.in)} – ${dShort(s.out)}${n ? `, night ${n} of ${nights(s)}` : `, ${nights(s)} nights`}`)
+  const n = view >= s.in && view < s.out ? Math.round((Date.parse(view) - Date.parse(s.in)) / 864e5) + 1 : 0, me = HERE && Date.now() - HERE.t < 30 * 6e4 ? HERE : null;
+  const k = me && s.lat != null ? km(me.lat, me.lng, s.lat, s.lng) : null, d = k == null ? "Directions" : k > 25 ? `${Math.round(k)} km away` : (t => /walk/.test(t[1] || "") ? t[1] : (t[1] || t[0]).replace(/^~/, "").replace(" or taxi", ""))(distTxt(k).split(" · "));
+  return `<div class="ph-top"><div class="ph-t"><h3 id="sheet-title">${esc(s.hotel)}</h3><span class="pmeta">${dRange(s.in, s.out)}${n ? ` · night ${n} of ${nights(s)}` : ` · ${nights(s)} nights`}</span></div>`
+    + (s.q ? `<a class="pgo press" href="${dirs(s.q)}" target="_blank" rel="noopener" aria-label="Directions">${pI("go")}<span>${esc(d)}</span></a>` : "") + `</div><div style="height:14px"></div>`
     + `<div class="ig">${r("Check in", `${s12(s.ci)}${s.ciEnd ? ` – ${s12(s.ciEnd)}` : ""}, ${dDay(s.in)}`)}${r("Check out", `${s12(s.co)}, ${dDay(s.out)}`)}${r("Address", esc(s.addr || s.city))}${r("Luggage", s.store ? "Storage available" : s.store === false ? "No storage listed" : "Ask the host")}</div>
     ${s.note || s.est ? `<p class="nt">${s.est ? "Usual times for rentals. " : ""}${esc(s.note || "")}</p>` : ""}
-    <div class="acts"><button class="btn blue press" data-show-stay="${STAYS.indexOf(s)}">Show to driver</button>${s.q ? `<a class="btn card press" href="${dirs(s.q)}" target="_blank" rel="noopener">Directions</a>` : ""}</div>
     <div class="restore"><button data-open-trip>All 12 stops and booking refs ›</button></div>`;
 }
 
@@ -2806,7 +2807,7 @@ function mapFilter(z) {
 }
 function dockRender() {
   const { list } = mapPlaces();
-  const items = [["q", "", "search"], ["all", "🗺️", "all"], ...DOCK.filter(([k]) => list.some(z => inGrp(z, k)))];
+  const items = [["q", "", "search"], ...(anchorFor(view) ? [["home", "🏠", "home"]] : []), ["all", "🗺️", "all"], ...DOCK.filter(([k]) => list.some(z => inGrp(z, k)))];
   const html = items.map(([k, e, l]) => `<button data-mdk="${k}" aria-pressed="${k === "q" ? MQON : !MQON && MCAT === k}"><span class="mic" aria-hidden="true">${k === "q" ? QSVG : `<span>${e}</span>`}</span><small>${GRP[k] ? `<i class="lg" style="background:${MAPCOL[k]}"></i>` : ""}${l}</small></button>`).join("");
   if (mdock.dataset.sig !== html) { mdock.dataset.sig = html; const x = mdock.scrollLeft; mdock.innerHTML = html; mdock.scrollLeft = x; }
 }
@@ -2886,6 +2887,8 @@ mdock.addEventListener("click", e => {
   const b = e.target.closest("[data-mdk]"); if (!b) return; e.stopPropagation(); haptic();
   const k = b.dataset.mdk;
   if (k === "q") return MQON ? mqClose() : mqOpen();
+  if (k === "home") { const a = anchorFor(view); if (!a) return; if (MQON) mqClose(true); listClose(); clearPick(); layoutPins(); MUSER = true; SEEN = false;
+    const sz = mSize(); MAP.easeTo({ center: [a.lng, a.lat], zoom: Math.max(MAP.getZoom(), 15), offset: [0, -sz.y * 0.22], duration: reduce() ? 0 : 900, easing: ease }); return openSheet(staySheet(a)); }
   if (MQON) mqClose(true);
   clearPick();
   MSUB = "";
@@ -2912,7 +2915,7 @@ function daySheet() {
   const cur = STAYS.find(s => s.in <= view && view < s.out);
   const rows = STAYS.filter(s => s.out > today).map(s => { const now = s.in <= today && today < s.out;
     return `<button class="crow press${now ? " cur" : ""}${s === cur ? " on" : ""}" data-tripgo="${now ? today : s.in}"><span><div class="a">${esc(s.city)}</div><div class="b">${esc(s.hotel)}</div></span><span class="r">${dRange(s.in, s.out)}<br>${nights(s)} nights</span></button>`; }).join("");
-  return menuSheet() + (rows ? `<h4 class="triph">Cities</h4><div class="tripc">${rows}</div>` : "");
+  return head("Cities", "") + `<div class="tripc">${rows}</div>`;
 }
 tabs.addEventListener("click", e => {
   const b = e.target.closest("[data-tab]"); if (!b) return; haptic();
