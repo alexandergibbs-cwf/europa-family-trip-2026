@@ -820,8 +820,7 @@ body.mapopen .sheet { max-height: calc(56vh + 120px); } body.mapopen .scrim { ba
 body.mapopen .tabs { z-index: 65; }
 /* while the map or Explore is up, the page underneath (the schedule) can't scroll or bounce, so nothing shifts or shows black edges */
 html { overscroll-behavior: none; }
-body.mapopen, body.xpon { position: fixed; inset: 0; overflow: hidden; touch-action: none; }
-body.mapopen .mapv, body.xpon .xp, body.mapopen .sheet, body.xpon .sheet, body.mapopen .tabs, body.xpon .tabs, body.xpon .tour, body.mapopen .tour, body.mapopen .a2hs, body.xpon .a2hs { touch-action: auto; }
+html:has(> body.mapopen), html:has(> body.xpon), body.mapopen, body.xpon { overflow: hidden; overscroll-behavior: none; }
 .xp { padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
 body .mapv .mcar { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
 body .mapv .mcard { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
@@ -896,7 +895,13 @@ body .mapv .mme { top: max(12px, env(safe-area-inset-top, 0px)); bottom: auto !i
 .mapv.lon .mdock small { text-shadow: none; }
 /* the map's one panel: the list (tall) and a place (shorter, map and pin still visible above) are the same surface */
 .mlist { transition: transform 520ms var(--glide), top 460ms var(--glide); }
-.mlist.pm { top: calc(env(safe-area-inset-top, 0px) + 36vh); }
+.mlist.pm { top: calc(env(safe-area-inset-top, 0px) + 30vh); }
+.mlist.pm.pfull { top: calc(env(safe-area-inset-top, 0px) + 66px); }
+.mdock { transition: transform 420ms var(--glide), opacity 240ms ease, background-color 280ms ease, box-shadow 280ms ease; }
+.mapv.pmode .mdock { transform: translateY(120%); opacity: 0; pointer-events: none; }
+.mapv.pmode .mfoot { height: calc(86px + env(safe-area-inset-bottom, 0px)); }
+.mlist.pm .mpl { padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
+.mpl .gal.strip .gtrack img { height: 128px; } .mpl .gal.strip .gtrack img:only-child { height: 150px; }
 .mlist.pm .mlist-h, .mlist.pm .mlist-l { display: none; }
 .mpl { display: none; flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 0 16px calc(184px + env(safe-area-inset-bottom, 0px)); }
 .mlist.pm .mpl { display: block; }
@@ -1313,8 +1318,7 @@ const SAVE_BY = Object.fromEntries(SAVES.map(s => [s.id, s]));
 function anchorFor(iso) { const s = stayOn(iso) || (iso === "2026-11-19" ? STAYS[11] : null); return s && s.lat != null ? s : null; }
 /* where you are right now: only used on today's lists, and only when you're in the same city as the hotel */
 let HERE = null, hereAsked = 0;
-function liveFrom(iso) { if (iso !== today || !HERE || Date.now() - HERE.t > 15 * 6e4) return null; const near = x => x && x.lat != null && km(x.lat, x.lng, HERE.lat, HERE.lng) < 40;
-  return near(anchorFor(iso)) || near(STAYS.find(st => st.out === iso)) ? HERE : null; }
+function liveFrom(iso) { const a = anchorFor(iso); return iso === today && a && HERE && Date.now() - HERE.t < 15 * 6e4 && km(a.lat, a.lng, HERE.lat, HERE.lng) < 40 ? HERE : null; }
 /* the stay the map is about: tonight's (on a travel day, the city you're heading to: Alex, 5 Nov, "forget Zürich, open on Berlin") */
 function mapStay() { return anchorFor(view) || STAYS.find(st => st.out === view && st.lat != null); }
 let HERE_FRESH = 0, hereWatch = null, hereDrawn = null, hereDrawT = 0, hereDrawQ = 0;
@@ -3124,7 +3128,9 @@ function mapNear(z) { if (!MAP) return; const sz = mSize(), zm = Math.min(Math.m
    settles lower and the place slides in from the right; nearby places push the same way; back steps out, drag down or a tap on the map closes */
 let MPS = [];
 const mpl = document.getElementById("mpl");
-function panelSync() { mapv.classList.toggle("lon", MLOPEN || MPS.length > 0); mlist.classList.toggle("pm", MPS.length > 0); }
+function panelSync() { const p = MPS.length > 0; mapv.classList.toggle("lon", MLOPEN || p); mapv.classList.toggle("pmode", p); mlist.classList.toggle("pm", p); if (!p) mlist.classList.remove("pfull"); }
+/* scrolling a place expands the panel to full height, like Apple Maps */
+mpl.addEventListener("scroll", () => { if (mpl.scrollTop > 16 && !mlist.classList.contains("pfull")) mlist.classList.add("pfull"); }, { passive: true });
 function plRender(dir) {
   const it = MPS[MPS.length - 1], prev = MPS[MPS.length - 2];
   const back = prev ? (prev.stay ? prev.stay.hotel : prev.name) : MLOPEN ? document.getElementById("mlistt").textContent.replace(/ nearby$/, "") : "";
@@ -3134,7 +3140,7 @@ function plRender(dir) {
   const ids = [...mpl.querySelectorAll("[data-sid]")].map(e => SAVE_BY[e.dataset.sid]).filter(Boolean); if (ids.length) walkFetch(it.stay || it, ids);
   if (dir && !reduce()) mpl.animate([{ transform: `translateX(${dir * 32}px)`, opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 380, easing: "cubic-bezier(.22,.8,.24,1)" });
 }
-function panelPlace(it, push) { if (!push) MPS = []; MPS.push(it); plRender(MPS.length > 1 || MLOPEN ? 1 : 0); panelSync(); }
+function panelPlace(it, push) { if (!push) { MPS = []; mlist.classList.remove("pfull"); } MPS.push(it); plRender(MPS.length > 1 || MLOPEN ? 1 : 0); panelSync(); }
 function mapPlace(z) { panelPlace(z, false); }
 function panelBack() {
   if (MPS.length > 1) { MPS.pop(); const it = MPS[MPS.length - 1]; if (!it.stay && it.lat != null) { MPICK = it; layoutPins(); mapNear(it); } return plRender(-1); }
@@ -3145,9 +3151,10 @@ mpl.addEventListener("click", e => { if (e.target.closest("[data-mpb]")) { e.sto
 /* drag the place panel down (by its top, or from the top of its scroll) to close */
 { let d = null;
   const start = y => { d = { y, t: performance.now(), moved: false }; };
-  const move = y => { if (!d) return false; const dy = y - d.y; if (!d.moved && Math.abs(dy) < 6) return false; if (!d.moved) { d.moved = true; mlist.classList.add("drag"); } mlist.style.transform = `translateY(${Math.max(0, dy)}px)`; return true; };
+  const move = y => { if (!d) return false; const dy = y - d.y; if (!d.moved && Math.abs(dy) < 6) return false; if (!d.moved) { d.moved = true; mlist.classList.add("drag"); } mlist.style.transform = `translateY(${Math.max(-60, dy)}px)`; return true; };
   const end = y => { if (!d) return; const g = d; d = null; mlist.classList.remove("drag"); if (!g.moved) { mlist.style.transform = ""; return; }
-    const dy = y - g.y, v = dy / Math.max(1, performance.now() - g.t); if (dy > 90 || v > 0.5) { haptic(); panelClose(); } else mlist.style.transform = ""; };
+    const dy = y - g.y, v = dy / Math.max(1, performance.now() - g.t); mlist.style.transform = "";
+    if (dy < -40 || v < -0.5) { haptic(); mlist.classList.add("pfull"); } else if (dy > 90 || v > 0.5) { haptic(); if (mlist.classList.contains("pfull")) mlist.classList.remove("pfull"); else panelClose(); } };
   mpl.addEventListener("pointerdown", e => { if (!e.target.closest(".mpl-h") || e.target.closest("[data-mpb]")) return; start(e.clientY); e.target.setPointerCapture?.(e.pointerId); });
   mpl.addEventListener("pointermove", e => { if (d && !d.touch) move(e.clientY); });
   mpl.addEventListener("pointerup", e => { if (d && !d.touch) end(e.clientY); });
