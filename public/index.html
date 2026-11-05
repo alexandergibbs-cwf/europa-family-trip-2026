@@ -1072,6 +1072,12 @@ body .mapv .mcar { bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
    category: the details fold to a name row at the top and the nearby pill grows to fill, with its own scroll */
 .mlist.pm { background: none; box-shadow: none; border-radius: 0; overflow: visible; top: max(calc(env(safe-area-inset-top, 0px) + 62px), calc(100% - 10px - env(safe-area-inset-bottom, 0px) - var(--ph, 50vh))); }
 .mlist.pm.pfull { top: max(calc(env(safe-area-inset-top, 0px) + 62px), calc(100% - 10px - env(safe-area-inset-bottom, 0px) - var(--pf, 100vh))); }
+/* Nearby open: the panel stops at 42% so the place and its nearby pins stay in view above it; the list scrolls inside */
+.mlist.pm.pfull.nx { top: max(calc(env(safe-area-inset-top, 0px) + 62px), calc(100% - 10px - env(safe-area-inset-bottom, 0px) - var(--pf, 100vh)), 42%); }
+/* the places you came through (a trail): ringed, labelled, a step below the picked one */
+.mp.org .b { box-shadow: 0 0 0 2.4px #007aff, 0 3px 9px rgba(0,0,0,.26); }
+.mp.org .t b { color: #007aff; }
+.safe-probe { position: fixed; top: 0; left: 0; width: 0; height: 0; visibility: hidden; pointer-events: none; padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); }
 .mlist.pm .mpl, .mlist.pm:not(.pfull) .mpl { display: flex; flex-direction: column; gap: 8px; padding: 0; overflow: visible; height: 100%; touch-action: pan-x; }
 .pdet, .pnear { background: var(--card); border-radius: 26px; box-shadow: var(--glass-shadow), inset 0 0 0 .5px var(--glass-edge), 0 10px 34px rgba(0, 0, 0, .2); }
 .pdet { flex: none; padding: 0 16px 14px; overflow: hidden; }
@@ -2768,7 +2774,7 @@ const NEXT = { dinner: ["drinks", "sweet", "see", "clothes", "shop"], drinks: ["
 const NEXTL = { dinner: "Eat", drinks: "Drinks", coffee: "Coffee", sweet: "Something sweet", culture: "Museums and galleries", see: "Things to see", shop: "Shops", clothes: "Clothes shops", experience: "Experiences" };
 /* nearby, by kind: one row of chips (what usually comes next after this kind first), one list showing at a time */
 const NXC = { dinner: "Eat", drinks: "Drinks", coffee: "Coffee", sweet: "Sweet", culture: "Museums", see: "Sights", shop: "Shops", clothes: "Clothes", experience: "Experiences" };
-function nextNear(z) {
+function nextNear(z, nk) {
   if (!z || z.lat == null) return "";
   const gOf = k => (DOCK.find(([g]) => GRP[g] ? GRP[g].kinds.includes(k) : g === k) || [])[0];
   const k0 = mk(z), order = [...new Set([...(NEXT[k0] || NEXT.see).map(gOf), ...DOCK.map(d => d[0])])].filter(Boolean), groups = [];
@@ -2780,17 +2786,18 @@ function nextNear(z) {
   }
   if (!groups.length) return "";
   groups.sort((a, b) => (a[2] <= 15 ? 0 : 1) - (b[2] <= 15 ? 0 : 1));  /* kinds with something close come first */
-  const cap = (k, i) => { const d = DOCK.find(x => x[0] === k) || [k, "", NXC[k] || k]; return `<button class="mdc" data-nxk="${k}" style="--c:${MAPCOL[k] || "#8e8e93"}" aria-pressed="${i === 0}"><span class="mic" aria-hidden="true"><span>${d[1]}</span></span><small><i class="lg"></i>${d[2]}</small></button>`; };
+  const sel = groups.some(g => g[0] === nk) ? nk : groups[0][0];
+  const cap = (k, i) => { const d = DOCK.find(x => x[0] === k) || [k, "", NXC[k] || k]; return `<button class="mdc" data-nxk="${k}" style="--c:${MAPCOL[k] || "#8e8e93"}" aria-pressed="${k === sel}"><span class="mic" aria-hidden="true"><span>${d[1]}</span></span><small><i class="lg"></i>${d[2]}</small></button>`; };
   return `<div class="nxwrap" data-of="${esc(z.id)}"><div class="nx-top"><div class="nx-h" data-nxo>Nearby<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></div><div class="nx-chips">${groups.map(([k], i) => cap(k, i)).join("")}</div></div><div class="nxl">`
     + groups.map(([k, near], i) => { const rows = list => `<div class="ig">${list.map(({ s, k }) => `<div class="place hasph" data-sid="${s.id}">${ph(s)}<span><span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(hookOf(s))}</span><span class="m" style="display:block"><b>${k < 0.06 ? "Next door" : distTxt(k) + " from here"}</b></span></span></div>`).join("")}</div>`;
-      return `<div class="nxp" data-nxp="${k}"${i ? " hidden" : ""}>${rows(near)}</div>`; }).join("") + `</div></div>`;
+      return `<div class="nxp" data-nxp="${k}"${k !== sel ? " hidden" : ""}>${rows(near)}</div>`; }).join("") + `</div></div>`;
 }
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-nxk]"); if (!b) return; e.stopPropagation(); haptic();
   const w = b.closest(".nxwrap"); w.querySelectorAll("[data-nxk]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
   w.querySelectorAll("[data-nxp]").forEach(p => { p.hidden = p.dataset.nxp !== b.dataset.nxk; });
   const l = w.querySelector(".nxl"); if (l) l.scrollTop = 0;
-  if (w.closest(".pnear")) { mlist.classList.add("pfull"); panelFit(); }
+  if (w.closest(".pnear")) { mlist.classList.add("pfull"); panelFit(); nearSync(); }
 }, true);
 function placeSheet(z, split) {
   const on = getPlan(view).find(p => p.id === z.id), meta = placeMeta(z), d = placeDist(z), f = h => split ? `<div class="pcl"><div>${h}</div></div>` : h;
@@ -2805,7 +2812,7 @@ function placeSheet(z, split) {
 /* opened over whatever sheet is showing, with a way back to it */
 function pushBack() { if (!sheet.hidden) { SBACK.push({ h: document.getElementById("sheet-body").innerHTML, st: sheet.scrollTop, R: REFRESH }); REFRESH = null; } }
 function openPlace(z) { if (!z) return; haptic();
-  if (!mapv.hidden) { if (z.lat != null && MAP) { MPICK = z; mapv.classList.add("picked"); layoutPins(); mapNear(z); } return panelPlace(z, MPS.length > 0); }
+  if (!mapv.hidden) { const push = MPS.length > 0; if (z.lat != null && MAP) { MPICK = z; mapv.classList.add("picked"); if (!push) mapNear(z); } return panelPlace(z, push); }
   pushBack(); swapSheet(placeSheet(z)); }
 function goBack() {
   const b = SBACK.pop(); if (!b) return closeSheet(); sheet.querySelectorAll("iframe").forEach(f => { f.src = "about:blank"; });
@@ -3296,8 +3303,8 @@ function openMap(focusId, quiet) {
       const a = anchorFor(view) || { lat: 47.37, lng: 8.54 };
       MAP = new maplibregl.Map({ container: "mapc", style: tileUrl(), center: [a.lng, a.lat], zoom: 14, attributionControl: false, dragRotate: false, pitchWithRotate: false, touchPitch: false, fadeDuration: 180, maxPitch: 0 });
       MAP.touchZoomRotate.disableRotation(); MTILE = tileUrl();
-      MAP.on("styledata", () => tintMap(MAP));
-      MAP.on("click", e => { if (Date.now() - MTAP < 350) return; const lz = labelAt(e.point); if (lz) { MTAP = Date.now(); haptic(); return lz.home ? 0 : pinTap(lz); } mapCard(null); if (!sheet.hidden) return closeSheet(); if (MLOPEN || MPS.length) { haptic(); return panelClose(); } if (MPICK) { haptic(); mapPick(null); } });
+      MAP.on("styledata", () => { tintMap(MAP); nxLayers(); });
+      MAP.on("click", e => { if (Date.now() - MTAP < 350) return; const lz = labelAt(e.point); if (lz) { MTAP = Date.now(); haptic(); return lz.home ? 0 : pinTap(lz); } mapCard(null); if (!sheet.hidden) return closeSheet(); if (MPS.length && mlist.classList.contains("pfull")) { haptic(); mlist.classList.remove("pfull"); return; } if (MLOPEN || MPS.length) { haptic(); return panelClose(); } if (MPICK) { haptic(); mapPick(null); } });
       /* pins re-sort themselves while the map is still moving (a few times a second), and once more when it stops */
       MAP.on("move", () => { const t = performance.now(); if (t - MLAST > 220 && !MRAF) MRAF = requestAnimationFrame(() => { MRAF = 0; MLAST = performance.now(); layoutPins(); }); });
       ["dragstart", "zoomstart"].forEach(t => MAP.on(t, e => { if (e.originalEvent) MUSER = true; }));
@@ -3323,11 +3330,12 @@ function plRender(dir) {
   const it = MPS[MPS.length - 1], prev = MPS[MPS.length - 2];
   const back = prev ? (prev.stay ? prev.stay.hotel : prev.name) : MLOPEN ? document.getElementById("mlistt").textContent.replace(/ nearby$/, "") : "";
   SBACK = []; REFRESH = null;
-  const hd = `<div class="mpl-h" id="mplh"><i></i>${back ? `<button class="mpb" data-mpb>‹ ${esc(back)}</button>` : ""}</div>`, nr = it.stay ? "" : nextNear(it);
-  mlist.classList.remove("pfull");
+  const hd = `<div class="mpl-h" id="mplh"><i></i>${back ? `<button class="mpb" data-mpb>‹ ${esc(back)}</button>` : ""}</div>`, nr = it.stay ? "" : nextNear(it, it.nk);
+  mlist.classList.remove("pfull"); mlist.classList.toggle("nx", !!nr);
   mpl.innerHTML = `<div class="pdet${it.stay ? " pst" : ""}">${hd}${it.stay ? staySheet(it.stay) : placeSheet(it, true)}</div>` + (nr ? `<div class="pnear">${nr}</div>` : "");
   mpl.scrollTop = 0; loadGalleries(mpl); panelFit();
   const ids = [...mpl.querySelectorAll("[data-sid]")].map(e => SAVE_BY[e.dataset.sid]).filter(Boolean); if (ids.length) walkFetch(it.stay || it, ids);
+  if (it.full && nr) { mlist.classList.add("pfull"); panelFit(); } delete it.full; nearSync();
   if (dir && !reduce()) mpl.animate([{ transform: `translateX(${dir * 32}px)`, opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 380, easing: "cubic-bezier(.22,.8,.24,1)" });
 }
 /* half height = the details card at its own height plus the nearby pill's top row */
@@ -3342,13 +3350,75 @@ function panelFit() { const dt = mpl.querySelector(".pdet"), nt = mpl.querySelec
 const PFIT = new ResizeObserver(() => { if (MPS.length) panelFit(); });
 new MutationObserver(() => { PFIT.disconnect(); mpl.querySelectorAll(".pdet, .pcl > div").forEach(e => PFIT.observe(e)); }).observe(mpl, { childList: true });
 addEventListener("resize", () => { if (MPS.length) panelFit(); });
-function panelPlace(it, push) { if (MQON) mqi.blur(); if (!push) { MPS = []; mlist.classList.remove("pfull"); } MPS.push(it); panelSync(); plRender(MPS.length > 1 || MLOPEN ? 1 : 0); }
+function panelPlace(it, push) { if (MQON) mqi.blur();
+  if (!push) { MPS = []; mlist.classList.remove("pfull"); }
+  else { const pr = MPS[MPS.length - 1]; if (pr) { const c = mpl.querySelector(".pnear [data-nxk][aria-pressed=true]"); pr.nk = c ? c.dataset.nxk : pr.nk; pr.back = mlist.classList.contains("pfull"); } }
+  MPS.push(it); panelSync(); plRender(MPS.length > 1 || MLOPEN ? 1 : 0); }
 function mapPlace(z) { panelPlace(z, false); }
+/* back to a place you came through: same Nearby category, same height as you left it */
+function panelBackTo(i) { if (i < 0 || i >= MPS.length - 1) return; MPS.length = i + 1; const it = MPS[i];
+  if (!it.stay && it.lat != null) { MPICK = it; mapv.classList.add("picked"); } it.full = it.back; plRender(-1); }
 function panelBack() {
-  if (MPS.length > 1) { MPS.pop(); const it = MPS[MPS.length - 1]; if (!it.stay && it.lat != null) { MPICK = it; layoutPins(); mapNear(it); } return plRender(-1); }
+  if (MPS.length > 1) return panelBackTo(MPS.length - 2);
   MPS = []; panelSync(); if (MLOPEN && !reduce()) mlistl.animate([{ transform: "translateX(-32px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 380, easing: "cubic-bezier(.22,.8,.24,1)" });
 }
-function panelClose() { if (!MPS.length && !MLOPEN) return; MPS = []; MLOPEN = false; mlist.style.transform = ""; mlist.classList.remove("drag"); panelSync(); }
+function panelClose() { if (!MPS.length && !MLOPEN) return; MPS = []; MLOPEN = false; mlist.style.transform = ""; mlist.classList.remove("drag"); panelSync(); nearSync(); }
+/* ---- the place and what's around it, on the map ----
+   NEAR: Nearby is open on a place (anchor + the shown category's list). The map keeps the place picked, shows only those
+   places, draws a dotted walking line from the place to each, and frames them all above the panel.
+   TRAIL: places opened from Nearby stack up (A → B → C). Earlier ones stay on the map, ringed in blue, joined by a blue line,
+   so you can see where you came from; tapping one goes back to it. */
+let NEAR = null, TRAIL = [], NSIG = "", PTOP = 0;
+const sprobe = document.createElement("div"); sprobe.className = "safe-probe"; document.body.appendChild(sprobe);
+const safeIn = () => { const c = getComputedStyle(sprobe); return { t: parseFloat(c.paddingTop) || 0, b: parseFloat(c.paddingBottom) || 0 }; };
+/* where the panel's top will settle (CSS animates it there), in map pixels */
+function panelTop() { if (!MAP) return 0; const H = mSize().y, si = safeIn(), v = n => parseFloat(mlist.style.getPropertyValue(n)) || 0;
+  if (!MPS.length) return H; const full = mlist.classList.contains("pfull"), min = si.t + 62;
+  if (full) return Math.max(min, H - 10 - si.b - (v("--pf") || H), mlist.classList.contains("nx") ? H * 0.42 : 0);
+  return Math.max(min, H - 10 - si.b - (v("--ph") || H * 0.5)); }
+/* fit places into the strip of map left between the top bar and the panel */
+function frameBand(pts) { if (!MAP || !pts.length) return; const sz = mSize(), si = safeIn(); PTOP = panelTop();
+  let top = si.t + 70, bot = Math.max(30, sz.y - PTOP + 22); if (sz.y - top - bot < 140) top = Math.max(10, sz.y - bot - 140);
+  MUSER = true; const d = reduce() ? 0 : 900;
+  if (pts.length === 1) return MAP.easeTo({ center: [pts[0].lng, pts[0].lat], zoom: Math.min(16, Math.max(MAP.getZoom(), 15)), offset: [0, (top - bot) / 2], duration: d, easing: ease });
+  const b = pts.reduce((r, z) => [Math.min(r[0], z.lng), Math.min(r[1], z.lat), Math.max(r[2], z.lng), Math.max(r[3], z.lat)], [180, 90, -180, -90]);
+  MAP.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: { top, bottom: bot, left: 46, right: 64 }, maxZoom: pts.length === 2 ? 17.2 : 16.4, duration: d, easing: ease }); }
+const NXDOT = () => darkMap() ? "#1b1e27" : "#ffffff";
+function nxLayers() { if (!MAP) return; try { const fresh = !MAP.getLayer("nx-trail");
+  if (!MAP.getSource("nx")) MAP.addSource("nx", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+  if (!MAP.getLayer("nx-near")) MAP.addLayer({ id: "nx-near", type: "line", source: "nx", filter: ["==", ["get", "t"], "near"], layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": ["get", "c"], "line-width": 3.2, "line-opacity": 0, "line-dasharray": [0.01, 2.1] } });
+  if (!MAP.getLayer("nx-trail-c")) MAP.addLayer({ id: "nx-trail-c", type: "line", source: "nx", filter: ["==", ["get", "t"], "trail"], layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": NXDOT(), "line-width": 7, "line-opacity": 0 } });
+  if (!MAP.getLayer("nx-trail")) MAP.addLayer({ id: "nx-trail", type: "line", source: "nx", filter: ["==", ["get", "t"], "trail"], layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#007aff", "line-width": 4, "line-opacity": 0 } });
+  MAP.setPaintProperty("nx-trail-c", "line-color", NXDOT()); if (fresh) nxDraw(true);
+  } catch (e) { /* style not ready yet; styledata calls again */ } }
+let NXA = 0;
+function nxDraw(now) { if (!MAP || !MAP.getSource("nx")) return;
+  const f = [], ln = (a, b, t, c) => f.push({ type: "Feature", properties: { t, c }, geometry: { type: "LineString", coordinates: [[a.lng, a.lat], [b.lng, b.lat]] } });
+  for (let i = 1; i < TRAIL.length; i++) ln(TRAIL[i - 1], TRAIL[i], "trail", "#007aff");
+  if (NEAR) NEAR.list.forEach(z => ln(NEAR.a, z, "near", pinCol(z)));
+  MAP.getSource("nx").setData({ type: "FeatureCollection", features: f });
+  /* fade the lines in rather than snap them */
+  cancelAnimationFrame(NXA); const set = o => { try { MAP.setPaintProperty("nx-near", "line-opacity", 0.8 * o); MAP.setPaintProperty("nx-trail", "line-opacity", o); MAP.setPaintProperty("nx-trail-c", "line-opacity", 0.9 * o); } catch (e) {} };
+  if (now || reduce()) return set(1); const t0 = performance.now(); set(0);
+  const step = () => { const k = Math.min(1, (performance.now() - t0) / 420); set(k * k * (3 - 2 * k)); if (k < 1) NXA = requestAnimationFrame(step); }; NXA = requestAnimationFrame(step); }
+/* one place decides what the map shows: run whenever the panel's place, height or Nearby category changes */
+function nearSync() {
+  const it = MPS[MPS.length - 1], place = it && !it.stay && it.lat != null ? it : null;
+  const chip = place && mlist.classList.contains("pfull") ? mpl.querySelector(".pnear [data-nxk][aria-pressed=true]") : null;
+  const list = chip ? [...mpl.querySelectorAll(`.pnear [data-nxp="${chip.dataset.nxk}"] [data-sid]`)].map(e => SAVE_BY[e.dataset.sid]).filter(z => z && z.lat != null) : [];
+  NEAR = chip && list.length ? { a: place, k: chip.dataset.nxk, list } : null;
+  TRAIL = MPS.filter(x => !x.stay && x.lat != null); if (TRAIL.length < 2) TRAIL = [];
+  const sig = MPS.map(x => x.id || "stay").join(">") + "|" + (NEAR ? NEAR.k : "") + "|" + mlist.classList.contains("pfull");
+  if (!MAP || mapv.hidden) { NSIG = ""; return; }
+  if (sig === NSIG) return; NSIG = sig;
+  if (place) { MPICK = place; mapv.classList.add("picked"); }
+  nxLayers(); nxDraw(); layoutPins();
+  if (!MPS.length) { PTOP = 0; return layoutPins(); }
+  /* frame: Nearby open = the place and everything listed; otherwise the place with the one you came from, or just the place */
+  const tgt = it.stay ? it.stay : place, pts = NEAR ? [NEAR.a, ...NEAR.list] : TRAIL.length ? TRAIL.slice(-2) : tgt ? [tgt] : [];
+  requestAnimationFrame(() => { frameBand(pts); setTimeout(layoutPins, 950); });
+}
+new MutationObserver(() => { if (MPS.length || NSIG) nearSync(); }).observe(mlist, { attributes: true, attributeFilter: ["class"] });
 mpl.addEventListener("click", e => { if (e.target.closest("[data-mpb]")) { e.stopPropagation(); haptic(); panelBack(); return; }
   if (e.target.closest("[data-nxo]")) { haptic(); mlist.classList.toggle("pfull"); return; }
   if (mlist.classList.contains("pfull") && e.target.closest(".pdet") && !e.target.closest("a, button, .gal, iframe, .ph-top h3")) { haptic(); mlist.classList.remove("pfull"); } });
@@ -3404,7 +3474,7 @@ document.getElementById("mcar").addEventListener("scroll", e => {
     const z = MCARL[Math.round(c.scrollLeft / (w + 8))]; if (z && z !== MPICK) { haptic(); MPICK = z; document.querySelector("#mselx span").textContent = z.name; layoutPins(); mapAim(z, 0.38); }
   }, 110);
 }, { passive: true });
-function closeMap() { mqClose(true); panelClose(); closeSheet(); MPICK = null; mapv.classList.remove("picked"); mapv.hidden = true; document.body.classList.remove("mapopen"); mapCard(null); setTab(); }
+function closeMap() { mqClose(true); panelClose(); NEAR = null; TRAIL = []; NSIG = ""; closeSheet(); MPICK = null; mapv.classList.remove("picked"); mapv.hidden = true; document.body.classList.remove("mapopen"); mapCard(null); setTab(); }
 function drawMap(focusId, fit) {
   const { a, list } = mapPlaces(); if (!a || !MAP) return;
   const added = new Set(getPlan(view).map(p => p.id).concat(((getDay(view) || {}).steps || []).flatMap(p => p.ids || [])));
@@ -3430,7 +3500,20 @@ function mkMarker(lng, lat, html, onTap) {
   return new maplibregl.Marker({ element: w, anchor: "center" }).setLngLat([lng, lat]).addTo(MAP);
 }
 /* Name labels never take taps (a pin or dot under the text wins). A tap that hits no pin falls back to the label it landed on. */
-function pinTap(z) { return MPICK && MPICK.id === z.id ? mapPlace(z) : mapPick(z, true); }
+function pinTap(z) {
+  if (MPS.length && !MPS[MPS.length - 1].stay) { const top = MPS[MPS.length - 1], ti = MPS.findIndex(x => x.id === z.id);
+    if (z.id === top.id) { if (mlist.classList.contains("pfull")) mlist.classList.remove("pfull"); return; }  /* the place itself: back to its details */
+    if (ti >= 0) return panelBackTo(ti);  /* a place you came through */
+    if (NEAR && NEAR.list.some(x => x.id === z.id)) return openPlace(z);  /* one of the nearby pins: open it, the line follows */
+    mapPick(z, true); return mapPlace(z); }  /* anything else starts fresh */
+  if (MPS.length) { mapPick(z, true); return mapPlace(z); }
+  return MPICK && MPICK.id === z.id ? mapPlace(z) : mapPick(z, true); }
+function pinPool() {
+  if (!NEAR && !TRAIL.length) return MPTS;
+  const seen = new Set(), out = [], add = q => { if (q.z && q.z.lat != null && !seen.has(q.z.id)) { seen.add(q.z.id); out.push(q); } };
+  TRAIL.forEach(z => add({ z, on: false, org: true }));
+  if (NEAR) { add({ z: NEAR.a, on: false }); NEAR.list.forEach(z => add({ z, on: false, nx: true })); } else MPTS.forEach(add);
+  return out; }
 function labelAt(pt) {
   const c = MAP.getContainer().getBoundingClientRect(), x = pt.x + c.left, y = pt.y + c.top; let best = null, bz = -1e9;
   PM.forEach(o => { if (o.st !== "l" && o.st !== "sel") return; const t = o.m.getElement().querySelector(".t"); if (!t) return;
@@ -3456,33 +3539,33 @@ const Z_CITY = 13, Z_STREET = 14.5;
 window.__tripMap = () => MAP;  /* for tests only */
 function layoutPins() {
   if (!MAP || mapv.hidden) return;
-  const sz = mSize(), boxes = [[-999, -999, sz.x + 999, 62], [-999, sz.y - (MPICK ? 216 : 104) - KB(), sz.x + 999, sz.y + 999]], hit = (x0, y0, x1, y1) => boxes.some(b => x0 < b[2] && x1 > b[0] && y0 < b[3] && y1 > b[1]);
+  const sz = mSize(), boxes = [[-999, -999, sz.x + 999, 62], [-999, (MPS.length && PTOP ? Math.min(PTOP, sz.y - (MPICK ? 216 : 104)) : sz.y - (MPICK ? 216 : 104)) - KB(), sz.x + 999, sz.y + 999]], hit = (x0, y0, x1, y1) => boxes.some(b => x0 < b[2] && x1 > b[0] && y0 < b[3] && y1 > b[1]);
   const a = MHOME;
   if (a) {
     if (!PHOME || PHOME.a !== a) { if (PHOME) PHOME.m.remove();
       const m = mkMarker(a.lng, a.lat, `<div class="mp home s-l"><span class="b"><i class="e">🏠</i></span><span class="t"><b>${esc(a.hotel)}</b><em>where you're staying</em></span></div>`, () => mapv.hidden ? openSheet(staySheet(a)) : panelPlace({ stay: a }, false)); m.getElement().style.zIndex = 2900; PHOME = { m, a }; }
     const p = mPt(a), hl = p.x + 160 > sz.x - 6; boxes.push(hl ? [p.x - 160, p.y - 24, p.x + 22, p.y + 26] : [p.x - 22, p.y - 24, p.x + 160, p.y + 26]);
-    PHOME.m.getElement().firstElementChild.classList.toggle("l", hl);
+    PHOME.m.getElement().firstElementChild.classList.toggle("l", hl); PHOME.m.getElement().style.opacity = NEAR ? "0" : ""; PHOME.m.getElement().style.pointerEvents = NEAR ? "none" : "";
   }
   const want = new Map(); let nl = 0, nb = 0;
-  const zm = MAP.getZoom(), far = zm < Z_CITY, mid = !far && zm < Z_STREET, NL = far ? 0 : mid ? 6 : 14, NB = far ? 16 : 14;
+  const zm = MAP.getZoom(), far = zm < Z_CITY && !NEAR, mid = !far && zm < Z_STREET && !NEAR, NL = far ? 0 : mid ? 6 : 14, NB = far ? 16 : 14, pool = pinPool();
   mapv.classList.toggle("zmid", mid); mapv.classList.toggle("zfar", far);
-  const order = MPICK ? [{ z: MPICK, on: false }, ...MPTS.filter(q => q.z.id !== MPICK.id)] : MPTS;
-  order.forEach(({ z, on }, i) => {
+  const order = MPICK ? [{ z: MPICK, on: false }, ...pool.filter(q => q.org && q.z.id !== MPICK.id), ...pool.filter(q => !q.org && q.z.id !== MPICK.id)] : pool;
+  order.forEach(({ z, on, org }, i) => {
     const o = PM.get(z.id) || pinEl(z), p = mPt(z);
     const off = p.x < -40 || p.y < -40 || p.x > sz.x + 40 || p.y > sz.y + 40;
     if (MPICK && z.id === MPICK.id) { const left = p.x + 190 > sz.x - 6; boxes.push(left ? [p.x - 196, p.y - 34, p.x + 34, p.y + 44] : [p.x - 34, p.y - 34, p.x + 196, p.y + 44]); want.set(z.id, ["sel", left, 1200]); return; }
-    if (off) return want.set(z.id, ["d", false, 0]);
+    if (off) return want.set(z.id, ["d", false, 0, org]);
     const left = p.x + 22 + o.lw > sz.x - 6, bx = left ? [p.x - 22 - o.lw, p.y - 24, p.x + 22, p.y + 26] : [p.x - 22, p.y - 24, p.x + 22 + o.lw, p.y + 26];
-    if ((nl < NL || (on && !far)) && p.x > 8 && p.x < sz.x - 8 && !hit(...bx)) { boxes.push(bx); nl++; want.set(z.id, ["l", left, on ? 800 : 500 - i]); }
-    else if (nb < NB && !hit(p.x - 28, p.y - 28, p.x + 28, p.y + 28)) { boxes.push([p.x - 23, p.y - 23, p.x + 23, p.y + 23]); nb++; want.set(z.id, ["b", false, 300 - i]); }
-    else want.set(z.id, ["d", false, 0]);
+    if ((nl < NL || ((on || org) && !far)) && p.x > 8 && p.x < sz.x - 8 && !hit(...bx)) { boxes.push(bx); nl++; want.set(z.id, ["l", left, org ? 1000 : on ? 800 : 500 - i, org]); }
+    else if ((nb < NB || org || NEAR) && !hit(p.x - 28, p.y - 28, p.x + 28, p.y + 28)) { boxes.push([p.x - 23, p.y - 23, p.x + 23, p.y + 23]); nb++; want.set(z.id, ["b", false, org ? 1000 : 300 - i, org]); }
+    else want.set(z.id, [org || NEAR ? "b" : "d", false, org ? 1000 : 0, org]);
   });
-  const ids = new Set(MPTS.map(q => q.z.id)); let k = 0;
+  const ids = new Set(pool.map(q => q.z.id)); let k = 0;
   PM.forEach((o, id) => {
     const w = want.get(id);
-    if (w) pinSet(o, w[0], w[1], w[2], PFIRST ? Math.min(400, (k++) * 12) : 0);
-    else if (!ids.has(id) && !(MPICK && MPICK.id === id)) { pinSet(o, "h", false, -100); if (!(mapPlaces().list || []).some(z => z.id === id)) { PM.delete(id); setTimeout(() => o.m.remove(), 400); } }
+    if (w) { pinSet(o, w[0], w[1], w[2], PFIRST ? Math.min(400, (k++) * 12) : 0); o.m.getElement().firstElementChild.classList.toggle("org", !!w[3]); }
+    else if (!ids.has(id) && !(MPICK && MPICK.id === id)) { o.m.getElement().firstElementChild.classList.remove("org"); pinSet(o, "h", false, -100); if (!(mapPlaces().list || []).some(z => z.id === id)) { PM.delete(id); setTimeout(() => o.m.remove(), 400); } }
   });
   PFIRST = false;
   const fresh = HERE && Date.now() - HERE.t < 30 * 6e4;
