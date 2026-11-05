@@ -1002,6 +1002,18 @@ body .mapv .maplibregl-ctrl-bottom-left { bottom: calc(66px + env(safe-area-inse
 .mapv.qon .mdock { opacity: 0; pointer-events: none; }
 .mapv.qon .mcar { bottom: calc(max(calc(10px + env(safe-area-inset-bottom, 0px)), calc(var(--kb, 0px) + 8px)) + 50px) !important; }
 .mapv.qon .mqnone { bottom: calc(max(calc(10px + env(safe-area-inset-bottom, 0px)), calc(var(--kb, 0px) + 8px)) + 56px); }
+
+/* 5 Nov, latest: bottom up = cards, categories, then a "45 places to eat ⌃" pill that opens the list */
+body .mapv .mcar { bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
+.mapv .mdock { transition: bottom 520ms var(--glide), transform 420ms var(--glide), opacity 240ms ease, background-color 280ms ease; }
+.mapv.picked .mdock { bottom: calc(122px + env(safe-area-inset-bottom, 0px)); }
+.mapv.lon .mdock { bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
+.mapv .mgrab { width: auto; height: 30px; margin: 0; left: 50%; transform: translateX(-50%); border-radius: 15px; padding: 0 10px 0 13px; display: flex !important; align-items: center; gap: 5px; white-space: nowrap; max-width: calc(100vw - 48px); font: 600 13px/1 var(--font); color: var(--ink); background: var(--glass); -webkit-backdrop-filter: saturate(1.8) blur(20px); backdrop-filter: saturate(1.8) blur(20px); box-shadow: 0 1px 6px rgba(0, 0, 0, .14); bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
+.mapv .mgrab[hidden] { display: none !important; }
+.mapv .mgrab span { overflow: hidden; text-overflow: ellipsis; }
+.mapv .mgrab svg { flex: none; width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; opacity: .7; }
+.mapv .mgrab:active { transform: translateX(-50%) scale(.94); }
+.mapv.picked .mgrab { bottom: calc(176px + env(safe-area-inset-bottom, 0px)); }
 </style>
 
 <div class="page" id="page">
@@ -2965,6 +2977,8 @@ function dockRender() {
   /* no "all" and no count: nothing picked = everything, and the list is the pull-up sheet (grabber) */
   const html = items.map(([k, e, l]) => { const on = k === "q" ? MQON : !MQON && MCAT === k, ic = k === "q" || k === "home" || k === "all";
     const c = !ic && MAPCOL[k]; return `<button data-mdk="${k}" class="${ic ? "mdi" : ""}${c ? " mdc" : ""}" ${c ? `style="--c:${c}"` : ""} aria-pressed="${on}" aria-label="${on ? `${l}, tap to show everything` : l}"><span class="mic" aria-hidden="true">${k === "q" ? QSVG : `<span>${e}</span>`}</span>${ic ? "" : `<small>${c ? `<i class="lg"></i>` : ""}${l}</small>${on ? `<svg class="mx" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>` : ""}`}</button>${on && subs ? subs.replace(/ glass/g, "") : ""}`; }).join("");
+  const gb = document.getElementById("mgrab"), gt = n ? listTitle(n).replace(/ nearby$/, "") : "", gh = gt ? `<span>${esc(gt)}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg>` : "";
+  if (gb.dataset.h !== gh) { gb.dataset.h = gh; gb.innerHTML = gh; gb.hidden = !gh; gb.setAttribute("aria-label", gt ? `List ${gt}` : "List"); }
   if (mdock.dataset.sig !== html) { const fresh = mdock.dataset.k !== MCAT; mdock.dataset.sig = html; mdock.dataset.k = MCAT; const x = mdock.scrollLeft; mdock.innerHTML = html; mdock.scrollLeft = x;
     const sel = mdock.querySelector('[data-mdk]:not([data-mdk="q"]):not(.mdn)[aria-pressed="true"]');
     if (fresh && sel && MCAT !== "all") { const r = sel.offsetLeft - 56; if (r < mdock.scrollLeft || sel.offsetLeft + sel.offsetWidth > mdock.scrollLeft + mdock.clientWidth) mdock.scrollTo({ left: Math.max(0, r), behavior: reduce() ? "auto" : "smooth" }); } }
@@ -3042,7 +3056,7 @@ function overview(list) {
   const o = mapHere() || mapStay(), near = src.filter(z => !o || km(o.lat, o.lng, z.lat, z.lng) <= R), use = (near.length >= 3 ? near : src.slice(0, 5)).concat(o ? [o] : []);
   const b = use.reduce((r, z) => [Math.min(r[0], z.lng), Math.min(r[1], z.lat), Math.max(r[2], z.lng), Math.max(r[3], z.lat)], [180, 90, -180, -90]);
   MUSER = true; mhdSet();
-  MAP.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: { top: 90, bottom: (MPICK ? 240 : 100) + KB(), left: 40, right: 40 }, maxZoom: 15.5, duration: reduce() ? 0 : 1000, easing: ease });
+  MAP.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: { top: 90, bottom: (MPICK ? 250 : 120) + KB(), left: 40, right: 40 }, maxZoom: 15.5, duration: reduce() ? 0 : 1000, easing: ease });
 }
 function clearPick() { MPICK = null; mapv.classList.remove("picked"); mapCard(null); dockRender(); }
 mdock.addEventListener("click", e => {
@@ -3328,7 +3342,7 @@ const Z_CITY = 13, Z_STREET = 14.5;
 window.__tripMap = () => MAP;  /* for tests only */
 function layoutPins() {
   if (!MAP || mapv.hidden) return;
-  const sz = mSize(), boxes = [[-999, -999, sz.x + 999, 62], [-999, sz.y - (MPICK ? 212 : 84) - KB(), sz.x + 999, sz.y + 999]], hit = (x0, y0, x1, y1) => boxes.some(b => x0 < b[2] && x1 > b[0] && y0 < b[3] && y1 > b[1]);
+  const sz = mSize(), boxes = [[-999, -999, sz.x + 999, 62], [-999, sz.y - (MPICK ? 216 : 104) - KB(), sz.x + 999, sz.y + 999]], hit = (x0, y0, x1, y1) => boxes.some(b => x0 < b[2] && x1 > b[0] && y0 < b[3] && y1 > b[1]);
   const a = MHOME;
   if (a) {
     if (!PHOME || PHOME.a !== a) { if (PHOME) PHOME.m.remove();
