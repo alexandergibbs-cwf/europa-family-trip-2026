@@ -831,6 +831,7 @@ body .mapv .maplibregl-ctrl-bottom-left { bottom: calc(90px + env(safe-area-inse
 .mdock .mic svg { width: 24px; height: 24px; fill: none; stroke: var(--ink); stroke-width: 2.2; stroke-linecap: round; }
 .mdock [data-mdk="q"] .mic { background: var(--card); box-shadow: 0 2px 10px rgba(0, 0, 0, .16); width: 44px; height: 44px; margin: 3px; }
 .mdock button:active .mic { transform: scale(.86); }
+.mdock small .lg { display: inline-block; width: 8px; height: 8px; border-radius: 4px; margin-right: 4px; vertical-align: 1px; box-shadow: 0 0 0 1.5px var(--mhalo); }
 .mdock small { font-size: 12px; font-weight: 500; white-space: nowrap; text-shadow: 0 0 3px var(--mhalo), 0 0 6px var(--mhalo); transition: font-weight 0ms; }
 .mdock button[aria-pressed="true"] .mic { background: var(--card); box-shadow: 0 2px 12px rgba(0, 0, 0, .18); }
 .mdock button[aria-pressed="true"] small { font-weight: 700; }
@@ -868,6 +869,8 @@ body .mapv .mme { top: max(12px, env(safe-area-inset-top, 0px)); bottom: auto !i
 .mapv.zfar .mp.home .t { display: none; }
 .mapv.zfar .mp.s-d .b { transform: scale(.22); }
 .mqnone { position: absolute; z-index: 501; left: 16px; right: 16px; bottom: calc(176px + env(safe-area-inset-bottom, 0px)); padding: 12px 16px; border-radius: 16px; font-size: 15px; line-height: 1.35; color: var(--ink); text-align: center; }
+/* first-run cards (location, tour, Add to Home Screen) sit above the map, which is now the opening screen */
+.a2bg { z-index: 90 !important; } .a2hs, .tour { z-index: 91 !important; }
 .mqbar { position: absolute; z-index: 502; top: max(12px, env(safe-area-inset-top, 0px)); left: 12px; right: 12px; height: 44px; border-radius: 22px; display: none; align-items: center; gap: 8px; padding: 0 4px 0 14px; }
 .mapv.qon .mqbar { display: flex; }
 .mapv.qon .mtt, .mapv.qon .mme { visibility: hidden; }
@@ -2804,7 +2807,7 @@ function mapFilter(z) {
 function dockRender() {
   const { list } = mapPlaces();
   const items = [["q", "", "search"], ["all", "🗺️", "all"], ...DOCK.filter(([k]) => list.some(z => inGrp(z, k)))];
-  const html = items.map(([k, e, l]) => `<button data-mdk="${k}" aria-pressed="${k === "q" ? MQON : !MQON && MCAT === k}"><span class="mic" aria-hidden="true">${k === "q" ? QSVG : `<span>${e}</span>`}</span><small>${l}</small></button>`).join("");
+  const html = items.map(([k, e, l]) => `<button data-mdk="${k}" aria-pressed="${k === "q" ? MQON : !MQON && MCAT === k}"><span class="mic" aria-hidden="true">${k === "q" ? QSVG : `<span>${e}</span>`}</span><small>${GRP[k] ? `<i class="lg" style="background:${MAPCOL[k]}"></i>` : ""}${l}</small></button>`).join("");
   if (mdock.dataset.sig !== html) { mdock.dataset.sig = html; const x = mdock.scrollLeft; mdock.innerHTML = html; mdock.scrollLeft = x; }
 }
 function fullList() {
@@ -2927,7 +2930,9 @@ document.addEventListener("click", e => {
     if (!xp.hidden) { xpDay(d); xpRender(false); xp.scrollTop = 0; } else selectDay(d); }
 }, true);
 /* ---------- map: every saved place around the day's hotel, coloured by kind; the day's added stops stand out ---------- */
-const MAPCOL = { dinner: "#ff2d55", drinks: "#5856d6", coffee: "#a2845e", sweet: "#ff9f0a", culture: "#af52de", see: "#34c759", shop: "#30b0c7", clothes: "#007aff", experience: "#00c7be" };
+const MAPCOL = { dinner: "#ff2d55", drinks: "#5856d6", coffee: "#a2845e", sweet: "#ff9f0a", culture: "#af52de", see: "#34c759", shop: "#30b0c7", clothes: "#007aff", experience: "#34c759" };
+/* on the map a pin takes its rail button's colour (sights = culture purple, clothes = shops teal), so the dot beside each category name is the key */
+const pinCol = z => MAPCOL[{ see: "culture", clothes: "shop" }[mk(z)] || mk(z)];
 const MAPLAB = { dinner: "Eat", coffee: "Coffee", sweet: "Sweets", drinks: "Drinks", see: "Sights", culture: "Culture", clothes: "Clothes", shop: "Shops", experience: "Experiences" };
 const mk = z => z.kind === "shop" && z.clo ? "clothes" : z.kind;
 const MAPCAT = { dinner: "dinner", drinks: "drinks", coffee: "coffee", sweet: "sweet", culture: "culture", see: "see", shop: "shop", experience: "experience" };
@@ -3004,9 +3009,9 @@ function mapPlaces() {
   const list = SAVES.filter(z => z.lat != null && MAPCOL[z.kind] && (z.city === a.city || km(a.lat, a.lng, z.lat, z.lng) < 15));
   return { a, list };
 }
-function openMap(focusId) {
+function openMap(focusId, quiet) {
   PFIRST = true; MCAT = KGRP[XCAT] || XCAT; MSUB = "";
-  mapv.hidden = false; document.body.classList.add("mapopen"); haptic(); setTab(); mttSet();
+  mapv.hidden = false; document.body.classList.add("mapopen"); if (!quiet) haptic(); setTab(); mttSet();
   if (!reduce()) mapv.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220 });
   MUSER = false; hereAsked = 0;
   askHere(() => { if (mapv.hidden || !MAP) return; drawMap(); const h = mapHere(); if (h && !MUSER && !MPICK) MAP.easeTo({ center: [h.lng, h.lat], zoom: 15, duration: reduce() ? 0 : 700, easing: ease }); });
@@ -3097,7 +3102,7 @@ function labelAt(pt) {
 }
 function pinEl(z) {
   const nm = z.name.length > 24 ? z.name.slice(0, 23) + "…" : z.name, hk = shortHook(z);
-  const m = mkMarker(z.lng, z.lat, `<div class="mp s-h" style="--c:${MAPCOL[mk(z)]}"><span class="b"><i class="e">${emoOf(z)}</i></span><span class="t"><b>${esc(nm)}</b>${hk ? `<em>${esc(hk)}</em>` : ""}</span></div>`, () => pinTap(z));
+  const m = mkMarker(z.lng, z.lat, `<div class="mp s-h" style="--c:${pinCol(z)}"><span class="b"><i class="e">${emoOf(z)}</i></span><span class="t"><b>${esc(nm)}</b>${hk ? `<em>${esc(hk)}</em>` : ""}</span></div>`, () => pinTap(z));
   const o = { m, z, st: "h", lw: Math.min(132, Math.max(nm.length * 7.9, hk.length > 18 ? 118 : hk.length * 6.6)) + 8 }; PM.set(z.id, o); return o;
 }
 function pinSet(o, st, left, zi, delay) {
@@ -3344,10 +3349,10 @@ function tick() {
 renderWeek(); renderHeader(false); measureTop(); content.innerHTML = renderContent(view);
 pullState(); setInterval(pullState, 60000); document.addEventListener("visibilitychange", () => { if (!document.hidden) pullState(); });
 document.getElementById("modePill").classList.toggle("on", MODE === "multi"); document.getElementById("wsel").classList.toggle("span2", MODE === "multi");
-/* the app opens on what to do; on a day with a flight or train it opens on the schedule instead */
-{ let off = ""; try { off = localStorage.getItem("xpoff") || ""; } catch (e) {}
-  const travel = MOVES.some(m => m.dep && m.dep[0] === today) || /[?&]schedule/.test(location.search);
-  if (!travel && off !== today && today >= START && today <= END) showXP(true); }
+/* the app opens on the map (Alex, 5 Nov); on a day with a flight or train it opens on the schedule instead */
+{ const travel = MOVES.some(m => m.dep && m.dep[0] === today) || /[?&]schedule/.test(location.search);
+  if (/[?&]explore/.test(location.search)) showXP(true);
+  else if (!travel && today >= START && today <= END) openMap(null, true); }
 refreshLive(); setTab();
 requestAnimationFrame(() => { measureTop(); padWheel(); centreDay(view, false); scrollToDay(); warmAround(view); });
 addEventListener("resize", () => { wSelTop = null; measureTop(); padWheel(); centreDay(view, false); });
@@ -3420,7 +3425,7 @@ window.__tripICS = () => {
 };
 /* a short "how it works" the first time the app is opened (from the Home Screen on iPhone, so it isn't stacked on the add-to-home card) */
 const TOUR = [
-  { t: "Your trip, day by day", d: "It opens on today: where you’re staying and what’s booked.", p: `<div class="bk tint" style="--c:#ff8a00;top:14px">Hotel<small>Check out · 10:30 am</small></div><div class="bk solid" style="--c:#ff8a00;top:54px;height:40px">Rome → Florence<small>12:30 pm – 2:11 pm</small></div><div class="bk tint" style="--c:#ff8a00;top:104px">Hotel<small>Check in · 2:30 pm</small></div>` },
+  { t: "Your trip, day by day", d: "It opens on the map: you, your hotel and your saved places. Schedule has what’s booked.", p: `<div class="bk tint" style="--c:#ff8a00;top:14px">Hotel<small>Check out · 10:30 am</small></div><div class="bk solid" style="--c:#ff8a00;top:54px;height:40px">Rome → Florence<small>12:30 pm – 2:11 pm</small></div><div class="bk tint" style="--c:#ff8a00;top:104px">Hotel<small>Check in · 2:30 pm</small></div>` },
   { t: "Swipe between days", d: "Swipe the page sideways, or tap a date at the top.", p: `<div class="strip"><span>27</span><span class="c">28</span><span>29</span></div><div class="hand"></div>` },
   { t: "Ideas for free time", d: "Dashed blocks are ideas from your saved places. Tap one for directions, its TikTok, or to add it.", p: `<div class="bk dash" style="--c:#a2845e;top:14px">Coffee<small>Caffè Teichner · 5 min walk</small></div><div class="bk dash" style="--c:#34c759;top:54px">Sightsee<small>Trevi Fountain · 8 min walk</small></div><div class="bk dash" style="--c:#ff2d55;top:94px;height:42px">Food<small>Supplizio · 9 min walk</small></div>` },
   { t: "Plan a whole day", d: "Tap the city name, then Plan the day. A few taps and it’s done.", p: `<div class="pill">Rome</div><div class="menu"><div>Spagna Boutique</div><div class="hl">Plan the day</div></div>` },
