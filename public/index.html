@@ -3048,8 +3048,11 @@ const GRP = {
     { k: "markets", l: "markets & food", n: "markets and food shops", kinds: ["shop"], t: z => shopSub(z) === "markets" },
     { k: "design", l: "design & home", n: "design and homeware shops", kinds: ["shop"], t: z => shopSub(z) === "design" }] },
   experience: { kinds: ["experience"], n: "experiences", subs: [],
-    /* photo booths, swings, slides, karaoke, cinemas, boats, tours: saved under other kinds, so they join by what the one-liner says (not plain cafes or restaurants) */
-    extra: z => mk(z) !== "experience" && RX.exp.test(ztxt(z)) && (!["dinner", "coffee", "sweet"].includes(mk(z)) || /karaoke|photo ?booth|bowling|cinema/.test(ztxt(z))) }
+    /* photo booths, swings, slides, karaoke, cinemas, boats, tours: saved under other kinds, so they join by what the one-liner says (not plain cafes or restaurants).
+       Bars stay in Drinks only (Alex, 5 Nov), unless the bar itself is a karaoke bar by name. */
+    extra: z => mk(z) !== "experience" && RX.exp.test(ztxt(z))
+      && (mk(z) !== "drinks" || /karaoke/i.test(z.name))
+      && (!["dinner", "coffee", "sweet"].includes(mk(z)) || /karaoke|photo ?booth|bowling|cinema/.test(ztxt(z))) }
 };
 const KGRP = { see: "culture", clothes: "shop" };
 /* a non-clothes shop gets exactly one sub, first match wins */
