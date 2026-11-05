@@ -824,6 +824,18 @@ body .mapv .mme { top: max(12px, env(safe-area-inset-top, 0px)); bottom: auto !i
 .mhd span { color: var(--sub); font-weight: 500; }
 .mhd svg { width: 12px; height: 12px; fill: none; stroke: var(--sub); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 .mapv.picked .mhd { display: flex; }
+.mhdr { position: absolute; z-index: 501; left: 0; right: 0; bottom: calc(298px + env(safe-area-inset-bottom, 0px)); display: none; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 4px 16px; transition: opacity 220ms ease; }
+.mhdr::-webkit-scrollbar { display: none; }
+.mapv.picked .mhdr { display: flex; }
+.mapv.lon .mhdr { opacity: 0; pointer-events: none; }
+.mhdr .mhd { position: static; display: flex; flex: none; }
+.msub { flex: none; height: 34px; border: 0; border-radius: 17px; padding: 0 14px; font: 500 14px/1 var(--font); color: var(--ink); cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background-color 200ms ease, color 200ms ease; }
+.msub[aria-pressed="true"] { background: var(--ink); color: var(--bg); font-weight: 600; box-shadow: none; }
+.mlsubs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 10px -20px 0; padding: 0 20px; }
+.mlsubs::-webkit-scrollbar { display: none; }
+.mlsubs:empty { display: none; }
+.mlsubs .msub { background: rgba(118, 118, 128, .14); }
+.mlsubs .msub[aria-pressed="true"] { background: var(--ink); }
 .mlist { position: absolute; left: 0; right: 0; bottom: 0; top: calc(env(safe-area-inset-top, 0px) + 118px); z-index: 499; display: flex; flex-direction: column; background: var(--panel); border-radius: 24px 24px 0 0; box-shadow: 0 -6px 28px rgba(0, 0, 0, .14); transform: translateY(105%); transition: transform 520ms var(--glide); }
 .mapv.lon .mlist { transform: none; }
 .mlist.drag { transition: none; }
@@ -877,7 +889,7 @@ body .mapv .mcard { bottom: calc(158px + env(safe-area-inset-bottom, 0px)); }
 </aside>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden><div class="grab"></div><div id="sheet-body"></div></div>
 <div class="show" id="show" role="dialog" aria-modal="true" hidden></div>
-<div class="mapv" id="mapv" role="dialog" aria-modal="true" aria-label="Map" hidden><div id="mapc"></div><div class="mtop"><div class="xp-top"><button class="pill glass press mselx" id="mselx"><span></span><i aria-hidden="true">✕</i></button><button class="pill glass press mtt" data-trip><span id="mtt"></span><i class="chr"></i></button><span class="sp"></span></div><div class="xp-row xcats mchips" id="mchips"></div><span class="mcity" id="mcity" hidden></span></div><div class="mdock" id="mdock" role="toolbar" aria-label="Categories"></div><label class="mqbar glass" id="mqbar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><input id="mqi" type="search" placeholder="Search your saves" enterkeyhint="search" autocomplete="off" aria-label="Search saved places"><button id="mqx" type="button">Cancel</button></label><div class="mlist" id="mlist" aria-label="All places"><div class="mlist-h" id="mlisth"><i></i><b id="mlistt"></b></div><div class="mlist-l" id="mlistl"></div></div><button class="mhd glass press" id="mhd"><b id="mhdt"></b><span id="mhdn"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></button><div class="mcar" id="mcar"></div><button class="pill glass press ib mme" id="mme" aria-label="Where am I"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg></button><div class="mcard" id="mcard" hidden></div></div>
+<div class="mapv" id="mapv" role="dialog" aria-modal="true" aria-label="Map" hidden><div id="mapc"></div><div class="mtop"><div class="xp-top"><button class="pill glass press mselx" id="mselx"><span></span><i aria-hidden="true">✕</i></button><button class="pill glass press mtt" data-trip><span id="mtt"></span><i class="chr"></i></button><span class="sp"></span></div><div class="xp-row xcats mchips" id="mchips"></div><span class="mcity" id="mcity" hidden></span></div><div class="mdock" id="mdock" role="toolbar" aria-label="Categories"></div><label class="mqbar glass" id="mqbar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><input id="mqi" type="search" placeholder="Search your saves" enterkeyhint="search" autocomplete="off" aria-label="Search saved places"><button id="mqx" type="button">Cancel</button></label><div class="mlist" id="mlist" aria-label="All places"><div class="mlist-h" id="mlisth"><i></i><b id="mlistt"></b><div class="mlsubs" id="mlsubs"></div></div><div class="mlist-l" id="mlistl"></div></div><div class="mhdr" id="mhdr"><button class="mhd glass press" id="mhd"><b id="mhdt"></b><span id="mhdn"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></button><span id="msubs" style="display:contents"></span></div><div class="mcar" id="mcar"></div><button class="pill glass press ib mme" id="mme" aria-label="Where am I"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg></button><div class="mcard" id="mcard" hidden></div></div>
 <nav class="tabs glass" id="tabs" role="tablist" aria-label="Views"><button role="tab" data-tab="xp" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg><span>Explore</span></button><button role="tab" data-tab="map" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6z"/><path d="M9 4v14M15 6v14"/></svg><span>Map</span></button><button role="tab" data-tab="cal" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Schedule</span></button></nav>
 <div class="sr" aria-live="polite" id="live"></div>
 
@@ -2444,7 +2456,7 @@ const photoUrl = (z, i) => "/api/photo?" + new URLSearchParams({ v: 3, ...(i ? {
 const vidAttr = z => z && z.url && /tiktok\.com|instagram\.com/.test(z.url) ? ` data-vid="${esc(z.url)}" data-vsid="${esc(z.id)}"` : "";
 const ph = z => z ? `<span class="ph" style="--c:${MAPCOL[mk(z)] || "#8e8e93"}">${svgI(icoOf(z))}${z.lat != null ? `<img loading="lazy" decoding="async" alt="" src="${esc(photoUrl(z))}" onload="this.classList.add('ld')" onerror="this.remove()">` : ""}</span>` : "";
 const PI = {
-  go: '<path d="M20.5 3.5 3.5 10.6l7.2 2.7 2.7 7.2z" fill="currentColor" stroke="none"/>',
+  go: '<path d="M6.5 19v-5.5a3.5 3.5 0 0 1 3.5-3.5h9"/><path d="m15 6 4 4-4 4"/>',
   add: '<path d="M7 3.5h10a1 1 0 0 1 1 1V21l-6-4-6 4V4.5a1 1 0 0 1 1-1z"/>',
   added: '<path d="M7 3.5h10a1 1 0 0 1 1 1V21l-6-4-6 4V4.5a1 1 0 0 1 1-1z" fill="currentColor"/>',
   vid: '<rect x="3" y="5" width="18" height="14" rx="3.5"/><path d="M10.2 9.2v5.6l4.6-2.8z" fill="currentColor"/>',
@@ -2682,17 +2694,60 @@ xp.addEventListener("click", e => {
   const m = t.closest("[data-xmore]"); if (m) { haptic(); XMORE[m.dataset.xmore] = !XMORE[m.dataset.xmore]; return xpRender(); }
 });
 /* ---------- map: the rail filters the pins and fills the swipe cards (nearest first; top picks by rating). Search does the same from a field at the top. ---------- */
-const DOCK = [["dinner", "🍽️", "eat"], ["coffee", "☕", "cafes"], ["sweet", "🍦", "sweets"], ["drinks", "🍸", "bars"], ["see", "🏞️", "sights"], ["culture", "🖼️", "culture"], ["shop", "🛍️", "shops"], ["clothes", "👕", "clothes"], ["experience", "🎟️", "experiences"]];
+const DOCK = [["dinner", "🍽️", "eat"], ["coffee", "☕", "cafes"], ["sweet", "🍦", "sweets"], ["drinks", "🍸", "bars"], ["culture", "🖼️", "culture"], ["shop", "🛍️", "shops"], ["experience", "🎟️", "experiences"]];
+/* each rail button is a group of kinds; some have sub-chips worked out from the save's name, one-liner and vibe */
+const ztxt = z => (z.name + " " + (z.hook || "") + " " + (z.vibe || "")).toLowerCase();
+const RX = { brk: /brunch|breakfast|bakery|pancake|bagel|eggs|croissant|morning|waffle|granola/, lun: /lunch|sandwich|deli|soup|salad|bowl|ramen|noodle|pizza|street food|market|burger|kebab|falafel|dumpling|quick|casual|cheap|taco|bao|banh|bánh|poke|canteen|imbiss/,
+  din: /dinner|fine dining|tasting|steak|wine|trattoria|bistro|izakaya|fondue|tavern|romantic|date night|seafood|sushi|omakase|grill|osteria|brasserie|supper/,
+  view: /view|lookout|panoram|tower|rooftop|terrace|hill|skyline|overlook/, park: /park|garden|lake|river|beach|forest|nature|island|canal|swim|bath/,
+  vint: /vintage|second.?hand|thrift|flea|consign|pre-?loved|upcycl|antique|retro/, des: /design|home|interior|ceramic|concept|furniture|stationer|plant|flower|lifestyle|homeware/,
+  book: /book|libra|buch|record|vinyl|zine/, food: /deli|market|chocolate|cheese|grocer|food|spice|tea shop|wine shop|pastr|épicerie|epicerie/,
+  cock: /cocktail|speakeasy|martini|mixolog|negroni/, wine: /wine|vino|enoteca|natural wine|cave/, beer: /beer|brew|pub|taproom|ale|bier|lager/ };
+const GRP = {
+  dinner: { kinds: ["dinner"], n: "places to eat", subs: [
+    { k: "breakfast", l: "breakfast", n: "breakfast spots", kinds: ["dinner", "coffee"], t: z => RX.brk.test(ztxt(z)) },
+    { k: "lunch", l: "lunch", n: "lunch spots", t: z => { const x = ztxt(z); return RX.lun.test(x) || !(RX.brk.test(x) || RX.din.test(x)); } },
+    { k: "dinner", l: "dinner", n: "dinner spots", t: z => { const x = ztxt(z); return RX.din.test(x) || !(RX.brk.test(x) || RX.lun.test(x)); } }] },
+  coffee: { kinds: ["coffee"], n: "cafes", subs: [] },
+  sweet: { kinds: ["sweet"], n: "sweet spots", subs: [] },
+  drinks: { kinds: ["drinks"], n: "bars", subs: [
+    { k: "cocktails", l: "cocktails", n: "cocktail bars", t: z => RX.cock.test(ztxt(z)) },
+    { k: "wine", l: "wine", n: "wine bars", t: z => RX.wine.test(ztxt(z)) },
+    { k: "beer", l: "beer", n: "beer spots", t: z => RX.beer.test(ztxt(z)) }] },
+  culture: { kinds: ["culture", "see"], n: "places to see", subs: [
+    { k: "museums", l: "museums", n: "museums and galleries", kinds: ["culture"], t: () => true },
+    { k: "sights", l: "sights", n: "sights", kinds: ["see"], t: () => true },
+    { k: "views", l: "views", n: "viewpoints", t: z => RX.view.test(ztxt(z)) },
+    { k: "parks", l: "parks", n: "parks and nature", t: z => RX.park.test(ztxt(z)) }] },
+  shop: { kinds: ["shop", "clothes"], n: "shops", subs: [
+    { k: "clothes", l: "clothes", n: "clothes shops", kinds: ["clothes"], t: () => true },
+    { k: "vintage", l: "vintage", n: "vintage shops", t: z => RX.vint.test(ztxt(z)) },
+    { k: "design", l: "design", n: "design and homeware shops", t: z => RX.des.test(ztxt(z)) },
+    { k: "books", l: "books & records", n: "book and record shops", t: z => RX.book.test(ztxt(z)) },
+    { k: "markets", l: "markets & food", n: "markets and food shops", t: z => RX.food.test(ztxt(z)) }] },
+  experience: { kinds: ["experience"], n: "experiences", subs: [] }
+};
+const KGRP = { see: "culture", clothes: "shop" };
+let MSUB = "";
+const subOf = () => { const g = GRP[MCAT]; return g && MSUB ? g.subs.find(x => x.k === MSUB) : null; };
+const inGrp = (z, k) => { const g = GRP[k]; return g ? g.kinds.includes(mk(z)) : mk(z) === k; };
+function subsHTML() {
+  const g = GRP[MCAT]; if (!g || !g.subs.length || MQ) return "";
+  const { list } = mapPlaces();
+  return g.subs.filter(sb => list.some(z => (sb.kinds || g.kinds).includes(mk(z)) && sb.t(z))).map(sb => `<button class="msub glass" data-msub="${sb.k}" aria-pressed="${MSUB === sb.k}">${sb.l}</button>`).join("");
+}
 const QSVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>`;
 const mdock = document.getElementById("mdock"), mqi = document.getElementById("mqi");
 let MQ = "", MQON = false, MQT = 0;
 function mapFilter(z) {
   if (MQ) { const q = MQ.toLowerCase(); return (z.name + " " + (z.hook || "") + " " + (z.vibe || "")).toLowerCase().includes(q); }
-  return MCAT === "all" || mk(z) === MCAT;
+  if (MCAT === "all") return true;
+  const g = GRP[MCAT], sb = subOf(); if (!g) return mk(z) === MCAT;
+  return sb ? (sb.kinds || g.kinds).includes(mk(z)) && sb.t(z) : g.kinds.includes(mk(z));
 }
 function dockRender() {
-  const { list } = mapPlaces(), kinds = XKINDS.filter(k => list.some(z => mk(z) === k));
-  const items = [["q", "", "search"], ["all", "🗺️", "all"], ...DOCK.filter(([k]) => kinds.includes(k))];
+  const { list } = mapPlaces();
+  const items = [["q", "", "search"], ["all", "🗺️", "all"], ...DOCK.filter(([k]) => list.some(z => inGrp(z, k)))];
   const html = items.map(([k, e, l]) => `<button data-mdk="${k}" aria-pressed="${k === "q" ? MQON : !MQON && MCAT === k}"><span class="mic" aria-hidden="true">${k === "q" ? QSVG : `<span>${e}</span>`}</span><small>${l}</small></button>`).join("");
   if (mdock.dataset.sig !== html) { mdock.dataset.sig = html; const x = mdock.scrollLeft; mdock.innerHTML = html; mdock.scrollLeft = x; }
 }
@@ -2703,9 +2758,10 @@ function fullList() {
 const railList = () => fullList().slice(0, 25);
 /* "See all": everything the pins show, nearest first, same cards stacked */
 const LISTN = { dinner: "places to eat", coffee: "cafes", sweet: "sweet spots", drinks: "bars", see: "sights", culture: "museums and galleries", shop: "shops", clothes: "clothes shops", experience: "experiences" };
-function listTitle(n) { return MQ ? `${n} for “${MQ}”` : `${n} ${MCAT !== "all" ? LISTN[MCAT] || "places" : "saved places"} nearby`; }
+function listTitle(n) { const sb = subOf(); return MQ ? `${n} for “${MQ}”` : `${n} ${sb ? sb.n : MCAT !== "all" ? (GRP[MCAT] || {}).n || LISTN[MCAT] || "places" : "saved places"} nearby`; }
 function mhdSet() {
-  const n = MPTS.length; document.getElementById("mhdt").textContent = MQ ? `“${MQ}”` : MCAT !== "all" ? (DOCK.find(d => d[0] === MCAT) || [, , "all"])[2] : "all";
+  const n = MPTS.length, sb = subOf(); document.getElementById("mhdt").textContent = MQ ? `“${MQ}”` : sb ? sb.l : MCAT !== "all" ? (DOCK.find(d => d[0] === MCAT) || [, , "all"])[2] : "all";
+  const sh = subsHTML(), ms = document.getElementById("msubs"); if (ms.dataset.h !== sh) { ms.dataset.h = sh; ms.innerHTML = sh; }
   document.getElementById("mhdn").textContent = SEEN ? "List" : `See all ${n}`;
   document.getElementById("mhd").hidden = n < 3;
 }
@@ -2714,11 +2770,21 @@ const mlist = document.getElementById("mlist"), mlistl = document.getElementById
 function listFill() {
   const list = fullList(), o = liveFrom(view) || anchorFor(view), sig = view + "|" + list.map(z => z.id).join(",");
   document.getElementById("mlistt").textContent = listTitle(list.length);
+  const sh = subsHTML().replace(/ glass/g, ""), ls = document.getElementById("mlsubs"); if (ls.dataset.h !== sh) { ls.dataset.h = sh; ls.innerHTML = sh; }
   if (sig === MLSIG) return; const keep = MLSIG.split("|")[1]?.split(",")[0] === list[0]?.id && MLSIG.length === sig.length;
   MLSIG = sig; const st = mlistl.scrollTop; mlistl.innerHTML = list.map(z => mcHTML(z, o)).join(""); mlistl.scrollTop = keep ? st : 0;
 }
 function listOpen() { if (MLOPEN) return; MLOPEN = true; MLSIG = ""; listFill(); mlistl.scrollTop = 0; mapv.classList.add("lon"); }
 function listClose() { if (!MLOPEN) return; MLOPEN = false; mapv.classList.remove("lon"); mlist.style.transform = ""; mlist.classList.remove("drag"); }
+function subTap(e) {
+  const b = e.target.closest("[data-msub]"); if (!b) return; e.stopPropagation(); haptic();
+  MSUB = MSUB === b.dataset.msub ? "" : b.dataset.msub; SEEN = false;
+  if (MLOPEN) { MPICK = null; drawMap(); const l = railList(); if (l.length) { mcarFill(l); MPICK = l[0]; mapv.classList.add("picked"); layoutPins(); } mhdSet(); return; }
+  clearPick(); drawMap(); carShow(railList());
+}
+document.getElementById("msubs").addEventListener("click", subTap);
+document.getElementById("mlsubs").addEventListener("click", subTap);
+document.getElementById("mlsubs").addEventListener("pointerdown", e => e.stopPropagation());
 function seeAll() {
   const zs = MPTS.map(q => q.z); if (!zs.length) return;
   const b = zs.reduce((r, z) => [Math.min(r[0], z.lng), Math.min(r[1], z.lat), Math.max(r[2], z.lng), Math.max(r[3], z.lat)], [180, 90, -180, -90]);
@@ -2761,6 +2827,7 @@ mdock.addEventListener("click", e => {
   if (k === "q") return MQON ? mqClose() : mqOpen();
   if (MQON) mqClose(true);
   clearPick();
+  MSUB = "";
   if (k === "all" || k === MCAT) { const was = MCAT; MCAT = "all"; XCAT = "all"; XMORE = {}; drawMap();
     if (k === "all" && (was !== "all" || !MPICK)) { carShow(railList()); return; } listClose(); return; }
   MCAT = k; XCAT = k; XMORE = {};
@@ -2880,7 +2947,7 @@ function mapPlaces() {
   return { a, list };
 }
 function openMap(focusId) {
-  PFIRST = true; MCAT = XCAT;
+  PFIRST = true; MCAT = KGRP[XCAT] || XCAT; MSUB = "";
   mapv.hidden = false; document.body.classList.add("mapopen"); haptic(); setTab(); mttSet();
   if (!reduce()) mapv.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220 });
   MUSER = false; hereAsked = 0;
@@ -2916,7 +2983,7 @@ function mcarFill(list) {
     document.getElementById("mcar").innerHTML = list.map(x => mcHTML(x, o)).join("");
   MCLOCK = Date.now(); document.getElementById("mcar").scrollLeft = 0; mhdSet();
 }
-const MCARROW = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg>`;
+const MCARROW = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 19v-5.5a3.5 3.5 0 0 1 3.5-3.5h9"/><path d="m15 6 4 4-4 4"/></svg>`;
 function mcHTML(x, o) { const k = o ? km(o.lat, o.lng, x.lat, x.lng) : null, arrow = MCARROW;
   return `<div class="mc" data-mc="${x.id}">${ph(x).replace('class="ph"', 'class="ph"')}<span class="a">${esc(x.name)}</span><span class="h">${esc(hookOf(x))}</span><span class="m">${MAPLAB[mk(x)] || ""}${k != null ? ` · <b>${distTxt(k, walkKm(o, x))}</b>` : ""}</span><a class="go press" href="${dirs(x.name + " " + (x.address || x.city))}" target="_blank" rel="noopener" aria-label="Directions">${arrow}</a></div>`; }
 function mapPick(z, rebuild) {
@@ -2941,7 +3008,7 @@ function drawMap(focusId, fit) {
   const { a, list } = mapPlaces(); if (!a || !MAP) return;
   const added = new Set(getPlan(view).map(p => p.id).concat(((getDay(view) || {}).steps || []).flatMap(p => p.ids || [])));
   const kinds = [...new Set(list.map(mk))].sort((x, y) => Object.keys(MAPLAB).indexOf(x) - Object.keys(MAPLAB).indexOf(y));
-  if (MCAT !== "all" && !kinds.includes(MCAT)) MCAT = "all";
+  if (MCAT !== "all" && !list.some(z => inGrp(z, MCAT))) { MCAT = "all"; MSUB = ""; }
   document.getElementById("mchips").innerHTML = ["all", ...kinds].map(k => `<button data-mcat="${k}" aria-pressed="${MCAT === k}">${k === "all" ? svgI("all") + "All" : svgI(k, MCAT === k ? null : MAPCOL[k]) + MAPLAB[k]}</button>`).join("");
   document.getElementById("mcity").textContent = a.city;
   MPTS = list.filter(mapFilter).map(z => ({ z, on: added.has(z.id), sc: (added.has(z.id) ? 100 : 0) + pinScore(z) })).sort((x, y) => y.sc - x.sc);
