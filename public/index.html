@@ -1270,7 +1270,18 @@ const SAVE_BY = Object.fromEntries(SAVES.map(s => [s.id, s]));
 function anchorFor(iso) { const s = stayOn(iso) || (iso === "2026-11-19" ? STAYS[11] : null); return s && s.lat != null ? s : null; }
 /* where you are right now: only used on today's lists, and only when you're in the same city as the hotel */
 let HERE = null, hereAsked = 0;
-function liveFrom(iso) { const a = anchorFor(iso); return iso === today && a && HERE && Date.now() - HERE.t < 15 * 6e4 && km(a.lat, a.lng, HERE.lat, HERE.lng) < 40 ? HERE : null; }
+function liveFrom(iso) { if (iso !== today || !HERE || Date.now() - HERE.t > 15 * 6e4) return null; const near = x => x && x.lat != null && km(x.lat, x.lng, HERE.lat, HERE.lng) < 40;
+  return near(anchorFor(iso)) || near(STAYS.find(st => st.out === iso)) ? HERE : null; }
+/* the stay the map is about: normally tonight's; on a travel day today, the one you're leaving until you're nearer the next one
+   (by your location), or without a location until the departure time */
+function mapStay() {
+  const a = anchorFor(view), leaving = view === today ? STAYS.find(st => st.out === today && st.lat != null) : null;
+  if (!leaving) return a || STAYS.find(st => st.out === view && st.lat != null);
+  if (!a) return leaving;
+  if (HERE && Date.now() - HERE.t < 30 * 6e4) return km(HERE.lat, HERE.lng, leaving.lat, leaving.lng) < km(HERE.lat, HERE.lng, a.lat, a.lng) ? leaving : a;
+  const mv = MOVES.find(m => m.dep && m.dep[0] === today); if (!mv) return a;
+  const [h, mi] = mv.dep[1].split(":").map(Number), now = new Date(); return now.getHours() * 60 + now.getMinutes() < h * 60 + mi ? leaving : a;
+}
 let HERE_FRESH = 0, hereWatch = null, hereDrawn = null, hereDrawT = 0, hereDrawQ = 0;
 function stopWatch() { if (hereWatch != null) { try { navigator.geolocation.clearWatch(hereWatch); } catch (e) {} hereWatch = null; } }
 /* once you've allowed location, keep following you while the app is on screen (stops when it's in the background) */
@@ -2809,12 +2820,12 @@ function mapFilter(z) {
 }
 function dockRender() {
   const { list } = mapPlaces();
-  const items = [["q", "", "search"], ...(anchorFor(view) ? [["home", "🏠", "home"]] : []), ["all", "🗺️", "all"], ...DOCK.filter(([k]) => list.some(z => inGrp(z, k)))];
+  const items = [["q", "", "search"], ...(mapStay() ? [["home", "🏠", "home"]] : []), ["all", "🗺️", "all"], ...DOCK.filter(([k]) => list.some(z => inGrp(z, k)))];
   const html = items.map(([k, e, l]) => `<button data-mdk="${k}" aria-pressed="${k === "q" ? MQON : !MQON && MCAT === k}"><span class="mic" aria-hidden="true">${k === "q" ? QSVG : `<span>${e}</span>`}</span><small>${GRP[k] ? `<i class="lg" style="background:${MAPCOL[k]}"></i>` : ""}${l}</small></button>`).join("");
   if (mdock.dataset.sig !== html) { mdock.dataset.sig = html; const x = mdock.scrollLeft; mdock.innerHTML = html; mdock.scrollLeft = x; }
 }
 function fullList() {
-  const o = liveFrom(view) || anchorFor(view); if (!o) return [];
+  const o = mapHere() || mapStay(); if (!o) return [];
   return MPTS.map(q => ({ z: q.z, k: km(o.lat, o.lng, q.z.lat, q.z.lng) })).sort((a, b) => a.k - b.k).map(x => x.z);
 }
 const railList = () => fullList().slice(0, 25);
@@ -2830,7 +2841,7 @@ function mhdSet() {
 let MLOPEN = false, MLSIG = "", SEEN = false;
 const mlist = document.getElementById("mlist"), mlistl = document.getElementById("mlistl");
 function listFill() {
-  const list = fullList(), o = liveFrom(view) || anchorFor(view), sig = view + "|" + list.map(z => z.id).join(",");
+  const list = fullList(), o = mapHere() || mapStay(), sig = view + "|" + list.map(z => z.id).join(",");
   document.getElementById("mlistt").textContent = listTitle(list.length);
   const sh = subsHTML().replace(/ glass/g, ""), ls = document.getElementById("mlsubs"); if (ls.dataset.h !== sh) { ls.dataset.h = sh; ls.innerHTML = sh; }
   if (sig === MLSIG) return; const keep = MLSIG.split("|")[1]?.split(",")[0] === list[0]?.id && MLSIG.length === sig.length;
@@ -2879,7 +2890,7 @@ mlist.addEventListener("click", e => {
    and swiping the cards only highlights each place. Tapping a pin is what zooms in. */
 function carShow(list) { SEEN = false; if (!list.length) return mapPick(null); SEEN = true; mcarFill(list); mapPick(list[0]); overview(list); }
 function overview(list) {
-  const o = liveFrom(view) || anchorFor(view), near = list.filter(z => !o || km(o.lat, o.lng, z.lat, z.lng) <= 3), use = (near.length >= 3 ? near : list.slice(0, 5)).concat(o ? [o] : []);
+  const o = mapHere() || mapStay(), near = list.filter(z => !o || km(o.lat, o.lng, z.lat, z.lng) <= 3), use = (near.length >= 3 ? near : list.slice(0, 5)).concat(o ? [o] : []);
   const b = use.reduce((r, z) => [Math.min(r[0], z.lng), Math.min(r[1], z.lat), Math.max(r[2], z.lng), Math.max(r[3], z.lat)], [180, 90, -180, -90]);
   MUSER = true; mhdSet();
   MAP.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: { top: 90, bottom: 380, left: 40, right: 40 }, maxZoom: 15.5, duration: reduce() ? 0 : 1000, easing: ease });
@@ -2889,8 +2900,8 @@ mdock.addEventListener("click", e => {
   const b = e.target.closest("[data-mdk]"); if (!b) return; e.stopPropagation(); haptic();
   const k = b.dataset.mdk;
   if (k === "q") return MQON ? mqClose() : mqOpen();
-  if (k === "home") { const a = anchorFor(view); if (!a) return; if (MQON) mqClose(true); listClose(); clearPick(); layoutPins(); MUSER = true; SEEN = false;
-    const sz = mSize(); MAP.easeTo({ center: [a.lng, a.lat], zoom: Math.max(MAP.getZoom(), 15), offset: [0, -sz.y * 0.22], duration: reduce() ? 0 : 900, easing: ease }); return openSheet(staySheet(a)); }
+  if (k === "home") { const a = mapStay(); if (!a) return; if (MQON) mqClose(true); listClose(); clearPick(); layoutPins(); MUSER = true; SEEN = false;
+    closeSheet(); MAP.easeTo({ center: [a.lng, a.lat], zoom: Math.max(MAP.getZoom(), 15), offset: [0, -60], duration: reduce() ? 0 : 900, easing: ease }); return; }  /* just go there; tapping the hotel pin opens its details */
   if (MQON) mqClose(true);
   clearPick();
   MSUB = "";
@@ -2912,7 +2923,7 @@ document.getElementById("mqbar").addEventListener("click", e => e.stopPropagatio
 const tabs = document.getElementById("tabs");
 function curTab() { return !mapv.hidden ? "map" : !xp.hidden ? "xp" : "cal"; }
 function setTab() { const c = curTab(); tabs.querySelectorAll("[data-tab]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === c))); }
-function mttSet() { const el = document.getElementById("mtt"); if (el) el.textContent = cityOn(view); }
+function mttSet() { const el = document.getElementById("mtt"); if (el) el.textContent = (mapStay() || {}).city || cityOn(view); }
 function daySheet() {
   const cur = STAYS.find(s => s.in <= view && view < s.out);
   const rows = STAYS.filter(s => s.out > today).map(s => { const now = s.in <= today && today < s.out;
@@ -2931,7 +2942,7 @@ tabs.addEventListener("click", e => {
 document.addEventListener("click", e => {
   const tr = e.target.closest("[data-trip]"); if (tr) { e.stopPropagation(); haptic(); openSheet(daySheet()); startCycle(view); return; }
   const g = e.target.closest("[data-tripgo]"); if (g) { e.stopPropagation(); haptic(); const d = g.dataset.tripgo; closeSheet(); XMORE = {};
-    if (!mapv.hidden) { xpDay(d); if (!xp.hidden) xpRender(false); listClose(); mqClose(true); clearPick(); MUSER = false; if (MAP) drawMap(null, true); mttSet(); return; }
+    if (!mapv.hidden) { xpDay(d); if (!xp.hidden) xpRender(false); listClose(); mqClose(true); clearPick(); MUSER = false; if (MAP) { drawMap(null, true); const l = railList(); if (l.length) overview(l); } mttSet(); return; }
     if (!xp.hidden) { xpDay(d); xpRender(false); xp.scrollTop = 0; } else selectDay(d); }
 }, true);
 /* ---------- map: every saved place around the day's hotel, coloured by kind; the day's added stops stand out ---------- */
@@ -3010,7 +3021,7 @@ const mSize = () => ({ x: MAP.getContainer().clientWidth, y: MAP.getContainer().
 const mPt = z => MAP.project([z.lng, z.lat]);
 let MTAP = 0, MRAF = 0, MLAST = 0;
 function mapPlaces() {
-  const a = anchorFor(view) || STAYS.find(st => st.out === view && st.lat != null); if (!a) return { a: null, list: [] };
+  const a = mapStay(); if (!a) return { a: null, list: [] };
   const list = SAVES.filter(z => z.lat != null && MAPCOL[z.kind] && (z.city === a.city || km(a.lat, a.lng, z.lat, z.lng) < 15));
   return { a, list };
 }
@@ -3037,7 +3048,7 @@ function openMap(focusId, quiet) {
   }).catch(e => { console.warn("map", e); document.getElementById("mcard").hidden = false; document.getElementById("mcard").className = "mcard noph"; document.getElementById("mcard").innerHTML = `<span class="a">The map couldn't load</span><span class="h">Check your connection and try again.</span>`; });
 }
 let MUSER = false;
-function mapHere() { if (!HERE || Date.now() - HERE.t > 30 * 6e4) return null; const a = anchorFor(view); return !a || km(a.lat, a.lng, HERE.lat, HERE.lng) < 40 ? HERE : null; }
+function mapHere() { if (!HERE || Date.now() - HERE.t > 30 * 6e4) return null; const a = mapStay(); return !a || km(a.lat, a.lng, HERE.lat, HERE.lng) < 40 ? HERE : null; }
 function mapPlace(z) { SBACK = []; REFRESH = null; swapSheet(placeSheet(z)); }
 /* like mio: tapping a pin picks it (bigger, with a stem), slides it into the top of the screen and shows a row of
    cards for it and the places around it; swiping the cards moves the pick and the map follows */
@@ -3047,7 +3058,7 @@ function mapAim(z, frac) { const sz = mSize();
   MAP.easeTo({ center: [z.lng, z.lat], zoom: Math.max(MAP.getZoom(), Z_STREET), offset: [0, -sz.y * (0.5 - (frac || 0.38))], duration: reduce() ? 0 : 950, easing: ease }); }
 function mapFlyHere() { if (reduce()) return MAP.jumpTo({ center: [HERE.lng, HERE.lat], zoom: 15 }); MAP.flyTo({ center: [HERE.lng, HERE.lat], zoom: 15, curve: 1.15, speed: 0.9, maxDuration: 1500, easing: ease }); }
 function mcarFill(list) {
-  MCARL = list; const o = liveFrom(view) || anchorFor(view);
+  MCARL = list; const o = mapHere() || mapStay();
     document.getElementById("mcar").innerHTML = list.map(x => mcHTML(x, o)).join("");
   MCLOCK = Date.now(); document.getElementById("mcar").scrollLeft = 0; mhdSet();
 }
@@ -3084,7 +3095,7 @@ function drawMap(focusId, fit) {
   const f = focusId && SAVE_BY[focusId];
   if (f) { MAP.jumpTo({ center: [f.lng, f.lat], zoom: 15 }); mapPick(f, true); }
   else if (fit) { const me = mapHere(); MAP.jumpTo({ center: me ? [me.lng, me.lat] : [a.lng, a.lat], zoom: me ? 15 : 14 }); layoutPins(); }
-  dockRender(); if (MLOPEN) listFill(); if (MPICK) mhdSet();
+  dockRender(); mttSet(); if (MLOPEN) listFill(); if (MPICK) mhdSet();
 }
 /* like mio: the best places get a picture bubble with name and a few words, others a bubble, and when it's crowded a small dot */
 /* Pins stay on the map and change state in place, with springs, instead of being redrawn:
@@ -3354,10 +3365,9 @@ function tick() {
 renderWeek(); renderHeader(false); measureTop(); content.innerHTML = renderContent(view);
 pullState(); setInterval(pullState, 60000); document.addEventListener("visibilitychange", () => { if (!document.hidden) pullState(); });
 document.getElementById("modePill").classList.toggle("on", MODE === "multi"); document.getElementById("wsel").classList.toggle("span2", MODE === "multi");
-/* the app opens on the map (Alex, 5 Nov); on a day with a flight or train it opens on the schedule instead */
-{ const travel = MOVES.some(m => m.dep && m.dep[0] === today) || /[?&]schedule/.test(location.search);
-  if (/[?&]explore/.test(location.search)) showXP(true);
-  else if (!travel && today >= START && today <= END) openMap(null, true); }
+/* the app always opens on the map (Alex, 5 Nov), travel days included; ?schedule / ?explore for testing */
+if (/[?&]explore/.test(location.search)) showXP(true);
+else if (!/[?&]schedule/.test(location.search)) openMap(null, true);
 refreshLive(); setTab();
 requestAnimationFrame(() => { measureTop(); padWheel(); centreDay(view, false); scrollToDay(); warmAround(view); });
 addEventListener("resize", () => { wSelTop = null; measureTop(); padWheel(); centreDay(view, false); });
