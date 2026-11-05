@@ -1052,6 +1052,14 @@ body .mapv .mcar { bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
 .mapv.lon .mfoot { display: none; }
 .mlist:not(.pm) { left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); top: max(calc(env(safe-area-inset-top, 0px) + 160px), calc(100% - 420px - env(safe-area-inset-bottom, 0px))); border-radius: 26px; background: var(--card); overflow: hidden; transform: translateY(calc(100% + 60px)); box-shadow: var(--glass-shadow), inset 0 0 0 .5px var(--glass-edge), 0 10px 34px rgba(0, 0, 0, .2); }
 .mapv.lon .mlist:not(.pm) { transform: none; }
+/* 5 Nov, later (Alex: a gap opened between the categories and the shorter list; categories should look as they normally do):
+   the list is a 400px card (3 places and a peek) and the tools row and categories ride just above it, in the same order and
+   spacing as above the card row (cards → 8px → categories → tools), instead of jumping up under the city pill */
+.mapv { --lh: min(400px, calc(100% - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 230px)); }
+.mlist:not(.pm) { top: calc(100% - var(--lh) - 10px - env(safe-area-inset-bottom, 0px)); }
+.mapv.lon:not(.pmode) .mdock { bottom: calc(var(--lh) + 18px + env(safe-area-inset-bottom, 0px)); }
+.mapv.lon:not(.pmode) .mtool { bottom: calc(var(--lh) + 69px + env(safe-area-inset-bottom, 0px)); }
+.mapv.lon:not(.pmode) .mgrab { bottom: calc(var(--lh) + 72px + env(safe-area-inset-bottom, 0px)); }
 .mlist:not(.pm) .mlist-h { background: var(--card); }
 .mlist:not(.pm) .mlist-l { padding-bottom: 24px; }
 .mlist:not(.pm) .mlg { background: none; }
@@ -3099,7 +3107,8 @@ function listFill() {
   if (sig === MLSIG) return; const keep = MLSIG.split("|")[1]?.split(",")[0] === list[0]?.id && MLSIG.length === sig.length;
   MLSIG = sig; const st = mlistl.scrollTop; mlistl.innerHTML = `<div class="mlg">${list.map(z => mcHTML(z, o)).join("")}</div>`; mlistl.scrollTop = keep ? st : 0;
 }
-function listOpen() { if (MLOPEN) return; MLOPEN = true; MPS = []; MLSIG = ""; listFill(); mlistl.scrollTop = 0; panelSync(); dockRender(); }
+function listOpen() { if (MLOPEN) return; MLOPEN = true; MPS = []; MLSIG = ""; listFill(); mlistl.scrollTop = 0; panelSync(); dockRender(); 
+  if (MPICK && MAP) { const sz = mSize(), p = mPt(MPICK); if (p.y > sz.y * 0.36 || p.y < 110) MAP.easeTo({ center: [MPICK.lng, MPICK.lat], offset: [0, -sz.y * 0.24], duration: reduce() ? 0 : 700, easing: ease }); } }
 function listClose() { if (!MLOPEN) return; MLOPEN = false; MPS = []; panelSync(); mlist.style.transform = ""; mlist.classList.remove("drag"); }
 function subTap(e) {
   const b = e.target.closest("[data-msub]"); if (!b) return; e.stopPropagation(); haptic();
