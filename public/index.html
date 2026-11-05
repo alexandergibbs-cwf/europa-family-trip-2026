@@ -835,6 +835,15 @@ body .mapv .mme { top: max(12px, env(safe-area-inset-top, 0px)); bottom: auto !i
 .mapv.lon .mcar, .mapv.lon .mhd { opacity: 0; pointer-events: none; }
 .mapv.lon .mdock { background: var(--panel); box-shadow: 0 -0.5px 0 var(--hair); }
 .mapv.lon .mdock small { text-shadow: none; }
+/* zoom tiers: street (names + one-liners), neighbourhood (a few names, no one-liners), city (area bubbles) */
+.mapv.zmid .mp .t em { display: none; }
+.mapv.zfar .mp.home .t { display: none; }
+.mcl { position: relative; width: 42px; height: 42px; border-radius: 21px; display: grid; place-items: center; background: var(--card); cursor: pointer; box-shadow: 0 3px 10px rgba(0, 0, 0, .22), 0 0 0 .5px rgba(0, 0, 0, .06); animation: mclin 320ms var(--glide); -webkit-tap-highlight-color: transparent; }
+.mcl i { font-style: normal; font-size: 23px; line-height: 1; }
+.mcl b { position: absolute; top: -7px; left: 28px; min-width: 22px; height: 22px; box-sizing: border-box; padding: 0 6px; border-radius: 11px; background: var(--ink); color: var(--bg); font: 700 12px/22px var(--font); font-variant-numeric: tabular-nums; text-align: center; box-shadow: 0 0 0 2px var(--card); }
+.mcl.big { width: 48px; height: 48px; border-radius: 24px; } .mcl.big i { font-size: 26px; } .mcl.big b { left: 32px; }
+.mcl:active { transform: scale(.92); }
+@keyframes mclin { from { opacity: 0; transform: scale(.6); } }
 .mqbar { position: absolute; z-index: 502; top: max(12px, env(safe-area-inset-top, 0px)); left: 12px; right: 12px; height: 44px; border-radius: 22px; display: none; align-items: center; gap: 8px; padding: 0 4px 0 14px; }
 .mapv.qon .mqbar { display: flex; }
 .mapv.qon .mtt, .mapv.qon .mme { visibility: hidden; }
@@ -2688,7 +2697,7 @@ function mapFilter(z) {
 }
 function dockRender() {
   const { list } = mapPlaces(), kinds = XKINDS.filter(k => list.some(z => mk(z) === k));
-  const items = [["q", "", "search"], ["all", "📍", "all"], ...DOCK.filter(([k]) => kinds.includes(k))];
+  const items = [["q", "", "search"], ["all", "🗺️", "all"], ...DOCK.filter(([k]) => kinds.includes(k))];
   const html = items.map(([k, e, l]) => `<button data-mdk="${k}" aria-pressed="${k === "q" ? MQON : !MQON && MCAT === k}"><span class="mic" aria-hidden="true">${k === "q" ? QSVG : `<span>${e}</span>`}</span><small>${l}</small></button>`).join("");
   if (mdock.dataset.sig !== html) { mdock.dataset.sig = html; const x = mdock.scrollLeft; mdock.innerHTML = html; mdock.scrollLeft = x; }
 }
@@ -2897,7 +2906,7 @@ function mapPlace(z) { SBACK = []; REFRESH = null; swapSheet(placeSheet(z)); }
 /* like mio: tapping a pin picks it (bigger, with a stem), slides it into the top of the screen and shows a row of
    cards for it and the places around it; swiping the cards moves the pick and the map follows */
 let MPICK = null, MCARL = [], MCST = 0, MCLOCK = 0;
-function mapAim(z, frac) { const sz = mSize(); MAP.easeTo({ center: [z.lng, z.lat], offset: [0, -sz.y * (0.5 - (frac || 0.38))], duration: reduce() ? 0 : 950, easing: ease }); }
+function mapAim(z, frac) { const sz = mSize(); MAP.easeTo({ center: [z.lng, z.lat], zoom: Math.max(MAP.getZoom(), Z_STREET), offset: [0, -sz.y * (0.5 - (frac || 0.38))], duration: reduce() ? 0 : 950, easing: ease }); }
 function mapFlyHere() { if (reduce()) return MAP.jumpTo({ center: [HERE.lng, HERE.lat], zoom: 15 }); MAP.flyTo({ center: [HERE.lng, HERE.lat], zoom: 15, curve: 1.15, speed: 0.9, maxDuration: 1500, easing: ease }); }
 function mcarFill(list) {
   MCARL = list; const o = liveFrom(view) || anchorFor(view);
@@ -2970,6 +2979,38 @@ function pinSet(o, st, left, zi, delay) {
   }
   if (o.zi !== zi) { o.m.getElement().style.zIndex = 2000 + zi; o.zi = zi; } o.m.getElement().style.pointerEvents = st === "h" ? "none" : "";
 }
+/* city-wide: pins merge into one bubble per area (a stable grid in world pixels, so bubbles don't jump while panning).
+   The bubble shows what kinds are there and how many; tapping it zooms into that area. */
+const Z_CITY = 13, Z_STREET = 14.5, CLKIND = { dinner: "🍽️", coffee: "☕", sweet: "🍦", drinks: "🍸", see: "🏞️", culture: "🖼️", shop: "🛍️", clothes: "👕", experience: "🎟️" };
+let CLM = new Map();
+function clusterPins(sz) {
+  const zf = Math.floor(MAP.getZoom()), W = 256 * 2 ** zf, cell = 84;
+  const wx = lng => (lng + 180) / 360 * W, wy = lat => { const t = Math.sin(lat * Math.PI / 180); return (0.5 - Math.log((1 + t) / (1 - t)) / (4 * Math.PI)) * W; };
+  const cells = new Map(), out = new Map();
+  MPTS.forEach(({ z }) => { if (MPICK && z.id === MPICK.id) return; const key = zf + ":" + Math.floor(wx(z.lng) / cell) + ":" + Math.floor(wy(z.lat) / cell); if (!cells.has(key)) cells.set(key, []); cells.get(key).push(z); });
+  const keep = new Set();
+  cells.forEach((zs, key) => {
+    if (zs.length === 1) return out.set(zs[0].id, ["b", false, 200]);
+    zs.forEach(z => out.set(z.id, ["h", false, 0]));
+    const lat = zs.reduce((t, z) => t + z.lat, 0) / zs.length, lng = zs.reduce((t, z) => t + z.lng, 0) / zs.length;
+    const cnt = {}; zs.forEach(z => { const k = mk(z); cnt[k] = (cnt[k] || 0) + 1; });
+    const em = Object.keys(cnt).sort((x, y) => cnt[y] - cnt[x]).slice(0, 1).map(k => `<i>${CLKIND[k] || "📍"}</i>`).join("");
+    const html = `<div class="mcl${zs.length >= 10 ? " big" : ""}" aria-label="${zs.length} places">${em}<b>${zs.length}</b></div>`;
+    keep.add(key); let c = CLM.get(key);
+    if (c && c.html !== html) { c.m.remove(); c = null; }
+    if (!c) { const m = mkMarker(lng, lat, html, () => clusterGo(CLM.get(key))); m.getElement().style.zIndex = 2600 + Math.min(zs.length, 99); c = { m, html }; CLM.set(key, c); }
+    c.zs = zs;
+  });
+  CLM.forEach((c, key) => { if (!keep.has(key)) { c.m.remove(); CLM.delete(key); } });
+  return out;
+}
+window.__tripMap = () => MAP;  /* for tests only */
+function clearClusters() { CLM.forEach(c => c.m.remove()); CLM.clear(); }
+function clusterGo(c) {
+  if (!c || !c.zs) return; const zs = c.zs;
+  const b = zs.reduce((r, z) => [Math.min(r[0], z.lng), Math.min(r[1], z.lat), Math.max(r[2], z.lng), Math.max(r[3], z.lat)], [180, 90, -180, -90]);
+  MUSER = true; MAP.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: { top: 90, bottom: 210, left: 40, right: 40 }, maxZoom: 16, duration: reduce() ? 0 : 900, easing: ease });
+}
 function layoutPins() {
   if (!MAP || mapv.hidden) return;
   const sz = mSize(), boxes = [[-999, -999, sz.x + 999, 62], [-999, sz.y - (MPICK ? 344 : 176), sz.x + 999, sz.y + 999]], hit = (x0, y0, x1, y1) => boxes.some(b => x0 < b[2] && x1 > b[0] && y0 < b[3] && y1 > b[1]);
@@ -2981,14 +3022,18 @@ function layoutPins() {
     PHOME.m.getElement().firstElementChild.classList.toggle("l", hl);
   }
   const want = new Map(); let nl = 0, nb = 0;
+  const zm = MAP.getZoom(), far = zm < Z_CITY, mid = !far && zm < Z_STREET, NL = mid ? 6 : 14;
+  mapv.classList.toggle("zmid", mid); mapv.classList.toggle("zfar", far);
+  const inCl = far ? clusterPins(sz, boxes) : null;
   const order = MPICK ? [{ z: MPICK, on: false }, ...MPTS.filter(q => q.z.id !== MPICK.id)] : MPTS;
   order.forEach(({ z, on }, i) => {
     const o = PM.get(z.id) || pinEl(z), p = mPt(z);
     const off = p.x < -40 || p.y < -40 || p.x > sz.x + 40 || p.y > sz.y + 40;
     if (MPICK && z.id === MPICK.id) { const left = p.x + 190 > sz.x - 6; boxes.push(left ? [p.x - 196, p.y - 34, p.x + 34, p.y + 44] : [p.x - 34, p.y - 34, p.x + 196, p.y + 44]); want.set(z.id, ["sel", left, 1200]); return; }
     if (off) return want.set(z.id, ["d", false, 0]);
+    if (inCl) return want.set(z.id, inCl.get(z.id) || ["h", false, 0]);
     const left = p.x + 22 + o.lw > sz.x - 6, bx = left ? [p.x - 22 - o.lw, p.y - 24, p.x + 22, p.y + 26] : [p.x - 22, p.y - 24, p.x + 22 + o.lw, p.y + 26];
-    if ((nl < 14 || on) && p.x > 8 && p.x < sz.x - 8 && !hit(...bx)) { boxes.push(bx); nl++; want.set(z.id, ["l", left, on ? 800 : 500 - i]); }
+    if ((nl < NL || on) && p.x > 8 && p.x < sz.x - 8 && !hit(...bx)) { boxes.push(bx); nl++; want.set(z.id, ["l", left, on ? 800 : 500 - i]); }
     else if (nb < 14 && !hit(p.x - 28, p.y - 28, p.x + 28, p.y + 28)) { boxes.push([p.x - 23, p.y - 23, p.x + 23, p.y + 23]); nb++; want.set(z.id, ["b", false, 300 - i]); }
     else want.set(z.id, ["d", false, 0]);
   });
@@ -2998,6 +3043,7 @@ function layoutPins() {
     if (w) pinSet(o, w[0], w[1], w[2], PFIRST ? Math.min(400, (k++) * 12) : 0);
     else if (!ids.has(id) && !(MPICK && MPICK.id === id)) { pinSet(o, "h", false, -100); if (!(mapPlaces().list || []).some(z => z.id === id)) { PM.delete(id); setTimeout(() => o.m.remove(), 400); } }
   });
+  if (!inCl) clearClusters();
   PFIRST = false;
   const fresh = HERE && Date.now() - HERE.t < 30 * 6e4;
   if (fresh) { if (!PHERE) { PHERE = mkMarker(HERE.lng, HERE.lat, `<div class="mme-dot"></div>`); PHERE.getElement().style.zIndex = 3000; PHERE.getElement().style.pointerEvents = "none"; } else PHERE.setLngLat([HERE.lng, HERE.lat]); }
