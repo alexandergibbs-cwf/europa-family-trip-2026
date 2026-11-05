@@ -1056,6 +1056,40 @@ body .mapv .mcar { bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
 .mlist:not(.pm) .mlg { background: none; }
 
 .mlist.pm:not(.pfull) .mpl { overflow-y: hidden; touch-action: pan-x; }
+
+/* place on the map = two pills (5 Nov): details card, and under it a separate Nearby pill. Swipe up / tap Nearby / pick a
+   category: the details fold to a name row at the top and the nearby pill grows to fill, with its own scroll */
+.mlist.pm { background: none; box-shadow: none; border-radius: 0; overflow: visible; top: max(calc(env(safe-area-inset-top, 0px) + 62px), calc(100% - 10px - env(safe-area-inset-bottom, 0px) - var(--ph, 50vh))); }
+.mlist.pm.pfull { top: calc(env(safe-area-inset-top, 0px) + 62px); }
+.mlist.pm .mpl, .mlist.pm:not(.pfull) .mpl { display: flex; flex-direction: column; gap: 8px; padding: 0; overflow: visible; height: 100%; touch-action: pan-x; }
+.pdet, .pnear { background: var(--card); border-radius: 26px; box-shadow: var(--glass-shadow), inset 0 0 0 .5px var(--glass-edge), 0 10px 34px rgba(0, 0, 0, .2); }
+.pdet { flex: none; padding: 0 16px 14px; overflow: hidden; }
+.pdet.pst { flex: 0 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; }
+.mlist.pm .pdet .mpl-h { border-radius: 26px 26px 0 0; }
+.pcl { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 460ms var(--glide), opacity 260ms ease; }
+.pcl > div { min-height: 0; overflow: hidden; }
+.mlist.pfull .pcl { grid-template-rows: 0fr; opacity: 0; }
+.mlist.pfull .pdet .ph-top { cursor: pointer; }
+.pnear { flex: 1 1 auto; min-height: 0; overflow: hidden; padding: 0 16px; }
+.pnear .nxwrap { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.pnear .nx-top { flex: none; padding: 10px 0 0; }
+.pnear .nx-h { display: flex; align-items: center; justify-content: space-between; margin: 0 4px 9px; font-size: 17px; cursor: pointer; }
+.nx-h svg { display: none; }
+.pnear .nx-h svg { display: block; width: 18px; height: 18px; fill: none; stroke: var(--sub); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; transition: transform 460ms var(--glide); }
+.mlist.pfull .pnear .nx-h svg { transform: rotate(180deg); }
+.pnear .nx-chips { margin-bottom: 4px; }
+.pnear .nxl { flex: 1; min-height: 0; overflow: hidden; padding-bottom: 16px; opacity: 0; transition: opacity 300ms ease; }
+.mlist.pfull .pnear .nxl { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y; opacity: 1; }
+.mlist.pm .pnear .ig { background: none; }
+/* nearby kinds = the map's category capsules */
+.nx-chips .mdc { flex: none; display: flex; align-items: center; gap: 5px; height: 36px; padding: 0 13px 0 9px; border: 0; border-radius: 18px; background: rgba(118, 118, 128, .14); color: var(--ink); font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background-color 200ms ease, color 200ms ease, transform 160ms var(--glide); }
+.nx-chips .mdc:active { transform: scale(.92); }
+.nx-chips .mdc .mic { font-size: 19px; line-height: 1; }
+.nx-chips .mdc small { display: flex; align-items: center; font-size: 15px; font-weight: 500; }
+.nx-chips .mdc .lg { width: 8px; height: 8px; border-radius: 4px; margin-right: 5px; background: var(--c); }
+.nx-chips .mdc[aria-pressed="true"] { background: var(--c); color: #fff; }
+.nx-chips .mdc[aria-pressed="true"] small { font-weight: 700; }
+.nx-chips .mdc[aria-pressed="true"] .lg { display: none; }
 </style>
 
 <div class="page" id="page">
@@ -2739,33 +2773,37 @@ const NEXTL = { dinner: "Eat", drinks: "Drinks", coffee: "Coffee", sweet: "Somet
 const NXC = { dinner: "Eat", drinks: "Drinks", coffee: "Coffee", sweet: "Sweet", culture: "Museums", see: "Sights", shop: "Shops", clothes: "Clothes", experience: "Experiences" };
 function nextNear(z) {
   if (!z || z.lat == null) return "";
-  const k0 = mk(z), order = [...new Set([...(NEXT[k0] || NEXT.see), ...XKINDS])], groups = [];
+  const gOf = k => (DOCK.find(([g]) => GRP[g] ? GRP[g].kinds.includes(k) : g === k) || [])[0];
+  const k0 = mk(z), order = [...new Set([...(NEXT[k0] || NEXT.see).map(gOf), ...DOCK.map(d => d[0])])].filter(Boolean), groups = [];
   for (const k of order) {
-    const all = SAVES.filter(s => s.lat != null && s.id !== z.id && s.kind !== "skip" && mk(s) === k && !(s.name === z.name))
+    const all = SAVES.filter(s => s.lat != null && s.id !== z.id && s.kind !== "skip" && inGrp(s, k) && !(s.name === z.name))
       .map(s => { const d = km(z.lat, z.lng, s.lat, s.lng); return { s, k: d, w: walkMin(d * DETOUR) }; }).filter(x => x.w <= 25).sort((x, y) => x.k - y.k);
     const near = all.filter(x => x.w <= 15).slice(0, 6), far = all.filter(x => x.w > 15).slice(0, 6);
     if (near.length || far.length) groups.push([k, near, far]);
   }
   if (!groups.length) return "";
   groups.sort((a, b) => (b[1].length ? 1 : 0) - (a[1].length ? 1 : 0));  /* kinds with something close come first */
-  return `<div class="nxwrap" data-of="${esc(z.id)}"><div class="nx-h">Nearby</div><div class="nx-chips">${groups.map(([k], i) => `<button class="msub" data-nxk="${k}" aria-pressed="${i === 0}">${NXC[k] || NEXTL[k]}</button>`).join("")}</div>`
+  const cap = (k, i) => { const d = DOCK.find(x => x[0] === k) || [k, "", NXC[k] || k]; return `<button class="mdc" data-nxk="${k}" style="--c:${MAPCOL[k] || "#8e8e93"}" aria-pressed="${i === 0}"><span class="mic" aria-hidden="true"><span>${d[1]}</span></span><small><i class="lg"></i>${d[2]}</small></button>`; };
+  return `<div class="nxwrap" data-of="${esc(z.id)}"><div class="nx-top"><div class="nx-h" data-nxo>Nearby<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></div><div class="nx-chips">${groups.map(([k], i) => cap(k, i)).join("")}</div></div><div class="nxl">`
     + groups.map(([k, near, far], i) => { const rows = list => `<div class="ig">${list.map(({ s, k }) => `<div class="place hasph" data-sid="${s.id}">${ph(s)}<span><span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(hookOf(s))}</span><span class="m" style="display:block"><b>${k < 0.06 ? "Next door" : distTxt(k) + " from here"}</b></span></span></div>`).join("")}</div>`;
-      return `<div class="nxp" data-nxp="${k}"${i ? " hidden" : ""}>${near.length ? (far.length ? `<div class="nx-b">Under 15 min walk</div>` : "") + rows(near) : ""}${far.length ? `<div class="nx-b">15–25 min walk</div>` + rows(far) : ""}</div>`; }).join("") + `</div>`;
+      return `<div class="nxp" data-nxp="${k}"${i ? " hidden" : ""}>${near.length ? (far.length ? `<div class="nx-b">Under 15 min walk</div>` : "") + rows(near) : ""}${far.length ? `<div class="nx-b">15–25 min walk</div>` + rows(far) : ""}</div>`; }).join("") + `</div></div>`;
 }
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-nxk]"); if (!b) return; e.stopPropagation(); haptic();
   const w = b.closest(".nxwrap"); w.querySelectorAll("[data-nxk]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
   w.querySelectorAll("[data-nxp]").forEach(p => { p.hidden = p.dataset.nxp !== b.dataset.nxk; });
+  const l = w.querySelector(".nxl"); if (l) l.scrollTop = 0;
+  if (w.closest(".pnear")) mlist.classList.add("pfull");
 }, true);
-function placeSheet(z) {
-  const on = getPlan(view).find(p => p.id === z.id), meta = placeMeta(z), d = placeDist(z);
-  return (SBACK.length ? `<button class="sback press" data-sback>‹ Back</button>` : "") + hero(z)
+function placeSheet(z, split) {
+  const on = getPlan(view).find(p => p.id === z.id), meta = placeMeta(z), d = placeDist(z), f = h => split ? `<div class="pcl"><div>${h}</div></div>` : h;
+  return (SBACK.length ? `<button class="sback press" data-sback>‹ Back</button>` : "") + f(hero(z))
     + `<div class="ph-top"><div class="ph-t"><h3 id="sheet-title">${esc(z.name)}</h3><span class="pmeta" data-pid="${esc(z.id)}">${meta}${on ? `${meta ? " · " : ""}<span class="pon">On the day, ${t12(on.t)}</span>` : ""}</span></div>`
     + `<a class="pgo press" href="${dirs(z.name + " " + (z.address || z.city))}" target="_blank" rel="noopener" aria-label="Directions">${pI("go")}<span class="pdist">${esc(d || "Go")}</span></a></div>`
-    + (z.hook ? `<p class="pl-tl">${esc(hookOf(z))}</p>` : "")
+    + f((z.hook ? `<p class="pl-tl">${esc(hookOf(z))}</p>` : "")
     + `<div class="pmini">${z.url && embedOf(z.url) ? `<button class="pchip press"${vidAttr(z)}>${pI("vid")}Video</button>` : ""}`
     + `<button class="pchip press" data-pshare="${esc(z.id)}">${pI("share")}Share</button>`
-    + `<a class="pchip press" href="${gq(z.name, z.city)}" target="_blank" rel="noopener">${pI("web")}Google</a></div>` + nextNear(z);
+    + `<a class="pchip press" href="${gq(z.name, z.city)}" target="_blank" rel="noopener">${pI("web")}Google</a></div>`) + (split ? "" : nextNear(z));
 }
 /* opened over whatever sheet is showing, with a way back to it */
 function pushBack() { if (!sheet.hidden) { SBACK.push({ h: document.getElementById("sheet-body").innerHTML, st: sheet.scrollTop, R: REFRESH }); REFRESH = null; } }
@@ -3287,19 +3325,31 @@ function plRender(dir) {
   const it = MPS[MPS.length - 1], prev = MPS[MPS.length - 2];
   const back = prev ? (prev.stay ? prev.stay.hotel : prev.name) : MLOPEN ? document.getElementById("mlistt").textContent.replace(/ nearby$/, "") : "";
   SBACK = []; REFRESH = null;
-  mpl.innerHTML = `<div class="mpl-h" id="mplh"><i></i>${back ? `<button class="mpb" data-mpb>‹ ${esc(back)}</button>` : ""}</div>` + (it.stay ? staySheet(it.stay) : placeSheet(it));
-  mpl.scrollTop = 0; loadGalleries(mpl);
+  const hd = `<div class="mpl-h" id="mplh"><i></i>${back ? `<button class="mpb" data-mpb>‹ ${esc(back)}</button>` : ""}</div>`, nr = it.stay ? "" : nextNear(it);
+  mlist.classList.remove("pfull");
+  mpl.innerHTML = `<div class="pdet${it.stay ? " pst" : ""}">${hd}${it.stay ? staySheet(it.stay) : placeSheet(it, true)}</div>` + (nr ? `<div class="pnear">${nr}</div>` : "");
+  mpl.scrollTop = 0; loadGalleries(mpl); panelFit();
   const ids = [...mpl.querySelectorAll("[data-sid]")].map(e => SAVE_BY[e.dataset.sid]).filter(Boolean); if (ids.length) walkFetch(it.stay || it, ids);
   if (dir && !reduce()) mpl.animate([{ transform: `translateX(${dir * 32}px)`, opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 380, easing: "cubic-bezier(.22,.8,.24,1)" });
 }
-function panelPlace(it, push) { if (!push) { MPS = []; mlist.classList.remove("pfull"); } MPS.push(it); plRender(MPS.length > 1 || MLOPEN ? 1 : 0); panelSync(); }
+/* half height = the details card at its own height plus the nearby pill's top row */
+/* measured as if unfolded, so it holds mid-animation and when photos turn up (or don't) after opening */
+function panelFit() { const dt = mpl.querySelector(".pdet"), nt = mpl.querySelector(".pnear .nx-top"); if (!dt) return;
+  let h = dt.offsetHeight; dt.querySelectorAll(".pcl").forEach(c => { h += c.firstElementChild.scrollHeight - c.offsetHeight; });
+  const v = (h + (nt ? 8 + nt.offsetHeight + 6 : 0)) + "px"; if (mlist.style.getPropertyValue("--ph") !== v) mlist.style.setProperty("--ph", v); }
+const PFIT = new ResizeObserver(() => { if (MPS.length) panelFit(); });
+new MutationObserver(() => { PFIT.disconnect(); mpl.querySelectorAll(".pdet, .pcl > div").forEach(e => PFIT.observe(e)); }).observe(mpl, { childList: true });
+addEventListener("resize", () => { if (MPS.length) panelFit(); });
+function panelPlace(it, push) { if (!push) { MPS = []; mlist.classList.remove("pfull"); } MPS.push(it); panelSync(); plRender(MPS.length > 1 || MLOPEN ? 1 : 0); }
 function mapPlace(z) { panelPlace(z, false); }
 function panelBack() {
   if (MPS.length > 1) { MPS.pop(); const it = MPS[MPS.length - 1]; if (!it.stay && it.lat != null) { MPICK = it; layoutPins(); mapNear(it); } return plRender(-1); }
   MPS = []; panelSync(); if (MLOPEN && !reduce()) mlistl.animate([{ transform: "translateX(-32px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 380, easing: "cubic-bezier(.22,.8,.24,1)" });
 }
 function panelClose() { if (!MPS.length && !MLOPEN) return; MPS = []; MLOPEN = false; mlist.style.transform = ""; mlist.classList.remove("drag"); panelSync(); }
-mpl.addEventListener("click", e => { if (e.target.closest("[data-mpb]")) { e.stopPropagation(); haptic(); panelBack(); } });
+mpl.addEventListener("click", e => { if (e.target.closest("[data-mpb]")) { e.stopPropagation(); haptic(); panelBack(); return; }
+  if (e.target.closest("[data-nxo]")) { haptic(); mlist.classList.toggle("pfull"); return; }
+  if (mlist.classList.contains("pfull") && e.target.closest(".pdet") && !e.target.closest("a, button, .gal, iframe")) { haptic(); mlist.classList.remove("pfull"); } });
 /* drag the place panel down (by its top, or from the top of its scroll) to close */
 { let d = null;
   const start = y => { d = { y, t: performance.now(), moved: false }; };
@@ -3311,8 +3361,9 @@ mpl.addEventListener("click", e => { if (e.target.closest("[data-mpb]")) { e.sto
   mpl.addEventListener("pointermove", e => { if (d && !d.touch) move(e.clientY); });
   mpl.addEventListener("pointerup", e => { if (d && !d.touch) end(e.clientY); });
   let lt = null;
-  mpl.addEventListener("touchstart", e => { if (e.target.closest(".mpl-h")) return; lt = e.touches.length === 1 && mpl.scrollTop <= 0 ? e.touches[0].clientY : null; if (lt != null) { start(lt); d.touch = true; } }, { passive: true });
-  mpl.addEventListener("touchmove", e => { if (lt == null) return; const y = e.touches[0].clientY; if (y < lt && !d?.moved && mlist.classList.contains("pfull")) { lt = null; d = null; return; } if (mpl.scrollTop <= 0 && move(y)) e.preventDefault(); }, { passive: false });
+  let sc = null; const st = () => sc && mlist.classList.contains("pfull") ? sc.scrollTop : 0;
+  mpl.addEventListener("touchstart", e => { if (e.target.closest(".mpl-h")) return; sc = e.target.closest(".nxl, .pst"); lt = e.touches.length === 1 && st() <= 0 ? e.touches[0].clientY : null; if (lt != null) { start(lt); d.touch = true; } }, { passive: true });
+  mpl.addEventListener("touchmove", e => { if (lt == null) return; const y = e.touches[0].clientY; if (y < lt && !d?.moved && mlist.classList.contains("pfull")) { lt = null; d = null; return; } if (st() <= 0 && move(y)) e.preventDefault(); }, { passive: false });
   mpl.addEventListener("touchend", e => { if (lt == null) return; lt = null; end(e.changedTouches[0].clientY); }); }
 /* like mio: tapping a pin picks it (bigger, with a stem), slides it into the top of the screen and shows a row of
    cards for it and the places around it; swiping the cards moves the pick and the map follows */
