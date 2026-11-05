@@ -1315,16 +1315,8 @@ function anchorFor(iso) { const s = stayOn(iso) || (iso === "2026-11-19" ? STAYS
 let HERE = null, hereAsked = 0;
 function liveFrom(iso) { if (iso !== today || !HERE || Date.now() - HERE.t > 15 * 6e4) return null; const near = x => x && x.lat != null && km(x.lat, x.lng, HERE.lat, HERE.lng) < 40;
   return near(anchorFor(iso)) || near(STAYS.find(st => st.out === iso)) ? HERE : null; }
-/* the stay the map is about: normally tonight's; on a travel day today, the one you're leaving until you're nearer the next one
-   (by your location), or without a location until the departure time */
-function mapStay() {
-  const a = anchorFor(view), leaving = view === today ? STAYS.find(st => st.out === today && st.lat != null) : null;
-  if (!leaving) return a || STAYS.find(st => st.out === view && st.lat != null);
-  if (!a) return leaving;
-  if (HERE && Date.now() - HERE.t < 30 * 6e4) return km(HERE.lat, HERE.lng, leaving.lat, leaving.lng) < km(HERE.lat, HERE.lng, a.lat, a.lng) ? leaving : a;
-  const mv = MOVES.find(m => m.dep && m.dep[0] === today); if (!mv) return a;
-  const [h, mi] = mv.dep[1].split(":").map(Number), now = new Date(); return now.getHours() * 60 + now.getMinutes() < h * 60 + mi ? leaving : a;
-}
+/* the stay the map is about: tonight's (on a travel day, the city you're heading to: Alex, 5 Nov, "forget Zürich, open on Berlin") */
+function mapStay() { return anchorFor(view) || STAYS.find(st => st.out === view && st.lat != null); }
 let HERE_FRESH = 0, hereWatch = null, hereDrawn = null, hereDrawT = 0, hereDrawQ = 0;
 function stopWatch() { if (hereWatch != null) { try { navigator.geolocation.clearWatch(hereWatch); } catch (e) {} hereWatch = null; } }
 /* once you've allowed location, keep following you while the app is on screen (stops when it's in the background) */
