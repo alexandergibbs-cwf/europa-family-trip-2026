@@ -954,6 +954,11 @@ body .mapv .mcard { bottom: calc(158px + env(safe-area-inset-bottom, 0px)); }
 .mapv.lon .mdock { background: var(--panel); }
 .mapv.lon .mdock button:not([aria-pressed="true"]):not(.mdn) { background: rgba(118, 118, 128, .14); box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 .mapv .mlsubs { display: none; }
+/* colour key: a dot by the word, and the picked category fills with its pin colour */
+.mapv .mdock .mdc small { display: flex; align-items: center; }
+.mapv .mdock .mdc .lg { width: 8px; height: 8px; border-radius: 4px; margin: 0 5px 0 0; background: var(--c); box-shadow: none; vertical-align: 0; }
+.mapv .mdock .mdc[aria-pressed="true"] { background: var(--c); color: #fff; }
+.mapv .mdock .mdc[aria-pressed="true"] .lg { display: none; }
 body .mapv .mcar { bottom: calc(126px + env(safe-area-inset-bottom, 0px)); }
 .mapv .mgrab { bottom: calc(258px + env(safe-area-inset-bottom, 0px)); }
 .mapv .mfoot { height: calc(128px + env(safe-area-inset-bottom, 0px)); }
@@ -2921,7 +2926,7 @@ function dockRender() {
   /* the count is the list button: no "all" / "See all" words */
   const head = n >= 3 && mapv.classList.contains("picked") ? `<button class="mdn" data-mdk="list" aria-label="List all ${n}">${LSVG}<b>${n}</b></button>` : "";
   const html = head + items.map(([k, e, l]) => { const on = k === "q" ? MQON : !MQON && MCAT === k, ic = k === "q" || k === "home" || k === "all";
-    return `<button data-mdk="${k}" class="${ic ? "mdi" : ""}" aria-pressed="${on}" aria-label="${l}"><span class="mic" aria-hidden="true">${k === "q" ? QSVG : `<span>${e}</span>`}</span>${ic ? "" : `<small>${l}</small>`}</button>${on && subs ? subs.replace(/ glass/g, "") : ""}`; }).join("");
+    const c = !ic && MAPCOL[k]; return `<button data-mdk="${k}" class="${ic ? "mdi" : ""}${c ? " mdc" : ""}" ${c ? `style="--c:${c}"` : ""} aria-pressed="${on}" aria-label="${l}"><span class="mic" aria-hidden="true">${k === "q" ? QSVG : `<span>${e}</span>`}</span>${ic ? "" : `<small>${c ? `<i class="lg"></i>` : ""}${l}</small>`}</button>${on && subs ? subs.replace(/ glass/g, "") : ""}`; }).join("");
   if (mdock.dataset.sig !== html) { const fresh = mdock.dataset.k !== MCAT; mdock.dataset.sig = html; mdock.dataset.k = MCAT; const x = mdock.scrollLeft; mdock.innerHTML = html; mdock.scrollLeft = x;
     const sel = mdock.querySelector('[data-mdk]:not([data-mdk="q"]):not(.mdn)[aria-pressed="true"]');
     if (fresh && sel && MCAT !== "all") { const r = sel.offsetLeft - 56; if (r < mdock.scrollLeft || sel.offsetLeft + sel.offsetWidth > mdock.scrollLeft + mdock.clientWidth) mdock.scrollTo({ left: Math.max(0, r), behavior: reduce() ? "auto" : "smooth" }); } }
