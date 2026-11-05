@@ -446,8 +446,9 @@ body.mapopen .sheet { max-height: calc(56vh + 120px); } body.mapopen .scrim { ba
 .pa { flex: none; height: 50px; border: 0; border-radius: 25px; padding: 0 18px 0 14px; display: inline-flex; align-items: center; gap: 8px; background: var(--card); color: var(--ink); font: 600 16px/1 var(--font); letter-spacing: -0.01em; text-decoration: none; cursor: pointer; white-space: nowrap; }
 .pa svg { width: 20px; height: 20px; flex: none; }
 .pa.go { background: var(--blue); color: #fff; flex: 1; min-width: 0; padding-right: 12px; }
-.pa.go span { display: flex; flex-direction: column; gap: 3px; }
-.pa.go small { font-size: 12px; font-weight: 500; opacity: .85; letter-spacing: 0; }
+.pa.go span { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.pa.go small { font-size: 12px; font-weight: 500; opacity: .85; letter-spacing: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.mapopen .gal.strip .gtrack img { height: 150px; } body.mapopen .gal.strip .gtrack img:only-child { height: 180px; }
 .pa.on { color: var(--blue); }
 .pa.ic { width: 50px; padding: 0; justify-content: center; }
 .pmeta .pon { color: var(--blue); }
@@ -802,12 +803,11 @@ body .mapv .maplibregl-ctrl-bottom-left { bottom: calc(90px + env(safe-area-inse
 .tripc .crow.on .a { color: var(--blue); }
 .tripc .crow.cur .a::after { content: "Now"; font-size: 11px; font-weight: 700; color: #fff; background: var(--red); border-radius: 980px; padding: 2px 7px; margin-left: 8px; vertical-align: 2px; }
 
-/* map: one fixed bottom stack (tab bar, category rail) that never moves away; the sheet rises above the rail.
-   Top-left the city, top-right locate. Tap a category to open its sheet, tap it again (or the map, or drag down) to put it away. */
+/* map: two layers only. Browse = the category rail + swipeable cards over the map; detail = the place sheet.
+   Top-left the city (or the search field), top-right locate, rail and tab bar always at the bottom. */
 .mapv #mchips { display: none !important; }
 .mdock { position: absolute; left: 0; right: 0; bottom: 0; z-index: 500; display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; padding: 6px 8px calc(86px + env(safe-area-inset-bottom, 0px)); scroll-padding: 0 8px; pointer-events: none; background: transparent; transition: background-color 280ms ease, box-shadow 280ms ease; }
 .mdock button { pointer-events: auto; }
-.mapv.sugup .mdock { background: var(--panel); box-shadow: 0 -0.5px 0 var(--hair), 0 -10px 20px color-mix(in srgb, var(--panel) 85%, transparent); }
 .mdock::-webkit-scrollbar { display: none; }
 .mdock button { flex: none; width: 68px; border: 0; background: none; padding: 0; font: inherit; color: var(--mtxt); display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .mdock .mic { width: 50px; height: 50px; border-radius: 25px; display: grid; place-items: center; font-size: 34px; line-height: 1; transition: transform 160ms var(--glide), background-color 220ms ease, box-shadow 220ms ease; }
@@ -818,50 +818,14 @@ body .mapv .maplibregl-ctrl-bottom-left { bottom: calc(90px + env(safe-area-inse
 .mdock small { font-size: 12px; font-weight: 500; white-space: nowrap; text-shadow: 0 0 3px var(--mhalo), 0 0 6px var(--mhalo); transition: font-weight 0ms; }
 .mdock button[aria-pressed="true"] .mic { background: var(--card); box-shadow: 0 2px 12px rgba(0, 0, 0, .18); }
 .mdock button[aria-pressed="true"] small { font-weight: 700; }
-.mapv.sugup .mdock small { text-shadow: none; }
 body .mapv .mme { top: max(12px, env(safe-area-inset-top, 0px)); bottom: auto !important; right: 12px; width: 44px; height: 44px; display: flex !important; }
-.msug { position: absolute; left: 0; right: 0; bottom: 0; z-index: 499; height: calc(100% - 66px - env(safe-area-inset-top, 0px)); display: flex; flex-direction: column; background: var(--panel); border-radius: 24px 24px 0 0; box-shadow: 0 -6px 28px rgba(0, 0, 0, .14); --chrome: calc(160px + env(safe-area-inset-bottom, 0px)); transform: translateY(105%); transition: transform 560ms var(--glide); }
-.msug.half { transform: translateY(30%); }
-.msug.full { transform: none; }
-.msug.drag { transition: none; }
-.mapv.picked .msug, .mapv.carded .msug { transform: translateY(105%); }
-.msug-h { flex: none; height: 22px; touch-action: none; cursor: grab; display: grid; place-items: center; }
-.msug-h i { width: 36px; height: 5px; border-radius: 3px; background: color-mix(in srgb, var(--sub) 45%, transparent); }
-.msug-q { flex: none; display: flex; align-items: center; gap: 12px; padding: 0 16px 10px; }
-.msug-q label { flex: 1; min-width: 0; height: 40px; border-radius: 12px; background: rgba(118, 118, 128, .14); display: flex; align-items: center; gap: 8px; padding: 0 12px; }
-.msug-q svg { flex: none; width: 18px; height: 18px; fill: none; stroke: var(--sub); stroke-width: 2.2; stroke-linecap: round; }
-.msug-q input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; color: var(--ink); font: inherit; font-size: 17px; padding: 0; -webkit-appearance: none; appearance: none; }
-.msug-q input::-webkit-search-cancel-button { display: none; }
-.msug-q button { border: 0; background: none; color: var(--blue); font: inherit; font-size: 17px; padding: 8px 0; cursor: pointer; }
-.msug-l { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 0 12px calc(var(--chrome) + 12px); }
-.msug.half .msug-l { padding-bottom: calc(var(--chrome) + 28vh); }
-.msug-t { margin: 2px 4px 14px; font-size: 26px; font-weight: 800; letter-spacing: -.02em; line-height: 30px; }
-.msug-s { display: flex; align-items: center; gap: 9px; margin: 4px 4px 10px; font-size: 15px; font-weight: 800; letter-spacing: .01em; text-transform: uppercase; }
-.msug-s i { width: 10px; height: 10px; border-radius: 5px; background: #ff9500; }
-.mtps { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; margin: 0 -12px 18px; padding: 0 16px; scroll-snap-type: x mandatory; scroll-padding: 0 16px; }
-.mtps::-webkit-scrollbar { display: none; }
-.mtp { flex: none; width: 166px; scroll-snap-align: start; cursor: pointer; }
-.mtp-p, .mcd-p { position: relative; display: grid; place-items: center; overflow: hidden; border-radius: 6px; color: var(--c); background: color-mix(in srgb, var(--c) 14%, var(--card)); }
-.mtp-p { width: 166px; height: 220px; }
-.mtp-p svg, .mcd-p svg { width: 34px; height: 34px; }
-.mtp-p img, .mcd-p img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 220ms ease; }
-.mtp-p img.ld, .mcd-p img.ld { opacity: 1; }
-.mtp-p i { position: absolute; z-index: 1; top: 8px; right: 8px; font-style: normal; font-size: 12px; font-weight: 800; letter-spacing: .02em; color: #1c1c1e; background: #ffb8de; border-radius: 4px; padding: 2px 6px; }
-.mtp .a { display: block; margin-top: 8px; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mtp .a em, .mcd .h em { font-style: normal; margin-right: 6px; }
-.mtp .h { display: block; font-size: 13px; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mcd { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 14px; background: var(--card); border-radius: 14px; padding: 12px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0, 0, 0, .06); cursor: pointer; }
-.mcd-p { width: 112px; height: 148px; }
-.mcd-p::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 46px; background: linear-gradient(transparent, rgba(0, 0, 0, .35)); }
-.mcd-p b { position: absolute; z-index: 1; left: 8px; bottom: 7px; color: #fff; font-size: 15px; font-weight: 600; text-shadow: 0 1px 4px rgba(0, 0, 0, .6); }
-.mcd-t { display: flex; flex-direction: column; min-width: 0; padding-top: 2px; }
-.mcd .a { font-size: 17px; font-weight: 800; letter-spacing: -.02em; line-height: 1.2; }
-.mcd .h { margin-top: 8px; font-size: 15px; line-height: 1.35; color: color-mix(in srgb, var(--ink) 72%, transparent); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.mcd .f { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.mcd .pl { font-size: 13px; color: var(--sub); background: var(--panel); border-radius: 10px; padding: 4px 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mcd .bk { flex: none; width: 36px; height: 36px; margin-right: -6px; border: 0; background: none; color: var(--sub); display: grid; place-items: center; cursor: pointer; }
-.mcd .bk svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
-.mcd .bk.on { color: var(--blue); } .mcd .bk.on svg { fill: currentColor; }
+.mqbar { position: absolute; z-index: 502; top: max(12px, env(safe-area-inset-top, 0px)); left: 12px; right: 12px; height: 44px; border-radius: 22px; display: none; align-items: center; gap: 8px; padding: 0 4px 0 14px; }
+.mapv.qon .mqbar { display: flex; }
+.mapv.qon .mtt, .mapv.qon .mme { visibility: hidden; }
+.mqbar svg { flex: none; width: 18px; height: 18px; fill: none; stroke: var(--sub); stroke-width: 2.2; stroke-linecap: round; }
+.mqbar input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; color: var(--ink); font: inherit; font-size: 17px; padding: 0; -webkit-appearance: none; appearance: none; }
+.mqbar input::-webkit-search-cancel-button { display: none; }
+.mqbar button { flex: none; border: 0; background: none; color: var(--blue); font: inherit; font-size: 17px; padding: 0 12px; height: 44px; cursor: pointer; }
 /* a picked pin's card row sits on top of the rail */
 body .mapv .mcar { bottom: calc(158px + env(safe-area-inset-bottom, 0px)); }
 body .mapv .mcard { bottom: calc(158px + env(safe-area-inset-bottom, 0px)); }
@@ -893,7 +857,7 @@ body .mapv .mcard { bottom: calc(158px + env(safe-area-inset-bottom, 0px)); }
 </aside>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden><div class="grab"></div><div id="sheet-body"></div></div>
 <div class="show" id="show" role="dialog" aria-modal="true" hidden></div>
-<div class="mapv" id="mapv" role="dialog" aria-modal="true" aria-label="Map" hidden><div id="mapc"></div><div class="mtop"><div class="xp-top"><button class="pill glass press mselx" id="mselx"><span></span><i aria-hidden="true">✕</i></button><button class="pill glass press mtt" data-trip><span id="mtt"></span><i class="chr"></i></button><span class="sp"></span></div><div class="xp-row xcats mchips" id="mchips"></div><span class="mcity" id="mcity" hidden></span></div><div class="mdock" id="mdock" role="toolbar" aria-label="Categories"></div><div class="msug" id="msug" aria-label="Suggestions"><div class="msug-h" id="msugh" aria-hidden="true"><i></i></div><div class="msug-q" id="msugq" hidden><label><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><input id="msq" type="search" placeholder="Search your saves" enterkeyhint="search" autocomplete="off" aria-label="Search saved places"></label><button id="msqx">Cancel</button></div><div class="msug-l" id="msugl"></div></div><div class="mcar" id="mcar"></div><button class="pill glass press ib mme" id="mme" aria-label="Where am I"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg></button><div class="mcard" id="mcard" hidden></div></div>
+<div class="mapv" id="mapv" role="dialog" aria-modal="true" aria-label="Map" hidden><div id="mapc"></div><div class="mtop"><div class="xp-top"><button class="pill glass press mselx" id="mselx"><span></span><i aria-hidden="true">✕</i></button><button class="pill glass press mtt" data-trip><span id="mtt"></span><i class="chr"></i></button><span class="sp"></span></div><div class="xp-row xcats mchips" id="mchips"></div><span class="mcity" id="mcity" hidden></span></div><div class="mdock" id="mdock" role="toolbar" aria-label="Categories"></div><label class="mqbar glass" id="mqbar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><input id="mqi" type="search" placeholder="Search your saves" enterkeyhint="search" autocomplete="off" aria-label="Search saved places"><button id="mqx" type="button">Cancel</button></label><div class="mcar" id="mcar"></div><button class="pill glass press ib mme" id="mme" aria-label="Where am I"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg></button><div class="mcard" id="mcard" hidden></div></div>
 <nav class="tabs glass" id="tabs" role="tablist" aria-label="Views"><button role="tab" data-tab="xp" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg><span>Explore</span></button><button role="tab" data-tab="map" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6z"/><path d="M9 4v14M15 6v14"/></svg><span>Map</span></button><button role="tab" data-tab="cal" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Schedule</span></button></nav>
 <div class="sr" aria-live="polite" id="live"></div>
 
@@ -2523,7 +2487,7 @@ function placeMeta(z) {
 function placeDist(z) {
   const o = liveFrom(view) || anchorFor(view); if (!o || z.lat == null) return "";
   const k = km(o.lat, o.lng, z.lat, z.lng); if (k >= 8 && z.city !== (anchorFor(view) || {}).city) return `${Math.round(k)} km away`;
-  const t = distTxt(k, walkKm(o, z)).split(" · "); return /walk/.test(t[1] || "") ? t[1] : t[1] ? t[1].replace(/^~/, "") : t[0];
+  const t = distTxt(k, walkKm(o, z)).split(" · "); return /walk/.test(t[1] || "") ? t[1] : t[1] ? t[1].replace(/^~/, "").replace(" or taxi", "") : t[0];
 }
 /* what people usually do next after a place like this, from the saves within a short walk of it */
 const NEXT = { dinner: ["drinks", "sweet", "see", "clothes", "shop"], drinks: ["dinner", "drinks", "sweet"], coffee: ["see", "clothes", "culture", "shop", "sweet"], sweet: ["see", "clothes", "shop", "coffee"],
@@ -2539,7 +2503,7 @@ function nextNear(z) {
     if (!near.length) continue; near.forEach(x => used.add(x.s.id));
     out.push(`<div class="nx-h">${k === k0 ? "More " + NEXTL[k].toLowerCase() : NEXTL[k]} nearby</div><div class="ig">${near.map(({ s, k }) => `<div class="place hasph" data-sid="${s.id}">${ph(s)}<span><span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(hookOf(s))}</span><span class="m" style="display:block"><b>${k < 0.06 ? "Next door" : distTxt(k) + " from here"}</b></span></span></div>`).join("")}</div>`);
   }
-  return out.length ? `<div class="nxwrap" data-of="${esc(z.id)}"><div class="sec">NEAR HERE, NEXT</div>${out.join("")}</div>` : "";
+  return out.length ? `<div class="nxwrap" data-of="${esc(z.id)}">${out.join("")}</div>` : "";
 }
 function placeSheet(z) {
   const inTrip = view >= START && view <= END, on = getPlan(view).find(p => p.id === z.id), meta = placeMeta(z), d = placeDist(z);
@@ -2697,108 +2661,49 @@ xp.addEventListener("click", e => {
   const c = t.closest("[data-xcat]"); if (c) { haptic(); XCAT = c.dataset.xcat; return xpRender(false); }
   const m = t.closest("[data-xmore]"); if (m) { haptic(); XMORE[m.dataset.xmore] = !XMORE[m.dataset.xmore]; return xpRender(); }
 });
-/* ---------- map: category rail (always there) → sheet (half / full) with top-rated carousel + nearest list; search ---------- */
-const DOCK = [["all", "⭐", "top picks"], ["dinner", "🍽️", "eat"], ["coffee", "☕", "cafes"], ["sweet", "🍦", "sweets"], ["drinks", "🍸", "bars"], ["see", "🏞️", "sights"], ["culture", "🖼️", "culture"], ["shop", "🛍️", "shops"], ["clothes", "👕", "clothes"], ["experience", "🎟️", "experiences"]];
-const TOPN = { all: "top picks", dinner: "top-rated restaurants", coffee: "top-rated cafés", sweet: "top-rated sweets", drinks: "top-rated bars", see: "top-rated sights", culture: "top-rated culture", shop: "top-rated shops", clothes: "top-rated clothes shops", experience: "top-rated experiences" };
-const BKSVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3.5h11v17l-5.5-4-5.5 4z"/></svg>`;
+/* ---------- map: the rail filters the pins and fills the swipe cards (nearest first; top picks by rating). Search does the same from a field at the top. ---------- */
+const DOCK = [["top", "⭐", "top picks"], ["dinner", "🍽️", "eat"], ["coffee", "☕", "cafes"], ["sweet", "🍦", "sweets"], ["drinks", "🍸", "bars"], ["see", "🏞️", "sights"], ["culture", "🖼️", "culture"], ["shop", "🛍️", "shops"], ["clothes", "👕", "clothes"], ["experience", "🎟️", "experiences"]];
 const QSVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>`;
-const msug = document.getElementById("msug"), msugl = document.getElementById("msugl"), mdock = document.getElementById("mdock"), msq = document.getElementById("msq"), msugq = document.getElementById("msugq");
-let SUGSIG = "", SUGQ = "", SUGSRCH = false;
-const sugState = () => msug.classList.contains("full") ? "full" : msug.classList.contains("half") ? "half" : "";
-const lowHook = z => { const h = (z.hook || "").replace(/[|\x1f]/g, " ").trim(); return h ? h[0].toLowerCase() + h.slice(1) : ""; };
-const sugImg = z => `${svgI(icoOf(z))}<img loading="lazy" decoding="async" alt="" src="${esc(photoUrl(z))}" onload="this.classList.add('ld')" onerror="this.remove()">`;
-function sugTop(z) {
-  return `<div class="mtp" data-sid="${z.id}"><span class="mtp-p" style="--c:${MAPCOL[mk(z)] || "#8e8e93"}">${sugImg(z)}<i>★ ${Number(z.rating).toFixed(1)}</i></span><span class="a"><em>${emoOf(z)}</em>${esc(z.name)}</span><span class="h">${esc(lowHook(z))}</span></div>`;
+const mdock = document.getElementById("mdock"), mqi = document.getElementById("mqi");
+let MQ = "", MQON = false, MQT = 0;
+const TOPR = 4.5;
+function mapFilter(z) {
+  if (MQ) { const q = MQ.toLowerCase(); return (z.name + " " + (z.hook || "") + " " + (z.vibe || "")).toLowerCase().includes(q); }
+  return MCAT === "all" || (MCAT === "top" ? (z.rating || 0) >= TOPR : mk(z) === MCAT);
 }
-function sugCard(z, k, o) {
-  const d = distTxt(k, o && walkKm(o, z)).split(" · "), on = getPlan(view).some(p => p.id === z.id), h = lowHook(z);
-  return `<div class="mcd" data-sid="${z.id}"><span class="mcd-p" style="--c:${MAPCOL[mk(z)] || "#8e8e93"}">${sugImg(z)}<b>${esc(d[0])}</b></span><span class="mcd-t"><span class="a">${esc(z.name)}</span>${h ? `<span class="h"><em>${emoOf(z)}</em>${esc(h)}</span>` : ""}<span class="f"><span class="pl">${z.rating ? `★ ${z.rating} · ` : ""}${esc(d[1] || d[0])}</span><button class="bk${on ? " on" : ""}" data-sbk="${z.id}" aria-label="${on ? "Remove from the day" : "Add to the day"}">${BKSVG}</button></span></span></div>`;
-}
-function dockRender(kinds) {
-  const st = sugState(), items = [["q", "", "search"], ...DOCK.filter(([k]) => k === "all" || kinds.includes(k))];
-  const html = items.map(([k, e, l]) => `<button data-mdk="${k}" aria-pressed="${k === "q" ? SUGSRCH && !!st : !SUGSRCH && MCAT === k && (k !== "all" || !!st)}"><span class="mic" aria-hidden="true">${k === "q" ? QSVG : `<span>${e}</span>`}</span><small>${l}</small></button>`).join("");
+function dockRender() {
+  const { list } = mapPlaces(), kinds = XKINDS.filter(k => list.some(z => mk(z) === k)), top = list.some(z => (z.rating || 0) >= TOPR);
+  const items = [["q", "", "search"], ...DOCK.filter(([k]) => k === "top" ? top : kinds.includes(k))];
+  const html = items.map(([k, e, l]) => `<button data-mdk="${k}" aria-pressed="${k === "q" ? MQON : !MQON && MCAT === k}"><span class="mic" aria-hidden="true">${k === "q" ? QSVG : `<span>${e}</span>`}</span><small>${l}</small></button>`).join("");
   if (mdock.dataset.sig !== html) { mdock.dataset.sig = html; const x = mdock.scrollLeft; mdock.innerHTML = html; mdock.scrollLeft = x; }
 }
-function sugRender() {
-  const { a, list } = mapPlaces(), o = liveFrom(view) || a;
-  dockRender(XKINDS.filter(k => list.some(z => mk(z) === k)));
-  if (!o) { msugl.innerHTML = ""; SUGSIG = ""; return; }
-  const q = SUGSRCH ? SUGQ.trim().toLowerCase() : "";
-  const pool = (SUGSRCH ? (q ? list.filter(z => (z.name + " " + (z.hook || "") + " " + (z.vibe || "")).toLowerCase().includes(q)) : []) : list.filter(z => MCAT === "all" || mk(z) === MCAT))
-    .map(z => ({ z, k: km(o.lat, o.lng, z.lat, z.lng) })).sort((x, y) => x.k - y.k).slice(0, 40);
-  const top = SUGSRCH ? [] : list.filter(z => z.rating && (MCAT === "all" || mk(z) === MCAT)).map(z => ({ z, k: km(o.lat, o.lng, z.lat, z.lng) })).filter(x => x.k < 3)
-    .sort((x, y) => y.z.rating - x.z.rating || x.k - y.k).slice(0, 8);
-  const lab = (DOCK.find(d => d[0] === MCAT) || DOCK[0])[2];
-  const head = [view, SUGSRCH ? "q" : MCAT, q].join("|"), sig = head + "|" + pool.map(x => x.z.id).join(",") + "|" + getPlan(view).map(p => p.id).join(",");
-  if (sig === SUGSIG) {  /* only walk times changed: patch them in place */
-    msugl.querySelectorAll(".mcd[data-sid]").forEach(r => { const x = pool.find(y => y.z.id === r.dataset.sid); if (!x) return; const d = distTxt(x.k, walkKm(o, x.z)).split(" · "), b = r.querySelector(".mcd-p b"), pl = r.querySelector(".pl"); if (b) b.textContent = d[0]; if (pl) pl.textContent = (x.z.rating ? `★ ${x.z.rating} · ` : "") + (d[1] || d[0]); });
-    return;
-  }
-  const keep = SUGSIG.startsWith(head + "|"), st = msugl.scrollTop, tsc = msugl.querySelector(".mtps")?.scrollLeft || 0; SUGSIG = sig;
-  msugl.innerHTML = (SUGSRCH ? "" : `<h2 class="msug-t">${esc(lab)}</h2>`)
-    + (top.length >= 3 ? `<h3 class="msug-s"><i></i>${esc(TOPN[MCAT] || "top picks")}</h3><div class="mtps">${top.map(x => sugTop(x.z)).join("")}</div>` : "")
-    + (pool.length ? pool.map(x => sugCard(x.z, x.k, o)).join("") : SUGSRCH ? (q ? `<p class="xp-empty">Nothing saved matches that.</p>` : "") : `<p class="xp-empty">Nothing saved near here.</p>`);
-  if (keep) { msugl.scrollTop = st; const t = msugl.querySelector(".mtps"); if (t) t.scrollLeft = tsc; } else msugl.scrollTop = 0;
+function railList() {
+  const o = liveFrom(view) || anchorFor(view); if (!o) return [];
+  const r = MPTS.map(q => ({ z: q.z, k: km(o.lat, o.lng, q.z.lat, q.z.lng) }));
+  if (MCAT === "top" && !MQ) return r.filter(x => x.k < 4).sort((a, b) => (b.z.rating || 0) - (a.z.rating || 0) || a.k - b.k).slice(0, 25).map(x => x.z);
+  return r.sort((a, b) => a.k - b.k).slice(0, 25).map(x => x.z);
 }
-function sugTo(st) {
-  msug.classList.remove("half", "full", "drag"); msug.style.transform = ""; if (st) msug.classList.add(st);
-  mapv.classList.toggle("sugup", !!st);
-  if (!st && SUGSRCH) sugSearch(false); else sugRender();
-}
-function sugSearch(on) {
-  SUGSRCH = on; msugq.hidden = !on; SUGQ = ""; msq.value = ""; SUGSIG = "";
-  if (on) { sugTo("full"); msq.focus({ preventScroll: true }); } else { msq.blur(); sugRender(); }
-}
-/* the rail: a new category opens its sheet; the open one again puts the sheet away (the filter stays on the pins) */
+function carShow(list) { if (!list.length) return mapPick(null); mcarFill(list); mapPick(list[0]); }
+function clearPick() { MPICK = null; mapv.classList.remove("picked"); mapCard(null); }
 mdock.addEventListener("click", e => {
   const b = e.target.closest("[data-mdk]"); if (!b) return; e.stopPropagation(); haptic();
-  const k = b.dataset.mdk, st = sugState();
-  if (MPICK) { MPICK = null; mapv.classList.remove("picked"); mapCard(null); }
-  if (k === "q") { if (SUGSRCH && st) return sugTo(""); return sugSearch(true); }
-  if (SUGSRCH) { SUGSRCH = false; msugq.hidden = true; msq.blur(); }
-  if (k === MCAT && st) return sugTo("");
-  if (k !== MCAT) { MCAT = XCAT = k; XMORE = {}; SUGSIG = ""; drawMap(); }
-  sugTo(st || "half");
+  const k = b.dataset.mdk;
+  if (k === "q") return MQON ? mqClose() : mqOpen();
+  if (MQON) mqClose(true);
+  clearPick();
+  if (k === MCAT) { MCAT = "all"; XCAT = "all"; XMORE = {}; drawMap(); return; }
+  MCAT = k; if (k !== "top") { XCAT = k; XMORE = {}; }
+  drawMap(); carShow(railList());
 });
-document.getElementById("msqx").addEventListener("click", e => { e.stopPropagation(); haptic(); sugSearch(false); sugTo(""); });
-msq.addEventListener("input", () => { SUGQ = msq.value; sugRender(); });
-msq.addEventListener("keydown", e => { if (e.key === "Enter") msq.blur(); });
-msugq.addEventListener("click", e => e.stopPropagation());
-/* drag: the grabber, or the list when it's scrolled to the top and pulled down */
-let sg = null;
-const sgBase = () => { const r = msug.getBoundingClientRect(), pr = mapv.getBoundingClientRect(); return r.top - pr.top - (mapv.offsetHeight - msug.offsetHeight); };
-function sgStart(y) { sg = { y, y0: sgBase(), t: performance.now(), moved: false, H: msug.offsetHeight }; }
-function sgMove(y) {
-  if (!sg) return false; const dy = y - sg.y; if (!sg.moved && Math.abs(dy) < 6) return false;
-  if (!sg.moved) { sg.moved = true; msug.classList.add("drag"); }
-  msug.style.transform = `translateY(${Math.max(0, sg.y0 + dy)}px)`; return true;
+function mqOpen() { MQON = true; mapv.classList.add("qon"); clearPick(); layoutPins(); dockRender(); mqi.value = ""; mqi.focus({ preventScroll: true }); }
+function mqClose(quiet) {
+  const had = !!MQ; MQON = false; MQ = ""; mqi.value = ""; mqi.blur(); mapv.classList.remove("qon"); clearTimeout(MQT);
+  if (quiet) return; clearPick(); if (had) drawMap(); else { layoutPins(); dockRender(); }
 }
-function sgEnd(y) {
-  if (!sg) return; const g = sg; sg = null;
-  if (!g.moved) return false;
-  const top = Math.max(0, g.y0 + (y - g.y)), v = (y - g.y) / Math.max(1, performance.now() - g.t), H = g.H;
-  const stops = [["full", 0], ["half", H * 0.30], ["", H]];
-  let to = stops.reduce((b, x) => Math.abs(x[1] - top) < Math.abs(b[1] - top) ? x : b);
-  if (Math.abs(v) > 0.45) { const cur = stops.findIndex(x => x[0] === sugState()); to = stops[Math.max(0, Math.min(2, cur + (v > 0 ? 1 : -1)))]; }
-  haptic(); sugTo(to[0]); return true;
-}
-const msh = document.getElementById("msugh");
-msh.addEventListener("pointerdown", e => { sgStart(e.clientY); msh.setPointerCapture?.(e.pointerId); });
-msh.addEventListener("pointermove", e => sgMove(e.clientY));
-msh.addEventListener("pointerup", e => { if (sgEnd(e.clientY) === false) { haptic(); sugTo(sugState() === "full" ? "half" : "full"); } });
-msh.addEventListener("pointercancel", e => sgEnd(e.clientY));
-let lt = null;
-msugl.addEventListener("touchstart", e => { lt = e.touches.length === 1 && msugl.scrollTop <= 0 ? e.touches[0].clientY : null; if (lt != null) sgStart(lt); }, { passive: true });
-msugl.addEventListener("touchmove", e => { if (lt == null) return; const y = e.touches[0].clientY; if (y - lt < 0 && !sg?.moved) { lt = null; sg = null; return; } if (msugl.scrollTop <= 0 && sgMove(y)) e.preventDefault(); }, { passive: false });
-msugl.addEventListener("touchend", e => { if (lt == null) return; lt = null; sgEnd(e.changedTouches[0].clientY); });
-msug.addEventListener("click", e => {
-  const bk = e.target.closest("[data-sbk]"); if (bk) { e.stopPropagation(); haptic("heavy");
-    const z = SAVE_BY[bk.dataset.sbk], p = getPlan(view), j = p.findIndex(x => x.id === z.id), c = MAPCAT[z.kind] || "see";
-    if (j >= 0) p.splice(j, 1); else p.push({ id: z.id, c, t: slotFor(view, c) }); setPlan(view, p); content.innerHTML = renderContent(view); drawMap(); return; }
-  const r = e.target.closest("[data-sid]"); if (!r || e.target.closest("a")) return;
-  e.stopPropagation(); const z = SAVE_BY[r.dataset.sid]; if (!z) return; haptic(); msq.blur();
-  mapPick(z); mapAim(z, 0.24); setTimeout(() => mapPlace(z), 120);
-});
+mqi.addEventListener("input", () => { clearTimeout(MQT); MQT = setTimeout(() => { MQ = mqi.value.trim(); clearPick(); drawMap(); if (MQ) carShow(railList()); }, 180); });
+mqi.addEventListener("keydown", e => { if (e.key === "Enter") mqi.blur(); });
+document.getElementById("mqx").addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); haptic(); mqClose(); });
+document.getElementById("mqbar").addEventListener("click", e => e.stopPropagation());
 /* ---------- tab bar: Explore / Map / Schedule; the day and category carry across ---------- */
 const tabs = document.getElementById("tabs");
 function curTab() { return !mapv.hidden ? "map" : !xp.hidden ? "xp" : "cal"; }
@@ -2914,7 +2819,7 @@ function openMap(focusId) {
       MAP = new maplibregl.Map({ container: "mapc", style: tileUrl(), center: [a.lng, a.lat], zoom: 14, attributionControl: false, dragRotate: false, pitchWithRotate: false, touchPitch: false, fadeDuration: 180, maxPitch: 0 });
       MAP.touchZoomRotate.disableRotation(); MTILE = tileUrl();
       MAP.on("styledata", () => tintMap(MAP));
-      MAP.on("click", e => { if (Date.now() - MTAP < 350) return; const lz = labelAt(e.point); if (lz) { MTAP = Date.now(); haptic(); return lz.home ? 0 : pinTap(lz); } mapCard(null); if (!sheet.hidden) return closeSheet(); if (MPICK) { haptic(); mapPick(null); } else if (sugState()) { haptic(); sugTo(""); } });
+      MAP.on("click", e => { if (Date.now() - MTAP < 350) return; const lz = labelAt(e.point); if (lz) { MTAP = Date.now(); haptic(); return lz.home ? 0 : pinTap(lz); } mapCard(null); if (!sheet.hidden) return closeSheet(); if (MPICK) { haptic(); mapPick(null); } });
       /* pins re-sort themselves while the map is still moving (a few times a second), and once more when it stops */
       MAP.on("move", () => { const t = performance.now(); if (t - MLAST > 220 && !MRAF) MRAF = requestAnimationFrame(() => { MRAF = 0; MLAST = performance.now(); layoutPins(); }); });
       MAP.on("moveend", () => { clearTimeout(MLT); MLT = setTimeout(layoutPins, 0); });
@@ -2929,17 +2834,20 @@ function mapPlace(z) { SBACK = []; REFRESH = null; swapSheet(placeSheet(z)); }
 let MPICK = null, MCARL = [], MCST = 0, MCLOCK = 0;
 function mapAim(z, frac) { const sz = mSize(); MAP.easeTo({ center: [z.lng, z.lat], offset: [0, -sz.y * (0.5 - (frac || 0.38))], duration: reduce() ? 0 : 950, easing: ease }); }
 function mapFlyHere() { if (reduce()) return MAP.jumpTo({ center: [HERE.lng, HERE.lat], zoom: 15 }); MAP.flyTo({ center: [HERE.lng, HERE.lat], zoom: 15, curve: 1.15, speed: 0.9, maxDuration: 1500, easing: ease }); }
+function mcarFill(list) {
+  MCARL = list; const o = liveFrom(view) || anchorFor(view);
+    const arrow = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg>`;
+    document.getElementById("mcar").innerHTML = list.map(x => { const k = o ? km(o.lat, o.lng, x.lat, x.lng) : null;
+      return `<div class="mc" data-mc="${x.id}">${ph(x).replace('class="ph"', 'class="ph"')}<span class="a">${esc(x.name)}</span><span class="h">${esc(hookOf(x))}</span><span class="m">${MAPLAB[mk(x)] || ""}${k != null ? ` · <b>${distTxt(k, walkKm(o, x))}</b>` : ""}</span><a class="go press" href="${dirs(x.name + " " + (x.address || x.city))}" target="_blank" rel="noopener" aria-label="Directions">${arrow}</a></div>`; }).join("");
+  MCLOCK = Date.now(); document.getElementById("mcar").scrollLeft = 0;
+}
 function mapPick(z, rebuild) {
   MPICK = z; mapv.classList.toggle("picked", !!z); closeSheet();
   if (!z) { layoutPins(); return; }
   document.querySelector("#mselx span").textContent = z.name;
   if (rebuild || !MCARL.some(x => x.id === z.id)) {
     const pool = MPTS.map(q => q.z).filter(x => x.id !== z.id).map(x => ({ x, k: km(z.lat, z.lng, x.lat, x.lng) })).sort((a, b) => a.k - b.k).slice(0, 24).map(q => q.x);
-    MCARL = [z, ...pool]; const o = liveFrom(view) || anchorFor(view);
-    const arrow = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg>`;
-    document.getElementById("mcar").innerHTML = MCARL.map(x => { const k = o ? km(o.lat, o.lng, x.lat, x.lng) : null;
-      return `<div class="mc" data-mc="${x.id}">${ph(x).replace('class="ph"', 'class="ph"')}<span class="a">${esc(x.name)}</span><span class="h">${esc(hookOf(x))}</span><span class="m">${MAPLAB[mk(x)] || ""}${k != null ? ` · <b>${distTxt(k, walkKm(o, x))}</b>` : ""}</span><a class="go press" href="${dirs(x.name + " " + (x.address || x.city))}" target="_blank" rel="noopener" aria-label="Directions">${arrow}</a></div>`; }).join("");
-    MCLOCK = Date.now(); document.getElementById("mcar").scrollLeft = 0;
+    mcarFill([z, ...pool]);
   } else { const i = MCARL.findIndex(x => x.id === z.id), c = document.getElementById("mcar"), card = c.children[i]; if (card) { MCLOCK = Date.now(); c.scrollTo({ left: card.offsetLeft - 16, behavior: reduce() ? "auto" : "smooth" }); } }
   layoutPins(); mapAim(z, 0.38);
 }
@@ -2949,20 +2857,20 @@ document.getElementById("mcar").addEventListener("scroll", e => {
     const z = MCARL[Math.round(c.scrollLeft / (w + 8))]; if (z && z !== MPICK) { haptic(); MPICK = z; document.querySelector("#mselx span").textContent = z.name; layoutPins(); mapAim(z, 0.38); }
   }, 110);
 }, { passive: true });
-function closeMap() { sugTo(""); closeSheet(); MPICK = null; mapv.classList.remove("picked"); mapv.hidden = true; document.body.classList.remove("mapopen"); mapCard(null); setTab(); }
+function closeMap() { mqClose(true); closeSheet(); MPICK = null; mapv.classList.remove("picked"); mapv.hidden = true; document.body.classList.remove("mapopen"); mapCard(null); setTab(); }
 function drawMap(focusId, fit) {
   const { a, list } = mapPlaces(); if (!a || !MAP) return;
   const added = new Set(getPlan(view).map(p => p.id).concat(((getDay(view) || {}).steps || []).flatMap(p => p.ids || [])));
   const kinds = [...new Set(list.map(mk))].sort((x, y) => Object.keys(MAPLAB).indexOf(x) - Object.keys(MAPLAB).indexOf(y));
-  if (MCAT !== "all" && !kinds.includes(MCAT)) MCAT = "all";
+  if (MCAT !== "all" && MCAT !== "top" && !kinds.includes(MCAT)) MCAT = "all";
   document.getElementById("mchips").innerHTML = ["all", ...kinds].map(k => `<button data-mcat="${k}" aria-pressed="${MCAT === k}">${k === "all" ? svgI("all") + "All" : svgI(k, MCAT === k ? null : MAPCOL[k]) + MAPLAB[k]}</button>`).join("");
   document.getElementById("mcity").textContent = a.city;
-  MPTS = list.filter(z => MCAT === "all" || mk(z) === MCAT).map(z => ({ z, on: added.has(z.id), sc: (added.has(z.id) ? 100 : 0) + pinScore(z) })).sort((x, y) => y.sc - x.sc);
+  MPTS = list.filter(mapFilter).map(z => ({ z, on: added.has(z.id), sc: (added.has(z.id) ? 100 : 0) + pinScore(z) })).sort((x, y) => y.sc - x.sc);
   MHOME = a; layoutPins();
   const f = focusId && SAVE_BY[focusId];
   if (f) { MAP.jumpTo({ center: [f.lng, f.lat], zoom: 15 }); mapPick(f, true); }
   else if (fit) { const me = liveFrom(view); MAP.jumpTo({ center: me ? [me.lng, me.lat] : [a.lng, a.lat], zoom: 14 }); layoutPins(); }
-  sugRender();
+  dockRender();
 }
 /* like mio: the best places get a picture bubble with name and a few words, others a bubble, and when it's crowded a small dot */
 /* Pins stay on the map and change state in place, with springs, instead of being redrawn:
@@ -2998,7 +2906,7 @@ function pinSet(o, st, left, zi, delay) {
 }
 function layoutPins() {
   if (!MAP || mapv.hidden) return;
-  const sz = mSize(), boxes = [[-999, -999, sz.x + 999, 62], [-999, sz.y - (MPICK ? 140 : 112), sz.x + 999, sz.y + 999]], hit = (x0, y0, x1, y1) => boxes.some(b => x0 < b[2] && x1 > b[0] && y0 < b[3] && y1 > b[1]);
+  const sz = mSize(), boxes = [[-999, -999, sz.x + 999, 62], [-999, sz.y - (MPICK ? 290 : 176), sz.x + 999, sz.y + 999]], hit = (x0, y0, x1, y1) => boxes.some(b => x0 < b[2] && x1 > b[0] && y0 < b[3] && y1 > b[1]);
   const a = MHOME;
   if (a) {
     if (!PHOME || PHOME.a !== a) { if (PHOME) PHOME.m.remove();
