@@ -2865,8 +2865,8 @@ tabs.addEventListener("click", e => {
 document.addEventListener("click", e => {
   const tr = e.target.closest("[data-trip]"); if (tr) { e.stopPropagation(); haptic(); openSheet(daySheet()); startCycle(view); return; }
   const g = e.target.closest("[data-tripgo]"); if (g) { e.stopPropagation(); haptic(); const d = g.dataset.tripgo; closeSheet(); XMORE = {};
-    if (!xp.hidden) { xpDay(d); xpRender(false); xp.scrollTop = 0; } else selectDay(d);
-    if (!mapv.hidden && MAP) { drawMap(null, true); mttSet(); } }
+    if (!mapv.hidden) { xpDay(d); if (!xp.hidden) xpRender(false); listClose(); mqClose(true); clearPick(); MUSER = false; if (MAP) drawMap(null, true); mttSet(); return; }
+    if (!xp.hidden) { xpDay(d); xpRender(false); xp.scrollTop = 0; } else selectDay(d); }
 }, true);
 /* ---------- map: every saved place around the day's hotel, coloured by kind; the day's added stops stand out ---------- */
 const MAPCOL = { dinner: "#ff2d55", drinks: "#5856d6", coffee: "#a2845e", sweet: "#ff9f0a", culture: "#af52de", see: "#34c759", shop: "#30b0c7", clothes: "#007aff", experience: "#00c7be" };
