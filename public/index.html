@@ -2887,16 +2887,18 @@ document.getElementById("mhd").addEventListener("click", e => { e.stopPropagatio
 mlist.addEventListener("click", e => {
   const r = e.target.closest("[data-mc]"); if (!r || e.target.closest("a")) return;
   e.stopPropagation(); const z = SAVE_BY[r.dataset.mc]; if (!z) return; haptic(); listClose();
-  mapPick(z, !MCARL.some(x => x.id === z.id)); setTimeout(() => mapPlace(z), 160);
+  mapPick(z, !MCARL.some(x => x.id === z.id)); mapNear(z); setTimeout(() => mapPlace(z), 160);
 });
 /* a category, sub or search shows the lay of the land: the map fits that kind's places around you (within ~3 km), the strip stays,
    and swiping the cards only highlights each place. Tapping a pin is what zooms in. */
 function carShow(list) { SEEN = false; if (!list.length) return mapPick(null); SEEN = true; mcarFill(list); mapPick(list[0]); overview(list); }
 function overview(list) {
-  const o = mapHere() || mapStay(), near = list.filter(z => !o || km(o.lat, o.lng, z.lat, z.lng) <= 3), use = (near.length >= 3 ? near : list.slice(0, 5)).concat(o ? [o] : []);
+  /* "all" shows the whole spread of saves (within ~6 km); a category, sub or search stays tighter (~3 km) */
+  const wide = MCAT === "all" && !MQ, src = wide ? fullList() : list, R = wide ? 6 : 3;
+  const o = mapHere() || mapStay(), near = src.filter(z => !o || km(o.lat, o.lng, z.lat, z.lng) <= R), use = (near.length >= 3 ? near : src.slice(0, 5)).concat(o ? [o] : []);
   const b = use.reduce((r, z) => [Math.min(r[0], z.lng), Math.min(r[1], z.lat), Math.max(r[2], z.lng), Math.max(r[3], z.lat)], [180, 90, -180, -90]);
   MUSER = true; mhdSet();
-  MAP.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: { top: 90, bottom: 380, left: 40, right: 40 }, maxZoom: 15.5, duration: reduce() ? 0 : 1000, easing: ease });
+  MAP.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: { top: 90, bottom: MPICK ? 380 : 200, left: 40, right: 40 }, maxZoom: 15.5, duration: reduce() ? 0 : 1000, easing: ease });
 }
 function clearPick() { MPICK = null; mapv.classList.remove("picked"); mapCard(null); }
 mdock.addEventListener("click", e => {
@@ -3052,6 +3054,9 @@ function openMap(focusId, quiet) {
 }
 let MUSER = false;
 function mapHere() { if (!HERE || Date.now() - HERE.t > 30 * 6e4) return null; const a = mapStay(); return !a || km(a.lat, a.lng, HERE.lat, HERE.lng) < 40 ? HERE : null; }
+/* opening a place from the cards or the list: a gentle zoom towards it (a step or so, street level at most), sitting above its sheet */
+function mapNear(z) { if (!MAP) return; const sz = mSize(), zm = Math.min(Math.max(MAP.getZoom() + 1.5, 14), 16);
+  MAP.easeTo({ center: [z.lng, z.lat], zoom: zm, offset: [0, -sz.y * 0.26], duration: reduce() ? 0 : 900, easing: ease }); }
 function mapPlace(z) { SBACK = []; REFRESH = null; swapSheet(placeSheet(z)); }
 /* like mio: tapping a pin picks it (bigger, with a stem), slides it into the top of the screen and shows a row of
    cards for it and the places around it; swiping the cards moves the pick and the map follows */
@@ -3186,7 +3191,7 @@ mapv.addEventListener("click", e => {
   if (t.closest("#mcal")) { e.stopPropagation(); haptic(); closeMap(); return showXP(false); }
   if (t.closest("[data-mx]")) { e.stopPropagation(); return mapCard(null); }
   if (t.closest("#mselx")) { e.stopPropagation(); haptic(); return mapPick(null); }
-  const mcd = t.closest("[data-mc]"); if (mcd && !t.closest("a")) { e.stopPropagation(); const z = SAVE_BY[mcd.dataset.mc]; if (z !== MPICK) mapPick(z); haptic(); mapAim(z, 0.24); return setTimeout(() => mapPlace(z), 120); }
+  const mcd = t.closest("[data-mc]"); if (mcd && !t.closest("a")) { e.stopPropagation(); const z = SAVE_BY[mcd.dataset.mc]; if (z !== MPICK) mapPick(z); haptic(); mapNear(z); return setTimeout(() => mapPlace(z), 120); }
   if (t.closest("#mme")) { e.stopPropagation(); haptic(); hereAsked = 0; const had = !!HERE; askHere(() => { if (MAP && HERE) { drawMap(); if (!had) mapFlyHere(); } }); if (had && MAP) mapFlyHere(); return; }
   const mc = t.closest("[data-mcat]"); if (mc) { e.stopPropagation(); haptic(); MCAT = XCAT = mc.dataset.mcat; XMORE = {}; mapCard(null); MPICK = null; mapv.classList.remove("picked"); return drawMap(); }
   const ma = t.closest("[data-madd]"); if (ma) { e.stopPropagation(); haptic("heavy"); const z = SAVE_BY[ma.dataset.madd], p = getPlan(view), j = p.findIndex(x => x.id === z.id), c = MAPCAT[z.kind] || "see";
