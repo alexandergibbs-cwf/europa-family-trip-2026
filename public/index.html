@@ -515,6 +515,7 @@ body.mapopen .sheet { max-height: calc(56vh + 120px); } body.mapopen .scrim { ba
 /* map chrome uses Explore's own pieces (4 Nov): glass top bar, category pills, card rows */
 #mapc { z-index: 0; }
 .mapv .mtop { padding: 0; display: block; }
+.mapv .mtop .xp-top { background: none; }  /* the map runs clean to the top; the pills carry their own glass */
 .mapv .xp-top { position: static; background: none; pointer-events: none; }
 .mapv .xp-top > * { pointer-events: auto; }
 .mapv .xp-top .sp { pointer-events: none; }
