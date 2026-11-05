@@ -2788,7 +2788,7 @@ function listTitle(n) { const sb = subOf(); return MQ ? `${n} for “${MQ}”` :
 function mhdSet() {
   const n = MPTS.length, sb = subOf(); document.getElementById("mhdt").textContent = MQ ? `“${MQ}”` : sb ? sb.l : MCAT !== "all" ? (DOCK.find(d => d[0] === MCAT) || [, , "all"])[2] : "all";
   const sh = subsHTML(), ms = document.getElementById("msubs"); if (ms.dataset.h !== sh) { ms.dataset.h = sh; ms.innerHTML = sh; }
-  document.getElementById("mhdn").textContent = SEEN ? "List" : `See all ${n}`;
+  document.getElementById("mhdn").textContent = `See all ${n}`;
   document.getElementById("mhd").hidden = n < 3;
 }
 let MLOPEN = false, MLSIG = "", SEEN = false;
@@ -2811,13 +2811,7 @@ function subTap(e) {
 document.getElementById("msubs").addEventListener("click", subTap);
 document.getElementById("mlsubs").addEventListener("click", subTap);
 document.getElementById("mlsubs").addEventListener("pointerdown", e => e.stopPropagation());
-function seeAll() {
-  const zs = MPTS.map(q => q.z); if (!zs.length) return;
-  const b = zs.reduce((r, z) => [Math.min(r[0], z.lng), Math.min(r[1], z.lat), Math.max(r[2], z.lng), Math.max(r[3], z.lat)], [180, 90, -180, -90]);
-  SEEN = true; MUSER = true; mhdSet();
-  MAP.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: { top: 80, bottom: 370, left: 36, right: 36 }, maxZoom: 15, duration: reduce() ? 0 : 1000, easing: ease });
-}
-document.getElementById("mhd").addEventListener("click", e => { e.stopPropagation(); haptic(); SEEN ? listOpen() : seeAll(); });
+document.getElementById("mhd").addEventListener("click", e => { e.stopPropagation(); haptic(); listOpen(); });
 /* swipe the card row up to open the list */
 { const mc = document.getElementById("mcar"); let v = null;
   mc.addEventListener("touchstart", e => { const t = e.touches[0]; v = { x: t.clientX, y: t.clientY, up: null }; }, { passive: true });
@@ -2845,7 +2839,15 @@ mlist.addEventListener("click", e => {
   e.stopPropagation(); const z = SAVE_BY[r.dataset.mc]; if (!z) return; haptic(); listClose();
   mapPick(z, !MCARL.some(x => x.id === z.id)); setTimeout(() => mapPlace(z), 160);
 });
-function carShow(list) { SEEN = false; if (!list.length) return mapPick(null); mcarFill(list); mapPick(list[0]); }
+/* a category, sub or search shows the lay of the land: the map fits that kind's places around you (within ~3 km), the strip stays,
+   and swiping the cards only highlights each place. Tapping a pin is what zooms in. */
+function carShow(list) { SEEN = false; if (!list.length) return mapPick(null); SEEN = true; mcarFill(list); mapPick(list[0]); overview(list); }
+function overview(list) {
+  const o = liveFrom(view) || anchorFor(view), near = list.filter(z => !o || km(o.lat, o.lng, z.lat, z.lng) <= 3), use = (near.length >= 3 ? near : list.slice(0, 5)).concat(o ? [o] : []);
+  const b = use.reduce((r, z) => [Math.min(r[0], z.lng), Math.min(r[1], z.lat), Math.max(r[2], z.lng), Math.max(r[3], z.lat)], [180, 90, -180, -90]);
+  MUSER = true; mhdSet();
+  MAP.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: { top: 90, bottom: 380, left: 40, right: 40 }, maxZoom: 15.5, duration: reduce() ? 0 : 1000, easing: ease });
+}
 function clearPick() { MPICK = null; mapv.classList.remove("picked"); mapCard(null); }
 mdock.addEventListener("click", e => {
   const b = e.target.closest("[data-mdk]"); if (!b) return; e.stopPropagation(); haptic();
