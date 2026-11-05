@@ -998,7 +998,9 @@ body .mapv .maplibregl-ctrl-bottom-left { bottom: calc(66px + env(safe-area-inse
 .mapv .mdock .mx { width: 13px; height: 13px; margin-left: 1px; fill: none; stroke: currentColor; stroke-width: 2.8; stroke-linecap: round; opacity: .85; }
 
 /* search lives at the bottom, where the row was, and rides up on the keyboard (--kb from visualViewport) */
-.mapv .mqbar { top: auto; bottom: max(calc(10px + env(safe-area-inset-bottom, 0px)), calc(var(--kb, 0px) + 8px)); transition: bottom 260ms var(--glide); }
+.mapv .mqbar { top: auto; bottom: max(calc(10px + env(safe-area-inset-bottom, 0px)), calc(var(--kb, 0px) + 8px)); transition: bottom 260ms var(--glide), transform 420ms var(--glide), opacity 220ms ease; }
+/* a place opened from search: the field tucks away under the panel and comes back with the results when the place closes */
+.mapv.qon.pmode .mqbar, .mapv.qon.pmode .mqnone { transform: translateY(calc(100% + 40px)); opacity: 0; pointer-events: none; }
 .mapv.qon .mtt, .mapv.qon .mme { visibility: visible; }
 .mapv.qon .mdock { opacity: 0; pointer-events: none; }
 .mapv.qon .mcar { bottom: calc(max(calc(10px + env(safe-area-inset-bottom, 0px)), calc(var(--kb, 0px) + 8px)) + 50px) !important; }
@@ -3340,7 +3342,7 @@ function panelFit() { const dt = mpl.querySelector(".pdet"), nt = mpl.querySelec
 const PFIT = new ResizeObserver(() => { if (MPS.length) panelFit(); });
 new MutationObserver(() => { PFIT.disconnect(); mpl.querySelectorAll(".pdet, .pcl > div").forEach(e => PFIT.observe(e)); }).observe(mpl, { childList: true });
 addEventListener("resize", () => { if (MPS.length) panelFit(); });
-function panelPlace(it, push) { if (!push) { MPS = []; mlist.classList.remove("pfull"); } MPS.push(it); panelSync(); plRender(MPS.length > 1 || MLOPEN ? 1 : 0); }
+function panelPlace(it, push) { if (MQON) mqi.blur(); if (!push) { MPS = []; mlist.classList.remove("pfull"); } MPS.push(it); panelSync(); plRender(MPS.length > 1 || MLOPEN ? 1 : 0); }
 function mapPlace(z) { panelPlace(z, false); }
 function panelBack() {
   if (MPS.length > 1) { MPS.pop(); const it = MPS[MPS.length - 1]; if (!it.stay && it.lat != null) { MPICK = it; layoutPins(); mapNear(it); } return plRender(-1); }
