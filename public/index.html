@@ -2239,11 +2239,12 @@ function moveSheet(m) {
 function staySheet(s) {
   const n = view >= s.in && view < s.out ? Math.round((Date.parse(view) - Date.parse(s.in)) / 864e5) + 1 : 0, me = HERE && Date.now() - HERE.t < 30 * 6e4 ? HERE : null;
   const k = me && s.lat != null ? km(me.lat, me.lng, s.lat, s.lng) : null, d = k == null ? "Directions" : k > 25 ? `${Math.round(k)} km away` : (t => /walk/.test(t[1] || "") ? t[1] : (t[1] || t[0]).replace(/^~/, "").replace(" or taxi", ""))(distTxt(k).split(" · "));
-  return `<div class="ph-top"><div class="ph-t"><h3 id="sheet-title">${esc(s.hotel)}</h3><span class="pmeta">${dRange(s.in, s.out)}${n ? ` · night ${n} of ${nights(s)}` : ` · ${nights(s)} nights`}</span></div>`
-    + (s.q ? `<a class="pgo press" href="${dirs(s.q)}" target="_blank" rel="noopener" aria-label="Directions">${pI("go")}<span>${esc(d)}</span></a>` : "") + `</div><div style="height:14px"></div>`
-    + `<div class="ig">${r("Check in", `${s12(s.ci)}${s.ciEnd ? ` – ${s12(s.ciEnd)}` : ""}, ${dDay(s.in)}`)}${r("Check out", `${s12(s.co)}, ${dDay(s.out)}`)}${r("Address", esc(s.addr || s.city))}${r("Luggage", s.store ? "Storage available" : s.store === false ? "No storage listed" : "Ask the host")}</div>
-    ${s.note || s.est ? `<p class="nt">${s.est ? "Usual times for rentals. " : ""}${esc(s.note || "")}</p>` : ""}
-    <div class="restore"><button data-open-trip>All 12 stops and booking refs ›</button></div>`;
+  /* laid out like any other place (5 Nov, Alex): name, dates, Directions; one line for check in and out; no booking table, no "all 12 stops" */
+  const sh = s.addr && !/booking/i.test(s.addr) ? s.addr : "";
+  return `<div class="ph-top"><div class="ph-t"><h3 id="sheet-title">${esc(s.hotel)}</h3><span class="pmeta">${n ? `Night ${n} of ${nights(s)}` : `${dRange(s.in, s.out)} · ${nights(s)} nights`}${sh ? ` · ${esc(sh)}` : ""}</span></div>`
+    + (s.q || sh ? `<a class="pgo press" href="${dirs(s.q || s.hotel + " " + sh)}" target="_blank" rel="noopener" aria-label="Directions">${pI("go")}<span>${esc(d)}</span></a>` : "") + `</div>`
+    + `<p class="pl-tl">Check in ${s12(s.ci)}${s.ciEnd ? `–${s12(s.ciEnd)}` : ""} ${dDay(s.in).replace(",", "")}, out ${s12(s.co)} ${dDay(s.out).replace(",", "")}.${s.note ? " " + esc(s.note) : ""}</p>`
+    + (s.q ? `<div class="pmini"><a class="pchip press" href="${gq(s.q, s.city)}" target="_blank" rel="noopener">${pI("web")}Google</a></div>` : "");
 }
 
 
@@ -3252,20 +3253,26 @@ const ICON = {
 const svgI = (k, c, w) => `<svg viewBox="0 0 24 24" fill="none" stroke="${c || "currentColor"}" stroke-width="${w || 1.9}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k] || ICON.see}</svg>`;
 const icoOf = z => ICON[mk(z)] ? mk(z) : "see";
 /* one emoji per place, mio style: read from what it is, falling back on its kind */
-const EMO = [[/pizz/i, "🍕", "F"], [/burger|smash/i, "🍔", "F"], [/sushi|omakase|japanese/i, "🍣", "F"], [/ramen|noodle|udon|\bpho\b/i, "🍜", "F"], [/taco|mexican|burrito/i, "🌮", "F"], [/dumpling|dim sum|chinese|asian street/i, "🥟", "F"],
+const EMO = [[/pizz/i, "🍕", "F", 1], [/burger|smash/i, "🍔", "F"], [/sushi|omakase|japanese/i, "🍣", "F"], [/ramen|noodle|udon|\bpho\b/i, "🍜", "F"], [/taco|mexican|burrito/i, "🌮", "F"], [/dumpling|dim sum|chinese|asian street/i, "🥟", "F"],
   [/kebab|gyro|souvlaki|falafel/i, "🥙", "F"], [/donut|doughnut/i, "🍩", "F"], [/gelato|ice cream|glace|gelateria/i, "🍨", "F"], [/chocolat/i, "🍫", "F"], [/croissant|bakery|baker|pastr|boulanger|patisserie|cinnamon|cardamom|focaccia/i, "🥐", "F"],
   [/cake|cheesecake|dessert|cookie/i, "🍰", "F"], [/pancake|waffle/i, "🥞", "F"], [/brunch|breakfast/i, "🍳", "F"], [/sandwich|\bsubs?\b|panino|panuozzo|deli\b/i, "🥪", "F"], [/fondue|raclette|cheese|fromag/i, "🧀", "F"],
-  [/seafood|oyster|fish|mussel/i, "🦪", "F"], [/steak|grill|bbq|smok|bratwurst|sausage/i, "🥩", "F"], [/pasta|trattoria|osteria|italian/i, "🍝", "F"], [/matcha/i, "🍵", "F"],
-  [/whisk|distiller/i, "🥃", "F"], [/wine|vino|enoteca|negroni/i, "🍷", "F"], [/beer|\bpub\b|brew|guinness|tavern|beer hall/i, "🍺", "F"], [/jazz|live music|music venue/i, "🎷", "F"], [/techno|\bclub\b|disco/i, "🪩", "F"], [/cocktail|\bbar\b|speakeasy|aperitivo/i, "🍸", "F"],
-  [/museum|gallery|galerie|collection|\bart\b|kunst|mural|street art|photograph/i, "🖼️", "P"], [/church|cathedral|chapel|basilica|kirk|abbey|minster|münster/i, "⛪", "P"], [/castle|palace|palazzo|schloss|château/i, "🏰", "P"],
-  [/park|botanic|woods|forest|meadow|garden/i, "🌳", "P"], [/lake|river|beach|lido|harbour|canal|swim|pool\b|badi\b|boat/i, "🌊", "P"], [/view|lookout|panoram|hill|summit|terrace|kulm|funicular/i, "🏞️", "P"], [/waterfall|falls/i, "💦", "P"],
-  [/bridge|brücke|ponte/i, "🌉", "P"], [/spa\b|sauna|therm/i, "🧖", "P"], [/zoo|animal|aquarium/i, "🐾", "P"], [/cinema|movie/i, "🎬", "P"], [/football|stadium|sport/i, "⚽", "P"],
-  [/vinyl|record/i, "💿", "S"], [/book/i, "📚", "S"], [/perfume|fragrance|parfum|scent|cosmetic|buly/i, "🧴", "S"], [/vintage|thrift|second.?hand|denim|jeans/i, "🧥", "S"], [/sneaker|shoe/i, "👟", "S"],
-  [/jewel/i, "💍", "S"], [/market|flea|markt|mercato|marché/i, "🧺", "S"], [/flower|florist/i, "💐", "S"], [/photo ?booth|photoautomat|film develop/i, "📸", "S"], [/stationery|pens?\b|paper/i, "🖊️", "S"], [/home ?goods|homeware|interior|design/i, "🏺", "S"]];
+  [/seafood|oyster|fish|mussel/i, "🦪", "F"], [/steak|grill|bbq|smokehouse|smoked|bratwurst|sausage/i, "🥩", "F"], [/pasta|trattoria|osteria|italian/i, "🍝", "F"], [/matcha/i, "🍵", "F"],
+  [/whisk|distiller/i, "🥃", "F"], [/wine|vino|enoteca|negroni/i, "🍷", "F"], [/beer|bier|\bpub\b|brew|guinness|tavern|beer hall/i, "🍺", "F"], [/jazz|live music|music venue/i, "🎷", "F"], [/techno|\bclub\b|disco/i, "🪩", "F"], [/cocktail|\bbar\b|speakeasy|aperitivo/i, "🍸", "F"], [/market|markt|mercato|marché|food hall/i, "🧺", "M", 1],
+  [/eiffel|tv tower|fernsehturm/i, "🗼", "P"], [/clock ?tower|big ben/i, "🕰️", "P"], [/photo ?booth|photoautomat|stillsautomat|film develop/i, "📸", "P"], [/librar|bibliot|bookshop|bookstore/i, "📚", "P"], [/acropolis|temple|ruins?\b|forum\b|colosseum|amphithea/i, "🏛️", "P"],
+  [/museum|gallery|collection|\bart\b|kunst|mural|street art|photograph/i, "🖼️", "P"], [/galerie|museum/i, "🖼️", "P", 1], [/church|cathedral|chapel|basilica|kirk|abbey|minster|église|chiesa|duomo|\bdom\b|kirche/i, "⛪", "P"], [/münster/i, "⛪", "P", 1], [/castle|castel|palace|palazzo|schloss|château/i, "🏰", "P"],
+  [/alps|alpine|mountain|glacier|kulm|\bpeak/i, "🏔️", "P"], [/(?<!car |rope )park|botanic|woods|forest|meadow|(?<!covent )garden/i, "🌳", "P"], [/lake|river|beach|lido|harbour|canal|swim|pool\b|badi\b|boat/i, "🌊", "P"], [/view|lookout|panoram|hill|summit|terrace|kulm|funicular/i, "🏞️", "P"], [/waterfall|falls/i, "💦", "P"],
+  [/bridge|ponte/i, "🌉", "P"], [/brücke/i, "🌉", "P", 1], [/distiller/i, "🥃", "P"], [/spa\b|sauna|therm/i, "🧖", "P"], [/zoo|animal|aquarium/i, "🐾", "P"], [/cinema(?!tic)|kino|picturehouse|movie/i, "🎬", "P"], [/football|stadium|sport/i, "⚽", "P"], [/\btor\b|\bgate\b|triumph|monument|memorial|column|reichstag|parliament|altare/i, "🏛️", "P"],
+  [/vinyl|record/i, "💿", "S"], [/book/i, "📚", "S"], [/perfume|fragrance|parfum|scent|cosmetic|buly/i, "🧴", "S"], [/vintage|thrift|second.?hand|denim|jeans/i, "🧥", "S", 1], [/sneaker|shoe/i, "👟", "S"],
+  [/jewel/i, "💍", "S"], [/market|flea|markt|mercato|marché/i, "🧺", "S", 1], [/flower|florist/i, "💐", "S"], [/stationery|pens?\b|paper/i, "🖊️", "S"], [/home ?goods|homeware|interior|design/i, "🏺", "S"]];
 const EMOK = { dinner: "🍽️", drinks: "🍸", coffee: "☕", sweet: "🍰", culture: "🏛️", see: "📍", shop: "🛍️", clothes: "👕", experience: "✨" };
-const EMOG = { dinner: "FPS", drinks: "FPS", coffee: "F", sweet: "F", culture: "PFS", see: "PFS", shop: "SFP", clothes: "S", experience: "PFS" };
-const emoOf = z => { if (z.emo) return z.emo; const k = mk(z), t = z.name + " " + (z.hook || "") + " " + (z.vibe || ""), g = EMOG[k] || "PFS";
-  let e = null; for (const grp of g) { const hit = EMO.find(([re, , G]) => G === grp && re.test(t)); if (hit) { e = hit[1]; break; } }
+const EMOG = { dinner: "FM", drinks: "F", coffee: "F", sweet: "F", culture: "P", see: "PF", shop: "SF", clothes: "S", experience: "PF" };
+/* icon words match from the start of a word ("burger" not "Brandenburger", "park" not "sparkles"); entries flagged 1 also match inside German/Italian compounds (Gemäldegalerie, Grossmünster, Trapizzino) */
+const emoHit = (re, mid, t) => mid ? re.test(t) : new RegExp("(?:^|[^\\p{L}\\p{N}])(?:" + re.source + ")", "iu").test(t);
+const EMO_NAME = { "Gucci Garden": "🖼️", "Palazzo Gucci": "🖼️", "Monti": "📍", "Anafiotika": "📍", "Aiolou Street": "📍", "Green Door Bar": "🍸", "Hopfenreich": "🍺" };  /* places the words get wrong */
+const emoOf = z => { if (z.emo) return z.emo; if (EMO_NAME[z.name]) return (z.emo = EMO_NAME[z.name]); const k = mk(z), t = z.name + " " + (z.hook || "") + " " + (z.vibe || ""), g = EMOG[k] || "PFS";
+  let e = null;
+  if (g[0] === "P") for (const grp of g) { const hit = EMO.find(([re, , G, mid]) => G === grp && emoHit(re, mid, z.name)); if (hit) { e = hit[1]; break; } }  /* sights: the name says what it is ("Pulteney Bridge"), the one-liner only what's around it */
+  if (!e) for (const grp of g) { const hit = EMO.find(([re, , G, mid]) => G === grp && emoHit(re, mid, t)); if (hit) { e = hit[1]; break; } }
   if (k === "coffee" && !/🍵|🥐|🍩|🍰|🥞|🍳|🥪|🍫/.test(e || "")) e = "☕";
   if (k === "clothes" && !/🧥|👟|💍/.test(e || "")) e = "👕";
   return (z.emo = e || EMOK[k] || "📍"); };
