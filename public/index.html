@@ -369,6 +369,10 @@ a.crow { color: inherit; text-decoration: none; }
 .xp .place .h { display: -webkit-box !important; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .xp-empty { margin: 20px; color: var(--sub); font-size: 15px; line-height: 1.4; }
 .nx-h { font-size: 15px; font-weight: 600; margin: 14px 4px 8px; }
+.nx-chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px 10px; padding: 0 16px; }
+.nx-chips::-webkit-scrollbar { display: none; }
+.nx-chips .msub { background: rgba(118, 118, 128, .14); }
+.nx-chips .msub[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
 .prec { background: color-mix(in srgb, #ff9500 14%, var(--card)); color: var(--ink); border-radius: 12px; padding: 12px 14px; font-size: 14px; line-height: 1.4; margin: 0 0 12px; }
 .acts.three .btn { padding: 0 8px; font-size: 16px; }
 .vbox { width: min(100%, calc(62vh * 9 / 16)); aspect-ratio: 9 / 16; margin: 0 auto; border-radius: 18px; overflow: hidden; background: #000; }
@@ -2525,18 +2529,25 @@ function placeDist(z) {
 const NEXT = { dinner: ["drinks", "sweet", "see", "clothes", "shop"], drinks: ["dinner", "drinks", "sweet"], coffee: ["see", "clothes", "culture", "shop", "sweet"], sweet: ["see", "clothes", "shop", "coffee"],
   culture: ["coffee", "dinner", "see", "clothes"], see: ["coffee", "dinner", "culture", "clothes", "shop"], shop: ["clothes", "shop", "coffee", "dinner"], clothes: ["clothes", "shop", "coffee", "dinner"], experience: ["dinner", "drinks", "coffee"] };
 const NEXTL = { dinner: "Eat", drinks: "Drinks", coffee: "Coffee", sweet: "Something sweet", culture: "Museums and galleries", see: "Things to see", shop: "Shops", clothes: "Clothes shops", experience: "Experiences" };
+/* nearby, by kind: one row of chips (what usually comes next after this kind first), one list showing at a time */
+const NXC = { dinner: "Eat", drinks: "Drinks", coffee: "Coffee", sweet: "Sweet", culture: "Museums", see: "Sights", shop: "Shops", clothes: "Clothes", experience: "Experiences" };
 function nextNear(z) {
   if (!z || z.lat == null) return "";
-  const k0 = mk(z), used = new Set([z.id]), out = [];
-  for (const k of NEXT[k0] || NEXT.see) {
-    if (out.length >= 3) break;
-    const near = SAVES.filter(s => s.lat != null && !used.has(s.id) && s.kind !== "skip" && mk(s) === k && !(s.name === z.name))
-      .map(s => ({ s, k: km(z.lat, z.lng, s.lat, s.lng) })).filter(x => x.k < 1.2).sort((x, y) => x.k - y.k).slice(0, 3);
-    if (!near.length) continue; near.forEach(x => used.add(x.s.id));
-    out.push(`<div class="nx-h">${k === k0 ? "More " + NEXTL[k].toLowerCase() : NEXTL[k]} nearby</div><div class="ig">${near.map(({ s, k }) => `<div class="place hasph" data-sid="${s.id}">${ph(s)}<span><span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(hookOf(s))}</span><span class="m" style="display:block"><b>${k < 0.06 ? "Next door" : distTxt(k) + " from here"}</b></span></span></div>`).join("")}</div>`);
+  const k0 = mk(z), order = [...new Set([...(NEXT[k0] || NEXT.see), ...XKINDS])], groups = [];
+  for (const k of order) {
+    const near = SAVES.filter(s => s.lat != null && s.id !== z.id && s.kind !== "skip" && mk(s) === k && !(s.name === z.name))
+      .map(s => ({ s, k: km(z.lat, z.lng, s.lat, s.lng) })).filter(x => x.k < 1.2).sort((x, y) => x.k - y.k).slice(0, 6);
+    if (near.length) groups.push([k, near]);
   }
-  return out.length ? `<div class="nxwrap" data-of="${esc(z.id)}">${out.join("")}</div>` : "";
+  if (!groups.length) return "";
+  return `<div class="nxwrap" data-of="${esc(z.id)}"><div class="nx-h">Nearby</div><div class="nx-chips">${groups.map(([k], i) => `<button class="msub" data-nxk="${k}" aria-pressed="${i === 0}">${NXC[k] || NEXTL[k]}</button>`).join("")}</div>`
+    + groups.map(([k, near], i) => `<div class="ig nxp" data-nxp="${k}"${i ? " hidden" : ""}>${near.map(({ s, k }) => `<div class="place hasph" data-sid="${s.id}">${ph(s)}<span><span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(hookOf(s))}</span><span class="m" style="display:block"><b>${k < 0.06 ? "Next door" : distTxt(k) + " from here"}</b></span></span></div>`).join("")}</div>`).join("") + `</div>`;
 }
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-nxk]"); if (!b) return; e.stopPropagation(); haptic();
+  const w = b.closest(".nxwrap"); w.querySelectorAll("[data-nxk]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  w.querySelectorAll("[data-nxp]").forEach(p => { p.hidden = p.dataset.nxp !== b.dataset.nxk; });
+}, true);
 function placeSheet(z) {
   const inTrip = view >= START && view <= END, on = getPlan(view).find(p => p.id === z.id), meta = placeMeta(z), d = placeDist(z);
   return (SBACK.length ? `<button class="sback press" data-sback>‹ Back</button>` : "") + hero(z)
