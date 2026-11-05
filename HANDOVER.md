@@ -205,7 +205,7 @@ They sit in free time and play as whole-day ideas ("scenes").
   - Each row has "See all N", which opens the map on that category/sub with the list open (`XTH[k].map`, run through `MAPNEXT` once the map has drawn).
   - Tapping a card opens the place sheet.
   - The category chips and the "See all" inline expand were removed from Explore. `xpOrder` and `xpRow` are now unused.
-- When the large title scrolls away, a full-width small-title bar appears (`.xp .xp-top .xp-nt`).
+- A full-width small-title bar (`.xp .xp-top .xp-nt`, safe area + 44px) appears only once the week strip has scrolled fully under it (scroll listener compares against `.xp-wk` bottom minus the bar height). Card travel text is shortened like the map's.
 - Map list ("See all" on the map) is one grouped block (`.mlg`) with dividers. A solid footer `.mfoot` sits behind the rail and tab bar while it's open. Travel text is shortened ("16 min by metro").
 
 - **Explore header (4 Nov, Alex: top felt messy, not Apple-faithful):** iOS large-title layout. Bar: Cities button left; Map + Schedule are one grouped glass capsule (`.xp-grp`, icons only, no "Schedule" label), same capsule on the map (`#mdone` + `#mcal`). Large title = city, subline = location arrow + "Near you" / "Around <hotel>" (full date if neither). Day pills replaced by a Calendar-style week strip (`.xp-wk`: narrow weekday over date number; today red, selected filled circle, red if today). One chip row only: categories, filled grey (tertiary fill) rather than outlined. On scroll the large title slides under the bar and a centred inline title (`.xp-nt`) fades in (`xp` gets class `sc`, set by a passive scroll listener; re-checked after each `xpRender`).

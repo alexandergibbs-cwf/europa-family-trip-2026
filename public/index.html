@@ -2735,7 +2735,7 @@ function xpThemes(iso) {
 function xcCard(z, k, o, hero) {
   const w = distTxt(k, o && walkKm(o, z)).split(" · ");
   return `<button class="xc${hero ? " xh" : ""}" data-sid="${z.id}"><span class="xc-p" style="--c:${pinCol(z) || "#8e8e93"}">${svgI(icoOf(z))}<img loading="lazy" decoding="async" alt="" src="${esc(photoUrl(z))}" onload="this.classList.add('ld')" onerror="this.remove()">${z.rating ? `<i>★ ${Number(z.rating).toFixed(1)}</i>` : ""}</span>`
-    + `<span class="xc-n">${esc(z.name)}</span>${z.hook ? `<span class="xc-h">${esc(hookOf(z))}</span>` : ""}<span class="m">${hero ? esc(MAPLAB[mk(z)] || "") + " · " : ""}${esc(w[1] || w[0])}</span></button>`;
+    + `<span class="xc-n">${esc(z.name)}</span>${z.hook ? `<span class="xc-h">${esc(hookOf(z))}</span>` : ""}<span class="m">${hero ? esc(MAPLAB[mk(z)] || "") + " · " : ""}${esc((w[1] || w[0]).replace(/^~/, "").replace(" or taxi", ""))}</span></button>`;
 }
 function xpRender(keepScroll) {
   if (xp.hidden) return;
@@ -2768,7 +2768,8 @@ function xpRender(keepScroll) {
   xp.dispatchEvent(new Event("scroll"));
 }
 /* large title scrolls under the bar, then the small centred title fades in (iOS nav bar) */
-xp.addEventListener("scroll", () => { const h = xp.querySelector(".xp-h h1"), t = xp.querySelector(".xp-top"); if (!h || !t) return; xp.classList.toggle("sc", xp.scrollTop > h.offsetTop + h.offsetHeight - t.offsetHeight); }, { passive: true });
+/* the small-title bar comes in only once the title and the day strip have gone under it */
+xp.addEventListener("scroll", () => { const w = xp.querySelector(".xp-wk") || xp.querySelector(".xp-h"), n = xp.querySelector(".xp-nt"); if (!w || !n) return; xp.classList.toggle("sc", xp.scrollTop > w.offsetTop + w.offsetHeight - n.offsetHeight); }, { passive: true });
 function xpSoon() { clearTimeout(XRT); XRT = setTimeout(() => xpRender(), 200); }
 function showXP(on, keep) {
   if (on) { xp.hidden = false; document.body.classList.add("xpon"); if (!keep && view !== today && today >= START && today <= END) xpDay(today); xp.scrollTop = 0; xpRender(false);
