@@ -2728,6 +2728,7 @@ const RX = { brk: /brunch|breakfast|bakery|pancake|bagel|eggs|croissant|morning|
   view: /view|lookout|panoram|tower|rooftop|terrace|hill|skyline|overlook/, park: /park|garden|lake|river|beach|forest|nature|island|canal|swim|bath/,
   vint: /vintage|second.?hand|thrift|flea|consign|pre-?loved|upcycl|antique|retro/, des: /design|home|interior|ceramic|concept|furniture|stationer|plant|flower|lifestyle|homeware/,
   book: /book|libra|buch|record|vinyl|zine/, food: /deli|market|chocolate|cheese|grocer|food|spice|tea shop|wine shop|pastr|épicerie|epicerie/,
+  exp: /photo ?booth|photoautomat|\bswings?\b|toboggan|\bslides?\b|\bsled|rodel|karaoke|escape room|bowling|mini ?golf|sauna|\bspa\b|thermal bath|rent a boat|boat rental|boating|pedalo|kayak|paddle ?board|\btour\b|cooking class|pottery|\bcinemas?\b|\bkino\b|open-air screening|arcade|pinball|zip ?line|roller ?coaster|ferris wheel|bouldering|climbing|go-?kart|skatepark|skating|ice rink|trampoline|planetarium|observatory|\bzoo\b|aquarium|public pool|swimming|cable car|tasting/,
   cock: /cocktail|speakeasy|martini|mixolog|negroni/, wine: /wine|vino|enoteca|natural wine|cave/, beer: /beer|brew|pub|taproom|ale|bier|lager/ };
 const GRP = {
   dinner: { kinds: ["dinner"], n: "places to eat", subs: [
@@ -2751,7 +2752,9 @@ const GRP = {
     { k: "design", l: "design", n: "design and homeware shops", t: z => RX.des.test(ztxt(z)) },
     { k: "books", l: "books & records", n: "book and record shops", t: z => RX.book.test(ztxt(z)) },
     { k: "markets", l: "markets & food", n: "markets and food shops", t: z => RX.food.test(ztxt(z)) }] },
-  experience: { kinds: ["experience"], n: "experiences", subs: [] }
+  experience: { kinds: ["experience"], n: "experiences", subs: [],
+    /* photo booths, swings, slides, karaoke, cinemas, boats, tours: saved under other kinds, so they join by what the one-liner says (not plain cafes or restaurants) */
+    extra: z => mk(z) !== "experience" && RX.exp.test(ztxt(z)) && (!["dinner", "coffee", "sweet"].includes(mk(z)) || /karaoke|photo ?booth|bowling|cinema/.test(ztxt(z))) }
 };
 const KGRP = { see: "culture", clothes: "shop" };
 /* search by keyword: every word has to fit. A word fits if it's in the name / one-liner / vibe, or it names a kind ("food", "coffee",
@@ -2768,7 +2771,7 @@ const QKW = {
   sight: isK("see"), sightseeing: isK("see"), view: rxK(RX.view), viewpoint: rxK(RX.view), park: rxK(RX.park), nature: rxK(RX.park),
   shop: isK("shop", "clothes"), shopping: isK("shop", "clothes"), store: isK("shop", "clothes"), clothes: isK("clothes"), fashion: isK("clothes"),
   vintage: rxK(RX.vint), secondhand: rxK(RX.vint), thrift: rxK(RX.vint), design: rxK(RX.des, "shop", "clothes"), book: rxK(RX.book), record: rxK(RX.book), market: rxK(RX.food),
-  experience: isK("experience"), activity: isK("experience"), "things to do": isK("experience", "see")
+  experience: z => inGrp(z, "experience"), activity: z => inGrp(z, "experience"), "things to do": z => inGrp(z, "experience") || mk(z) === "see", fun: z => inGrp(z, "experience")
 };
 function qHit(z, q) {
   const t = qn(ztxt(z) + " " + (MAPLAB[mk(z)] || "")), raw = qn(q).trim(); if (!raw) return true;
@@ -2779,7 +2782,7 @@ function qHit(z, q) {
 }
 let MSUB = "";
 const subOf = () => { const g = GRP[MCAT]; return g && MSUB ? g.subs.find(x => x.k === MSUB) : null; };
-const inGrp = (z, k) => { const g = GRP[k]; return g ? g.kinds.includes(mk(z)) : mk(z) === k; };
+const inGrp = (z, k) => { const g = GRP[k]; return g ? g.kinds.includes(mk(z)) || !!(g.extra && g.extra(z)) : mk(z) === k; };
 function subsHTML() {
   const g = GRP[MCAT]; if (!g || !g.subs.length || MQ) return "";
   const { list } = mapPlaces();
@@ -2792,7 +2795,7 @@ function mapFilter(z) {
   if (MQ) return qHit(z, MQ);
   if (MCAT === "all") return true;
   const g = GRP[MCAT], sb = subOf(); if (!g) return mk(z) === MCAT;
-  return sb ? (sb.kinds || g.kinds).includes(mk(z)) && sb.t(z) : g.kinds.includes(mk(z));
+  return sb ? (sb.kinds || g.kinds).includes(mk(z)) && sb.t(z) : inGrp(z, MCAT);
 }
 function dockRender() {
   const { list } = mapPlaces();
