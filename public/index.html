@@ -1220,13 +1220,13 @@ const distTxt = (k, w) => { const x = w != null ? w : k * DETOUR; return k < 0.0
 const CULT = /museum|museo|musée|musee|museu|gallery|galleria|galerie|galleries|gallerie|kunst|exhibit|palazzo|palace|palais|biblioth|library|opera|theatre|theater|uffizi|louvre|orangerie|pergamon|vatican|academy|collection|foundation|fondation|fondazione/i;
 /* what each saved place really is, checked by hand (23 Oct): mio's own category is wrong for some, e.g. a bagel café saved as an attraction */
 const KIND_FIX = {
-  coffee: ["Vivoli", "Love - Specialty Croissants", "Melaleuca Florence Bakery +Bistrot", "Er Baretto", "Ciampini Roma", "Babu's", "Shakespeare & Sons - Fine Bagels", "Coucou", "The COO Bakehouse", "Hotel Café Royal"],
-  sweet: ["Tiramisù - I Tre Mercanti", "Biscottificio Antonio Mattei Museo Bottega a Firenze", "Pompi", "Pasticceria Leonardo Roma", "Giuffrè Forno & Gelato Trastevere", "Il Maritozzaro", "MYO – La Gelateria", "Biscottificio Innocenti", "Regoli Pasticceria", "Otaleg", "Forno Ritorno", "Nero Vaniglia", "Vermicelleria", "Gelateria di Berna", "Chapon", "Bachir", "Gelateria Gallonetto", "Gelateria Fassi - Gelato artigianale a Roma dal 1880", "Giolitti", "Gelateria La Romana dal 1947", "Mr. 100 Tiramisù"],
-  dinner: ["Li Rioni", "Steakhouse Old Town", "Lafayette's Paris", "Markthalle Neun", "Maxies Bistro", "Testaccio Market", "Seven Dials Market"],
-  drinks: ["Wine window dei servi", "La Buchetta del vino dello Strozzino", "Procacci 1885", "Antico Caffè del Moro", "Latteria Trastevere", "Cassiopeia Sommergarten", "Early June", "Hackney Bridge"],
+  coffee: ["Vivoli", "Love - Specialty Croissants", "Melaleuca Florence Bakery +Bistrot", "Er Baretto", "Ciampini Roma", "Babu's", "Shakespeare & Sons - Fine Bagels", "Coucou", "The COO Bakehouse", "Hotel Café Royal", "OUTLIER", "Spirito"],
+  sweet: ["Tiramisù - I Tre Mercanti", "Biscottificio Antonio Mattei Museo Bottega a Firenze", "Pompi", "Pasticceria Leonardo Roma", "Giuffrè Forno & Gelato Trastevere", "Il Maritozzaro", "MYO – La Gelateria", "Biscottificio Innocenti", "Regoli Pasticceria", "Otaleg", "Forno Ritorno", "Nero Vaniglia", "Vermicelleria", "Gelateria di Berna", "Chapon", "Bachir", "Gelateria Gallonetto", "Gelateria Fassi - Gelato artigianale a Roma dal 1880", "Giolitti", "Gelateria La Romana dal 1947", "Mr. 100 Tiramisù", "Fruttini", "Limon'è"],
+  dinner: ["Li Rioni", "Steakhouse Old Town", "Lafayette's Paris", "Markthalle Neun", "Maxies Bistro", "Testaccio Market", "Seven Dials Market", "Kitten deli", "goldies bar", "Aki"],
+  drinks: ["Wine window dei servi", "La Buchetta del vino dello Strozzino", "Procacci 1885", "Antico Caffè del Moro", "Latteria Trastevere", "Cassiopeia Sommergarten", "Early June", "Hackney Bridge", "Rhinoçéros", "migas, a listening bar", "Billie", "Sebb's"],
   see: ["Albert Einstein's locker", "Münzplatz", "Cockburn Street", "Tabobine", "Iseltwald", "Buttercup Farm Park", "East Side Gallery", "RAW-Gelände", "Haus Schwarzenberg", "Libreria Acqua Alta", "Leadenhall Market", "Academy of Athens"],
-  shop: ["Brupbacherplatz", "Museum Context: Retailer of Harry Potter Merchandise", "Giunti Odeon - Libreria e Cinema", "Royal Exchange"],
-  culture: ["Scuola Grande di San Rocco", "Basilica S.Maria Gloriosa dei Frari", "Chiesa di Santa Maria Assunta ai Gesuiti", "Madonna dell'Orto", "Chiesa Parrocchiale di San Pantalon", "Church of Saint Mary of Miracles", "Basilica dei Santi Giovanni e Paolo", "Basilica Santa Maria della Salute", "Teatro La Fenice", "Basilica of San Clemente", "Trajan's Markets", "Galleria Spada", "Galleria Colonna", "Villa Medici", "Rooms of St Ignatius", "Casino Massimo Lancellotti", "Palazzo Farnese", "Vatican Museums", "San Luigi dei Francesi", "Museo Leonardo da Vinci", "Pavillon Le Corbusier", "Galerie Eva Presenhuber", "Villa Farnesina", "Grossmünster", "Edinburgh Castle", "Bibliothèque Sainte-Geneviève", "Halle Saint-Pierre", "Maison de Victor Hugo", "Topography of Terror", "V&A East Storehouse", "Tate Britain", "Humboldt Forum", "The Royal Mews, Buckingham Palace"],
+  shop: ["Brupbacherplatz", "Museum Context: Retailer of Harry Potter Merchandise", "Giunti Odeon - Libreria e Cinema", "Royal Exchange", "The Rich Collection Bella Italia"],
+  culture: ["Scuola Grande di San Rocco", "Basilica S.Maria Gloriosa dei Frari", "Chiesa di Santa Maria Assunta ai Gesuiti", "Madonna dell'Orto", "Chiesa Parrocchiale di San Pantalon", "Church of Saint Mary of Miracles", "Basilica dei Santi Giovanni e Paolo", "Basilica Santa Maria della Salute", "Teatro La Fenice", "Basilica of San Clemente", "Trajan's Markets", "Galleria Spada", "Galleria Colonna", "Villa Medici", "Rooms of St Ignatius", "Casino Massimo Lancellotti", "Palazzo Farnese", "Vatican Museums", "San Luigi dei Francesi", "Museo Leonardo da Vinci", "Pavillon Le Corbusier", "Galerie Eva Presenhuber", "Villa Farnesina", "Grossmünster", "Edinburgh Castle", "Bibliothèque Sainte-Geneviève", "Halle Saint-Pierre", "Maison de Victor Hugo", "Topography of Terror", "V&A East Storehouse", "Tate Britain", "Humboldt Forum", "The Royal Mews, Buckingham Palace", "Gucci Garden", "TAPISSERIE & ARTES ARTISANALE"],
   experience: ["Hallenbad City", "Venice Gondola Tour", "Venice Cooking Class", "Enjoy Cooking", "The Dolder Grand", "L'Orto di Alberico", "Lindt Home of Chocolate", "The Scotsman Picturehouse", "Bootsvermietung Enge", "Rome With Chef", "Twilight Trastevere Rome Food Tour", "Electric Cinema", "Wheel of Fate"],
   /* a whole city, a save whose details describe somewhere else, duplicates, and summer-only open-air bars (Nov trip) */
   skip: ["Rundfunk.fm", "Barfuessbar", "Rimini Bar", "The Living Circle", "Bucherer CPO lounge", "Calle Contarini del Bovolo", "Strozzi Palace", "Berlin Art Week", "Porta Portese", "Frauenbad Stadthausquai", "Zürich", "Coop", "Apostolic Palace", "Saint Peter’s Basilica", "Hôtel Particulier"],
@@ -1236,7 +1236,7 @@ const HOOK_FIX = { "Buttercup Farm Park": "farm park on the west edge of edinbur
 /* shops split into clothes (fashion, vintage, menswear, jackets) and everything else (markets, books, scent, food, homeware) */
 const CLO_RE = /cloth|fashion|vintage|boutique|apparel|menswear|womenswear|streetwear|\bwear\b|jeans|denim|sneaker|shoe|jacket|knit|tailor|designer|thrift|second.?hand|dress|coat|cashmere|outfit|pyjama|prada|gucci|versace|barbour|aimé|archive/i;
 const CLO_YES = ["Clutch Cafe", "Our Legacy Workshop", "The Store X Berlin"];
-const CLO_NO = ["Breathe Fresh Cosmetics", "Officine Universelle Buly 1803", "Brupbacherplatz", "Helvetiaplatz Farmers' Market", "Markthalle Neun", "Mauerpark", "RAW-Gelände", "Tron Kirk Market", "The Gently Mad Book Shop & Bookbinder", "Seven Dials Market", "Leadenhall Market", "Camden Town", "Camden Passage, Islington", "Officine Universelle Buly 1803", "Stadthausanlage Market", "Baa Baa Sheep Shop", "Testaccio Market", "Porta Portese", "Flea Market", "Nowkölln Flowmarkt", "Kranoldplatz", "Santo Spirito Market", "il Mercato Centrale Firenze", "Mercato di Sant’Ambrogio", "Scuola del Cuoio S.r.l.", "Brilli Pet Boutique", "Dott. A. Bizzarri", "Maestri di fabbrica", "Liberty London", "King's Rd", "Merci", "Saint Laurent Babylone", "Hirono Store", "Kurfürstendamm", "Bahnhofstrasse", "KaDeWe - Kaufhaus des Westens", "Adrianou Street"];
+const CLO_NO = ["do you read me?!", "Breathe Fresh Cosmetics", "Officine Universelle Buly 1803", "Brupbacherplatz", "Helvetiaplatz Farmers' Market", "Markthalle Neun", "Mauerpark", "RAW-Gelände", "Tron Kirk Market", "The Gently Mad Book Shop & Bookbinder", "Seven Dials Market", "Leadenhall Market", "Camden Town", "Camden Passage, Islington", "Officine Universelle Buly 1803", "Stadthausanlage Market", "Baa Baa Sheep Shop", "Testaccio Market", "Porta Portese", "Flea Market", "Nowkölln Flowmarkt", "Kranoldplatz", "Santo Spirito Market", "il Mercato Centrale Firenze", "Mercato di Sant’Ambrogio", "Scuola del Cuoio S.r.l.", "Brilli Pet Boutique", "Dott. A. Bizzarri", "Maestri di fabbrica", "Liberty London", "King's Rd", "Merci", "Saint Laurent Babylone", "Hirono Store", "Kurfürstendamm", "Bahnhofstrasse", "KaDeWe - Kaufhaus des Westens", "Adrianou Street"];
 const KIND_BY_NAME = {}; Object.entries(KIND_FIX).forEach(([k, ns]) => ns.forEach(n => (KIND_BY_NAME[n] = k)));
 { const seen = new Set(); SAVES.forEach(s => {
   const key = s.name + "|" + s.city;
@@ -2725,10 +2725,11 @@ const DOCK = [["dinner", "🍽️", "eat"], ["coffee", "☕", "cafes"], ["sweet"
 const ztxt = z => (z.name + " " + (z.hook || "") + " " + (z.vibe || "")).toLowerCase();
 const RX = { brk: /brunch|breakfast|bakery|pancake|bagel|eggs|croissant|morning|waffle|granola/, lun: /lunch|sandwich|deli|soup|salad|bowl|ramen|noodle|pizza|street food|market|burger|kebab|falafel|dumpling|quick|casual|cheap|taco|bao|banh|bánh|poke|canteen|imbiss/,
   din: /dinner|fine dining|tasting|steak|wine|trattoria|bistro|izakaya|fondue|tavern|romantic|date night|seafood|sushi|omakase|grill|osteria|brasserie|supper/,
-  view: /view|lookout|panoram|tower|rooftop|terrace|hill|skyline|overlook/, park: /park|garden|lake|river|beach|forest|nature|island|canal|swim|bath/,
-  vint: /vintage|second.?hand|thrift|flea|consign|pre-?loved|upcycl|antique|retro/, des: /design|home|interior|ceramic|concept|furniture|stationer|plant|flower|lifestyle|homeware/,
+  view: /view|lookout|panoram|tower|rooftop|terrace|hill|skyline|overlook/, park: /(?<!car )(?<!rope )\bparks?\b|garden|botanic|beach|forest|\bwoods\b|nature|picnic|meadow|lakefront|green escape|green space/,
+  vint: /vintage|second.?hand|thrift|flea|consign|pre-?loved|upcycl|antique|retro/, des: /\bdesign(?!er)|home|interior|ceramic|concept store|furniture|stationer|plant|flower|homeware|lifestyle/,
+  beauty: /fragrance|perfume|parfum|\bscents?\b|candle|skin ?care|cosmetic|beauty|\bsoap|apothecary|officine|buly|aesop|diptyque|le labo|byredo/,
   book: /book|libra|buch|record|vinyl|zine/, food: /deli|market|chocolate|cheese|grocer|food|spice|tea shop|wine shop|pastr|épicerie|epicerie/,
-  exp: /photo ?booth|photoautomat|\bswings?\b|toboggan|\bslides?\b|\bsled|rodel|karaoke|escape room|bowling|mini ?golf|sauna|\bspa\b|thermal bath|rent a boat|boat rental|boating|pedalo|kayak|paddle ?board|\btour\b|cooking class|pottery|\bcinemas?\b|\bkino\b|open-air screening|arcade|pinball|zip ?line|roller ?coaster|ferris wheel|bouldering|climbing|go-?kart|skatepark|skating|ice rink|trampoline|planetarium|observatory|\bzoo\b|aquarium|public pool|swimming|cable car|tasting/,
+  exp: /photo ?booth|photoautomat|\bswings?\b|toboggan|\bslides?\b|\bsled|rodel|karaoke|escape room|bowling|mini ?golf|sauna|\bspa\b|thermal bath|rent a boat|boat rental|boating|pedalo|kayak|paddle ?board|\btour\b|cooking class|pottery|\bcinemas?\b|\bkino\b|open-air screening|arcade|pinball|zip ?line|roller ?coaster|ferris wheel|bouldering|climbing|go-?kart|casino|rope park|high ropes|skatepark|skating|ice rink|trampoline|planetarium|observatory|\bzoo\b|aquarium|public pool|swimming|cable car|tasting/,
   cock: /cocktail|speakeasy|martini|mixolog|negroni/, wine: /wine|vino|enoteca|natural wine|cave/, beer: /beer|brew|pub|taproom|ale|bier|lager/ };
 const GRP = {
   dinner: { kinds: ["dinner"], n: "places to eat", subs: [
@@ -2744,19 +2745,22 @@ const GRP = {
   culture: { kinds: ["culture", "see"], n: "places to see", subs: [
     { k: "museums", l: "museums", n: "museums and galleries", kinds: ["culture"], t: () => true },
     { k: "sights", l: "sights", n: "sights", kinds: ["see"], t: () => true },
-    { k: "views", l: "views", n: "viewpoints", t: z => RX.view.test(ztxt(z)) },
-    { k: "parks", l: "parks", n: "parks and nature", t: z => RX.park.test(ztxt(z)) }] },
+    { k: "views", l: "views", n: "viewpoints", kinds: ["see"], t: z => RX.view.test(ztxt(z)) },
+    { k: "parks", l: "parks", n: "parks and nature", kinds: ["see"], t: z => RX.park.test(ztxt(z)) }] },
   shop: { kinds: ["shop", "clothes"], n: "shops", subs: [
     { k: "clothes", l: "clothes", n: "clothes shops", kinds: ["clothes"], t: () => true },
-    { k: "vintage", l: "vintage", n: "vintage shops", t: z => RX.vint.test(ztxt(z)) },
-    { k: "design", l: "design", n: "design and homeware shops", t: z => RX.des.test(ztxt(z)) },
-    { k: "books", l: "books & records", n: "book and record shops", t: z => RX.book.test(ztxt(z)) },
-    { k: "markets", l: "markets & food", n: "markets and food shops", t: z => RX.food.test(ztxt(z)) }] },
+    { k: "vintage", l: "vintage", n: "vintage shops", t: z => mk(z) === "clothes" ? RX.vint.test(ztxt(z)) : shopSub(z) === "vintage" },
+    { k: "beauty", l: "beauty & scent", n: "beauty and fragrance shops", kinds: ["shop"], t: z => shopSub(z) === "beauty" },
+    { k: "books", l: "books & records", n: "book and record shops", kinds: ["shop"], t: z => shopSub(z) === "books" },
+    { k: "markets", l: "markets & food", n: "markets and food shops", kinds: ["shop"], t: z => shopSub(z) === "markets" },
+    { k: "design", l: "design & home", n: "design and homeware shops", kinds: ["shop"], t: z => shopSub(z) === "design" }] },
   experience: { kinds: ["experience"], n: "experiences", subs: [],
     /* photo booths, swings, slides, karaoke, cinemas, boats, tours: saved under other kinds, so they join by what the one-liner says (not plain cafes or restaurants) */
     extra: z => mk(z) !== "experience" && RX.exp.test(ztxt(z)) && (!["dinner", "coffee", "sweet"].includes(mk(z)) || /karaoke|photo ?booth|bowling|cinema/.test(ztxt(z))) }
 };
 const KGRP = { see: "culture", clothes: "shop" };
+/* a non-clothes shop gets exactly one sub, first match wins */
+function shopSub(z) { const x = ztxt(z); return RX.beauty.test(x) ? "beauty" : RX.vint.test(x) ? "vintage" : RX.book.test(x) ? "books" : RX.food.test(x) ? "markets" : RX.des.test(x) ? "design" : ""; }
 /* search by keyword: every word has to fit. A word fits if it's in the name / one-liner / vibe, or it names a kind ("food", "coffee",
    "museum", "shopping") or one of the sub-chip ideas ("brunch", "vintage", "cocktails"). Plurals and accents don't matter. */
 const qn = t => t.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
@@ -2770,7 +2774,7 @@ const QKW = {
   museum: isK("culture"), gallery: isK("culture"), galleries: isK("culture"), art: isK("culture"), culture: isK("culture"),
   sight: isK("see"), sightseeing: isK("see"), view: rxK(RX.view), viewpoint: rxK(RX.view), park: rxK(RX.park), nature: rxK(RX.park),
   shop: isK("shop", "clothes"), shopping: isK("shop", "clothes"), store: isK("shop", "clothes"), clothes: isK("clothes"), fashion: isK("clothes"),
-  vintage: rxK(RX.vint), secondhand: rxK(RX.vint), thrift: rxK(RX.vint), design: rxK(RX.des, "shop", "clothes"), book: rxK(RX.book), record: rxK(RX.book), market: rxK(RX.food),
+  vintage: rxK(RX.vint), secondhand: rxK(RX.vint), thrift: rxK(RX.vint), design: z => mk(z) === "shop" && shopSub(z) === "design", beauty: z => mk(z) === "shop" && shopSub(z) === "beauty", perfume: rxK(RX.beauty), fragrance: rxK(RX.beauty), scent: rxK(RX.beauty), book: rxK(RX.book), record: rxK(RX.book), market: rxK(RX.food),
   experience: z => inGrp(z, "experience"), activity: z => inGrp(z, "experience"), "things to do": z => inGrp(z, "experience") || mk(z) === "see", fun: z => inGrp(z, "experience")
 };
 function qHit(z, q) {
