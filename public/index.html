@@ -1082,6 +1082,12 @@ body .mapv .mcar { bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
 .pdet, .pnear { background: var(--card); border-radius: 26px; box-shadow: var(--glass-shadow), inset 0 0 0 .5px var(--glass-edge), 0 10px 34px rgba(0, 0, 0, .2); }
 .pdet { flex: none; padding: 0 16px 14px; overflow: hidden; }
 .pdet.pst { flex: 0 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; }
+.stio { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0 0; }
+.stio > div { background: rgba(118, 118, 128, .14); border-radius: 12px; padding: 9px 12px; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.stio small { font-size: 12px; color: var(--sub); font-weight: 600; }
+.stio b { font-size: 17px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.stio span { font-size: 13px; color: var(--sub); }
+.stnt { font-size: 14px; color: var(--sub); line-height: 1.35; margin: 8px 2px 0; }
 .mlist.pm .pdet .mpl-h { border-radius: 26px 26px 0 0; }
 .pcl { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 460ms var(--glide), opacity 260ms ease; }
 .pcl > div { min-height: 0; overflow: hidden; }
@@ -2236,16 +2242,17 @@ function moveSheet(m) {
     ${notes ? `<p class="nt">${esc(notes)}</p>` : ""}
     <div class="acts">${a.ref ? `<button class="btn blue press" data-show-ref="${a.ref}" data-show-l="${esc(a.code)}">Show ref</button>` : ""}${a.fromQ ? `<a class="btn card press" href="${dirs(a.fromQ)}" target="_blank" rel="noopener">Directions</a>` : ""}</div>`;
 }
-function staySheet(s) {
+function staySheet(s, split) {
   const n = view >= s.in && view < s.out ? Math.round((Date.parse(view) - Date.parse(s.in)) / 864e5) + 1 : 0, me = HERE && Date.now() - HERE.t < 30 * 6e4 ? HERE : null;
   const k = me && s.lat != null ? km(me.lat, me.lng, s.lat, s.lng) : null, d = k == null ? "Directions" : k > 25 ? `${Math.round(k)} km away` : (t => /walk/.test(t[1] || "") ? t[1] : (t[1] || t[0]).replace(/^~/, "").replace(" or taxi", ""))(distTxt(k).split(" · "));
-  /* laid out like any other place (5 Nov, Alex): name, dates, Directions; one line for check in and out; no booking table, no "all 12 stops" */
-  const sh = s.addr && !/booking/i.test(s.addr) ? s.addr : "";
-  return `<div class="ph-top"><div class="ph-t"><h3 id="sheet-title">${esc(s.hotel)}</h3><span class="pmeta">${n ? `Night ${n} of ${nights(s)}` : `${dRange(s.in, s.out)} · ${nights(s)} nights`}${sh ? ` · ${esc(sh)}` : ""}</span></div>`
+  /* laid out like any other place (5 Nov, Alex): name, night, Directions; check in / check out side by side; Nearby below in the panel */
+  const sh = s.addr && !/booking/i.test(s.addr) ? s.addr : "", f = x => split ? `<div class="pcl"><div>${x}</div></div>` : x, day = iso => dDay(iso).replace(",", "");
+  return `<div class="ph-top"><div class="ph-t"><h3 id="sheet-title">${esc(s.hotel)}</h3><span class="pmeta">${n ? `Night ${n} of ${nights(s)}` : `${dRange(s.in, s.out)}`}${sh ? ` · ${esc(sh)}` : ""}</span></div>`
     + (s.q || sh ? `<a class="pgo press" href="${dirs(s.q || s.hotel + " " + sh)}" target="_blank" rel="noopener" aria-label="Directions">${pI("go")}<span>${esc(d)}</span></a>` : "") + `</div>`
-    + `<p class="pl-tl">Check in ${s12(s.ci)}${s.ciEnd ? `–${s12(s.ciEnd)}` : ""} ${dDay(s.in).replace(",", "")}, out ${s12(s.co)} ${dDay(s.out).replace(",", "")}.${s.note ? " " + esc(s.note) : ""}</p>`
-    + (s.q ? `<div class="pmini"><a class="pchip press" href="${gq(s.q, s.city)}" target="_blank" rel="noopener">${pI("web")}Google</a></div>` : "");
+    + f(`<div class="stio"><div><small>Check in</small><b>${s12(s.ci)}${s.ciEnd ? `–${s12(s.ciEnd)}` : ""}</b><span>${day(s.in)}</span></div><div><small>Check out</small><b>${s12(s.co)}</b><span>${day(s.out)}</span></div></div>`
+    + (s.note ? `<p class="stnt">${esc(s.note)}</p>` : ""));
 }
+const stayZ = s => s && s.lat != null ? { id: "stay:" + s.in, name: s.hotel, city: s.city, lat: s.lat, lng: s.lng, kind: "stay", stay: true } : null;  /* the hotel as an anchor for Nearby */
 
 
 const SLOTDEF = { coffee: { l: "Coffee", cat: "coffee", dur: 45 }, dinner: { l: "Dinner", cat: "dinner", dur: 90 }, drinks: { l: "Wine", cat: "drinks", dur: 75 } };
@@ -3337,9 +3344,9 @@ function plRender(dir) {
   const it = MPS[MPS.length - 1], prev = MPS[MPS.length - 2];
   const back = prev ? (prev.stay ? prev.stay.hotel : prev.name) : MLOPEN ? document.getElementById("mlistt").textContent.replace(/ nearby$/, "") : "";
   SBACK = []; REFRESH = null;
-  const hd = `<div class="mpl-h" id="mplh"><i></i>${back ? `<button class="mpb" data-mpb>‹ ${esc(back)}</button>` : ""}</div>`, nr = it.stay ? "" : nextNear(it, it.nk);
+  const hd = `<div class="mpl-h" id="mplh"><i></i>${back ? `<button class="mpb" data-mpb>‹ ${esc(back)}</button>` : ""}</div>`, nr = nextNear(it.stay ? stayZ(it.stay) : it, it.nk);
   mlist.classList.remove("pfull"); mlist.classList.toggle("nx", !!nr);
-  mpl.innerHTML = `<div class="pdet${it.stay ? " pst" : ""}">${hd}${it.stay ? staySheet(it.stay) : placeSheet(it, true)}</div>` + (nr ? `<div class="pnear">${nr}</div>` : "");
+  mpl.innerHTML = `<div class="pdet${it.stay && !nr ? " pst" : ""}">${hd}${it.stay ? staySheet(it.stay, !!nr) : placeSheet(it, true)}</div>` + (nr ? `<div class="pnear">${nr}</div>` : "");
   mpl.scrollTop = 0; loadGalleries(mpl); panelFit();
   const ids = [...mpl.querySelectorAll("[data-sid]")].map(e => SAVE_BY[e.dataset.sid]).filter(Boolean); if (ids.length) walkFetch(it.stay || it, ids);
   if (it.full && nr) { mlist.classList.add("pfull"); panelFit(); } delete it.full; nearSync();
@@ -3364,7 +3371,7 @@ function panelPlace(it, push) { if (MQON) mqi.blur();
 function mapPlace(z) { panelPlace(z, false); }
 /* back to a place you came through: same Nearby category, same height as you left it */
 function panelBackTo(i) { if (i < 0 || i >= MPS.length - 1) return; MPS.length = i + 1; const it = MPS[i];
-  if (!it.stay && it.lat != null) { MPICK = it; mapv.classList.add("picked"); } it.full = it.back; plRender(-1); }
+  if (!it.stay && it.lat != null) { MPICK = it; mapv.classList.add("picked"); } else if (it.stay) { MPICK = null; mapv.classList.remove("picked"); } it.full = it.back; plRender(-1); }
 function panelBack() {
   if (MPS.length > 1) return panelBackTo(MPS.length - 2);
   MPS = []; panelSync(); if (MLOPEN && !reduce()) mlistl.animate([{ transform: "translateX(-32px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 380, easing: "cubic-bezier(.22,.8,.24,1)" });
@@ -3410,10 +3417,10 @@ function nxDraw(now) { if (!MAP || !MAP.getSource("nx")) return;
   const step = () => { const k = Math.min(1, (performance.now() - t0) / 420); set(k * k * (3 - 2 * k)); if (k < 1) NXA = requestAnimationFrame(step); }; NXA = requestAnimationFrame(step); }
 /* one place decides what the map shows: run whenever the panel's place, height or Nearby category changes */
 function nearSync() {
-  const it = MPS[MPS.length - 1], place = it && !it.stay && it.lat != null ? it : null;
-  const chip = place && mlist.classList.contains("pfull") ? mpl.querySelector(".pnear [data-nxk][aria-pressed=true]") : null;
+  const it = MPS[MPS.length - 1], place = it && !it.stay && it.lat != null ? it : null, anchor = place || (it && it.stay ? stayZ(it.stay) : null);
+  const chip = anchor && mlist.classList.contains("pfull") ? mpl.querySelector(".pnear [data-nxk][aria-pressed=true]") : null;
   const list = chip ? [...mpl.querySelectorAll(`.pnear [data-nxp="${chip.dataset.nxk}"] [data-sid]`)].map(e => SAVE_BY[e.dataset.sid]).filter(z => z && z.lat != null) : [];
-  NEAR = chip && list.length ? { a: place, k: chip.dataset.nxk, list } : null;
+  NEAR = chip && list.length ? { a: anchor, k: chip.dataset.nxk, list } : null;
   TRAIL = MPS.filter(x => !x.stay && x.lat != null); if (TRAIL.length < 2) TRAIL = [];
   const sig = MPS.map(x => x.id || "stay").join(">") + "|" + (NEAR ? NEAR.k : "") + "|" + mlist.classList.contains("pfull");
   if (!MAP || mapv.hidden) { NSIG = ""; return; }
@@ -3519,7 +3526,7 @@ function pinPool() {
   if (!NEAR && !TRAIL.length) return MPTS;
   const seen = new Set(), out = [], add = q => { if (q.z && q.z.lat != null && !seen.has(q.z.id)) { seen.add(q.z.id); out.push(q); } };
   TRAIL.forEach(z => add({ z, on: false, org: true }));
-  if (NEAR) { add({ z: NEAR.a, on: false }); NEAR.list.forEach(z => add({ z, on: false, nx: true })); } else MPTS.forEach(add);
+  if (NEAR) { if (!NEAR.a.stay) add({ z: NEAR.a, on: false }); NEAR.list.forEach(z => add({ z, on: false, nx: true })); } else MPTS.forEach(add);
   return out; }
 function labelAt(pt) {
   const c = MAP.getContainer().getBoundingClientRect(), x = pt.x + c.left, y = pt.y + c.top; let best = null, bz = -1e9;
@@ -3552,7 +3559,7 @@ function layoutPins() {
     if (!PHOME || PHOME.a !== a) { if (PHOME) PHOME.m.remove();
       const m = mkMarker(a.lng, a.lat, `<div class="mp home s-l"><span class="b"><i class="e">🏠</i></span><span class="t"><b>${esc(a.hotel)}</b><em>where you're staying</em></span></div>`, () => mapv.hidden ? openSheet(staySheet(a)) : panelPlace({ stay: a }, false)); m.getElement().style.zIndex = 2900; PHOME = { m, a }; }
     const p = mPt(a), hl = p.x + 160 > sz.x - 6; boxes.push(hl ? [p.x - 160, p.y - 24, p.x + 22, p.y + 26] : [p.x - 22, p.y - 24, p.x + 160, p.y + 26]);
-    PHOME.m.getElement().firstElementChild.classList.toggle("l", hl); PHOME.m.getElement().style.opacity = NEAR ? "0" : ""; PHOME.m.getElement().style.pointerEvents = NEAR ? "none" : "";
+    PHOME.m.getElement().firstElementChild.classList.toggle("l", hl); const hid = NEAR && !NEAR.a.stay; PHOME.m.getElement().style.opacity = hid ? "0" : ""; PHOME.m.getElement().style.pointerEvents = hid ? "none" : "";
   }
   const want = new Map(); let nl = 0, nb = 0;
   const zm = MAP.getZoom(), far = zm < Z_CITY && !NEAR, mid = !far && zm < Z_STREET && !NEAR, NL = far ? 0 : mid ? 6 : 14, NB = far ? 16 : 14, pool = pinPool();
