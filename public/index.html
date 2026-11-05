@@ -447,14 +447,25 @@ body.mapopen .sheet { max-height: calc(56vh + 120px); } body.mapopen .scrim { ba
 .gal.strip .gtrack img { width: 38%; height: 190px; border-radius: 14px; scroll-snap-align: start; scroll-snap-stop: normal; }
 .gal.strip .gtrack img:only-child { width: 100%; height: 230px; }
 .gal.strip .gdots { display: none; }
-.pl-tl { font-size: 17px; line-height: 1.35; margin: 2px 4px 0; color: var(--ink); }
+.pl-tl { font-size: 16px; line-height: 1.38; margin: 8px 4px 0; color: var(--ink); }
+/* place sheet header: name and meta on the left, Directions beside them; the one-liner runs full width; small chips for the rest */
+.ph-top { display: flex; align-items: flex-start; gap: 12px; margin: 0 4px; }
+.ph-t { flex: 1; min-width: 0; }
+.ph-top h3 { font-size: 24px; line-height: 1.15; text-wrap: pretty; }
+.ph-top .pmeta { display: block; margin-top: 3px; font-size: 15px; color: var(--sub); font-variant-numeric: tabular-nums; }
+.pgo { flex: none; max-width: 48%; height: 40px; margin-top: 1px; padding: 0 14px 0 11px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; background: var(--blue); color: #fff; font: 600 15px/1 var(--font); text-decoration: none; }
+.pgo svg { width: 18px; height: 18px; flex: none; }
+.pgo span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pmini { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 2px; }
+.pchip { height: 32px; border: 0; border-radius: 16px; padding: 0 12px 0 10px; display: inline-flex; align-items: center; gap: 6px; background: rgba(118, 118, 128, .14); color: var(--ink); font: 500 14px/1 var(--font); text-decoration: none; cursor: pointer; }
+.pchip svg { width: 16px; height: 16px; }
 .pacts { display: flex; gap: 8px; margin: 18px 0 4px; }
 .pa { flex: none; height: 50px; border: 0; border-radius: 25px; padding: 0 18px 0 14px; display: inline-flex; align-items: center; gap: 8px; background: var(--card); color: var(--ink); font: 600 16px/1 var(--font); letter-spacing: -0.01em; text-decoration: none; cursor: pointer; white-space: nowrap; }
 .pa svg { width: 20px; height: 20px; flex: none; }
 .pa.go { background: var(--blue); color: #fff; flex: 1; min-width: 0; padding-right: 12px; }
 .pa.go span { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .pa.go small { font-size: 12px; font-weight: 500; opacity: .85; letter-spacing: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-body.mapopen .gal.strip .gtrack img { height: 150px; } body.mapopen .gal.strip .gtrack img:only-child { height: 180px; }
+.gal.strip .gtrack img { height: 150px; } .gal.strip .gtrack img:only-child { height: 180px; }
 .pa.on { color: var(--blue); }
 .pa.ic { width: 50px; padding: 0; justify-content: center; }
 .pmeta .pon { color: var(--blue); }
@@ -2554,15 +2565,14 @@ document.addEventListener("click", e => {
   w.querySelectorAll("[data-nxp]").forEach(p => { p.hidden = p.dataset.nxp !== b.dataset.nxk; });
 }, true);
 function placeSheet(z) {
-  const inTrip = view >= START && view <= END, on = getPlan(view).find(p => p.id === z.id), meta = placeMeta(z), d = placeDist(z);
+  const on = getPlan(view).find(p => p.id === z.id), meta = placeMeta(z), d = placeDist(z);
   return (SBACK.length ? `<button class="sback press" data-sback>‹ Back</button>` : "") + hero(z)
-    + head(esc(z.name), `<span class="pmeta" data-pid="${esc(z.id)}">${meta}${on ? `${meta ? " · " : ""}<span class="pon">On the day, ${t12(on.t)}</span>` : ""}</span>`)
+    + `<div class="ph-top"><div class="ph-t"><h3 id="sheet-title">${esc(z.name)}</h3><span class="pmeta" data-pid="${esc(z.id)}">${meta}${on ? `${meta ? " · " : ""}<span class="pon">On the day, ${t12(on.t)}</span>` : ""}</span></div>`
+    + `<a class="pgo press" href="${dirs(z.name + " " + (z.address || z.city))}" target="_blank" rel="noopener" aria-label="Directions">${pI("go")}<span class="pdist">${esc(d || "Go")}</span></a></div>`
     + (z.hook ? `<p class="pl-tl">${esc(hookOf(z))}</p>` : "")
-    + `<div class="pacts"><a class="pa go press" href="${dirs(z.name + " " + (z.address || z.city))}" target="_blank" rel="noopener">${pI("go")}<span>Directions<small class="pdist">${esc(d)}</small></span></a>`
-    + (inTrip ? `<button class="pa ic press${on ? " on" : ""}" data-zadd="${esc(z.id)}" aria-label="${on ? "Remove from the day" : "Add to the day"}">${pI(on ? "added" : "add")}</button>` : "")
-    + (z.url && embedOf(z.url) ? `<button class="pa ic press"${vidAttr(z)} aria-label="Video">${pI("vid")}</button>` : "")
-    + `<button class="pa ic press" data-pshare="${esc(z.id)}" aria-label="Share">${pI("share")}</button>`
-    + `<a class="pa ic press" href="${gq(z.name, z.city)}" target="_blank" rel="noopener" aria-label="Google">${pI("web")}</a></div>` + nextNear(z);
+    + `<div class="pmini">${z.url && embedOf(z.url) ? `<button class="pchip press"${vidAttr(z)}>${pI("vid")}Video</button>` : ""}`
+    + `<button class="pchip press" data-pshare="${esc(z.id)}">${pI("share")}Share</button>`
+    + `<a class="pchip press" href="${gq(z.name, z.city)}" target="_blank" rel="noopener">${pI("web")}Google</a></div>` + nextNear(z);
 }
 /* opened over whatever sheet is showing, with a way back to it */
 function pushBack() { if (!sheet.hidden) { SBACK.push({ h: document.getElementById("sheet-body").innerHTML, st: sheet.scrollTop, R: REFRESH }); REFRESH = null; } }
