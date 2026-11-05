@@ -965,16 +965,16 @@ body .mapv .mcar { bottom: calc(126px + env(safe-area-inset-bottom, 0px)); }
 .mapv.pmode .mfoot { height: calc(86px + env(safe-area-inset-bottom, 0px)); }
 
 /* 5 Nov, later: tabs move to a small icon capsule top-right on every screen; the bottom belongs to content */
-.tabs { top: max(12px, env(safe-area-inset-top, 0px)); bottom: auto; left: auto; right: 12px; transform: none; width: 132px; height: 44px; border-radius: 22px; padding: 3px; }
+.tabs { top: calc(env(safe-area-inset-top, 0px) + 8px); bottom: auto; left: auto; right: 12px; transform: none; width: 132px; height: 44px; border-radius: 22px; padding: 3px; }
 .tabs button { border-radius: 19px; }
 .tabs button span { display: none; }
 .tabs button svg { width: 21px; height: 21px; stroke-width: 1.9; }
 .tabs button[aria-selected="true"] { color: #fff; background: var(--blue); }
 .tabs button:active { transform: scale(.88); }
-body .mapv .mme { top: calc(max(12px, env(safe-area-inset-top, 0px)) + 54px); right: 12px; }
+body .mapv .mme { top: calc(env(safe-area-inset-top, 0px) + 62px); right: 12px; }
 .tabs { transition: opacity 200ms ease; }
 /* Schedule: city and the two-day switch sit left, clear of the tabs */
-#pills { display: flex; align-items: center; gap: 8px; padding-right: 156px; }
+#pills { display: flex; align-items: center; gap: 8px; padding-right: 156px; padding-top: 8px; }
 #pills > #titlePill { order: 1; } #pills > #modePill { order: 2; flex: none; }
 /* everything that sat above the tab bar drops down */
 .xp { padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
