@@ -189,6 +189,7 @@ They sit in free time and play as whole-day ideas ("scenes").
 - **Motion:** smooth, light and airy, not bouncy (except the pull stretch, which should feel springy). Revert quickly if a change looks worse.
 - **Map motion (4 Nov):** Alex found it too aggressive. Camera `ease` is now cubic-bezier(.3,0,.15,1) (was a quartic that covered half the move in 100ms); `mapAim` 950ms; locate uses one `mapFlyHere` flyTo (curve 1.15, speed .9) instead of two that restarted each other. Pins, card row, chips and buttons use `--glide` (cubic-bezier(.22,.8,.24,1)), no overshoot; picked pin scale 1.26. Pin re-layout mid-move throttled to ~4.5/s.
 - **Home-screen app:** updates live. Only the icon and name need a re-add.
+- **Edge to edge (5 Nov, Alex: the app stopped below the camera):** `apple-mobile-web-app-status-bar-style` is now `black-translucent`, so the home-screen app draws under the clock and Dynamic Island. The status text is then always white, so in light mode a soft top shade (`body::after`, standalone + light only) keeps it readable. Headers already pad by `env(safe-area-inset-top)`. Status-bar style is read at launch: if it doesn't change after closing and reopening, the home-screen icon needs re-adding. If Alex dislikes the shade on white pages, the alternative is to go back to `default`.
 
 ## Shared state (added 25 Oct)
 - `src/worker.js` runs before assets for `/api/*` and `/cal/*` (see `wrangler.jsonc`). KV namespace `europa-trip-shared` (binding `SHARED`) holds one value `state` = `{ key: { v, ts } }`, newest change wins.
