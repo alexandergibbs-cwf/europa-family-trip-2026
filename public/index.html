@@ -1158,6 +1158,9 @@ const pics = (n, c) => "https://www.google.com/search?tbm=isch&q=" + encodeURICo
 const gq = (n, c) => "https://www.google.com/search?q=" + encodeURIComponent((n + (c && c !== "Other" && !n.includes(c) ? " " + c : "")).trim());
 const ttq = (n, c) => "https://www.tiktok.com/search?q=" + encodeURIComponent((n + (c && c !== "Other" && !n.includes(c) ? " " + c : "")).trim());
 const dirs = q => "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(q);
+/* Directions start from where you are (Alex, 5 Nov: Google didn't fill in your position). Added when tapped, so it's never stale */
+document.addEventListener("click", e => { const l = e.target.closest && e.target.closest('a[href^="https://www.google.com/maps/dir/"]'); if (!l) return;
+  try { const u = new URL(l.href); if (typeof HERE !== "undefined" && HERE && Date.now() - HERE.t < 20 * 6e4) { u.searchParams.set("origin", HERE.lat.toFixed(6) + "," + HERE.lng.toFixed(6)); l.href = u.toString(); } } catch (x) {} }, true);
 const maps = q => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
 const wxLink = c => "https://www.google.com/search?q=" + encodeURIComponent("weather " + c);
 
