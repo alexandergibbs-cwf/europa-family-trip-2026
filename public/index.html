@@ -823,8 +823,7 @@ body .mapv .maplibregl-ctrl-bottom-left { bottom: calc(90px + env(safe-area-inse
 /* map: two layers only. Browse = the category rail + swipeable cards over the map; detail = the place sheet.
    Top-left the city (or the search field), top-right locate, rail and tab bar always at the bottom. */
 .mapv #mchips { display: none !important; }
-.mdock { position: absolute; left: 0; right: 0; bottom: 0; z-index: 500; display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; padding: 6px 8px calc(86px + env(safe-area-inset-bottom, 0px)); scroll-padding: 0 8px; pointer-events: none; background: transparent; transition: background-color 280ms ease, box-shadow 280ms ease; }
-.mdock button { pointer-events: auto; }
+.mdock { position: absolute; left: 0; right: 0; bottom: 0; z-index: 500; display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; bottom: calc(80px + env(safe-area-inset-bottom, 0px)); padding: 6px 8px; scroll-padding: 0 8px; touch-action: pan-x; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; background: transparent; transition: background-color 280ms ease, box-shadow 280ms ease; }
 .mdock::-webkit-scrollbar { display: none; }
 .mdock button { flex: none; width: 68px; border: 0; background: none; padding: 0; font: inherit; color: var(--mtxt); display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .mdock .mic { width: 50px; height: 50px; border-radius: 25px; display: grid; place-items: center; font-size: 34px; line-height: 1; transition: transform 160ms var(--glide), background-color 220ms ease, box-shadow 220ms ease; }
@@ -862,7 +861,7 @@ body .mapv .mme { top: max(12px, env(safe-area-inset-top, 0px)); bottom: auto !i
 .mlist-l { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 0 12px calc(176px + env(safe-area-inset-bottom, 0px)); }
 .mlist .mc { width: auto; max-width: none; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0, 0, 0, .06); cursor: pointer; }
 .mapv.lon .mcar, .mapv.lon .mhd { opacity: 0; pointer-events: none; }
-.mapv.lon .mdock { background: var(--panel); box-shadow: 0 -0.5px 0 var(--hair); }
+.mapv.lon .mdock { background: var(--panel); box-shadow: 0 -0.5px 0 var(--hair), 0 160px 0 0 var(--panel); }
 .mapv.lon .mdock small { text-shadow: none; }
 /* zoom tiers: street (names + one-liners), neighbourhood (a few names, no one-liners), city (area bubbles) */
 .mapv.zmid .mp .t em { display: none; }
