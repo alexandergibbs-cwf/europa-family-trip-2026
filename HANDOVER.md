@@ -200,7 +200,7 @@ They sit in free time and play as whole-day ideas ("scenes").
 - Alex: Explore should make it easy to see what there is to do in the city; the map handles "near me now".
 - Layout (`xpRender`):
   - Header: large city title (opens the cities sheet), subline "Near you / Around <hotel> · 11° typical" (weather from `wxFor`), week strip.
-  - **Top picks**: wide 280px photo cards, rated ≥ 4.5 within 4 km, round-robin across kinds (best of each kind first), up to 8.
+  - No "Top picks" row (removed 5 Nov at Alex's request).
   - **Themed rows** (`XTH`), horizontal 150px photo cards (`xcCard`: photo or tinted icon, ★ badge, name, one-liner, walk time): Breakfast & brunch, Coffee, Lunch, Dinner, Bars, Something sweet, Museums & galleries, Sights, Views, Parks & nature, Experiences, Clothes & vintage, Shops. Order by time of day comes from `xpThemes`.
   - Each row has "See all N", which opens the map on that category/sub with the list open (`XTH[k].map`, run through `MAPNEXT` once the map has drawn).
   - Tapping a card opens the place sheet.

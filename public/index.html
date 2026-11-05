@@ -2706,7 +2706,7 @@ function xpRow(z, k, o) {
   const w = o && walkKm(o, z);
   return `<div class="place hasph" data-sid="${z.id}">${ph(z)}<span><span class="a" style="display:block">${esc(z.name)}</span>${z.hook ? `<span class="h">${esc(hookOf(z))}</span>` : ""}<span class="m" style="display:block"><b>${distTxt(k, w)}</b>${z.rating ? ` · ★ ${z.rating}` : ""}</span></span></div>`;
 }
-/* Explore = a guide to the city: top picks, then themed rows you swipe through (photo cards), ordered for the time of day.
+/* Explore = a guide to the city: themed rows you swipe through (photo cards), ordered for the time of day.
    "See all" opens that theme's full list on the map. */
 const XTH = {
   brunch: { t: "Breakfast & brunch", f: z => ["dinner", "coffee"].includes(mk(z)) && RX.brk.test(ztxt(z)), map: ["dinner", "breakfast"] },
@@ -2748,11 +2748,6 @@ function xpRender(keepScroll) {
   if (!o) body = `<p class="xp-empty">No hotel for this day, so there's nothing to show nearby.</p>`;
   else if (!pool.length) body = `<p class="xp-empty">Nothing saved in ${esc(city)} yet.</p>`;
   else {
-    /* top picks: best rated within ~4 km, at most two of a kind */
-    const best = pool.filter(x => x.k < 4 && (x.z.rating || 0) >= 4.5).sort((x, y) => y.z.rating - x.z.rating || x.k - y.k), byK = {};
-    best.forEach(x => { (byK[pinCol(x.z)] = byK[pinCol(x.z)] || []).push(x); });  /* one of each kind first, then round again */
-    const top = []; for (let r = 0; r < 2 && top.length < 8; r++) Object.values(byK).forEach(l => { if (l[r] && top.length < 8) top.push(l[r]); });
-    if (top.length >= 3) body += `<div class="xp-sec"><h2>Top picks</h2></div><div class="xs">${top.map(x => xcCard(x.z, x.k, o, true)).join("")}</div>`;
     body += xpThemes(iso).map(key => { const th = XTH[key], all = pool.filter(x => th.f(x.z)); if (all.length < (key === "views" || key === "parks" ? 3 : 1)) return "";
       return `<div class="xp-sec"><h2>${th.t}</h2>${all.length > 3 ? `<button data-xall="${key}">See all ${all.length}</button>` : ""}</div><div class="xs">${all.slice(0, 10).map(x => xcCard(x.z, x.k, o)).join("")}</div>`; }).join("");
   }
