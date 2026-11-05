@@ -2688,7 +2688,7 @@ function mapFilter(z) {
 }
 function dockRender() {
   const { list } = mapPlaces(), kinds = XKINDS.filter(k => list.some(z => mk(z) === k));
-  const items = [["q", "", "search"], ...DOCK.filter(([k]) => kinds.includes(k))];
+  const items = [["q", "", "search"], ["all", "📍", "all"], ...DOCK.filter(([k]) => kinds.includes(k))];
   const html = items.map(([k, e, l]) => `<button data-mdk="${k}" aria-pressed="${k === "q" ? MQON : !MQON && MCAT === k}"><span class="mic" aria-hidden="true">${k === "q" ? QSVG : `<span>${e}</span>`}</span><small>${l}</small></button>`).join("");
   if (mdock.dataset.sig !== html) { mdock.dataset.sig = html; const x = mdock.scrollLeft; mdock.innerHTML = html; mdock.scrollLeft = x; }
 }
@@ -2699,9 +2699,9 @@ function fullList() {
 const railList = () => fullList().slice(0, 25);
 /* "See all": everything the pins show, nearest first, same cards stacked */
 const LISTN = { dinner: "places to eat", coffee: "cafes", sweet: "sweet spots", drinks: "bars", see: "sights", culture: "museums and galleries", shop: "shops", clothes: "clothes shops", experience: "experiences" };
-function listTitle(n) { return MQ ? `${n} for “${MQ}”` : `${n} ${MCAT !== "all" ? LISTN[MCAT] || "places" : "places"} nearby`; }
+function listTitle(n) { return MQ ? `${n} for “${MQ}”` : `${n} ${MCAT !== "all" ? LISTN[MCAT] || "places" : "saved places"} nearby`; }
 function mhdSet() {
-  const n = MPTS.length; document.getElementById("mhdt").textContent = MQ ? `“${MQ}”` : MCAT !== "all" ? (DOCK.find(d => d[0] === MCAT) || [, , "nearby"])[2] : "nearby";
+  const n = MPTS.length; document.getElementById("mhdt").textContent = MQ ? `“${MQ}”` : MCAT !== "all" ? (DOCK.find(d => d[0] === MCAT) || [, , "all"])[2] : "all";
   document.getElementById("mhdn").textContent = `See all ${n}`;
   document.getElementById("mhd").hidden = n < 3;
 }
@@ -2751,7 +2751,8 @@ mdock.addEventListener("click", e => {
   if (k === "q") return MQON ? mqClose() : mqOpen();
   if (MQON) mqClose(true);
   clearPick();
-  if (k === MCAT) { MCAT = "all"; XCAT = "all"; XMORE = {}; listClose(); drawMap(); return; }
+  if (k === "all" || k === MCAT) { const was = MCAT; MCAT = "all"; XCAT = "all"; XMORE = {}; drawMap();
+    if (k === "all" && (was !== "all" || !MPICK)) { carShow(railList()); return; } listClose(); return; }
   MCAT = k; XCAT = k; XMORE = {};
   drawMap(); carShow(railList());
 });
@@ -2872,7 +2873,8 @@ function openMap(focusId) {
   PFIRST = true; MCAT = XCAT;
   mapv.hidden = false; document.body.classList.add("mapopen"); haptic(); setTab(); mttSet();
   if (!reduce()) mapv.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220 });
-  if (!HERE) { hereAsked = 0; askHere(() => { if (!mapv.hidden && MAP) drawMap(); }); }
+  MUSER = false; hereAsked = 0;
+  askHere(() => { if (mapv.hidden || !MAP) return; drawMap(); const h = mapHere(); if (h && !MUSER && !MPICK) MAP.easeTo({ center: [h.lng, h.lat], zoom: 15, duration: reduce() ? 0 : 700, easing: ease }); });
   loadGL().then(() => {
     if (!MAP) {
       const a = anchorFor(view) || { lat: 47.37, lng: 8.54 };
@@ -2882,12 +2884,15 @@ function openMap(focusId) {
       MAP.on("click", e => { if (Date.now() - MTAP < 350) return; const lz = labelAt(e.point); if (lz) { MTAP = Date.now(); haptic(); return lz.home ? 0 : pinTap(lz); } mapCard(null); if (!sheet.hidden) return closeSheet(); if (MLOPEN) { haptic(); return listClose(); } if (MPICK) { haptic(); mapPick(null); } });
       /* pins re-sort themselves while the map is still moving (a few times a second), and once more when it stops */
       MAP.on("move", () => { const t = performance.now(); if (t - MLAST > 220 && !MRAF) MRAF = requestAnimationFrame(() => { MRAF = 0; MLAST = performance.now(); layoutPins(); }); });
+      ["dragstart", "zoomstart"].forEach(t => MAP.on(t, e => { if (e.originalEvent) MUSER = true; }));
       MAP.on("moveend", () => { clearTimeout(MLT); MLT = setTimeout(layoutPins, 0); });
     }
     if (MTILE !== tileUrl()) { MTILE = tileUrl(); MAP.setStyle(tileUrl()); }
     setTimeout(() => { MAP.resize(); drawMap(focusId, true); }, 30);
   }).catch(e => { console.warn("map", e); document.getElementById("mcard").hidden = false; document.getElementById("mcard").className = "mcard noph"; document.getElementById("mcard").innerHTML = `<span class="a">The map couldn't load</span><span class="h">Check your connection and try again.</span>`; });
 }
+let MUSER = false;
+function mapHere() { if (!HERE || Date.now() - HERE.t > 30 * 6e4) return null; const a = anchorFor(view); return !a || km(a.lat, a.lng, HERE.lat, HERE.lng) < 40 ? HERE : null; }
 function mapPlace(z) { SBACK = []; REFRESH = null; swapSheet(placeSheet(z)); }
 /* like mio: tapping a pin picks it (bigger, with a stem), slides it into the top of the screen and shows a row of
    cards for it and the places around it; swiping the cards moves the pick and the map follows */
@@ -2930,7 +2935,7 @@ function drawMap(focusId, fit) {
   MHOME = a; layoutPins();
   const f = focusId && SAVE_BY[focusId];
   if (f) { MAP.jumpTo({ center: [f.lng, f.lat], zoom: 15 }); mapPick(f, true); }
-  else if (fit) { const me = liveFrom(view); MAP.jumpTo({ center: me ? [me.lng, me.lat] : [a.lng, a.lat], zoom: 14 }); layoutPins(); }
+  else if (fit) { const me = mapHere(); MAP.jumpTo({ center: me ? [me.lng, me.lat] : [a.lng, a.lat], zoom: me ? 15 : 14 }); layoutPins(); }
   dockRender(); if (MLOPEN) listFill(); if (MPICK) mhdSet();
 }
 /* like mio: the best places get a picture bubble with name and a few words, others a bubble, and when it's crowded a small dot */
