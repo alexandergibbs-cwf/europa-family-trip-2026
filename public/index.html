@@ -819,6 +819,22 @@ body .mapv .maplibregl-ctrl-bottom-left { bottom: calc(90px + env(safe-area-inse
 .mdock button[aria-pressed="true"] .mic { background: var(--card); box-shadow: 0 2px 12px rgba(0, 0, 0, .18); }
 .mdock button[aria-pressed="true"] small { font-weight: 700; }
 body .mapv .mme { top: max(12px, env(safe-area-inset-top, 0px)); bottom: auto !important; right: 12px; width: 44px; height: 44px; display: flex !important; }
+/* browse → see all: the card row's "See all" pill (or a swipe up) opens the full list; rail and tab bar stay */
+.mhd { position: absolute; z-index: 501; left: 16px; bottom: calc(298px + env(safe-area-inset-bottom, 0px)); height: 34px; border: 0; border-radius: 17px; padding: 0 12px 0 14px; display: none; align-items: center; gap: 6px; font: 600 14px/1 var(--font); color: var(--ink); cursor: pointer; transition: opacity 220ms ease; }
+.mhd span { color: var(--sub); font-weight: 500; }
+.mhd svg { width: 12px; height: 12px; fill: none; stroke: var(--sub); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.mapv.picked .mhd { display: flex; }
+.mlist { position: absolute; left: 0; right: 0; bottom: 0; top: calc(env(safe-area-inset-top, 0px) + 118px); z-index: 499; display: flex; flex-direction: column; background: var(--panel); border-radius: 24px 24px 0 0; box-shadow: 0 -6px 28px rgba(0, 0, 0, .14); transform: translateY(105%); transition: transform 520ms var(--glide); }
+.mapv.lon .mlist { transform: none; }
+.mlist.drag { transition: none; }
+.mlist-h { flex: none; padding: 7px 20px 12px; touch-action: none; cursor: grab; }
+.mlist-h i { display: block; width: 36px; height: 5px; border-radius: 3px; background: color-mix(in srgb, var(--sub) 45%, transparent); margin: 0 auto 10px; }
+.mlist-h b { display: block; font-size: 22px; font-weight: 700; letter-spacing: -.01em; line-height: 26px; }
+.mlist-l { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 0 12px calc(176px + env(safe-area-inset-bottom, 0px)); }
+.mlist .mc { width: auto; max-width: none; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0, 0, 0, .06); cursor: pointer; }
+.mapv.lon .mcar, .mapv.lon .mhd { opacity: 0; pointer-events: none; }
+.mapv.lon .mdock { background: var(--panel); box-shadow: 0 -0.5px 0 var(--hair); }
+.mapv.lon .mdock small { text-shadow: none; }
 .mqbar { position: absolute; z-index: 502; top: max(12px, env(safe-area-inset-top, 0px)); left: 12px; right: 12px; height: 44px; border-radius: 22px; display: none; align-items: center; gap: 8px; padding: 0 4px 0 14px; }
 .mapv.qon .mqbar { display: flex; }
 .mapv.qon .mtt, .mapv.qon .mme { visibility: hidden; }
@@ -857,7 +873,7 @@ body .mapv .mcard { bottom: calc(158px + env(safe-area-inset-bottom, 0px)); }
 </aside>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden><div class="grab"></div><div id="sheet-body"></div></div>
 <div class="show" id="show" role="dialog" aria-modal="true" hidden></div>
-<div class="mapv" id="mapv" role="dialog" aria-modal="true" aria-label="Map" hidden><div id="mapc"></div><div class="mtop"><div class="xp-top"><button class="pill glass press mselx" id="mselx"><span></span><i aria-hidden="true">✕</i></button><button class="pill glass press mtt" data-trip><span id="mtt"></span><i class="chr"></i></button><span class="sp"></span></div><div class="xp-row xcats mchips" id="mchips"></div><span class="mcity" id="mcity" hidden></span></div><div class="mdock" id="mdock" role="toolbar" aria-label="Categories"></div><label class="mqbar glass" id="mqbar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><input id="mqi" type="search" placeholder="Search your saves" enterkeyhint="search" autocomplete="off" aria-label="Search saved places"><button id="mqx" type="button">Cancel</button></label><div class="mcar" id="mcar"></div><button class="pill glass press ib mme" id="mme" aria-label="Where am I"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg></button><div class="mcard" id="mcard" hidden></div></div>
+<div class="mapv" id="mapv" role="dialog" aria-modal="true" aria-label="Map" hidden><div id="mapc"></div><div class="mtop"><div class="xp-top"><button class="pill glass press mselx" id="mselx"><span></span><i aria-hidden="true">✕</i></button><button class="pill glass press mtt" data-trip><span id="mtt"></span><i class="chr"></i></button><span class="sp"></span></div><div class="xp-row xcats mchips" id="mchips"></div><span class="mcity" id="mcity" hidden></span></div><div class="mdock" id="mdock" role="toolbar" aria-label="Categories"></div><label class="mqbar glass" id="mqbar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><input id="mqi" type="search" placeholder="Search your saves" enterkeyhint="search" autocomplete="off" aria-label="Search saved places"><button id="mqx" type="button">Cancel</button></label><div class="mlist" id="mlist" aria-label="All places"><div class="mlist-h" id="mlisth"><i></i><b id="mlistt"></b></div><div class="mlist-l" id="mlistl"></div></div><button class="mhd glass press" id="mhd"><b id="mhdt"></b><span id="mhdn"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></button><div class="mcar" id="mcar"></div><button class="pill glass press ib mme" id="mme" aria-label="Where am I"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg></button><div class="mcard" id="mcard" hidden></div></div>
 <nav class="tabs glass" id="tabs" role="tablist" aria-label="Views"><button role="tab" data-tab="xp" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg><span>Explore</span></button><button role="tab" data-tab="map" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6z"/><path d="M9 4v14M15 6v14"/></svg><span>Map</span></button><button role="tab" data-tab="cal" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Schedule</span></button></nav>
 <div class="sr" aria-live="polite" id="live"></div>
 
@@ -2662,27 +2678,71 @@ xp.addEventListener("click", e => {
   const m = t.closest("[data-xmore]"); if (m) { haptic(); XMORE[m.dataset.xmore] = !XMORE[m.dataset.xmore]; return xpRender(); }
 });
 /* ---------- map: the rail filters the pins and fills the swipe cards (nearest first; top picks by rating). Search does the same from a field at the top. ---------- */
-const DOCK = [["top", "⭐", "top picks"], ["dinner", "🍽️", "eat"], ["coffee", "☕", "cafes"], ["sweet", "🍦", "sweets"], ["drinks", "🍸", "bars"], ["see", "🏞️", "sights"], ["culture", "🖼️", "culture"], ["shop", "🛍️", "shops"], ["clothes", "👕", "clothes"], ["experience", "🎟️", "experiences"]];
+const DOCK = [["dinner", "🍽️", "eat"], ["coffee", "☕", "cafes"], ["sweet", "🍦", "sweets"], ["drinks", "🍸", "bars"], ["see", "🏞️", "sights"], ["culture", "🖼️", "culture"], ["shop", "🛍️", "shops"], ["clothes", "👕", "clothes"], ["experience", "🎟️", "experiences"]];
 const QSVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>`;
 const mdock = document.getElementById("mdock"), mqi = document.getElementById("mqi");
 let MQ = "", MQON = false, MQT = 0;
-const TOPR = 4.5;
 function mapFilter(z) {
   if (MQ) { const q = MQ.toLowerCase(); return (z.name + " " + (z.hook || "") + " " + (z.vibe || "")).toLowerCase().includes(q); }
-  return MCAT === "all" || (MCAT === "top" ? (z.rating || 0) >= TOPR : mk(z) === MCAT);
+  return MCAT === "all" || mk(z) === MCAT;
 }
 function dockRender() {
-  const { list } = mapPlaces(), kinds = XKINDS.filter(k => list.some(z => mk(z) === k)), top = list.some(z => (z.rating || 0) >= TOPR);
-  const items = [["q", "", "search"], ...DOCK.filter(([k]) => k === "top" ? top : kinds.includes(k))];
+  const { list } = mapPlaces(), kinds = XKINDS.filter(k => list.some(z => mk(z) === k));
+  const items = [["q", "", "search"], ...DOCK.filter(([k]) => kinds.includes(k))];
   const html = items.map(([k, e, l]) => `<button data-mdk="${k}" aria-pressed="${k === "q" ? MQON : !MQON && MCAT === k}"><span class="mic" aria-hidden="true">${k === "q" ? QSVG : `<span>${e}</span>`}</span><small>${l}</small></button>`).join("");
   if (mdock.dataset.sig !== html) { mdock.dataset.sig = html; const x = mdock.scrollLeft; mdock.innerHTML = html; mdock.scrollLeft = x; }
 }
-function railList() {
+function fullList() {
   const o = liveFrom(view) || anchorFor(view); if (!o) return [];
-  const r = MPTS.map(q => ({ z: q.z, k: km(o.lat, o.lng, q.z.lat, q.z.lng) }));
-  if (MCAT === "top" && !MQ) return r.filter(x => x.k < 4).sort((a, b) => (b.z.rating || 0) - (a.z.rating || 0) || a.k - b.k).slice(0, 25).map(x => x.z);
-  return r.sort((a, b) => a.k - b.k).slice(0, 25).map(x => x.z);
+  return MPTS.map(q => ({ z: q.z, k: km(o.lat, o.lng, q.z.lat, q.z.lng) })).sort((a, b) => a.k - b.k).map(x => x.z);
 }
+const railList = () => fullList().slice(0, 25);
+/* "See all": everything the pins show, nearest first, same cards stacked */
+const LISTN = { dinner: "places to eat", coffee: "cafes", sweet: "sweet spots", drinks: "bars", see: "sights", culture: "museums and galleries", shop: "shops", clothes: "clothes shops", experience: "experiences" };
+function listTitle(n) { return MQ ? `${n} for “${MQ}”` : `${n} ${MCAT !== "all" ? LISTN[MCAT] || "places" : "places"} nearby`; }
+function mhdSet() {
+  const n = MPTS.length; document.getElementById("mhdt").textContent = MQ ? `“${MQ}”` : MCAT !== "all" ? (DOCK.find(d => d[0] === MCAT) || [, , "nearby"])[2] : "nearby";
+  document.getElementById("mhdn").textContent = `See all ${n}`;
+  document.getElementById("mhd").hidden = n < 3;
+}
+let MLOPEN = false, MLSIG = "";
+const mlist = document.getElementById("mlist"), mlistl = document.getElementById("mlistl");
+function listFill() {
+  const list = fullList(), o = liveFrom(view) || anchorFor(view), sig = view + "|" + list.map(z => z.id).join(",");
+  document.getElementById("mlistt").textContent = listTitle(list.length);
+  if (sig === MLSIG) return; const keep = MLSIG.split("|")[1]?.split(",")[0] === list[0]?.id && MLSIG.length === sig.length;
+  MLSIG = sig; const st = mlistl.scrollTop; mlistl.innerHTML = list.map(z => mcHTML(z, o)).join(""); mlistl.scrollTop = keep ? st : 0;
+}
+function listOpen() { if (MLOPEN) return; MLOPEN = true; MLSIG = ""; listFill(); mlistl.scrollTop = 0; mapv.classList.add("lon"); }
+function listClose() { if (!MLOPEN) return; MLOPEN = false; mapv.classList.remove("lon"); mlist.style.transform = ""; mlist.classList.remove("drag"); }
+document.getElementById("mhd").addEventListener("click", e => { e.stopPropagation(); haptic(); listOpen(); });
+/* swipe the card row up to open the list */
+{ const mc = document.getElementById("mcar"); let v = null;
+  mc.addEventListener("touchstart", e => { const t = e.touches[0]; v = { x: t.clientX, y: t.clientY, up: null }; }, { passive: true });
+  mc.addEventListener("touchmove", e => { if (!v) return; const t = e.touches[0], dx = t.clientX - v.x, dy = t.clientY - v.y;
+    if (v.up == null && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) v.up = dy < 0 && Math.abs(dy) > Math.abs(dx) * 1.2;
+    if (v.up && dy < -36) { v = null; haptic(); listOpen(); } }, { passive: true });
+  mc.addEventListener("touchend", () => { v = null; }, { passive: true }); }
+/* drag the list down (by its header, or from the top of the list) to go back to the cards */
+{ let d = null;
+  const start = y => { d = { y, t: performance.now(), moved: false }; };
+  const move = y => { if (!d) return false; const dy = y - d.y; if (!d.moved && Math.abs(dy) < 6) return false; if (!d.moved) { d.moved = true; mlist.classList.add("drag"); } mlist.style.transform = `translateY(${Math.max(0, dy)}px)`; return true; };
+  const end = y => { if (!d) return null; const g = d; d = null; mlist.classList.remove("drag"); mlist.style.transform = ""; if (!g.moved) return false;
+    const dy = y - g.y, v = dy / Math.max(1, performance.now() - g.t); if (dy > 90 || v > 0.5) { haptic(); listClose(); } return true; };
+  const h = document.getElementById("mlisth");
+  h.addEventListener("pointerdown", e => { start(e.clientY); h.setPointerCapture?.(e.pointerId); });
+  h.addEventListener("pointermove", e => move(e.clientY));
+  h.addEventListener("pointerup", e => { if (end(e.clientY) === false) { haptic(); listClose(); } });
+  h.addEventListener("pointercancel", e => end(e.clientY));
+  let lt = null;
+  mlistl.addEventListener("touchstart", e => { lt = e.touches.length === 1 && mlistl.scrollTop <= 0 ? e.touches[0].clientY : null; if (lt != null) start(lt); }, { passive: true });
+  mlistl.addEventListener("touchmove", e => { if (lt == null) return; const y = e.touches[0].clientY; if (y < lt && !d?.moved) { lt = null; d = null; return; } if (mlistl.scrollTop <= 0 && move(y)) e.preventDefault(); }, { passive: false });
+  mlistl.addEventListener("touchend", e => { if (lt == null) return; lt = null; end(e.changedTouches[0].clientY); }); }
+mlist.addEventListener("click", e => {
+  const r = e.target.closest("[data-mc]"); if (!r || e.target.closest("a")) return;
+  e.stopPropagation(); const z = SAVE_BY[r.dataset.mc]; if (!z) return; haptic(); listClose();
+  mapPick(z, !MCARL.some(x => x.id === z.id)); setTimeout(() => mapPlace(z), 160);
+});
 function carShow(list) { if (!list.length) return mapPick(null); mcarFill(list); mapPick(list[0]); }
 function clearPick() { MPICK = null; mapv.classList.remove("picked"); mapCard(null); }
 mdock.addEventListener("click", e => {
@@ -2691,8 +2751,8 @@ mdock.addEventListener("click", e => {
   if (k === "q") return MQON ? mqClose() : mqOpen();
   if (MQON) mqClose(true);
   clearPick();
-  if (k === MCAT) { MCAT = "all"; XCAT = "all"; XMORE = {}; drawMap(); return; }
-  MCAT = k; if (k !== "top") { XCAT = k; XMORE = {}; }
+  if (k === MCAT) { MCAT = "all"; XCAT = "all"; XMORE = {}; listClose(); drawMap(); return; }
+  MCAT = k; XCAT = k; XMORE = {};
   drawMap(); carShow(railList());
 });
 function mqOpen() { MQON = true; mapv.classList.add("qon"); clearPick(); layoutPins(); dockRender(); mqi.value = ""; mqi.focus({ preventScroll: true }); }
@@ -2700,7 +2760,7 @@ function mqClose(quiet) {
   const had = !!MQ; MQON = false; MQ = ""; mqi.value = ""; mqi.blur(); mapv.classList.remove("qon"); clearTimeout(MQT);
   if (quiet) return; clearPick(); if (had) drawMap(); else { layoutPins(); dockRender(); }
 }
-mqi.addEventListener("input", () => { clearTimeout(MQT); MQT = setTimeout(() => { MQ = mqi.value.trim(); clearPick(); drawMap(); if (MQ) carShow(railList()); }, 180); });
+mqi.addEventListener("input", () => { clearTimeout(MQT); MQT = setTimeout(() => { MQ = mqi.value.trim(); clearPick(); drawMap(); if (MQ) carShow(railList()); else listClose(); }, 180); });
 mqi.addEventListener("keydown", e => { if (e.key === "Enter") mqi.blur(); });
 document.getElementById("mqx").addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); haptic(); mqClose(); });
 document.getElementById("mqbar").addEventListener("click", e => e.stopPropagation());
@@ -2819,7 +2879,7 @@ function openMap(focusId) {
       MAP = new maplibregl.Map({ container: "mapc", style: tileUrl(), center: [a.lng, a.lat], zoom: 14, attributionControl: false, dragRotate: false, pitchWithRotate: false, touchPitch: false, fadeDuration: 180, maxPitch: 0 });
       MAP.touchZoomRotate.disableRotation(); MTILE = tileUrl();
       MAP.on("styledata", () => tintMap(MAP));
-      MAP.on("click", e => { if (Date.now() - MTAP < 350) return; const lz = labelAt(e.point); if (lz) { MTAP = Date.now(); haptic(); return lz.home ? 0 : pinTap(lz); } mapCard(null); if (!sheet.hidden) return closeSheet(); if (MPICK) { haptic(); mapPick(null); } });
+      MAP.on("click", e => { if (Date.now() - MTAP < 350) return; const lz = labelAt(e.point); if (lz) { MTAP = Date.now(); haptic(); return lz.home ? 0 : pinTap(lz); } mapCard(null); if (!sheet.hidden) return closeSheet(); if (MLOPEN) { haptic(); return listClose(); } if (MPICK) { haptic(); mapPick(null); } });
       /* pins re-sort themselves while the map is still moving (a few times a second), and once more when it stops */
       MAP.on("move", () => { const t = performance.now(); if (t - MLAST > 220 && !MRAF) MRAF = requestAnimationFrame(() => { MRAF = 0; MLAST = performance.now(); layoutPins(); }); });
       MAP.on("moveend", () => { clearTimeout(MLT); MLT = setTimeout(layoutPins, 0); });
@@ -2836,11 +2896,12 @@ function mapAim(z, frac) { const sz = mSize(); MAP.easeTo({ center: [z.lng, z.la
 function mapFlyHere() { if (reduce()) return MAP.jumpTo({ center: [HERE.lng, HERE.lat], zoom: 15 }); MAP.flyTo({ center: [HERE.lng, HERE.lat], zoom: 15, curve: 1.15, speed: 0.9, maxDuration: 1500, easing: ease }); }
 function mcarFill(list) {
   MCARL = list; const o = liveFrom(view) || anchorFor(view);
-    const arrow = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg>`;
-    document.getElementById("mcar").innerHTML = list.map(x => { const k = o ? km(o.lat, o.lng, x.lat, x.lng) : null;
-      return `<div class="mc" data-mc="${x.id}">${ph(x).replace('class="ph"', 'class="ph"')}<span class="a">${esc(x.name)}</span><span class="h">${esc(hookOf(x))}</span><span class="m">${MAPLAB[mk(x)] || ""}${k != null ? ` · <b>${distTxt(k, walkKm(o, x))}</b>` : ""}</span><a class="go press" href="${dirs(x.name + " " + (x.address || x.city))}" target="_blank" rel="noopener" aria-label="Directions">${arrow}</a></div>`; }).join("");
-  MCLOCK = Date.now(); document.getElementById("mcar").scrollLeft = 0;
+    document.getElementById("mcar").innerHTML = list.map(x => mcHTML(x, o)).join("");
+  MCLOCK = Date.now(); document.getElementById("mcar").scrollLeft = 0; mhdSet();
 }
+const MCARROW = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg>`;
+function mcHTML(x, o) { const k = o ? km(o.lat, o.lng, x.lat, x.lng) : null, arrow = MCARROW;
+  return `<div class="mc" data-mc="${x.id}">${ph(x).replace('class="ph"', 'class="ph"')}<span class="a">${esc(x.name)}</span><span class="h">${esc(hookOf(x))}</span><span class="m">${MAPLAB[mk(x)] || ""}${k != null ? ` · <b>${distTxt(k, walkKm(o, x))}</b>` : ""}</span><a class="go press" href="${dirs(x.name + " " + (x.address || x.city))}" target="_blank" rel="noopener" aria-label="Directions">${arrow}</a></div>`; }
 function mapPick(z, rebuild) {
   MPICK = z; mapv.classList.toggle("picked", !!z); closeSheet();
   if (!z) { layoutPins(); return; }
@@ -2857,12 +2918,12 @@ document.getElementById("mcar").addEventListener("scroll", e => {
     const z = MCARL[Math.round(c.scrollLeft / (w + 8))]; if (z && z !== MPICK) { haptic(); MPICK = z; document.querySelector("#mselx span").textContent = z.name; layoutPins(); mapAim(z, 0.38); }
   }, 110);
 }, { passive: true });
-function closeMap() { mqClose(true); closeSheet(); MPICK = null; mapv.classList.remove("picked"); mapv.hidden = true; document.body.classList.remove("mapopen"); mapCard(null); setTab(); }
+function closeMap() { mqClose(true); listClose(); closeSheet(); MPICK = null; mapv.classList.remove("picked"); mapv.hidden = true; document.body.classList.remove("mapopen"); mapCard(null); setTab(); }
 function drawMap(focusId, fit) {
   const { a, list } = mapPlaces(); if (!a || !MAP) return;
   const added = new Set(getPlan(view).map(p => p.id).concat(((getDay(view) || {}).steps || []).flatMap(p => p.ids || [])));
   const kinds = [...new Set(list.map(mk))].sort((x, y) => Object.keys(MAPLAB).indexOf(x) - Object.keys(MAPLAB).indexOf(y));
-  if (MCAT !== "all" && MCAT !== "top" && !kinds.includes(MCAT)) MCAT = "all";
+  if (MCAT !== "all" && !kinds.includes(MCAT)) MCAT = "all";
   document.getElementById("mchips").innerHTML = ["all", ...kinds].map(k => `<button data-mcat="${k}" aria-pressed="${MCAT === k}">${k === "all" ? svgI("all") + "All" : svgI(k, MCAT === k ? null : MAPCOL[k]) + MAPLAB[k]}</button>`).join("");
   document.getElementById("mcity").textContent = a.city;
   MPTS = list.filter(mapFilter).map(z => ({ z, on: added.has(z.id), sc: (added.has(z.id) ? 100 : 0) + pinScore(z) })).sort((x, y) => y.sc - x.sc);
@@ -2870,7 +2931,7 @@ function drawMap(focusId, fit) {
   const f = focusId && SAVE_BY[focusId];
   if (f) { MAP.jumpTo({ center: [f.lng, f.lat], zoom: 15 }); mapPick(f, true); }
   else if (fit) { const me = liveFrom(view); MAP.jumpTo({ center: me ? [me.lng, me.lat] : [a.lng, a.lat], zoom: 14 }); layoutPins(); }
-  dockRender();
+  dockRender(); if (MLOPEN) listFill(); if (MPICK) mhdSet();
 }
 /* like mio: the best places get a picture bubble with name and a few words, others a bubble, and when it's crowded a small dot */
 /* Pins stay on the map and change state in place, with springs, instead of being redrawn:
@@ -2906,7 +2967,7 @@ function pinSet(o, st, left, zi, delay) {
 }
 function layoutPins() {
   if (!MAP || mapv.hidden) return;
-  const sz = mSize(), boxes = [[-999, -999, sz.x + 999, 62], [-999, sz.y - (MPICK ? 290 : 176), sz.x + 999, sz.y + 999]], hit = (x0, y0, x1, y1) => boxes.some(b => x0 < b[2] && x1 > b[0] && y0 < b[3] && y1 > b[1]);
+  const sz = mSize(), boxes = [[-999, -999, sz.x + 999, 62], [-999, sz.y - (MPICK ? 344 : 176), sz.x + 999, sz.y + 999]], hit = (x0, y0, x1, y1) => boxes.some(b => x0 < b[2] && x1 > b[0] && y0 < b[3] && y1 > b[1]);
   const a = MHOME;
   if (a) {
     if (!PHOME || PHOME.a !== a) { if (PHOME) PHOME.m.remove();
