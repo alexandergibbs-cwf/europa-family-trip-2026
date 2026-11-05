@@ -1069,7 +1069,7 @@ body .mapv .mcar { bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
 /* place on the map = two pills (5 Nov): details card, and under it a separate Nearby pill. Swipe up / tap Nearby / pick a
    category: the details fold to a name row at the top and the nearby pill grows to fill, with its own scroll */
 .mlist.pm { background: none; box-shadow: none; border-radius: 0; overflow: visible; top: max(calc(env(safe-area-inset-top, 0px) + 62px), calc(100% - 10px - env(safe-area-inset-bottom, 0px) - var(--ph, 50vh))); }
-.mlist.pm.pfull { top: calc(env(safe-area-inset-top, 0px) + 62px); }
+.mlist.pm.pfull { top: max(calc(env(safe-area-inset-top, 0px) + 62px), calc(100% - 10px - env(safe-area-inset-bottom, 0px) - var(--pf, 100vh))); }
 .mlist.pm .mpl, .mlist.pm:not(.pfull) .mpl { display: flex; flex-direction: column; gap: 8px; padding: 0; overflow: visible; height: 100%; touch-action: pan-x; }
 .pdet, .pnear { background: var(--card); border-radius: 26px; box-shadow: var(--glass-shadow), inset 0 0 0 .5px var(--glass-edge), 0 10px 34px rgba(0, 0, 0, .2); }
 .pdet { flex: none; padding: 0 16px 14px; overflow: hidden; }
@@ -2773,22 +2773,22 @@ function nextNear(z) {
   for (const k of order) {
     const all = SAVES.filter(s => s.lat != null && s.id !== z.id && s.kind !== "skip" && inGrp(s, k) && !(s.name === z.name))
       .map(s => { const d = km(z.lat, z.lng, s.lat, s.lng); return { s, k: d, w: walkMin(d * DETOUR) }; }).filter(x => x.w <= 25).sort((x, y) => x.k - y.k);
-    const near = all.filter(x => x.w <= 15).slice(0, 6), far = all.filter(x => x.w > 15).slice(0, 6);
-    if (near.length || far.length) groups.push([k, near, far]);
+    const near = all.slice(0, 8);  /* one list, nearest first, within a 25 min walk; the distance on each row says how far */
+    if (near.length) groups.push([k, near, all[0].w]);
   }
   if (!groups.length) return "";
-  groups.sort((a, b) => (b[1].length ? 1 : 0) - (a[1].length ? 1 : 0));  /* kinds with something close come first */
+  groups.sort((a, b) => (a[2] <= 15 ? 0 : 1) - (b[2] <= 15 ? 0 : 1));  /* kinds with something close come first */
   const cap = (k, i) => { const d = DOCK.find(x => x[0] === k) || [k, "", NXC[k] || k]; return `<button class="mdc" data-nxk="${k}" style="--c:${MAPCOL[k] || "#8e8e93"}" aria-pressed="${i === 0}"><span class="mic" aria-hidden="true"><span>${d[1]}</span></span><small><i class="lg"></i>${d[2]}</small></button>`; };
   return `<div class="nxwrap" data-of="${esc(z.id)}"><div class="nx-top"><div class="nx-h" data-nxo>Nearby<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></div><div class="nx-chips">${groups.map(([k], i) => cap(k, i)).join("")}</div></div><div class="nxl">`
-    + groups.map(([k, near, far], i) => { const rows = list => `<div class="ig">${list.map(({ s, k }) => `<div class="place hasph" data-sid="${s.id}">${ph(s)}<span><span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(hookOf(s))}</span><span class="m" style="display:block"><b>${k < 0.06 ? "Next door" : distTxt(k) + " from here"}</b></span></span></div>`).join("")}</div>`;
-      return `<div class="nxp" data-nxp="${k}"${i ? " hidden" : ""}>${near.length ? (far.length ? `<div class="nx-b">Under 15 min walk</div>` : "") + rows(near) : ""}${far.length ? `<div class="nx-b">15–25 min walk</div>` + rows(far) : ""}</div>`; }).join("") + `</div></div>`;
+    + groups.map(([k, near], i) => { const rows = list => `<div class="ig">${list.map(({ s, k }) => `<div class="place hasph" data-sid="${s.id}">${ph(s)}<span><span class="a" style="display:block">${esc(s.name)}</span><span class="h" style="display:block">${esc(hookOf(s))}</span><span class="m" style="display:block"><b>${k < 0.06 ? "Next door" : distTxt(k) + " from here"}</b></span></span></div>`).join("")}</div>`;
+      return `<div class="nxp" data-nxp="${k}"${i ? " hidden" : ""}>${rows(near)}</div>`; }).join("") + `</div></div>`;
 }
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-nxk]"); if (!b) return; e.stopPropagation(); haptic();
   const w = b.closest(".nxwrap"); w.querySelectorAll("[data-nxk]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
   w.querySelectorAll("[data-nxp]").forEach(p => { p.hidden = p.dataset.nxp !== b.dataset.nxk; });
   const l = w.querySelector(".nxl"); if (l) l.scrollTop = 0;
-  if (w.closest(".pnear")) mlist.classList.add("pfull");
+  if (w.closest(".pnear")) { mlist.classList.add("pfull"); panelFit(); }
 }, true);
 function placeSheet(z, split) {
   const on = getPlan(view).find(p => p.id === z.id), meta = placeMeta(z), d = placeDist(z), f = h => split ? `<div class="pcl"><div>${h}</div></div>` : h;
@@ -3332,7 +3332,11 @@ function plRender(dir) {
 /* measured as if unfolded, so it holds mid-animation and when photos turn up (or don't) after opening */
 function panelFit() { const dt = mpl.querySelector(".pdet"), nt = mpl.querySelector(".pnear .nx-top"); if (!dt) return;
   let h = dt.offsetHeight; dt.querySelectorAll(".pcl").forEach(c => { h += c.firstElementChild.scrollHeight - c.offsetHeight; });
-  const v = (h + (nt ? 8 + nt.offsetHeight + 6 : 0)) + "px"; if (mlist.style.getPropertyValue("--ph") !== v) mlist.style.setProperty("--ph", v); }
+  const v = (h + (nt ? 8 + nt.offsetHeight + 6 : 0)) + "px"; if (mlist.style.getPropertyValue("--ph") !== v) mlist.style.setProperty("--ph", v);
+  /* open Nearby = folded details + the shown list at its own height, so two places don't fill the screen */
+  const np = mpl.querySelector(".pnear [data-nxp]:not([hidden])"); if (!nt || !np) { mlist.style.removeProperty("--pf"); return; }
+  let f = dt.offsetHeight; dt.querySelectorAll(".pcl").forEach(c => { f -= c.offsetHeight; });
+  const pf = Math.ceil(f + 8 + nt.offsetHeight + np.offsetHeight + 16) + "px"; if (mlist.style.getPropertyValue("--pf") !== pf) mlist.style.setProperty("--pf", pf); }
 const PFIT = new ResizeObserver(() => { if (MPS.length) panelFit(); });
 new MutationObserver(() => { PFIT.disconnect(); mpl.querySelectorAll(".pdet, .pcl > div").forEach(e => PFIT.observe(e)); }).observe(mpl, { childList: true });
 addEventListener("resize", () => { if (MPS.length) panelFit(); });
