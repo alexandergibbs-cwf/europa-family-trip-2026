@@ -367,6 +367,23 @@ a.crow { color: inherit; text-decoration: none; }
 .xp-sec button { border: 0; background: none; color: var(--blue); font: 500 15px inherit; font-family: inherit; cursor: pointer; padding: 0; }
 .xp .ig { margin: 0 16px; }
 .xp .place .h { display: -webkit-box !important; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.xs { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x mandatory; scroll-padding: 0 20px; padding: 2px 20px 6px; overscroll-behavior-x: contain; }
+.xs::-webkit-scrollbar { display: none; }
+.xc { flex: none; width: 150px; display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; align-self: flex-start; border: 0; background: none; padding: 0; margin: 0; text-align: left; font: inherit; color: inherit; scroll-snap-align: start; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.xc:active .xc-p { transform: scale(.97); }
+.xc-p { position: relative; display: grid; place-items: center; width: 150px; height: 190px; border-radius: 14px; overflow: hidden; color: var(--c); background: color-mix(in srgb, var(--c) 14%, var(--card)); transition: transform 160ms var(--glide); }
+.xc-p svg { width: 34px; height: 34px; }
+.xc-p img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 240ms ease; }
+.xc-p img.ld { opacity: 1; }
+.xc-p i { position: absolute; z-index: 1; top: 8px; left: 8px; font-style: normal; font-size: 12px; font-weight: 700; color: #fff; background: rgba(0, 0, 0, .42); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border-radius: 8px; padding: 3px 7px; }
+.xc-n { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 8px; font-size: 15px; font-weight: 600; line-height: 1.25; }
+.xc-h { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 2px; font-size: 13px; line-height: 1.3; color: var(--sub); }
+.xc .m { display: block; margin-top: 4px; font-size: 12px; font-weight: 600; color: var(--e-free-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.xh.xc { width: 280px; } .xh .xc-p { width: 280px; height: 200px; border-radius: 16px; } .xh .xc-n { font-size: 17px; -webkit-line-clamp: 1; } .xh .xc-h { -webkit-line-clamp: 1; font-size: 14px; }
+.xp-sec { padding-top: 22px !important; }
+/* Explore's bar has no buttons now: when the large title scrolls away, the small title comes in on its own full-width bar */
+.xp .xp-top { background: transparent; padding-bottom: 0; }
+.xp .xp-top .xp-nt { left: 0; right: 0; top: 0; max-width: none; transform: none; height: auto; line-height: 44px; padding: env(safe-area-inset-top, 0px) 60px 0; text-align: center; background: var(--bg); box-shadow: 0 .5px 0 var(--hair); pointer-events: none; }
 .xp-empty { margin: 20px; color: var(--sub); font-size: 15px; line-height: 1.4; }
 .nx-h { font-size: 15px; font-weight: 600; margin: 14px 4px 8px; }
 .nx-chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px 10px; padding: 0 16px; }
@@ -862,9 +879,15 @@ body .mapv .mme { top: max(12px, env(safe-area-inset-top, 0px)); bottom: auto !i
 .mlist-h i { display: block; width: 36px; height: 5px; border-radius: 3px; background: color-mix(in srgb, var(--sub) 45%, transparent); margin: 0 auto 10px; }
 .mlist-h b { display: block; font-size: 22px; font-weight: 700; letter-spacing: -.01em; line-height: 26px; }
 .mlist-l { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 0 12px calc(176px + env(safe-area-inset-bottom, 0px)); }
-.mlist .mc { width: auto; max-width: none; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0, 0, 0, .06); cursor: pointer; }
+.mlg { background: var(--card); border-radius: 16px; overflow: hidden; }
+.mlist .mc { width: auto; max-width: none; margin: 0; border-radius: 0; box-shadow: none; background: none; padding: 12px 14px; cursor: pointer; }
+.mlist .mc + .mc { box-shadow: inset 90px .5px 0 var(--card), inset 0 .5px 0 var(--hair); }
+.mlist .mc .go { width: 34px; height: 34px; }
+.mc .m { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mapv.lon .mcar, .mapv.lon .mhd { opacity: 0; pointer-events: none; }
-.mapv.lon .mdock { background: var(--panel); box-shadow: 0 -0.5px 0 var(--hair), 0 160px 0 0 var(--panel); }
+.mapv.lon .mdock { background: var(--panel); box-shadow: 0 -0.5px 0 var(--hair); }
+.mfoot { position: absolute; left: 0; right: 0; bottom: 0; z-index: 499; height: calc(170px + env(safe-area-inset-bottom, 0px)); background: var(--panel); display: none; }
+.mapv.lon .mfoot { display: block; } .mapv.lon .mlist { z-index: 498; }
 .mapv.lon .mdock small { text-shadow: none; }
 /* zoom tiers: street (names + one-liners), neighbourhood (a few names, no one-liners), city (area bubbles) */
 .mapv.zmid .mp .t em { display: none; }
@@ -914,7 +937,7 @@ body .mapv .mcard { bottom: calc(158px + env(safe-area-inset-bottom, 0px)); }
 </aside>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden><div class="grab"></div><div id="sheet-body"></div></div>
 <div class="show" id="show" role="dialog" aria-modal="true" hidden></div>
-<div class="mapv" id="mapv" role="dialog" aria-modal="true" aria-label="Map" hidden><div id="mapc"></div><div class="mtop"><div class="xp-top"><button class="pill glass press mselx" id="mselx"><span></span><i aria-hidden="true">✕</i></button><button class="pill glass press mtt" data-trip><span id="mtt"></span><i class="chr"></i></button><span class="sp"></span></div><div class="xp-row xcats mchips" id="mchips"></div><span class="mcity" id="mcity" hidden></span></div><div class="mdock" id="mdock" role="toolbar" aria-label="Categories"></div><div class="mqnone glass" id="mqnone" hidden></div><label class="mqbar glass" id="mqbar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><input id="mqi" type="search" placeholder="burger, brunch, vintage…" enterkeyhint="search" autocomplete="off" aria-label="Search saved places"><button id="mqx" type="button">Cancel</button></label><div class="mlist" id="mlist" aria-label="All places"><div class="mlist-h" id="mlisth"><i></i><b id="mlistt"></b><div class="mlsubs" id="mlsubs"></div></div><div class="mlist-l" id="mlistl"></div></div><div class="mhdr" id="mhdr"><button class="mhd glass press" id="mhd"><b id="mhdt"></b><span id="mhdn"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></button><span id="msubs" style="display:contents"></span></div><div class="mgrab" id="mgrab" aria-hidden="true"></div><div class="mcar" id="mcar"></div><button class="pill glass press ib mme" id="mme" aria-label="Where am I"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg></button><div class="mcard" id="mcard" hidden></div></div>
+<div class="mapv" id="mapv" role="dialog" aria-modal="true" aria-label="Map" hidden><div id="mapc"></div><div class="mtop"><div class="xp-top"><button class="pill glass press mselx" id="mselx"><span></span><i aria-hidden="true">✕</i></button><button class="pill glass press mtt" data-trip><span id="mtt"></span><i class="chr"></i></button><span class="sp"></span></div><div class="xp-row xcats mchips" id="mchips"></div><span class="mcity" id="mcity" hidden></span></div><div class="mfoot" aria-hidden="true"></div><div class="mdock" id="mdock" role="toolbar" aria-label="Categories"></div><div class="mqnone glass" id="mqnone" hidden></div><label class="mqbar glass" id="mqbar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><input id="mqi" type="search" placeholder="burger, brunch, vintage…" enterkeyhint="search" autocomplete="off" aria-label="Search saved places"><button id="mqx" type="button">Cancel</button></label><div class="mlist" id="mlist" aria-label="All places"><div class="mlist-h" id="mlisth"><i></i><b id="mlistt"></b><div class="mlsubs" id="mlsubs"></div></div><div class="mlist-l" id="mlistl"></div></div><div class="mhdr" id="mhdr"><button class="mhd glass press" id="mhd"><b id="mhdt"></b><span id="mhdn"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></button><span id="msubs" style="display:contents"></span></div><div class="mgrab" id="mgrab" aria-hidden="true"></div><div class="mcar" id="mcar"></div><button class="pill glass press ib mme" id="mme" aria-label="Where am I"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg></button><div class="mcard" id="mcard" hidden></div></div>
 <nav class="tabs glass" id="tabs" role="tablist" aria-label="Views"><button role="tab" data-tab="xp" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg><span>Explore</span></button><button role="tab" data-tab="map" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6z"/><path d="M9 4v14M15 6v14"/></svg><span>Map</span></button><button role="tab" data-tab="cal" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Schedule</span></button></nav>
 <div class="sr" aria-live="polite" id="live"></div>
 
@@ -2683,40 +2706,70 @@ function xpRow(z, k, o) {
   const w = o && walkKm(o, z);
   return `<div class="place hasph" data-sid="${z.id}">${ph(z)}<span><span class="a" style="display:block">${esc(z.name)}</span>${z.hook ? `<span class="h">${esc(hookOf(z))}</span>` : ""}<span class="m" style="display:block"><b>${distTxt(k, w)}</b>${z.rating ? ` · ★ ${z.rating}` : ""}</span></span></div>`;
 }
+/* Explore = a guide to the city: top picks, then themed rows you swipe through (photo cards), ordered for the time of day.
+   "See all" opens that theme's full list on the map. */
+const XTH = {
+  brunch: { t: "Breakfast & brunch", f: z => ["dinner", "coffee"].includes(mk(z)) && RX.brk.test(ztxt(z)), map: ["dinner", "breakfast"] },
+  coffee: { t: "Coffee", f: z => mk(z) === "coffee", map: ["coffee"] },
+  lunch: { t: "Lunch", f: z => mk(z) === "dinner" && GRP.dinner.subs[1].t(z), map: ["dinner", "lunch"] },
+  dinner: { t: "Dinner", f: z => mk(z) === "dinner" && GRP.dinner.subs[2].t(z), map: ["dinner", "dinner"] },
+  drinks: { t: "Bars", f: z => mk(z) === "drinks", map: ["drinks"] },
+  sweet: { t: "Something sweet", f: z => mk(z) === "sweet", map: ["sweet"] },
+  museums: { t: "Museums & galleries", f: z => mk(z) === "culture", map: ["culture", "museums"] },
+  sights: { t: "Sights", f: z => mk(z) === "see", map: ["culture", "sights"] },
+  views: { t: "Views", f: z => mk(z) === "see" && RX.view.test(ztxt(z)), map: ["culture", "views"] },
+  parks: { t: "Parks & nature", f: z => mk(z) === "see" && RX.park.test(ztxt(z)), map: ["culture", "parks"] },
+  exp: { t: "Experiences", f: z => inGrp(z, "experience"), map: ["experience"] },
+  clothes: { t: "Clothes & vintage", f: z => mk(z) === "clothes", map: ["shop", "clothes"] },
+  shops: { t: "Shops", f: z => mk(z) === "shop", map: ["shop"] }
+};
+function xpThemes(iso) {
+  if (iso !== today) return ["brunch", "coffee", "sights", "museums", "lunch", "clothes", "shops", "views", "parks", "exp", "sweet", "dinner", "drinks"];
+  const h = new Date().getHours();
+  if (h < 11) return ["brunch", "coffee", "sights", "museums", "views", "clothes", "shops", "parks", "exp", "lunch", "sweet", "dinner", "drinks"];
+  if (h < 15) return ["lunch", "sights", "museums", "clothes", "shops", "coffee", "sweet", "views", "parks", "exp", "dinner", "drinks"];
+  if (h < 18) return ["coffee", "sweet", "museums", "sights", "clothes", "shops", "exp", "views", "parks", "drinks", "dinner"];
+  if (h < 22) return ["dinner", "drinks", "sweet", "exp", "views", "sights"];
+  return ["drinks", "sweet", "dinner", "exp"];
+}
+function xcCard(z, k, o, hero) {
+  const w = distTxt(k, o && walkKm(o, z)).split(" · ");
+  return `<button class="xc${hero ? " xh" : ""}" data-sid="${z.id}"><span class="xc-p" style="--c:${pinCol(z) || "#8e8e93"}">${svgI(icoOf(z))}<img loading="lazy" decoding="async" alt="" src="${esc(photoUrl(z))}" onload="this.classList.add('ld')" onerror="this.remove()">${z.rating ? `<i>★ ${Number(z.rating).toFixed(1)}</i>` : ""}</span>`
+    + `<span class="xc-n">${esc(z.name)}</span>${z.hook ? `<span class="xc-h">${esc(hookOf(z))}</span>` : ""}<span class="m">${hero ? esc(MAPLAB[mk(z)] || "") + " · " : ""}${esc(w[1] || w[0])}</span></button>`;
+}
 function xpRender(keepScroll) {
   if (xp.hidden) return;
-  const iso = view, a = anchorFor(iso), me = liveFrom(iso), o = me || a, city = cityOn(iso), isToday = iso === today, st = xp.scrollTop;
+  const iso = view, a = iso === view ? mapStay() : anchorFor(iso), me = mapHere(), o = me || a, city = (a || {}).city || cityOn(iso), st = xp.scrollTop;
   const days = ALLDAYS.filter(d => d >= (today >= START ? today : START) && d <= END).slice(0, 8);
   const dayLab = d => d === today ? "Today" : d === addDays(today, 1) ? "Tomorrow" : fmt(d, { weekday: "short", day: "numeric" });
   const pool = o ? SAVES.filter(z => z.lat != null && z.kind !== "skip" && XKINDS.includes(mk(z))).map(z => ({ z, k: km(o.lat, o.lng, z.lat, z.lng) })).filter(x => x.z.city === city || x.k < 15).sort((x, y) => x.k - y.k) : [];
-  walkFetch(o, pool.slice(0, 60).map(x => x.z));
-  const kinds = XKINDS.filter(k => pool.some(x => mk(x.z) === k));
+  walkFetch(o, pool.slice(0, 80).map(x => x.z));
   let body = "";
   if (!o) body = `<p class="xp-empty">No hotel for this day, so there's nothing to show nearby.</p>`;
-  else if (XCAT === "all") {
-    body = xpOrder(iso).filter(([k]) => kinds.includes(k)).map(([k, t]) => {
-      const all = pool.filter(x => mk(x.z) === k); if (!all.length) return "";
-      const n = XMORE[k] ? all.length : 3;
-      return `<div class="xp-sec"><h2>${t}</h2>${all.length > 3 ? `<button data-xmore="${k}">${XMORE[k] ? "Less" : "See all " + all.length}</button>` : ""}</div><div class="ig">${all.slice(0, n).map(x => xpRow(x.z, x.k, o)).join("")}</div>`;
-    }).join("") || `<p class="xp-empty">Nothing saved in ${esc(city)} yet.</p>`;
-  } else {
-    const all = pool.filter(x => mk(x.z) === XCAT);
-    body = all.length ? `<div class="xp-sec"><h2>${MAPLAB[XCAT]}</h2></div><div class="ig">${all.map(x => xpRow(x.z, x.k, o)).join("")}</div>` : `<p class="xp-empty">No ${MAPLAB[XCAT].toLowerCase()} saved in ${esc(city)}.</p>`;
+  else if (!pool.length) body = `<p class="xp-empty">Nothing saved in ${esc(city)} yet.</p>`;
+  else {
+    /* top picks: best rated within ~4 km, at most two of a kind */
+    const best = pool.filter(x => x.k < 4 && (x.z.rating || 0) >= 4.5).sort((x, y) => y.z.rating - x.z.rating || x.k - y.k), byK = {};
+    best.forEach(x => { (byK[pinCol(x.z)] = byK[pinCol(x.z)] || []).push(x); });  /* one of each kind first, then round again */
+    const top = []; for (let r = 0; r < 2 && top.length < 8; r++) Object.values(byK).forEach(l => { if (l[r] && top.length < 8) top.push(l[r]); });
+    if (top.length >= 3) body += `<div class="xp-sec"><h2>Top picks</h2></div><div class="xs">${top.map(x => xcCard(x.z, x.k, o, true)).join("")}</div>`;
+    body += xpThemes(iso).map(key => { const th = XTH[key], all = pool.filter(x => th.f(x.z)); if (all.length < (key === "views" || key === "parks" ? 3 : 1)) return "";
+      return `<div class="xp-sec"><h2>${th.t}</h2>${all.length > 3 ? `<button data-xall="${key}">See all ${all.length}</button>` : ""}</div><div class="xs">${all.slice(0, 10).map(x => xcCard(x.z, x.k, o)).join("")}</div>`; }).join("");
   }
-  const where = me ? "Near you" : a ? `Around ${a.hotel}` : "";
-  const sig = [iso, city, where, XCAT, JSON.stringify(XMORE), body.replace(/<span class="m"[^]*?<\/span><\/span><\/div>/g, "")].join("|");
+  const w = wxFor(iso), where = me ? "Near you" : a ? `Around ${a.hotel}` : fmt(iso, { weekday: "long", day: "numeric", month: "long" });
+  const sub = `${me ? `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg>` : ""}${esc(where)}${w ? ` · ${w.hi}° ${esc(w.typical ? "typical" : w.cond.toLowerCase())}` : ""}`;
+  const sig = [iso, city, sub, body.replace(/<span class="m">[^<]*<\/span>/g, "")].join("|");
   if (sig === XSIG && xp.firstChild) {
     const tmp = document.createElement("div"); tmp.innerHTML = body;
-    tmp.querySelectorAll(".place[data-sid]").forEach(r => { const old = xp.querySelector(`.place[data-sid="${r.dataset.sid}"] .m`), nu = r.querySelector(".m"); if (old && nu && old.innerHTML !== nu.innerHTML) old.innerHTML = nu.innerHTML; });
+    tmp.querySelectorAll(".xc[data-sid]").forEach(r => { const nu = r.querySelector(".m"); xp.querySelectorAll(`.xc[data-sid="${r.dataset.sid}"] .m`).forEach(old => { if (nu && old.textContent !== nu.textContent) old.textContent = nu.textContent; }); });
     return;
   }
-  XSIG = sig;
+  XSIG = sig; const sx = {}; xp.querySelectorAll(".xs").forEach((r, i) => { sx[i] = r.scrollLeft; });
   xp.innerHTML = `<div class="xp-top"><span class="sp"></span><span class="xp-nt" aria-hidden="true">${esc(city)}</span></div>
-  <div class="xp-h"><h1><button class="xp-tt" data-trip aria-label="${esc(city)}, day and cities">${esc(city)}<i class="chr"></i></button></h1><p>${me ? `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg>` : ""}${esc(where || fmt(iso, { weekday: "long", day: "numeric", month: "long" }))}</p></div>
+  <div class="xp-h"><h1><button class="xp-tt" data-trip aria-label="${esc(city)}, cities">${esc(city)}<i class="chr"></i></button></h1><p>${sub}</p></div>
   <div class="xp-wk">${days.map(d => `<button data-xday="${d}" class="${d === today ? "td" : ""}" aria-pressed="${d === iso}" aria-label="${dayLab(d)}"><small>${fmt(d, { weekday: "narrow" })}</small><b>${fmt(d, { day: "numeric" })}</b></button>`).join("")}</div>
-  <div class="xp-row xcats"><button data-xcat="all" aria-pressed="${XCAT === "all"}">${svgI("all")}All</button>${kinds.map(k => `<button data-xcat="${k}" aria-pressed="${XCAT === k}">${svgI(k, XCAT === k ? null : MAPCOL[k])}${MAPLAB[k]}</button>`).join("")}</div>
   ${body}`;
-  if (keepScroll !== false) xp.scrollTop = st;
+  if (keepScroll !== false) { xp.scrollTop = st; xp.querySelectorAll(".xs").forEach((r, i) => { if (sx[i]) r.scrollLeft = sx[i]; }); }
   xp.dispatchEvent(new Event("scroll"));
 }
 /* large title scrolls under the bar, then the small centred title fades in (iOS nav bar) */
@@ -2737,7 +2790,9 @@ xp.addEventListener("click", e => {
   if (t.closest("[data-xcal]")) { haptic(); return showXP(false); }
   const d = t.closest("[data-xday]"); if (d) { haptic(); XMORE = {}; xpDay(d.dataset.xday); if (view === today && !HERE) { hereAsked = 0; askHere(() => xpRender()); } xpRender(false); xp.scrollTop = 0; return; }
   const c = t.closest("[data-xcat]"); if (c) { haptic(); XCAT = c.dataset.xcat; return xpRender(false); }
-  const m = t.closest("[data-xmore]"); if (m) { haptic(); XMORE[m.dataset.xmore] = !XMORE[m.dataset.xmore]; return xpRender(); }
+  const xc = t.closest(".xc[data-sid]"); if (xc) { const z = SAVE_BY[xc.dataset.sid]; if (z) openPlace(z); return; }
+  const al = t.closest("[data-xall]"); if (al) { haptic(); const [cat, sub] = XTH[al.dataset.xall].map; XCAT = cat;
+    MAPNEXT = () => { MSUB = sub || ""; drawMap(); carShow(railList()); listOpen(); }; return openMap(null, true); }
 });
 /* ---------- map: the rail filters the pins and fills the swipe cards (nearest first; top picks by rating). Search does the same from a field at the top. ---------- */
 const DOCK = [["dinner", "🍽️", "eat"], ["coffee", "☕", "cafes"], ["sweet", "🍦", "sweets"], ["drinks", "🍸", "bars"], ["culture", "🖼️", "culture"], ["shop", "🛍️", "shops"], ["experience", "🎟️", "experiences"]];
@@ -2848,7 +2903,7 @@ function listFill() {
   document.getElementById("mlistt").textContent = listTitle(list.length);
   const sh = subsHTML().replace(/ glass/g, ""), ls = document.getElementById("mlsubs"); if (ls.dataset.h !== sh) { ls.dataset.h = sh; ls.innerHTML = sh; }
   if (sig === MLSIG) return; const keep = MLSIG.split("|")[1]?.split(",")[0] === list[0]?.id && MLSIG.length === sig.length;
-  MLSIG = sig; const st = mlistl.scrollTop; mlistl.innerHTML = list.map(z => mcHTML(z, o)).join(""); mlistl.scrollTop = keep ? st : 0;
+  MLSIG = sig; const st = mlistl.scrollTop; mlistl.innerHTML = `<div class="mlg">${list.map(z => mcHTML(z, o)).join("")}</div>`; mlistl.scrollTop = keep ? st : 0;
 }
 function listOpen() { if (MLOPEN) return; MLOPEN = true; MLSIG = ""; listFill(); mlistl.scrollTop = 0; mapv.classList.add("lon"); }
 function listClose() { if (!MLOPEN) return; MLOPEN = false; mapv.classList.remove("lon"); mlist.style.transform = ""; mlist.classList.remove("drag"); }
@@ -3049,10 +3104,10 @@ function openMap(focusId, quiet) {
       MAP.on("moveend", () => { clearTimeout(MLT); MLT = setTimeout(layoutPins, 0); });
     }
     if (MTILE !== tileUrl()) { MTILE = tileUrl(); MAP.setStyle(tileUrl()); }
-    setTimeout(() => { MAP.resize(); drawMap(focusId, true); }, 30);
+    setTimeout(() => { MAP.resize(); drawMap(focusId, true); if (MAPNEXT) { const f = MAPNEXT; MAPNEXT = null; f(); } }, 30);
   }).catch(e => { console.warn("map", e); document.getElementById("mcard").hidden = false; document.getElementById("mcard").className = "mcard noph"; document.getElementById("mcard").innerHTML = `<span class="a">The map couldn't load</span><span class="h">Check your connection and try again.</span>`; });
 }
-let MUSER = false;
+let MUSER = false, MAPNEXT = null;
 function mapHere() { if (!HERE || Date.now() - HERE.t > 30 * 6e4) return null; const a = mapStay(); return !a || km(a.lat, a.lng, HERE.lat, HERE.lng) < 40 ? HERE : null; }
 /* opening a place from the cards or the list: a gentle zoom towards it (a step or so, street level at most), sitting above its sheet */
 function mapNear(z) { if (!MAP) return; const sz = mSize(), zm = Math.min(Math.max(MAP.getZoom() + 1.5, 14), 16);
@@ -3072,7 +3127,7 @@ function mcarFill(list) {
 }
 const MCARROW = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 19v-5.5a3.5 3.5 0 0 1 3.5-3.5h9"/><path d="m15 6 4 4-4 4"/></svg>`;
 function mcHTML(x, o) { const k = o ? km(o.lat, o.lng, x.lat, x.lng) : null, arrow = MCARROW;
-  return `<div class="mc" data-mc="${x.id}">${ph(x).replace('class="ph"', 'class="ph"')}<span class="a">${esc(x.name)}</span><span class="h">${esc(hookOf(x))}</span><span class="m">${MAPLAB[mk(x)] || ""}${k != null ? ` · <b>${distTxt(k, walkKm(o, x))}</b>` : ""}</span><a class="go press" href="${dirs(x.name + " " + (x.address || x.city))}" target="_blank" rel="noopener" aria-label="Directions">${arrow}</a></div>`; }
+  return `<div class="mc" data-mc="${x.id}">${ph(x).replace('class="ph"', 'class="ph"')}<span class="a">${esc(x.name)}</span><span class="h">${esc(hookOf(x))}</span><span class="m">${MAPLAB[mk(x)] || ""}${k != null ? ` · <b>${distTxt(k, walkKm(o, x)).replace(/^~/, "").replace(" · ~", " · ").replace(" or taxi", "")}</b>` : ""}</span><a class="go press" href="${dirs(x.name + " " + (x.address || x.city))}" target="_blank" rel="noopener" aria-label="Directions">${arrow}</a></div>`; }
 function mapPick(z, rebuild) {
   if (!z || rebuild) SEEN = false;
   MPICK = z; mapv.classList.toggle("picked", !!z); closeSheet();
