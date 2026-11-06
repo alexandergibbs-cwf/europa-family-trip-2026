@@ -1107,6 +1107,14 @@ body .mapv .mcar { bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
 .nx-chips .mdc[aria-pressed="true"] .lg { display: none; }
 .nx-chips .mdc .nxn { margin-left: 6px; font-weight: 600; color: var(--sub); font-variant-numeric: tabular-nums; }
 .nx-chips .mdc[aria-pressed="true"] .nxn { color: rgba(255, 255, 255, .8); }
+/* speed (6 Nov, Alex: laggy): the category capsules sit over the moving map, and seven live blurs cost a lot on the phone while panning.
+   They get a near-opaque fill instead (looks the same); the bars and round buttons keep their glass. The timetable's own header
+   pills are hidden while the map or Explore covers them, so they aren't blurred unseen underneath. */
+.mapv .mdock button { -webkit-backdrop-filter: none; backdrop-filter: none; }
+.mapv .mdock button:not([aria-pressed="true"]), .mapv.lon .mdock button:not([aria-pressed="true"]):not(.mdn) { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(249, 249, 251, .95); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .mapv .mdock button:not([aria-pressed="true"]), :root:not([data-theme="light"]) .mapv.lon .mdock button:not([aria-pressed="true"]):not(.mdn) { background: rgba(44, 44, 46, .96); } }
+:root[data-theme="dark"] .mapv .mdock button:not([aria-pressed="true"]), :root[data-theme="dark"] .mapv.lon .mdock button:not([aria-pressed="true"]):not(.mdn) { background: rgba(44, 44, 46, .96); }
+body.mapopen #pills, body.xpon #pills { visibility: hidden; }
 </style>
 
 <div class="page" id="page">
@@ -3242,13 +3250,18 @@ function loadGL() {
 /* map camera curve: cubic-bezier(.3, 0, .15, 1), a soft start and a long settle (the old quartic snapped off the mark) */
 const ease = (() => { const x1 = .3, y1 = 0, x2 = .15, y2 = 1, B = (t, a, b) => 3 * a * t * (1 - t) * (1 - t) + 3 * b * t * t * (1 - t) + t * t * t;
   return t => { if (t <= 0) return 0; if (t >= 1) return 1; let lo = 0, hi = 1, m = t; for (let i = 0; i < 22; i++) { m = (lo + hi) / 2; if (B(m, x1, x2) < t) lo = m; else hi = m; } return B(m, y1, y2); }; })();
-const mSize = () => ({ x: MAP.getContainer().clientWidth, y: MAP.getContainer().clientHeight });
+let MSZ = null, MSZO = null;
+const mSize = () => { if (MSZ) return MSZ; const c = MAP.getContainer();
+  if (!MSZO && window.ResizeObserver) { MSZO = new ResizeObserver(() => { MSZ = null; }); MSZO.observe(c); }
+  return (MSZ = { x: c.clientWidth, y: c.clientHeight }); };
 const mPt = z => MAP.project([z.lng, z.lat]);
 let MTAP = 0, MRAF = 0, MLAST = 0;
+let MPC = { k: "", r: null };
 function mapPlaces() {
   const a = mapStay(); if (!a) return { a: null, list: [] };
+  const k = a.in + "|" + a.lat + "," + a.lng + "|" + SAVES.length; if (MPC.k === k) return MPC.r;
   const list = SAVES.filter(z => z.lat != null && MAPCOL[z.kind] && (z.city === a.city || km(a.lat, a.lng, z.lat, z.lng) < 15));
-  return { a, list };
+  MPC = { k, r: { a, list, ids: new Set(list.map(z => z.id)) } }; return MPC.r;
 }
 function openMap(focusId, quiet) {
   PFIRST = true; MCHID = false; MCAT = KGRP[XCAT] || XCAT; MSUB = "";
@@ -3359,7 +3372,9 @@ function nxLayers() { if (!MAP) return; try { const fresh = !MAP.getLayer("nx-tr
 let NXA = 0;
 function nxDraw(now) { if (!MAP || !MAP.getSource("nx")) return;
   const f = [], ln = (a, b, t, c) => f.push({ type: "Feature", properties: { t, c }, geometry: { type: "LineString", coordinates: [[a.lng, a.lat], [b.lng, b.lat]] } });
-  for (let i = 1; i < TRAIL.length; i++) ln(TRAIL[i - 1], TRAIL[i], "trail", "#007aff");
+  /* place-to-place trail follows the streets (6 Nov, Alex): each leg uses the walking route once it has loaded, a straight line until then */
+  for (let i = 1; i < TRAIL.length; i++) { const r = legRoute(TRAIL[i - 1], TRAIL[i]);
+    if (r) f.push({ type: "Feature", properties: { t: "trail", c: "#007aff" }, geometry: { type: "LineString", coordinates: r } }); else ln(TRAIL[i - 1], TRAIL[i], "trail", "#007aff"); }
   if (ROUTE && ROUTE.c) f.push({ type: "Feature", properties: { t: "trail", c: "#007aff" }, geometry: { type: "LineString", coordinates: ROUTE.c } });
   if (NEAR) NEAR.list.forEach(z => ln(NEAR.a, z, "near", pinCol(z)));
   MAP.getSource("nx").setData({ type: "FeatureCollection", features: f });
@@ -3370,6 +3385,17 @@ function nxDraw(now) { if (!MAP || !MAP.getSource("nx")) return;
 /* Walking route (6 Nov, Alex): with a place open on its own (no Nearby, no trail), draw the way there on foot
    from you (when you're near this stay) or else the hotel. Only for walkable distances; the line comes from /api/route. */
 let ROUTE = null, ROUTEK = "";
+const LEGS = new Map();  /* "lat,lng>lat,lng" → route coordinates, "…" while loading, 0 when there is none */
+function legRoute(a, b) {
+  const k = `${a.lat.toFixed(5)},${a.lng.toFixed(5)}>${b.lat.toFixed(5)},${b.lng.toFixed(5)}`, v = LEGS.get(k);
+  if (Array.isArray(v)) return v; if (v !== undefined) return null;
+  if (km(a.lat, a.lng, b.lat, b.lng) > 3.2) { LEGS.set(k, 0); return null; }
+  LEGS.set(k, "…");
+  fetch(`/api/route?o=${a.lat.toFixed(5)},${a.lng.toFixed(5)}&d=${b.lat.toFixed(5)},${b.lng.toFixed(5)}`).then(r => r.ok ? r.json() : null)
+    .then(j => { LEGS.set(k, j && j.c && j.c.length > 1 ? [[a.lng, a.lat], ...j.c, [b.lng, b.lat]] : 0); if (TRAIL.length > 1) nxDraw(true); })
+    .catch(() => LEGS.set(k, 0));
+  return null;
+}
 function routeOrigin() { const h = mapHere(); if (h) return { lat: h.lat, lng: h.lng, me: true }; const a = mapStay(); return a && a.lat != null ? { lat: a.lat, lng: a.lng } : null; }
 function routeSync(place) {
   const o = place && routeOrigin(), k = o ? `${o.lat.toFixed(4)},${o.lng.toFixed(4)}>${place.id}` : "";
@@ -3509,13 +3535,20 @@ function pinEl(z) {
   const m = mkMarker(z.lng, z.lat, `<div class="mp s-h" style="--c:${pinCol(z)}"><span class="b"><i class="e">${emoOf(z)}</i></span><span class="t"><b>${esc(nm)}</b>${hk ? `<em>${esc(hk)}</em>` : ""}</span></div>`, () => pinTap(z));
   const o = { m, z, st: "h", lw: Math.min(132, Math.max(nm.length * 7.9, hk.length > 18 ? 118 : hk.length * 6.6)) + 8 }; PM.set(z.id, o); return o;
 }
+function pinAttach(o, on) {
+  if (on) { clearTimeout(o.dt); o.dt = 0; if (o.off) { o.off = false; o.m.addTo(MAP); } return; }
+  if (o.off || o.dt) return; o.dt = setTimeout(() => { o.dt = 0; if (o.st === "h" || o.st === "x") { o.off = true; o.m.remove(); } }, o.st === "x" ? 0 : 420);
+}
 function pinSet(o, st, left, zi, delay) {
+  if (st === "x") { o.st = "x"; pinAttach(o, false); return; }  /* far off screen: off the map until it comes back */
+  pinAttach(o, true);
   const el = o.m.getElement().firstElementChild;
   if (o.st !== st || o.left !== left) {
     el.classList.remove("s-l", "s-b", "s-d", "s-h", "sel"); el.classList.add(st === "sel" ? "s-l" : "s-" + st); if (st === "sel") el.classList.add("sel");
     el.classList.toggle("l", !!left); el.style.setProperty("--d", (delay || 0) + "ms"); o.st = st; o.left = left;
   }
   if (o.zi !== zi) { o.m.getElement().style.zIndex = 2000 + zi; o.zi = zi; } o.m.getElement().style.pointerEvents = st === "h" ? "none" : "";
+  if (st === "h") pinAttach(o, false);
 }
 /* zoom tiers: street = names + one-liners; neighbourhood = a few names; city = no names, a few icons where there's room, every other place a small dot in its colour */
 const Z_CITY = 13, Z_STREET = 14.5;
@@ -3547,19 +3580,20 @@ function layoutPins() {
   const order = MPICK ? [{ z: MPICK, on: false }, ...pool.filter(q => q.org && q.z.id !== MPICK.id), ...pool.filter(q => !q.org && q.z.id !== MPICK.id)] : pool;
   order.forEach(({ z, on, org }, i) => {
     const o = PM.get(z.id) || pinEl(z), p = mPt(z);
-    const off = p.x < -40 || p.y < -40 || p.x > sz.x + 40 || p.y > sz.y + 40;
+    const off = p.x < -40 || p.y < -40 || p.x > sz.x + 40 || p.y > sz.y + 40, gone = p.x < -sz.x * 0.6 || p.y < -sz.y * 0.6 || p.x > sz.x * 1.6 || p.y > sz.y * 1.6;
     if (MPICK && z.id === MPICK.id) { const left = p.x + 190 > sz.x - 6; boxes.push(left ? [p.x - 196, p.y - 34, p.x + 34, p.y + 44] : [p.x - 34, p.y - 34, p.x + 196, p.y + 44]); want.set(z.id, ["sel", left, 1200]); return; }
+    if (gone && !org) return want.set(z.id, ["x", false, 0]);
     if (off) return want.set(z.id, ["d", false, 0, org]);
     const left = p.x + 22 + o.lw > sz.x - 6, bx = left ? [p.x - 22 - o.lw, p.y - 24, p.x + 22, p.y + 26] : [p.x - 22, p.y - 24, p.x + 22 + o.lw, p.y + 26];
     if ((nl < NL || ((on || org) && !far)) && p.x > 8 && p.x < sz.x - 8 && !hit(...bx)) { boxes.push(bx); nl++; want.set(z.id, ["l", left, org ? 1000 : on ? 800 : 500 - i, org]); }
     else if ((nb < NB || org || NEAR) && !hit(p.x - 28, p.y - 28, p.x + 28, p.y + 28)) { boxes.push([p.x - 23, p.y - 23, p.x + 23, p.y + 23]); nb++; want.set(z.id, ["b", false, org ? 1000 : 300 - i, org]); }
     else want.set(z.id, [org || NEAR ? "b" : "d", false, org ? 1000 : 0, org]);
   });
-  const ids = new Set(pool.map(q => q.z.id)); let k = 0;
+  const ids = new Set(pool.map(q => q.z.id)), inCity = mapPlaces().ids || new Set(); let k = 0;
   PM.forEach((o, id) => {
     const w = want.get(id);
     if (w) { pinSet(o, w[0], w[1], w[2], PFIRST ? Math.min(400, (k++) * 12) : 0); o.m.getElement().firstElementChild.classList.toggle("org", !!w[3]); }
-    else if (!ids.has(id) && !(MPICK && MPICK.id === id)) { o.m.getElement().firstElementChild.classList.remove("org"); pinSet(o, "h", false, -100); if (!(mapPlaces().list || []).some(z => z.id === id)) { PM.delete(id); setTimeout(() => o.m.remove(), 400); } }
+    else if (!ids.has(id) && !(MPICK && MPICK.id === id)) { o.m.getElement().firstElementChild.classList.remove("org"); pinSet(o, "h", false, -100); if (!inCity.has(id)) { PM.delete(id); setTimeout(() => o.m.remove(), 400); } }
   });
   PFIRST = false;
   const fresh = HERE && Date.now() - HERE.t < 30 * 6e4;
