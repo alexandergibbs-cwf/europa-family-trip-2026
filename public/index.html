@@ -3108,6 +3108,8 @@ function fullList() {
   return MPTS.map(q => ({ z: q.z, k: km(o.lat, o.lng, q.z.lat, q.z.lng) })).sort((a, b) => a.k - b.k).map(x => x.z);
 }
 const railList = () => fullList().slice(0, 25);
+/* a category's cards start with the ones nearest the middle of the map, so the first card is in view (Alex, 6 Nov) */
+const viewList = () => { if (!MAP) return railList(); const c = MAP.getCenter(); return MPTS.map(q => [km(c.lat, c.lng, q.z.lat, q.z.lng), q.z]).sort((a, b) => a[0] - b[0]).slice(0, 25).map(x => x[1]); };
 /* "See all": everything the pins show, nearest first, same cards stacked */
 const LISTN = { dinner: "places to eat", coffee: "cafes", sweet: "sweet spots", drinks: "bars", see: "sights", culture: "museums and galleries", shop: "shops", clothes: "clothes shops", experience: "experiences" };
 function listTitle(n) { const sb = subOf(); return MQ ? `${n} for “${MQ}”` : `${n} ${sb ? sb.n : MCAT !== "all" ? (GRP[MCAT] || {}).n || LISTN[MCAT] || "places" : "saved places"}${(st => st && st.city ? " in " + st.city : "")(mapStay())}`; }
@@ -3174,6 +3176,16 @@ mlist.addEventListener("click", e => {
 function carShow(list) { SEEN = false; if (!list.length) return mapPick(null); SEEN = true; mcarFill(list); mapPick(list[0]); overview(list); }
 function overview(list) {
   /* "all" shows the whole spread of saves (within ~6 km); a category, sub or search stays tighter (~3 km) */
+  /* a category zooms out from where you're looking, not from the hotel (Alex, 6 Nov): the nearest few around the
+     middle of the view, kept centred there, and it only ever zooms out */
+  if (MCAT !== "all" && !MQ && list.length) { const c = MAP.getCenter(), byD = list.map(z => [km(c.lat, c.lng, z.lat, z.lng), z]).sort((a, b) => a[0] - b[0]);
+    const use = byD.filter(x => x[0] <= 1.5).slice(0, 8), pick = (use.length >= 4 ? use : byD.slice(0, 4)).map(x => x[1]);
+    const dx = Math.max(...pick.map(z => Math.abs(z.lng - c.lng))) || .002, dy = Math.max(...pick.map(z => Math.abs(z.lat - c.lat))) || .002;
+    MUSER = true; mhdSet();
+    const sz = mSize(), cam = MAP.cameraForBounds([[c.lng - dx, c.lat - dy], [c.lng + dx, c.lat + dy]], { padding: { top: 70, bottom: 70, left: 30, right: 30 } }), bot = (MPICK ? 250 : 120) + KB();
+    const zm = Math.max(Math.min(cam ? cam.zoom - Math.log2(sz.y / Math.max(200, sz.y - bot - 90)) : 13, MAP.getZoom(), 15), Math.min(13, MAP.getZoom()));
+    MAP.easeTo({ center: [c.lng, c.lat], zoom: zm, duration: reduce() ? 0 : 1000, easing: ease });
+    return; }
   const wide = MCAT === "all" && !MQ, src = wide ? fullList() : list, R = wide ? 8 : 5;
   const o = mapHere() || mapStay(), near = src.filter(z => !o || km(o.lat, o.lng, z.lat, z.lng) <= R), use = (near.length >= 3 ? near : src.slice(0, 5)).concat(o ? [o] : []);
   const b = use.reduce((r, z) => [Math.min(r[0], z.lng), Math.min(r[1], z.lat), Math.max(r[2], z.lng), Math.max(r[3], z.lat)], [180, 90, -180, -90]);
@@ -3195,7 +3207,7 @@ function dockClick(e) {
   if (k === "all" || k === MCAT) { const was = MCAT; MCAT = "all"; XCAT = "all"; XMORE = {}; drawMap();
     if (k === "all" && (was !== "all" || !MPICK)) { carShow(railList()); return; } listClose(); return; }
   MCAT = k; XCAT = k; XMORE = {};
-  drawMap(); carShow(railList());
+  drawMap(); carShow(viewList());
 }
 mdock.addEventListener("click", dockClick);
 document.getElementById("mtool").addEventListener("click", dockClick);
