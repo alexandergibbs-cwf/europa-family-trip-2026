@@ -82,6 +82,22 @@ async function tiktokCover(u) {
   const r = await fetch(`https://www.tiktok.com/oembed?url=${encodeURIComponent(u)}`, { headers: UA }); if (!r.ok) return null;
   const j = await r.json(); return j.thumbnail_url || null;
 }
+/* one walking route with its line (OpenStreetMap foot routing, FOSSGIS; free, no key), cached a week */
+async function route(url, ctx) {
+  const ll = v => { const m = /^(-?\d{1,2}\.\d{1,6}),(-?\d{1,3}\.\d{1,6})$/.exec(v || ""); return m ? [+m[1], +m[2]] : null; };
+  const o = ll(url.searchParams.get("o")), d = ll(url.searchParams.get("d"));
+  if (!o || !d) return json({ error: "bad" }, 400);
+  const cache = caches.default, key = new Request("https://route.cache/" + o.join(",") + "/" + d.join(","));
+  const hit = await cache.match(key); if (hit) return hit;
+  let out = null;
+  try {
+    const r = await fetch(`https://routing.openstreetmap.de/routed-foot/route/v1/foot/${o[1].toFixed(5)},${o[0].toFixed(5)};${d[1].toFixed(5)},${d[0].toFixed(5)}?overview=full&geometries=geojson`, { headers: { "user-agent": "europe-family-trip.app (family trip planner)" }, cf: { cacheTtl: 604800 } });
+    if (r.ok) { const j = await r.json(); const rt = j.code === "Ok" && j.routes && j.routes[0]; if (rt && rt.geometry) out = { m: Math.round(rt.distance), c: rt.geometry.coordinates.map(([a, b]) => [+a.toFixed(5), +b.toFixed(5)]) }; }
+  } catch (e) {}
+  if (!out) return json({ error: "routing" }, 502);
+  const res = new Response(JSON.stringify(out), { headers: { "content-type": "application/json", "cache-control": "public, max-age=604800" } });
+  ctx.waitUntil(cache.put(key, res.clone())); return res;
+}
 /* real walking distances along streets (OpenStreetMap foot routing, FOSSGIS) from one spot to up to 60 places */
 async function walk(url, ctx) {
   const ll = v => { const m = /^(-?\d{1,2}\.\d{1,6}),(-?\d{1,3}\.\d{1,6})$/.exec(v || ""); return m ? [+m[1], +m[2]] : null; };
@@ -146,6 +162,7 @@ export default {
       return json({ error: "method" }, 405);
     }
     if (url.pathname === "/api/walk") return walk(url, ctx);
+    if (url.pathname === "/api/route") return route(url, ctx);
     if (url.pathname === "/api/photo") return photo(url, env, ctx);
     if (url.pathname === "/api/photos") {
       const id = (url.searchParams.get("id") || "").slice(0, 60); if (!/^[\w-]{8,60}$/.test(id)) return json({ count: 0 }, 400);
