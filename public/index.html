@@ -2931,28 +2931,26 @@ function xpRow(z, k, o) {
 /* Explore = a guide to the city: themed rows you swipe through (photo cards), ordered for the time of day.
    "See all" opens that theme's full list on the map. */
 const XTH = {
-  brunch: { t: "Breakfast & brunch", f: z => ["dinner", "coffee"].includes(mk(z)) && RX.brk.test(ztxt(z)), map: ["dinner", "breakfast"] },
-  coffee: { t: "Coffee", f: z => mk(z) === "coffee", map: ["coffee"] },
-  lunch: { t: "Lunch", f: z => mk(z) === "dinner" && GRP.dinner.subs[1].t(z), map: ["dinner", "lunch"] },
-  dinner: { t: "Dinner", f: z => mk(z) === "dinner" && GRP.dinner.subs[2].t(z), map: ["dinner", "dinner"] },
+  brunch: { t: "Breakfast & brunch", f: z => ["dinner", "coffee", "sweet"].includes(mk(z)) && RX.brk.test(ztxt(z)), map: ["dinner", "breakfast"] },
+  coffee: { t: "Coffee", f: z => inGrp(z, "coffee"), map: ["coffee"] },
+  eat: { t: "Eat", f: z => mk(z) === "dinner", map: ["dinner"] },
   drinks: { t: "Bars", f: z => mk(z) === "drinks", map: ["drinks"] },
-  sweet: { t: "Something sweet", f: z => mk(z) === "sweet", map: ["sweet"] },
+  sweet: { t: "Something sweet", f: z => inGrp(z, "sweet"), map: ["sweet"] },
   museums: { t: "Museums & galleries", f: z => mk(z) === "culture", map: ["culture", "museums"] },
   sights: { t: "Sights", f: z => mk(z) === "see", map: ["culture", "sights"] },
-  views: { t: "Views", f: z => mk(z) === "see" && RX.view.test(ztxt(z)), map: ["culture", "views"] },
   parks: { t: "Parks & nature", f: z => mk(z) === "see" && RX.park.test(ztxt(z)), map: ["culture", "parks"] },
   exp: { t: "Experiences", f: z => inGrp(z, "experience"), map: ["experience"] },
   clothes: { t: "Clothes & vintage", f: z => mk(z) === "clothes", map: ["shop", "clothes"] },
   shops: { t: "Shops", f: z => mk(z) === "shop", map: ["shop"] }
 };
 function xpThemes(iso) {
-  if (iso !== today) return ["brunch", "coffee", "sights", "museums", "lunch", "clothes", "shops", "views", "parks", "exp", "sweet", "dinner", "drinks"];
+  if (iso !== today) return ["brunch", "coffee", "sights", "museums", "eat", "clothes", "shops", "parks", "exp", "sweet", "drinks"];
   const h = new Date().getHours();
-  if (h < 11) return ["brunch", "coffee", "sights", "museums", "views", "clothes", "shops", "parks", "exp", "lunch", "sweet", "dinner", "drinks"];
-  if (h < 15) return ["lunch", "sights", "museums", "clothes", "shops", "coffee", "sweet", "views", "parks", "exp", "dinner", "drinks"];
-  if (h < 18) return ["coffee", "sweet", "museums", "sights", "clothes", "shops", "exp", "views", "parks", "drinks", "dinner"];
-  if (h < 22) return ["dinner", "drinks", "sweet", "exp", "views", "sights"];
-  return ["drinks", "sweet", "dinner", "exp"];
+  if (h < 11) return ["brunch", "coffee", "sights", "museums", "clothes", "shops", "parks", "exp", "eat", "sweet", "drinks"];
+  if (h < 15) return ["eat", "sights", "museums", "clothes", "shops", "coffee", "sweet", "parks", "exp", "drinks"];
+  if (h < 18) return ["coffee", "sweet", "museums", "sights", "clothes", "shops", "exp", "parks", "drinks", "eat"];
+  if (h < 22) return ["eat", "drinks", "sweet", "exp", "sights"];
+  return ["drinks", "sweet", "eat", "exp"];
 }
 function xcCard(z, k, o, hero) {
   const w = distTxt(k, o && walkKm(o, z)).split(" · ");
@@ -2970,7 +2968,7 @@ function xpRender(keepScroll) {
   if (!o) body = `<p class="xp-empty">No hotel for this day, so there's nothing to show nearby.</p>`;
   else if (!pool.length) body = `<p class="xp-empty">Nothing saved in ${esc(city)} yet.</p>`;
   else {
-    body += xpThemes(iso).map(key => { const th = XTH[key], all = pool.filter(x => th.f(x.z)); if (all.length < (key === "views" || key === "parks" ? 3 : 1)) return "";
+    body += xpThemes(iso).map(key => { const th = XTH[key], all = pool.filter(x => th.f(x.z)); if (all.length < (key === "parks" ? 3 : 1)) return "";
       return `<div class="xp-sec"><h2>${th.t}</h2>${all.length > 3 ? `<button data-xall="${key}">See all ${all.length}</button>` : ""}</div><div class="xs">${all.slice(0, 10).map(x => xcCard(x.z, x.k, o)).join("")}</div>`; }).join("");
   }
   const w = wxFor(iso), where = me ? "Near you" : a ? `Around ${a.hotel}` : fmt(iso, { weekday: "long", day: "numeric", month: "long" });
@@ -3023,14 +3021,14 @@ const RX = { brk: /brunch|breakfast|bakery|pancake|bagel|eggs|croissant|morning|
   beauty: /fragrance|perfume|parfum|\bscents?\b|candle|skin ?care|cosmetic|beauty|\bsoap|apothecary|officine|buly|aesop|diptyque|le labo|byredo/,
   book: /book|libra|buch|record|vinyl|zine/, food: /deli|market|chocolate|cheese|grocer|food|spice|tea shop|wine shop|pastr|épicerie|epicerie/,
   exp: /photo ?booth|photoautomat|\bswings?\b|toboggan|\bslides?\b|\bsled|rodel|karaoke|escape room|bowling|mini ?golf|sauna|\bspa\b|thermal bath|rent a boat|boat rental|boating|pedalo|kayak|paddle ?board|\btour\b|cooking class|pottery|\bcinemas?\b|\bkino\b|open-air screening|arcade|pinball|zip ?line|roller ?coaster|ferris wheel|bouldering|climbing|go-?kart|casino|rope park|high ropes|skatepark|skating|ice rink|trampoline|planetarium|observatory|\bzoo\b|aquarium|public pool|swimming|cable car|tasting/,
+  cof: /coffee|\bcaf[eé]s?\b|espresso|latte|matcha|flat white|roaster|tea ?room|salon de th[eé]/,
+  swt: /pastr|p[aâ]tiss|bakery|bakeries|boulanger|b[aä]ckerei|\bbakes?\b|\bcakes?\b|torte|dessert|ice ?cream|gelat|\bglace|soft serve|doughnut|donut|macaron|cookie|brownie|cinnamon (roll|bun)|croissant|(?<!hot )chocolat(?!e bar)|\bwaffle|cr[eê]pe|churro|baklava|k[üu]nefe|mochi|bingsu|\btarts?\b|\bflan\b|babka|meringue|cheesecake|tiramisu/,
   cock: /cocktail|speakeasy|martini|mixolog|negroni/, wine: /wine|vino|enoteca|natural wine|cave/, beer: /beer|brew|pub|taproom|ale|bier|lager/ };
 const GRP = {
   dinner: { kinds: ["dinner"], n: "places to eat", subs: [
-    { k: "breakfast", l: "breakfast", n: "breakfast spots", kinds: ["dinner", "coffee"], t: z => RX.brk.test(ztxt(z)) },
-    { k: "lunch", l: "lunch", n: "lunch spots", t: z => { const x = ztxt(z); return RX.lun.test(x) || !(RX.brk.test(x) || RX.din.test(x)); } },
-    { k: "dinner", l: "dinner", n: "dinner spots", t: z => { const x = ztxt(z); return RX.din.test(x) || !(RX.brk.test(x) || RX.lun.test(x)); } }] },
-  coffee: { kinds: ["coffee"], n: "cafes", subs: [] },
-  sweet: { kinds: ["sweet"], n: "sweet spots", subs: [] },
+    { k: "breakfast", l: "breakfast", n: "breakfast spots", kinds: ["dinner", "coffee", "sweet"], t: z => RX.brk.test(ztxt(z)) }] },
+  coffee: { kinds: ["coffee"], n: "cafes", subs: [], extra: z => ["sweet", "dinner", "shop"].includes(mk(z)) && RX.cof.test(ztxt(z)) },
+  sweet: { kinds: ["sweet"], n: "sweet spots", subs: [], extra: z => ["coffee", "dinner", "shop"].includes(mk(z)) && RX.swt.test(ztxt(z)) },
   drinks: { kinds: ["drinks"], n: "bars", subs: [
     { k: "cocktails", l: "cocktails", n: "cocktail bars", t: z => RX.cock.test(ztxt(z)) },
     { k: "wine", l: "wine", n: "wine bars", t: z => RX.wine.test(ztxt(z)) },
@@ -3038,7 +3036,6 @@ const GRP = {
   culture: { kinds: ["culture", "see"], n: "places to see", subs: [
     { k: "museums", l: "museums", n: "museums and galleries", kinds: ["culture"], t: () => true },
     { k: "sights", l: "sights", n: "sights", kinds: ["see"], t: () => true },
-    { k: "views", l: "views", n: "viewpoints", kinds: ["see"], t: z => RX.view.test(ztxt(z)) },
     { k: "parks", l: "parks", n: "parks and nature", kinds: ["see"], t: z => RX.park.test(ztxt(z)) }] },
   shop: { kinds: ["shop", "clothes"], n: "shops", subs: [
     { k: "clothes", l: "clothes", n: "clothes shops", kinds: ["clothes"], t: () => true },
@@ -3063,22 +3060,47 @@ const qn = t => t.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 const isK = (...ks) => z => ks.includes(mk(z)), rxK = (rx, ...ks) => z => (!ks.length || ks.includes(mk(z))) && rx.test(ztxt(z));
 const QKW = {
   food: isK("dinner"), eat: isK("dinner"), restaurant: isK("dinner"), meal: isK("dinner"), dinner: isK("dinner"),
-  breakfast: rxK(RX.brk, "dinner", "coffee"), brunch: rxK(RX.brk, "dinner", "coffee"), lunch: z => mk(z) === "dinner" && GRP.dinner.subs[1].t(z),
-  coffee: isK("coffee"), cafe: isK("coffee"), espresso: isK("coffee"),
+  breakfast: rxK(RX.brk, "dinner", "coffee", "sweet"), brunch: rxK(RX.brk, "dinner", "coffee", "sweet"), lunch: rxK(RX.lun, "dinner"),
+  coffee: z => inGrp(z, "coffee"), cafe: z => inGrp(z, "coffee"), espresso: z => inGrp(z, "coffee"),
   drink: isK("drinks"), bar: isK("drinks"), pub: isK("drinks"), nightlife: isK("drinks"), cocktail: rxK(RX.cock), wine: rxK(RX.wine), beer: rxK(RX.beer),
-  sweet: isK("sweet"), dessert: isK("sweet"), cake: isK("sweet"), "ice cream": isK("sweet"), gelato: isK("sweet"),
+  sweet: z => inGrp(z, "sweet"), dessert: z => inGrp(z, "sweet"), cake: z => inGrp(z, "sweet"), "ice cream": z => inGrp(z, "sweet"), gelato: z => inGrp(z, "sweet"), bakery: z => inGrp(z, "sweet"), pastry: z => inGrp(z, "sweet"),
   museum: isK("culture"), gallery: isK("culture"), galleries: isK("culture"), art: isK("culture"), culture: isK("culture"),
   sight: isK("see"), sightseeing: isK("see"), view: rxK(RX.view), viewpoint: rxK(RX.view), park: rxK(RX.park), nature: rxK(RX.park),
   shop: isK("shop", "clothes"), shopping: isK("shop", "clothes"), store: isK("shop", "clothes"), clothes: isK("clothes"), fashion: isK("clothes"),
   vintage: rxK(RX.vint), secondhand: rxK(RX.vint), thrift: rxK(RX.vint), design: z => mk(z) === "shop" && shopSub(z) === "design", beauty: z => mk(z) === "shop" && shopSub(z) === "beauty", perfume: rxK(RX.beauty), fragrance: rxK(RX.beauty), scent: rxK(RX.beauty), book: rxK(RX.book), record: rxK(RX.book), market: rxK(RX.food),
   experience: z => inGrp(z, "experience"), activity: z => inGrp(z, "experience"), "things to do": z => inGrp(z, "experience") || mk(z) === "see", fun: z => inGrp(z, "experience")
 };
+/* ideas: a search word also finds places whose one-liner describes it ("dancing" finds clubs and bars with music) */
+const QIDEA = (() => {
+  const music = /music|\blive\b|jazz|concert|\bgigs?\b|\bdjs?\b|vinyl|listening|\bband|karaoke|piano|blues|\bsoul\b|punk|\brock\b|\bvenue/;
+  const dance = /danc|nightclub|clubbing|\bdjs?\b|techno|house music|disco|\brave|part(y|ies)|nightlife|after ?hours/;
+  const ideas = [
+    [["dance", "dancing", "club", "clubbing", "party", "rave", "nightlife", "nightclub", "techno"], z => dance.test(ztxt(z)) || (mk(z) === "drinks" && (music.test(ztxt(z)) || /\bclubs?\b/.test(ztxt(z))))],
+    [["music", "live", "gig", "concert", "jazz", "band", "dj", "vinyl", "listening"], z => music.test(ztxt(z))],
+    [["romantic", "date", "datenight", "intimate"], /romantic|\bdate|candle|intimate|charming|elegant|special occasion|celebrat/],
+    [["cheap", "budget", "affordable", "value"], /cheap|budget|affordable|value|bargain|steal|\bdeals?\b|[€£] ?\d/],
+    [["outdoor", "outside", "terrace", "garden", "sunny", "patio"], /terrace|garden|outdoor|rooftop|patio|courtyard|outdoors?|riverside|canal|by the (river|water|lake)|\bsun/],
+    [["quiet", "work", "laptop", "study", "calm"], /quiet|\bwork|laptop|study|calm|peaceful|relax/],
+    [["late", "latenight"], /\blate|night|after ?hours|24.?h/],
+    [["vegan", "vegetarian", "veggie", "plant"], /vegan|vegetarian|plant.?based|veggie|meat.?free/],
+    [["cosy", "cozy", "snug"], /cos[yi]|coz[yi]|snug|fire|candle|warm/],
+    [["historic", "history", "old", "classic", "traditional"], /histor|oldest|since 1\d|centur|tradition|institution|classic|legendary|old.?school|iconic/],
+    [["hidden", "secret", "gem", "speakeasy"], /hidden|secret|speakeasy|\bgem\b|tucked|underrated/],
+    [["fancy", "upscale", "michelin", "luxury", "posh", "splurge"], /michelin|fine dining|upscale|luxur|fancy|elegant|tasting menu|splurge|chic/],
+    [["kids", "family", "children"], /\bkids?\b|family|child|playground/],
+  ];
+  const m = {};
+  ideas.forEach(([ws, f]) => { const g = f instanceof RegExp ? z => f.test(ztxt(z)) : f; ws.forEach(w => (m[w] = g)); });
+  return m;
+})();
+const qStem = w => w.length > 5 && /(ing|ers)$/.test(w) ? w.slice(0, -3) : w.length > 4 && /(ed|er|es)$/.test(w) ? w.slice(0, -2) : w.length > 3 && w.endsWith("s") ? w.slice(0, -1) : w;
 function qHit(z, q) {
   const t = qn(ztxt(z) + " " + (MAPLAB[mk(z)] || "")), raw = qn(q).trim(); if (!raw) return true;
   if (QKW[raw] && QKW[raw](z)) return true;  /* two-word keywords like "ice cream" */
   const at = w => new RegExp("(^|[^a-z0-9])" + w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).test(t);  /* from the start of a word: "burger" not "Brandenburger" */
-  return raw.split(/\s+/).every(w => { const st = w.length > 3 && w.endsWith("s") ? w.slice(0, -1) : w, f = QKW[w] || QKW[st];
-    return at(st) || (f ? f(z) : false); });
+  if (QIDEA[raw.replace(/\s+/g, "")] && QIDEA[raw.replace(/\s+/g, "")](z)) return true;  /* "late night", "date night" */
+  return raw.split(/\s+/).every(w => { const st = w.length > 3 && w.endsWith("s") ? w.slice(0, -1) : w, f = QKW[w] || QKW[st], id = QIDEA[w] || QIDEA[st];
+    return at(st) || at(qStem(w)) || (f ? f(z) : false) || (id ? id(z) : false); });
 }
 let MSUB = "";
 const subOf = () => { const g = GRP[MCAT]; return g && MSUB ? g.subs.find(x => x.k === MSUB) : null; };
@@ -3086,7 +3108,7 @@ const inGrp = (z, k) => { const g = GRP[k]; return g ? g.kinds.includes(mk(z)) |
 function subsHTML() {
   const g = GRP[MCAT]; if (!g || !g.subs.length || MQ) return "";
   const { list } = mapPlaces();
-  return g.subs.filter(sb => list.some(z => (sb.kinds || g.kinds).includes(mk(z)) && sb.t(z))).map(sb => `<button class="msub glass" data-msub="${sb.k}" aria-pressed="${MSUB === sb.k}">${sb.l}</button>`).join("");
+  return g.subs.filter(sb => list.some(z => (sb.kinds ? sb.kinds.includes(mk(z)) : inGrp(z, MCAT)) && sb.t(z))).map(sb => `<button class="msub glass" data-msub="${sb.k}" aria-pressed="${MSUB === sb.k}">${sb.l}</button>`).join("");
 }
 const QSVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>`;
 const mdock = document.getElementById("mdock"), mqi = document.getElementById("mqi");
@@ -3095,7 +3117,7 @@ function mapFilter(z) {
   if (MQ) return qHit(z, MQ);
   if (MCAT === "all") return true;
   const g = GRP[MCAT], sb = subOf(); if (!g) return mk(z) === MCAT;
-  return sb ? (sb.kinds || g.kinds).includes(mk(z)) && sb.t(z) : inGrp(z, MCAT);
+  return sb ? (sb.kinds ? sb.kinds.includes(mk(z)) : inGrp(z, MCAT)) && sb.t(z) : inGrp(z, MCAT);
 }
 const LSVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r=".6"/><circle cx="4" cy="12" r=".6"/><circle cx="4" cy="18" r=".6"/></svg>`;
 function dockRender() {
