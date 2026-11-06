@@ -1109,6 +1109,21 @@ body .mapv .mcar { bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
 :root[data-theme="dark"] .mapv .mdock button:not([aria-pressed="true"]), :root[data-theme="dark"] .mapv.lon .mdock button:not([aria-pressed="true"]):not(.mdn) { background: rgba(44, 44, 46, .96); }
 body.mapopen #pills, body.xpon #pills { visibility: hidden; }
 .mp.sel.nolab .t { opacity: 0; }
+/* photo viewer (6 Nov, Alex): tap a place's photo to see it full screen; swipe across, swipe down or tap to close */
+.pv { position: fixed; inset: 0; z-index: 9000; background: #000; display: flex; flex-direction: column; justify-content: center; opacity: 0; transition: opacity 260ms var(--glide); touch-action: none; }
+.pv.on { opacity: 1; }
+.pv[hidden] { display: none; }
+.pvtrack { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior: contain; height: 100%; align-items: center; transition: transform 320ms var(--glide); touch-action: pan-x; }
+.pvtrack::-webkit-scrollbar { display: none; }
+.pvtrack figure { flex: 0 0 100%; height: 100%; margin: 0; display: grid; place-items: center; scroll-snap-align: center; scroll-snap-stop: always; }
+.pvtrack img { max-width: 100%; max-height: 100%; object-fit: contain; transform: scale(.94); transition: transform 380ms var(--glide); user-select: none; -webkit-user-drag: none; }
+.pv.on .pvtrack img { transform: none; }
+.pvx { position: absolute; top: calc(max(12px, env(safe-area-inset-top, 0px)) + 6px); right: 14px; width: 44px; height: 44px; border: 0; border-radius: 22px; background: rgba(60,60,64,.55); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); color: #fff; display: grid; place-items: center; cursor: pointer; }
+.pvx svg { width: 18px; height: 18px; }
+.pvn { position: absolute; top: calc(max(12px, env(safe-area-inset-top, 0px)) + 18px); left: 0; right: 0; text-align: center; color: rgba(255,255,255,.85); font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; pointer-events: none; }
+.pvname { position: absolute; bottom: calc(max(16px, env(safe-area-inset-bottom, 0px)) + 10px); left: 20px; right: 20px; text-align: center; color: #fff; font-size: 17px; font-weight: 600; pointer-events: none; text-shadow: 0 1px 8px rgba(0,0,0,.6); }
+.gal .gtrack img { cursor: zoom-in; }
+@media (prefers-reduced-motion: reduce) { .pv, .pvtrack img, .pvtrack { transition: none; } }
 </style>
 
 <div class="page" id="page">
@@ -1135,6 +1150,7 @@ body.mapopen #pills, body.xpon #pills { visibility: hidden; }
 <nav class="tabs glass" id="tabs" role="tablist" aria-label="Views"><button role="tab" data-tab="xp" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg><span>Explore</span></button><button role="tab" data-tab="map" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6z"/><path d="M9 4v14M15 6v14"/></svg><span>Map</span></button><button role="tab" data-tab="cal" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Schedule</span></button></nav>
 <div class="sr" aria-live="polite" id="live"></div>
 
+<div class="pv" id="pv" hidden role="dialog" aria-modal="true" aria-label="Photos"><div class="pvtrack" id="pvt"></div><div class="pvn" id="pvn"></div><div class="pvname" id="pvname"></div><button class="pvx" id="pvx" type="button" aria-label="Close photos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
 <script>
 (() => {
 const TZ = { ath:"Europe/Athens", it:"Europe/Rome", ch:"Europe/Zurich", de:"Europe/Berlin", fr:"Europe/Paris", uk:"Europe/London", doh:"Asia/Qatar", per:"Australia/Perth" };
@@ -2698,6 +2714,48 @@ function refreshSheetDist() {
   else if (body.querySelector(".cats") && PL.iso === view) refreshPlanner();
 }
 new MutationObserver(() => { loadGalleries(sheet); sheetWalk(); }).observe(document.getElementById("sheet-body"), { childList: true });
+/* Photo viewer (6 Nov, Alex): tapping a photo in a place's gallery opens every photo of that gallery full screen,
+   on the one you tapped. Swipe sideways between them; swipe down, tap, the close button or Escape closes it.
+   Same images as the gallery (already loaded, 1000 px wide), so it costs no extra photo lookups. */
+const pv = document.getElementById("pv"), pvt = document.getElementById("pvt"), pvn = document.getElementById("pvn");
+let PVN = 0, PVY = null;
+function pvCount() { const k = Math.round(pvt.scrollLeft / Math.max(1, pvt.clientWidth)); pvn.textContent = PVN > 1 ? `${k + 1} of ${PVN}` : ""; }
+function pvOpen(img) {
+  const tr = img.closest(".gtrack"), imgs = [...tr.querySelectorAll("img")].filter(x => x.complete && x.naturalWidth), at = Math.max(0, imgs.indexOf(img));
+  if (!imgs.length) return; PVN = imgs.length;
+  const z = SAVE_BY[(img.closest("[data-gal]") || {}).dataset ? img.closest("[data-gal]").dataset.gal : ""];
+  document.getElementById("pvname").textContent = z ? z.name : "";
+  pvt.innerHTML = imgs.map(x => `<figure><img alt="" src="${esc(x.currentSrc || x.src)}"></figure>`).join("");
+  pv.hidden = false; pvt.style.transform = ""; pv.style.background = "";
+  requestAnimationFrame(() => { pvt.scrollLeft = at * pvt.clientWidth; pvCount(); pv.classList.add("on"); });
+  document.documentElement.style.overflow = "hidden"; haptic();
+}
+function pvClose() {
+  if (pv.hidden) return; pv.classList.remove("on");
+  setTimeout(() => { pv.hidden = true; pvt.innerHTML = ""; pvt.style.transform = ""; pv.style.background = ""; }, reduce() ? 0 : 260);
+  document.documentElement.style.overflow = "";
+}
+document.addEventListener("click", e => {
+  const im = e.target.closest(".gal .gtrack img"); if (!im) return;
+  e.preventDefault(); e.stopPropagation(); pvOpen(im);
+}, true);
+pvt.addEventListener("scroll", pvCount, { passive: true });
+pv.addEventListener("click", e => { e.stopPropagation(); if (e.target.closest("#pvx") || !e.target.closest("img")) return pvClose(); });
+document.getElementById("pvx").addEventListener("click", e => { e.stopPropagation(); pvClose(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !pv.hidden) { e.stopPropagation(); pvClose(); } }, true);
+/* swipe down to close: the photo follows the finger and the black fades; let go past ~110 px to close */
+pv.addEventListener("touchstart", e => { if (e.touches.length === 1) PVY = { y: e.touches[0].clientY, x: e.touches[0].clientX, on: false }; }, { passive: true });
+pv.addEventListener("touchmove", e => {
+  if (!PVY || e.touches.length !== 1) return; const dy = e.touches[0].clientY - PVY.y, dx = e.touches[0].clientX - PVY.x;
+  if (!PVY.on) { if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx) * 1.3 && dy > 0) PVY.on = true; else return; }
+  e.preventDefault(); pvt.style.transition = "none"; pvt.style.transform = `translateY(${dy}px) scale(${Math.max(.82, 1 - dy / 1600)})`;
+  pv.style.background = `rgba(0,0,0,${Math.max(.25, 1 - dy / 420)})`;
+}, { passive: false });
+pv.addEventListener("touchend", e => {
+  if (!PVY) return; const on = PVY.on, dy = (e.changedTouches[0] || {}).clientY - PVY.y; PVY = null; if (!on) return;
+  pvt.style.transition = ""; if (dy > 110) return pvClose();
+  pvt.style.transform = ""; pv.style.background = "";
+});
 /* one place on its own sheet: photos, what it is, how far, and what you can do with it */
 function placeMeta(z) {
   const o = liveFrom(view) || anchorFor(view), k = o ? km(o.lat, o.lng, z.lat, z.lng) : null, far = k != null && k >= 8 && z.city !== (anchorFor(view) || {}).city;
