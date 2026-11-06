@@ -3085,7 +3085,7 @@ const QSVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="
 const mdock = document.getElementById("mdock"), mqi = document.getElementById("mqi");
 let MQ = "", MQON = false, MQT = 0;
 function mapFilter(z) {
-  if (MQ) return qHit(z, MQ);
+  if (MQ && !DPIN) return qHit(z, MQ);  /* a dropped pin shows every saved place around it (Alex, 6 Nov) */
   if (MCAT === "all") return true;
   const g = GRP[MCAT], sb = subOf(); if (!g) return mk(z) === MCAT;
   return sb ? (sb.kinds ? sb.kinds.includes(mk(z)) : inGrp(z, MCAT)) && sb.t(z) : inGrp(z, MCAT);
@@ -3225,7 +3225,7 @@ function dropOpen() { if (!DPIN) return; MPICK = null; mapv.classList.remove("pi
 function geoPick(r) {
   const city = (mapStay() || {}).city || cityOn(view);
   DPIN = { pin: true, hotel: r.n, addr: r.s || "", lat: r.lat, lng: r.lng, city, q: r.n + (r.s ? ", " + r.s : "") };
-  haptic(); mqi.blur(); clearPick(); MUSER = true; layoutPins(); dropOpen();
+  haptic(); mqi.blur(); clearPick(); MUSER = true; drawMap(); dropOpen();
 }
 document.getElementById("mqgeo").addEventListener("click", e => { const b = e.target.closest("[data-geo]"); if (!b) return; e.stopPropagation(); const r = ADDR[+b.dataset.geo]; if (r) geoPick(r); });
 document.getElementById("mqgeo").addEventListener("pointerdown", e => e.stopPropagation());
