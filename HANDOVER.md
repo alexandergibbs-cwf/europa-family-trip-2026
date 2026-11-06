@@ -124,7 +124,7 @@ They sit in free time and play as whole-day ideas ("scenes").
 
 ## Navigation and motion
 - **Tab bar (4 Nov, Alex picked option B over an Apple-Maps-style map+sheet):** floating glass capsule `#tabs.tabs` (Explore / Map / Schedule, `data-tab` xp|map|cal) above everything except sheets (z 35; 65 when the map is open, under the map scrim). `curTab()` reads state from `mapv.hidden` / `xp.hidden`; `setTab()` sets `aria-selected` and is called from `showXP`, `openMap`, `closeMap` and on load. Switching tabs keeps the chosen day and category (`showXP(true, true)` skips the jump-to-today). Tapping the active tab scrolls Explore to top / the day to its default time.
-- **Removed switchers:** Explore's Cities button and Map+Schedule capsule, the map's List+Schedule capsule (`#mdone`/`#mcal` gone), the timetable's compass `#xpPill` and cities `#backPill` (both left in the DOM `hidden`), the left-edge swipe that opened the sidebar. The `.side` sidebar code is still there but nothing opens it.
+- **Removed switchers:** Explore's Cities button and Map+Schedule capsule, the map's List+Schedule capsule, the timetable's compass and cities pills, the left-edge swipe sidebar. **6 Nov: the sidebar (`.side`, `openSide`/`closeSide`, its drag code and CSS) and the hidden `#backPill`/`#xpPill` were deleted outright, along with 14 functions nothing called (`xpOrder`, `xpRow`, `xpShown`, `menuSheet`, `ideaAlts`, `_oldRenderWeek`, `styleWheel`, `multiStart`, `hideOf`, `hourLabel`, `tBig`, `pics`, `WXE`, `isCulture`).**
 - **City title → cities only (5 Nov, Alex: the rest was pointless):** Explore's large title (`.xp-tt[data-trip]`), the map's top pill (`.mtt`) and the timetable `#titlePill` all open `daySheet()`, which is now just "Cities" plus the grouped list (`.tripc .crow[data-tripgo]`). Near me now, Plan the day, things to sort, the hotel row and the weather are gone from it (`menuSheet()` is unused). Picking a city jumps to its first day (today if current) on whichever tab you're on.
 - **Opens on the map (5 Nov, Alex), always, travel days included:** at startup `openMap(null, true)` (quiet, no haptic). `?schedule` / `?explore` override this for testing. First-run cards (location, tour, Add to Home Screen) are lifted above the map (z 90/91). Tour page 1 says the app opens on the map.
 - **Which city the map and Explore show (`mapStay`):** tonight's stay. On a travel day that's the city you're heading to (Alex: "forget Zürich, open on Berlin"). If you're far from it, the map centres on that hotel. `mapHere()` only uses your location within 40 km of that stay. `liveFrom` is back to "near tonight's stay" only (the travel-day extension made the place sheet in Berlin say "day trip" while Alex was in Zürich). Switching city on the map fits the view like "all".
@@ -192,6 +192,10 @@ They sit in free time and play as whole-day ideas ("scenes").
 - **Sidebar (Cities), landing sheet, sheets:** unchanged from earlier builds.
   - The landing sheet no longer shows sunset.
   - The dimming scrim is `hidden` (out of layout) when closed. A full-height fixed layer made Safari 26 paint a solid grey bottom bar.
+
+- **Distances (6 Nov, Alex):** `distTxt` gives walk time only ("10 min walk"; no metres or km, no "from here"); over ~3.5 km "~N min by metro or taxi"; day trips keep km. Distance text is secondary grey (`--sub`, weight 500), no longer green.
+- **Map list title (6 Nov):** "97 places to eat in Paris" (city from `mapStay()`), not "nearby", because the count is the whole city.
+- **Dark map pins (6 Nov):** bubbles are #3a3a3c instead of white; dots keep their colour with a #1c1c1e ring. Selection rings unchanged.
 
 ## Known gaps / open items
 - **Safari bottom bar:** Alex wants page content to run under Safari's floating toolbar. The scrim fix is pushed but wasn't confirmed on device. If the grey band persists, look for any other fixed element touching the bottom edge.
