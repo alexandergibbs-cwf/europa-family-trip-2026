@@ -988,7 +988,28 @@ body .mapv .maplibregl-ctrl-bottom-left { bottom: calc(66px + env(safe-area-inse
 .mapv.qon.pmode .mqbar, .mapv.qon.pmode .mqnone { transform: translateY(calc(100% + 40px)); opacity: 0; pointer-events: none; }
 .mapv.qon .mtt, .mapv.qon .mme { visibility: visible; }
 .mapv.qon .mdock { opacity: 0; pointer-events: none; }
-.mapv.qon .mcar { bottom: calc(max(calc(10px + env(safe-area-inset-bottom, 0px)), calc(var(--kb, 0px) + 8px)) + 50px) !important; }
+.mapv.qon .mcar { bottom: calc(max(calc(10px + env(safe-area-inset-bottom, 0px)), calc(var(--kb, 0px) + 8px)) + 50px + var(--gh, 0px)) !important; }
+/* addresses (6 Nov, Alex): looked-up streets sit just above the field, the saved-place cards ride above them */
+.mqgeo { position: absolute; z-index: 501; left: 12px; right: 12px; bottom: calc(max(calc(10px + env(safe-area-inset-bottom, 0px)), calc(var(--kb, 0px) + 8px)) + 52px); border-radius: 18px; padding: 4px 0; overflow: hidden; transition: bottom 260ms var(--glide), transform 420ms var(--glide), opacity 220ms ease; }
+.mapv:not(.qon) .mqgeo, .mapv.qon.pmode .mqgeo { transform: translateY(calc(100% + 100px)); opacity: 0; pointer-events: none; }
+.mqgeo button { display: flex; align-items: center; gap: 12px; width: 100%; border: 0; background: none; color: var(--ink); font: inherit; text-align: left; padding: 8px 14px; min-height: 50px; cursor: pointer; }
+.mqgeo button + button { box-shadow: inset 0 .5px 0 var(--sep, rgba(60,60,67,.18)); }
+.mqgeo .gi { flex: none; width: 30px; height: 30px; border-radius: 15px; background: #ff3b30; display: grid; place-items: center; }
+.mqgeo .gi svg { width: 15px; height: 15px; fill: #fff; }
+.mqgeo b { display: block; font-size: 16px; font-weight: 600; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mqgeo small { display: block; font-size: 13px; color: var(--sub); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mqgeo span:last-child { min-width: 0; flex: 1; }
+/* the dropped pin: Apple Maps red, a short stem down to the spot, the name underneath */
+.dpin { position: absolute; left: 20px; top: 20px; width: 0; height: 0; pointer-events: none; }
+.dpin .dh { position: absolute; left: -16px; top: -46px; width: 32px; height: 32px; border-radius: 16px; background: #ff3b30; border: 2.5px solid #fff; box-sizing: border-box; box-shadow: 0 3px 10px rgba(0,0,0,.28); display: grid; place-items: center; pointer-events: auto; cursor: pointer; }
+.dpin .dh::after { content: ""; width: 9px; height: 9px; border-radius: 5px; background: #fff; }
+.dpin .ds { position: absolute; left: -1.25px; top: -16px; width: 2.5px; height: 15px; border-radius: 2px; background: #ff3b30; }
+.dpin .dd { position: absolute; left: -4px; top: -3px; width: 8px; height: 6px; border-radius: 50%; background: rgba(0,0,0,.25); filter: blur(1px); }
+.dpin .dh, .dpin .ds { animation: dpin 520ms var(--glide) both; }
+.dpin b { position: absolute; left: 0; top: 6px; transform: translateX(-50%); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 700; color: var(--ink); text-shadow: 0 0 2px var(--bg), 0 0 3px var(--bg), 0 0 4px var(--bg); animation: dpinl 420ms 260ms ease both; }
+@keyframes dpin { from { transform: translateY(-34px); opacity: 0; } 40% { opacity: 1; } to { transform: none; opacity: 1; } }
+@keyframes dpinl { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .dpin .dh, .dpin .ds, .dpin b { animation: none; } }
 .mapv.qon .mqnone { bottom: calc(max(calc(10px + env(safe-area-inset-bottom, 0px)), calc(var(--kb, 0px) + 8px)) + 56px); }
 
 /* 5 Nov, latest: bottom up = cards, categories, then a "45 places to eat ⌃" pill that opens the list */
@@ -1146,7 +1167,7 @@ body.mapopen #pills, body.xpon #pills { visibility: hidden; }
 <div class="a2hs" id="a2hs" role="dialog" aria-modal="true" aria-label="Add to Home Screen" hidden><img src="/apple-touch-icon.png" alt="" width="76" height="76"><b>Add Europe Trip to your Home Screen</b><span id="a2how"></span><button class="btn blue press a2go" id="a2go" hidden>Install</button><button class="a2x press" data-a2x>Not now</button></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden><div class="grab"></div><div id="sheet-body"></div></div>
 <div class="show" id="show" role="dialog" aria-modal="true" hidden></div>
-<div class="mapv" id="mapv" role="dialog" aria-modal="true" aria-label="Map" hidden><div id="mapc"></div><div class="mtop"><div class="xp-top"><button class="pill glass press mselx" id="mselx"><span></span><i aria-hidden="true">✕</i></button><button class="pill glass press mtt" data-trip><span id="mtt"></span><i class="chr"></i></button><span class="sp"></span></div><div class="xp-row xcats mchips" id="mchips"></div><span class="mcity" id="mcity" hidden></span></div><div class="mfoot" aria-hidden="true"></div><div class="mdock" id="mdock" role="toolbar" aria-label="Categories"></div><div class="mqnone glass" id="mqnone" hidden></div><label class="mqbar glass" id="mqbar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><input id="mqi" type="search" placeholder="burger, brunch, vintage…" enterkeyhint="search" autocomplete="off" aria-label="Search saved places"><button id="mqx" type="button">Cancel</button></label><div class="mlist" id="mlist" aria-label="All places"><div class="mlist-h" id="mlisth"><i></i><b id="mlistt"></b><div class="mlsubs" id="mlsubs"></div></div><div class="mlist-l" id="mlistl"></div><div class="mpl" id="mpl"></div></div><div class="mhdr" id="mhdr"><button class="mhd glass press" id="mhd"><b id="mhdt"></b><span id="mhdn"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></button><span id="msubs" style="display:contents"></span></div><button class="mgrab" id="mgrab" aria-label="List"></button><div class="mtool" id="mtool"><button class="mtb" data-mdk="q" id="mtq" aria-label="Search" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button><button class="mtb" data-mdk="home" id="mth" aria-label="Back to the hotel"><span aria-hidden="true">🏠</span></button></div><div class="mcar" id="mcar"></div><button class="pill glass press ib mme" id="mme" aria-label="Where am I"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg></button><div class="mcard" id="mcard" hidden></div></div>
+<div class="mapv" id="mapv" role="dialog" aria-modal="true" aria-label="Map" hidden><div id="mapc"></div><div class="mtop"><div class="xp-top"><button class="pill glass press mselx" id="mselx"><span></span><i aria-hidden="true">✕</i></button><button class="pill glass press mtt" data-trip><span id="mtt"></span><i class="chr"></i></button><span class="sp"></span></div><div class="xp-row xcats mchips" id="mchips"></div><span class="mcity" id="mcity" hidden></span></div><div class="mfoot" aria-hidden="true"></div><div class="mdock" id="mdock" role="toolbar" aria-label="Categories"></div><div class="mqnone glass" id="mqnone" hidden></div><label class="mqbar glass" id="mqbar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><input id="mqi" type="search" placeholder="burger, brunch, an address…" enterkeyhint="search" autocomplete="off" aria-label="Search saved places or an address"><button id="mqx" type="button">Cancel</button></label><div class="mqgeo glass" id="mqgeo" hidden></div><div class="mlist" id="mlist" aria-label="All places"><div class="mlist-h" id="mlisth"><i></i><b id="mlistt"></b><div class="mlsubs" id="mlsubs"></div></div><div class="mlist-l" id="mlistl"></div><div class="mpl" id="mpl"></div></div><div class="mhdr" id="mhdr"><button class="mhd glass press" id="mhd"><b id="mhdt"></b><span id="mhdn"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></button><span id="msubs" style="display:contents"></span></div><button class="mgrab" id="mgrab" aria-label="List"></button><div class="mtool" id="mtool"><button class="mtb" data-mdk="q" id="mtq" aria-label="Search" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button><button class="mtb" data-mdk="home" id="mth" aria-label="Back to the hotel"><span aria-hidden="true">🏠</span></button></div><div class="mcar" id="mcar"></div><button class="pill glass press ib mme" id="mme" aria-label="Where am I"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg></button><div class="mcard" id="mcard" hidden></div></div>
 <nav class="tabs glass" id="tabs" role="tablist" aria-label="Views"><button role="tab" data-tab="xp" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg><span>Explore</span></button><button role="tab" data-tab="map" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6z"/><path d="M9 4v14M15 6v14"/></svg><span>Map</span></button><button role="tab" data-tab="cal" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Schedule</span></button></nav>
 <div class="sr" aria-live="polite" id="live"></div>
 
@@ -2201,13 +2222,15 @@ function staySheet(s, split, from) {
   const n = view >= s.in && view < s.out ? Math.round((Date.parse(view) - Date.parse(s.in)) / 864e5) + 1 : 0, me = HERE && Date.now() - HERE.t < 30 * 6e4 ? HERE : null;
   const k = me && s.lat != null ? km(me.lat, me.lng, s.lat, s.lng) : null, d = k == null ? "Directions" : k > 25 ? `${Math.round(k)} km away` : (t => /walk/.test(t[1] || "") ? t[1] : (t[1] || t[0]).replace(/^~/, "").replace(" or taxi", ""))(distTxt(k).split(" · "));
   /* laid out like any other place (5 Nov, Alex): name, night, Directions; check in / check out side by side; Nearby below in the panel */
+  if (s.pin) return `<div class="ph-top"><div class="ph-t"><h3 id="sheet-title">${esc(s.hotel)}</h3><span class="pmeta">${esc(s.addr || "Dropped pin")}</span></div>`
+    + (o => `<a class="pgo press" href="${o ? o.href : dirs(s.q)}" target="_blank" rel="noopener" aria-label="Directions${o ? " from " + esc(o.name) : ""}">${pI("go")}<span>${esc(o ? o.d : d)}</span></a>`)(from && dirFrom(from, { stay: s })) + `</div>`;
   const sh = s.addr && !/booking/i.test(s.addr) ? s.addr : "", f = x => split ? `<div class="pcl"><div>${x}</div></div>` : x, day = iso => dDay(iso).replace(",", "");
   return `<div class="ph-top"><div class="ph-t"><h3 id="sheet-title">${esc(s.hotel)}</h3><span class="pmeta">${n ? `Night ${n} of ${nights(s)}` : `${dRange(s.in, s.out)}`}${sh ? ` · ${esc(sh)}` : ""}</span></div>`
     + (s.q || sh ? (o => `<a class="pgo press" href="${o ? o.href : dirs(s.q || s.hotel + " " + sh)}" target="_blank" rel="noopener" aria-label="Directions${o ? " from " + esc(o.name) : ""}">${pI("go")}<span>${esc(o ? o.d : d)}</span></a>`)(from && dirFrom(from, { stay: s })) : "") + `</div>`
     + f(`<div class="stio"><div><small>Check in</small><b>${s12(s.ci)}${s.ciEnd ? `–${s12(s.ciEnd)}` : ""}</b><span>${day(s.in)}</span></div><div><small>Check out</small><b>${s12(s.co)}</b><span>${day(s.out)}</span></div></div>`
     + (s.note ? `<p class="stnt">${esc(s.note)}</p>` : ""));
 }
-const stayZ = s => s && s.lat != null ? { id: "stay:" + s.in, name: s.hotel, city: s.city, lat: s.lat, lng: s.lng, kind: "stay", stay: true } : null;  /* the hotel as an anchor for Nearby */
+const stayZ = s => s && s.lat != null ? { id: s.pin ? "pin:" + s.lat + "," + s.lng : "stay:" + s.in, name: s.hotel, city: s.city, lat: s.lat, lng: s.lng, kind: "stay", stay: true, pin: !!s.pin } : null;  /* the hotel as an anchor for Nearby */
 
 
 const SLOTDEF = { coffee: { l: "Coffee", cat: "coffee", dur: 45 }, dinner: { l: "Dinner", cat: "dinner", dur: 90 }, drinks: { l: "Wine", cat: "drinks", dur: 75 } };
@@ -3177,17 +3200,44 @@ function dockClick(e) {
 mdock.addEventListener("click", dockClick);
 document.getElementById("mtool").addEventListener("click", dockClick);
 /* keyboard height, so the search field can sit on top of it */
-const KB = () => MQON ? parseInt(document.documentElement.style.getPropertyValue("--kb")) || 0 : 0;
+const KB = () => MQON ? (parseInt(document.documentElement.style.getPropertyValue("--kb")) || 0) + GH : 0;
 if (window.visualViewport) { const vv = visualViewport, kb = () => document.documentElement.style.setProperty("--kb", Math.max(0, Math.round(innerHeight - vv.height - vv.offsetTop)) + "px"); vv.addEventListener("resize", kb); vv.addEventListener("scroll", kb); }
+/* ---- addresses (6 Nov, Alex): type a street and it drops a pin, then shows what's saved near it ----
+   /api/geo asks Photon (OpenStreetMap, free, no key) for addresses near tonight's stay. They show when the search reads like an
+   address (a number or a street word) or when nothing saved matches. Picking one drops a red pin and opens it with Nearby up. */
+let DPIN = null, PDROP = null, ADDR = [], GEOQ = "", GEOT = 0, GH = 0;
+const GEOW = /(^|[\s,])(\d|str(\.|asse|aße)?\b|stra(ss|ß)e|street|st\b|road|rd\b|rue|avenue|ave\b|boulevard|blvd|bd\b|quai|platz|place|square|sq\b|lane|via|viale|piazza|gasse|weg\b|allee|ufer|damm|close\b|gardens|terrace|crescent|row\b|drive|way\b)|(stra(ss|ß)e|str\.|platz|gasse|allee|damm|ufer)(\s|$)/i;
+function geoRender() {
+  const el = document.getElementById("mqgeo"), on = MQON && MQ && GEOQ === MQ && ADDR.length && (GEOW.test(MQ) || !MPTS.length);
+  el.hidden = !on;
+  if (on) { const h = ADDR.slice(0, MPTS.length ? 2 : 3).map((r, i) => `<button data-geo="${i}"><span class="gi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.6A2.6 2.6 0 1 1 12 6.4a2.6 2.6 0 0 1 0 5.2z"/></svg></span><span><b>${esc(r.n)}</b>${r.s ? `<small>${esc(r.s)}</small>` : ""}</span></button>`).join("");
+    if (el.dataset.h !== h) { el.dataset.h = h; el.innerHTML = h; } }
+  const gh = on ? el.offsetHeight + 6 : 0; if (gh !== GH) { GH = gh; mapv.style.setProperty("--gh", gh + "px"); }
+  if (on) document.getElementById("mqnone").hidden = true;
+}
+function geoFetch(q) {
+  clearTimeout(GEOT); if (!q || q.length < 3) { ADDR = []; GEOQ = ""; return geoRender(); }
+  const o = mapStay() || mapHere(); if (!o) return;
+  GEOT = setTimeout(() => fetch(`/api/geo?q=${encodeURIComponent(q)}&lat=${o.lat.toFixed(4)}&lng=${o.lng.toFixed(4)}`).then(r => r.ok ? r.json() : null).then(j => {
+    if (q !== MQ) return; ADDR = j && Array.isArray(j.r) ? j.r : []; GEOQ = q; geoRender(); }).catch(() => {}), 260);
+}
+function dropOpen() { if (!DPIN) return; MPICK = null; mapv.classList.remove("picked"); panelPlace({ id: "pin:" + DPIN.lat + "," + DPIN.lng, stay: DPIN, full: true }, false); }
+function geoPick(r) {
+  const city = (mapStay() || {}).city || cityOn(view);
+  DPIN = { pin: true, hotel: r.n, addr: r.s || "", lat: r.lat, lng: r.lng, city, q: r.n + (r.s ? ", " + r.s : "") };
+  haptic(); mqi.blur(); clearPick(); MUSER = true; layoutPins(); dropOpen();
+}
+document.getElementById("mqgeo").addEventListener("click", e => { const b = e.target.closest("[data-geo]"); if (!b) return; e.stopPropagation(); const r = ADDR[+b.dataset.geo]; if (r) geoPick(r); });
+document.getElementById("mqgeo").addEventListener("pointerdown", e => e.stopPropagation());
 function mqOpen() { MQON = true; listClose(); mapv.classList.add("qon"); clearPick(); layoutPins(); dockRender(); mqi.value = ""; mqi.focus({ preventScroll: true }); }
 function mqClose(quiet) {
-  const had = !!MQ; MQON = false; MQ = ""; document.getElementById("mqnone").hidden = true; mqi.value = ""; mqi.blur(); mapv.classList.remove("qon"); clearTimeout(MQT);
+  const had = !!MQ; MQON = false; MQ = ""; document.getElementById("mqnone").hidden = true; ADDR = []; GEOQ = ""; clearTimeout(GEOT); DPIN = null; geoRender(); mqi.value = ""; mqi.blur(); mapv.classList.remove("qon"); clearTimeout(MQT);
   if (quiet) return; clearPick(); if (had) drawMap(); else { layoutPins(); dockRender(); }
 }
-function mqRefresh() { clearPick(); drawMap(); const none = document.getElementById("mqnone"), city = (mapStay() || {}).city || cityOn(view); none.hidden = !MQ || MPTS.length > 0; if (!none.hidden) none.textContent = `Nothing saved in ${city} for “${MQ}”`; if (MQ) carShow(railList()); else listClose(); }
+function mqRefresh() { if (!MPS.length) DPIN = null; clearPick(); drawMap(); const none = document.getElementById("mqnone"), city = (mapStay() || {}).city || cityOn(view); none.hidden = !MQ || MPTS.length > 0; if (!none.hidden) none.textContent = `Nothing saved in ${city} for “${MQ}”`; if (MQ) carShow(railList()); else listClose(); geoRender(); geoFetch(MQ); }
 mqi.addEventListener("input", () => { clearTimeout(MQT); MQT = setTimeout(() => { MQ = mqi.value.trim(); mqRefresh(); }, 180); });
 
-mqi.addEventListener("keydown", e => { if (e.key === "Enter") mqi.blur(); });
+mqi.addEventListener("keydown", e => { if (e.key !== "Enter") return; const q = mqi.value.trim(); if (ADDR.length && GEOQ === q && (!MPTS.length || /\d/.test(q))) return geoPick(ADDR[0]); mqi.blur(); });
 document.getElementById("mqx").addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); haptic(); mqClose(); });
 document.getElementById("mqbar").addEventListener("click", e => e.stopPropagation());
 /* ---------- tab bar: Explore / Map / Schedule; the day and category carry across ---------- */
@@ -3629,8 +3679,14 @@ function layoutPins() {
     if (!PHOME || PHOME.a !== a) { if (PHOME) PHOME.m.remove();
       const m = mkMarker(a.lng, a.lat, `<div class="mp home s-l"><span class="b"><i class="e">🏠</i></span><span class="t"><b>${esc(a.hotel)}</b><em>where you're staying</em></span></div>`, () => mapv.hidden ? openSheet(staySheet(a)) : panelPlace({ stay: a }, false)); m.getElement().style.zIndex = 2900; PHOME = { m, a }; }
     const p = mPt(a), hl = p.x + 160 > sz.x - 6; boxes.push(hl ? [p.x - 160, p.y - 24, p.x + 22, p.y + 26] : [p.x - 22, p.y - 24, p.x + 160, p.y + 26]);
-    PHOME.m.getElement().firstElementChild.classList.toggle("l", hl); const hid = NEAR && !NEAR.a.stay; PHOME.m.getElement().style.opacity = hid ? "0" : ""; PHOME.m.getElement().style.pointerEvents = hid ? "none" : "";
+    PHOME.m.getElement().firstElementChild.classList.toggle("l", hl); const hid = NEAR && (!NEAR.a.stay || NEAR.a.pin); PHOME.m.getElement().style.opacity = hid ? "0" : ""; PHOME.m.getElement().style.pointerEvents = hid ? "none" : "";
   }
+  if ((PDROP && PDROP.a) !== DPIN) { if (PDROP) PDROP.m.remove(); PDROP = null;
+    if (DPIN) { const nm = DPIN.hotel.length > 26 ? DPIN.hotel.slice(0, 25) + "…" : DPIN.hotel, w = document.createElement("div"); w.className = "pinw";
+      w.innerHTML = `<div class="dpin"><span class="dd"></span><span class="ds"></span><span class="dh" role="button" aria-label="${esc(DPIN.hotel)}"></span><b>${esc(nm)}</b></div>`;
+      w.querySelector(".dh").addEventListener("click", e => { e.stopPropagation(); MTAP = Date.now(); haptic(); dropOpen(); });
+      const m = new maplibregl.Marker({ element: w, anchor: "center" }).setLngLat([DPIN.lng, DPIN.lat]).addTo(MAP); w.style.zIndex = 2950; PDROP = { m, a: DPIN }; } }
+  if (PDROP) { const p = mPt(DPIN); boxes.push([p.x - 22, p.y - 50, p.x + 22, p.y + 24]); }
   const want = new Map(); let nl = 0, nb = 0;
   const zm = MAP.getZoom(), far = zm < Z_CITY && !NEAR, mid = !far && zm < Z_STREET && !NEAR, NL = far ? 0 : mid ? 6 : 14, NB = far ? 16 : 14, pool = pinPool();
   mapv.classList.toggle("zmid", mid); mapv.classList.toggle("zfar", far);

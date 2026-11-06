@@ -115,6 +115,33 @@ async function walk(url, ctx) {
   const res = new Response(JSON.stringify({ d: out }), { headers: { "content-type": "application/json", "cache-control": "public, max-age=604800" } });
   ctx.waitUntil(cache.put(key, res.clone())); return res;
 }
+/* addresses for the map search (Photon: OpenStreetMap data, komoot; free, no key), near the point the app sends, cached a day */
+async function geo(url, ctx) {
+  const q = (url.searchParams.get("q") || "").trim().slice(0, 120), lat = +url.searchParams.get("lat"), lng = +url.searchParams.get("lng");
+  if (q.length < 3 || !isFinite(lat) || !isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return json({ error: "bad" }, 400);
+  const cache = caches.default, key = new Request("https://geo.cache/" + lat.toFixed(2) + "," + lng.toFixed(2) + "/" + encodeURIComponent(q.toLowerCase()));
+  const hit = await cache.match(key); if (hit) return hit;
+  let feats = null;
+  try {
+    const r = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&lat=${lat}&lon=${lng}&limit=10&lang=en`, { headers: UA, cf: { cacheTtl: 86400 } });
+    if (r.ok) feats = (await r.json()).features || [];
+  } catch (e) {}
+  if (!feats) return json({ error: "geocoder" }, 502);
+  const numFirst = c => !/^(DE|AT|CH|IT|NL|BE|ES|PT|GR|DK|SE|NO|FI|PL|CZ)$/.test(c || "");
+  const seen = new Set(), out = [];
+  for (const f of feats) {
+    const p = f.properties || {}, c = (f.geometry || {}).coordinates; if (!c) continue;
+    const d = kmBetween(lat, lng, c[1], c[0]); if (d > 40) continue;
+    const st = p.street ? (p.housenumber ? (numFirst(p.countrycode) ? `${p.housenumber} ${p.street}` : `${p.street} ${p.housenumber}`) : p.street) : "";
+    const named = p.name && p.name !== p.street ? p.name : "";
+    const n = named || st || p.name; if (!n) continue;
+    const s = [named && st ? st : "", p.district || p.locality || "", p.city || p.county || ""].filter((x, i, a) => x && x !== n && a.indexOf(x) === i).join(", ");
+    const k = (n + "|" + s).toLowerCase(); if (seen.has(k)) continue; seen.add(k);
+    out.push({ n, s, lat: +c[1].toFixed(6), lng: +c[0].toFixed(6) }); if (out.length >= 4) break;
+  }
+  const res = new Response(JSON.stringify({ r: out }), { headers: { "content-type": "application/json", "cache-control": "public, max-age=86400" } });
+  ctx.waitUntil(cache.put(key, res.clone())); return res;
+}
 async function photo(url, env, ctx) {
   const id = (url.searchParams.get("id") || "").slice(0, 60), idx = Math.max(0, Math.min(7, +url.searchParams.get("i") || 0)), key = "photo3:" + id + (idx ? ":" + idx : "");
   if (!/^[\w-]{8,60}$/.test(id)) return new Response("bad id", { status: 400 });
@@ -163,6 +190,7 @@ export default {
     }
     if (url.pathname === "/api/walk") return walk(url, ctx);
     if (url.pathname === "/api/route") return route(url, ctx);
+    if (url.pathname === "/api/geo") return geo(url, ctx);
     if (url.pathname === "/api/photo") return photo(url, env, ctx);
     if (url.pathname === "/api/photos") {
       const id = (url.searchParams.get("id") || "").slice(0, 60); if (!/^[\w-]{8,60}$/.test(id)) return json({ count: 0 }, 400);
