@@ -3565,8 +3565,13 @@ mpl.addEventListener("click", e => { if (!e.target.closest(".ph-top h3")) return
   mpl.addEventListener("pointerup", e => { if (d && !d.touch) end(e.clientY); });
   let lt = null;
   let sc = null; const st = () => sc && mlist.classList.contains("pfull") ? sc.scrollTop : 0;
-  mpl.addEventListener("touchstart", e => { if (e.target.closest(".mpl-h")) return; sc = e.target.closest(".nxl, .pst"); lt = e.touches.length === 1 && st() <= 0 ? e.touches[0].clientY : null; if (lt != null) { start(lt); d.touch = true; } }, { passive: true });
-  mpl.addEventListener("touchmove", e => { if (lt == null) return; const y = e.touches[0].clientY; if (y < lt && !d?.moved && mlist.classList.contains("pfull")) { lt = null; d = null; return; } if (st() <= 0 && move(y)) e.preventDefault(); }, { passive: false });
+  /* axis lock (Alex, 6 Nov: swiping the photos sideways also pulled the card): the first clear direction owns the gesture.
+     Sideways = let the strip scroll and never drag the panel; inside a sideways scroller vertical has to win clearly */
+  let lx = 0, ax = null, hz = false;
+  mpl.addEventListener("touchstart", e => { if (e.target.closest(".mpl-h")) return; sc = e.target.closest(".nxl, .pst"); hz = !!e.target.closest(".gal, .gtrack, .nx-chips, .pmini"); ax = null; lt = e.touches.length === 1 && st() <= 0 ? e.touches[0].clientY : null; if (lt != null) { lx = e.touches[0].clientX; start(lt); d.touch = true; } }, { passive: true });
+  mpl.addEventListener("touchmove", e => { if (lt == null) return; const y = e.touches[0].clientY, x = e.touches[0].clientX;
+    if (!ax) { const ady = Math.abs(y - lt), adx = Math.abs(x - lx); if (Math.max(adx, ady) < 8) return; ax = adx * (hz ? 1.6 : 1) >= ady ? "x" : "y"; if (ax === "x") { lt = null; d = null; return; } }
+    if (y < lt && !d?.moved && mlist.classList.contains("pfull")) { lt = null; d = null; return; } if (st() <= 0 && move(y)) e.preventDefault(); }, { passive: false });
   mpl.addEventListener("touchend", e => { if (lt == null) return; lt = null; end(e.changedTouches[0].clientY); }); }
 /* like mio: tapping a pin picks it (bigger, with a stem), slides it into the top of the screen and shows a row of
    cards for it and the places around it; swiping the cards moves the pick and the map follows */
