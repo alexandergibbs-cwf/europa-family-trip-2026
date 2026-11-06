@@ -2728,15 +2728,18 @@ function nextNear(z, nk) {
   for (const k of order) {
     const all = SAVES.filter(s => s.lat != null && s.id !== z.id && s.kind !== "skip" && inGrp(s, k) && !(s.name === z.name))
       .map(s => { const d = km(z.lat, z.lng, s.lat, s.lng); return { s, k: d, w: walkMin(d * DETOUR) }; }).filter(x => x.w <= 25).sort((x, y) => x.k - y.k);
-    const near = all.slice(0, 8);  /* one list, nearest first, within a 25 min walk; the distance on each row says how far */
+    /* every place within a 15 min walk, no cap (6 Nov, Alex: if A lists B, B must list A); only when that's under 8, top up from further out to 25 min */
+    const close = all.filter(x => x.w <= 15), near = close.length >= 8 ? close : all.slice(0, 8);
     if (near.length) groups.push([k, near, all[0].w]);
   }
   if (!groups.length) return "";
   groups.sort((a, b) => (a[2] <= 15 ? 0 : 1) - (b[2] <= 15 ? 0 : 1));  /* kinds with something close come first */
   /* "all" first (Alex, 5 Nov): everything close to this place, nearest first; the categories narrow it down */
   const allL = SAVES.filter(s => s.lat != null && s.id !== z.id && s.kind !== "skip" && s.name !== z.name && order.some(k => inGrp(s, k)))
-    .map(s => { const d = km(z.lat, z.lng, s.lat, s.lng); return { s, k: d, w: walkMin(d * DETOUR) }; }).filter(x => x.w <= 25).sort((x, y) => x.k - y.k).slice(0, 12);
-  if (groups.length > 1) groups.unshift(["all", allL, allL[0].w]);
+    .map(s => { const d = km(z.lat, z.lng, s.lat, s.lng); return { s, k: d, w: walkMin(d * DETOUR) }; }).filter(x => x.w <= 25).sort((x, y) => x.k - y.k);
+  /* "all": everything within a 10 min walk, no cap; topped up to 12 from further out when that's fewer */
+  const allC = allL.filter(x => x.w <= 10), allN = allC.length >= 12 ? allC : allL.slice(0, 12);
+  if (groups.length > 1 && allN.length) groups.unshift(["all", allN, allN[0].w]);
   const sel = groups.some(g => g[0] === nk) ? nk : groups[0][0];
   const cap = (k, n) => { const d = k === "all" ? ["all", "🗺️", "all"] : DOCK.find(x => x[0] === k) || [k, "", NXC[k] || k]; return `<button class="mdc" data-nxk="${k}" style="--c:${MAPCOL[k] || "#8e8e93"}" aria-pressed="${k === sel}" aria-label="${esc(d[2])}, ${n}"><span class="mic" aria-hidden="true"><span>${d[1]}</span></span><small><i class="lg"></i>${d[2]}<b class="nxn">${n}</b></small></button>`; };
   return `<div class="nxwrap" data-of="${esc(z.id)}"><div class="nx-top"><div class="nx-h" data-nxo>Nearby<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></div><div class="nx-chips">${groups.map(([k, near]) => cap(k, near.length)).join("")}</div></div><div class="nxl">`
