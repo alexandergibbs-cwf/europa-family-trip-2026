@@ -3085,7 +3085,7 @@ const QSVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="
 const mdock = document.getElementById("mdock"), mqi = document.getElementById("mqi");
 let MQ = "", MQON = false, MQT = 0;
 function mapFilter(z) {
-  if (MQ && !DPIN) return qHit(z, MQ);  /* a dropped pin shows every saved place around it (Alex, 6 Nov) */
+  if (MQ && !DPIN && !MPS.length) return qHit(z, MQ);  /* a dropped pin, or a place opened from the results, shows every saved place around it (Alex, 6 Nov) */
   if (MCAT === "all") return true;
   const g = GRP[MCAT], sb = subOf(); if (!g) return mk(z) === MCAT;
   return sb ? (sb.kinds ? sb.kinds.includes(mk(z)) : inGrp(z, MCAT)) && sb.t(z) : inGrp(z, MCAT);
@@ -3388,7 +3388,9 @@ function mapNear(z) { if (!MAP) return; const sz = mSize(), zm = Math.min(Math.m
    settles lower and the place slides in from the right; nearby places push the same way; back steps out, drag down or a tap on the map closes */
 let MPS = [], PVID = null; /* PVID: the top place is showing its video */
 const mpl = document.getElementById("mpl");
-function panelSync() { const p = MPS.length > 0; if (!p) PVID = null; mapv.classList.toggle("lon", MLOPEN || p); mapv.classList.toggle("pmode", p); mlist.classList.toggle("pm", p); if (!p) mlist.classList.remove("pfull"); }
+let QF = null;  /* is the search filter on the pins right now; flips when a place opens from the results or closes again */
+function panelSync() { const p = MPS.length > 0; if (!p) PVID = null;
+  if (MQ && MAP && QF !== (!p && !DPIN)) drawMap(); mapv.classList.toggle("lon", MLOPEN || p); mapv.classList.toggle("pmode", p); mlist.classList.toggle("pm", p); if (!p) mlist.classList.remove("pfull"); }
 /* scrolling a place expands the panel to full height, like Apple Maps */
 /* half height doesn't scroll: a swipe up grows the card first (the old scroll-to-expand moved the card under your finger mid-scroll) */
 function plRender(dir) {
@@ -3598,7 +3600,7 @@ function drawMap(focusId, fit) {
   if (MCAT !== "all" && !list.some(z => inGrp(z, MCAT))) { MCAT = "all"; MSUB = ""; }
   document.getElementById("mchips").innerHTML = ["all", ...kinds].map(k => `<button data-mcat="${k}" aria-pressed="${MCAT === k}">${k === "all" ? svgI("all") + "All" : svgI(k, MCAT === k ? null : MAPCOL[k]) + MAPLAB[k]}</button>`).join("");
   document.getElementById("mcity").textContent = a.city;
-  MPTS = list.filter(mapFilter).map(z => ({ z, on: added.has(z.id), sc: (added.has(z.id) ? 100 : 0) + pinScore(z) })).sort((x, y) => y.sc - x.sc);
+  QF = MQ ? !MPS.length && !DPIN : null; MPTS = list.filter(mapFilter).map(z => ({ z, on: added.has(z.id), sc: (added.has(z.id) ? 100 : 0) + pinScore(z) })).sort((x, y) => y.sc - x.sc);
   MHOME = a; layoutPins();
   const f = focusId && SAVE_BY[focusId];
   if (f) { MAP.jumpTo({ center: [f.lng, f.lat], zoom: 15 }); mapPick(f, true); }
