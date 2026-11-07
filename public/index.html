@@ -473,6 +473,7 @@ body.mapopen .sheet { max-height: calc(56vh + 120px); } body.mapopen .scrim { ba
 .pa.ic { width: 50px; padding: 0; justify-content: center; }
 .pmeta .pon { color: var(--blue); }
 .oh-o, .pmeta b.oh-o { color: #34c759; font-weight: 600; font-style: normal; } .oh-c, .pmeta b.oh-c { color: var(--red); font-weight: 600; font-style: normal; } .oh-s, .pmeta b.oh-s { color: #ff9500; font-weight: 600; font-style: normal; }
+.xc .oh2 { display: block; margin-top: 4px; font-size: 12px; font-weight: 500; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .xc .oh2 + .m { margin-top: 1px; }
 .ohl { display: block; cursor: pointer; margin-top: 1px; }
 .ohw { margin: 6px 0 2px; font-size: 15px; color: var(--sub); font-variant-numeric: tabular-nums; }
 .ohw > div { display: flex; gap: 14px; padding: 2px 0; } .ohw > div > span:first-child { width: 36px; flex: none; }
@@ -2811,7 +2812,16 @@ function ohLine(z) {
     return `<span class="ohl" data-ohw>${st.a <= 0 && st.b >= 1440 && (D[(ohNow(z).wd + 1) % 7] || [])[0]?.[0] === 0 ? '<b class="oh-o">Open 24 hours</b>' : left <= 60 ? `<b class="oh-s">Closes ${ohT(st.b)}</b>` : `<b class="oh-o">Open</b> until ${ohT(st.b)}`}</span>`; }
   return `<span class="ohl" data-ohw><b class="oh-c">Closed</b>${st.at != null ? ` · opens ${st.day ? st.day + " " : ""}${ohT(st.at)}` : ""}</span>`;
 }
-/* one word for cards and list rows, today only */
+/* hours for the small cards (7 Nov, Alex: show the times there too): today = live status with the time, another day = that day's hours */
+function ohCard(z) {
+  const D = ohDays(z); if (!D) return "";
+  const od = ohOther();
+  if (od != null) { const d = D[od]; return d === null ? "" : d.length ? d.map(ohR).join(", ") : `<i class="oh-c">Closed</i> ${OHD[od]}`; }
+  const st = ohStat(z); if (!st) return "";
+  if (st.open) { if (st.a <= 0 && st.b >= 1440) return `<i class="oh-o">Open 24 hours</i>`; return st.b - ohNow(z).m <= 60 ? `<i class="oh-s">Closes ${ohT(st.b)}</i>` : `<i class="oh-o">Open</i> until ${ohT(st.b)}`; }
+  return `<i class="oh-c">Closed</i>${st.at != null ? ` · opens ${st.day ? (st.day === "tomorrow" ? OHD[(ohNow(z).wd + 1) % 7] : st.day) + " " : ""}${ohT(st.at)}` : ""}`;
+}
+/* one word, today only */
 function ohShort(z) {
   if (view !== today) return ""; const st = ohStat(z); if (!st) return "";
   if (st.open) { const left = st.b - ohNow(z).m; return left <= 60 && !(st.a <= 0 && st.b >= 1440) ? `<i class="oh-s">Closes ${ohT(st.b)}</i>` : `<i class="oh-o">Open</i>`; }
@@ -2969,7 +2979,7 @@ function xpThemes(iso) {
 function xcCard(z, k, o, hero) {
   const w = distTxt(k, o && walkKm(o, z)).split(" · ");
   return `<button class="xc${hero ? " xh" : ""}" data-sid="${z.id}"><span class="xc-p" style="--c:${pinCol(z) || "#8e8e93"}">${svgI(icoOf(z))}<img loading="lazy" decoding="async" alt="" src="${esc(photoUrl(z))}" onload="this.classList.add('ld')" onerror="this.remove()">${z.rating ? `<i>★ ${Number(z.rating).toFixed(1)}</i>` : ""}</span>`
-    + `<span class="xc-n">${esc(z.name)}</span>${z.hook ? `<span class="xc-h">${esc(hookOf(z))}</span>` : ""}<span class="m">${hero ? esc(MAPLAB[mk(z)] || "") + " · " : ""}${ohShort(z) ? ohShort(z) + " · " : ""}${esc((w[1] || w[0]).replace(/^~/, "").replace(" or taxi", ""))}</span></button>`;
+    + `<span class="xc-n">${esc(z.name)}</span>${z.hook ? `<span class="xc-h">${esc(hookOf(z))}</span>` : ""}${ohCard(z) ? `<span class="oh2">${ohCard(z)}</span>` : ""}<span class="m">${hero ? esc(MAPLAB[mk(z)] || "") + " · " : ""}${esc((w[1] || w[0]).replace(/^~/, "").replace(" or taxi", ""))}</span></button>`;
 }
 function xpRender(keepScroll) {
   if (xp.hidden) return;
@@ -3633,7 +3643,7 @@ function mcarFill(list) {
 }
 const MCARROW = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 19v-5.5a3.5 3.5 0 0 1 3.5-3.5h9"/><path d="m15 6 4 4-4 4"/></svg>`;
 function mcHTML(x, o) { const k = o ? km(o.lat, o.lng, x.lat, x.lng) : null, arrow = MCARROW;
-  return `<div class="mc" data-mc="${x.id}">${ph(x).replace('class="ph"', 'class="ph"')}<span class="a">${esc(x.name)}</span><span class="h">${esc(hookOf(x))}</span><span class="m">${MAPLAB[mk(x)] || ""}${ohShort(x) ? " · " + ohShort(x) : ""}${k != null ? ` · <b>${distTxt(k, walkKm(o, x)).replace(/^~/, "").replace(" · ~", " · ").replace(" or taxi", "")}</b>` : ""}</span><a class="go press" href="${dirs(x.name + " " + (x.address || x.city))}" target="_blank" rel="noopener" aria-label="Directions">${arrow}</a></div>`; }
+  return `<div class="mc" data-mc="${x.id}">${ph(x).replace('class="ph"', 'class="ph"')}<span class="a">${esc(x.name)}</span><span class="h">${esc(hookOf(x))}</span><span class="m">${MAPLAB[mk(x)] || ""}${ohCard(x) ? " · " + ohCard(x) : ""}${k != null ? ` · <b>${distTxt(k, walkKm(o, x)).replace(/^~/, "").replace(" · ~", " · ").replace(" or taxi", "")}</b>` : ""}</span><a class="go press" href="${dirs(x.name + " " + (x.address || x.city))}" target="_blank" rel="noopener" aria-label="Directions">${arrow}</a></div>`; }
 function mapPick(z, rebuild) {
   if (!z || rebuild) SEEN = false;
   MPICK = z; mapv.classList.toggle("picked", !!z); closeSheet();
