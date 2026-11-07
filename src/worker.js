@@ -87,12 +87,13 @@ async function route(url, ctx) {
   const ll = v => { const m = /^(-?\d{1,2}\.\d{1,6}),(-?\d{1,3}\.\d{1,6})$/.exec(v || ""); return m ? [+m[1], +m[2]] : null; };
   const o = ll(url.searchParams.get("o")), d = ll(url.searchParams.get("d"));
   if (!o || !d) return json({ error: "bad" }, 400);
-  const cache = caches.default, key = new Request("https://route.cache/" + o.join(",") + "/" + d.join(","));
+  const car = url.searchParams.get("p") === "car";  /* ?p=car: the driving route (path + time), for places too far to walk */
+  const cache = caches.default, key = new Request("https://route.cache/" + (car ? "car/" : "v2/") + o.join(",") + "/" + d.join(","));
   const hit = await cache.match(key); if (hit) return hit;
   let out = null;
   try {
-    const r = await fetch(`https://routing.openstreetmap.de/routed-foot/route/v1/foot/${o[1].toFixed(5)},${o[0].toFixed(5)};${d[1].toFixed(5)},${d[0].toFixed(5)}?overview=full&geometries=geojson`, { headers: { "user-agent": "europe-family-trip.app (family trip planner)" }, cf: { cacheTtl: 604800 } });
-    if (r.ok) { const j = await r.json(); const rt = j.code === "Ok" && j.routes && j.routes[0]; if (rt && rt.geometry) out = { m: Math.round(rt.distance), c: rt.geometry.coordinates.map(([a, b]) => [+a.toFixed(5), +b.toFixed(5)]) }; }
+    const r = await fetch(`https://routing.openstreetmap.de/${car ? "routed-car/route/v1/driving" : "routed-foot/route/v1/foot"}/${o[1].toFixed(5)},${o[0].toFixed(5)};${d[1].toFixed(5)},${d[0].toFixed(5)}?overview=full&geometries=geojson`, { headers: { "user-agent": "europe-family-trip.app (family trip planner)" }, cf: { cacheTtl: 604800 } });
+    if (r.ok) { const j = await r.json(); const rt = j.code === "Ok" && j.routes && j.routes[0]; if (rt && rt.geometry) out = { m: Math.round(rt.distance), s: Math.round(rt.duration || 0), c: rt.geometry.coordinates.map(([a, b]) => [+a.toFixed(5), +b.toFixed(5)]) }; }
   } catch (e) {}
   if (!out) return json({ error: "routing" }, 502);
   const res = new Response(JSON.stringify(out), { headers: { "content-type": "application/json", "cache-control": "public, max-age=604800" } });
