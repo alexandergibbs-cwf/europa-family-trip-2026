@@ -3115,7 +3115,7 @@ const QKW = {
 /* ideas: a search word also finds places whose one-liner describes it ("dancing" finds clubs and bars with music) */
 const QIDEA = (() => {
   const music = /music|\blive\b|jazz|concert|\bgigs?\b|\bdjs?\b|vinyl|listening|\bband|karaoke|piano|blues|\bsoul\b|punk|\brock\b|\bvenue/;
-  const dance = /danc|nightclub|clubbing|\bdjs?\b|techno|house music|disco|\brave|part(y|ies)|nightlife|after ?hours/;
+  const dance = /danc|nightclub|clubbing|\bdjs?\b|techno|house music|\bdisco(s|theque)?\b|\brave|part(y|ies)|nightlife|after ?hours/;
   const ideas = [
     [["dance", "dancing", "club", "clubbing", "party", "rave", "nightlife", "nightclub", "techno"], z => dance.test(ztxt(z)) || (mk(z) === "drinks" && (music.test(ztxt(z)) || /\bclubs?\b/.test(ztxt(z))))],
     [["music", "live", "gig", "concert", "jazz", "band", "dj", "vinyl", "listening"], z => music.test(ztxt(z))],
@@ -3123,7 +3123,6 @@ const QIDEA = (() => {
     [["cheap", "budget", "affordable", "value"], /cheap|budget|affordable|value|bargain|steal|\bdeals?\b|[€£] ?\d/],
     [["outdoor", "outside", "terrace", "garden", "sunny", "patio"], /terrace|garden|outdoor|rooftop|patio|courtyard|outdoors?|riverside|canal|by the (river|water|lake)|\bsun/],
     [["quiet", "work", "laptop", "study", "calm"], /quiet|\bwork|laptop|study|calm|peaceful|relax/],
-    [["late", "latenight"], /\blate|night|after ?hours|24.?h/],
     [["vegan", "vegetarian", "veggie", "plant"], /vegan|vegetarian|plant.?based|veggie|meat.?free/],
     [["cosy", "cozy", "snug"], /cos[yi]|coz[yi]|snug|fire|candle|warm/],
     [["historic", "history", "old", "classic", "traditional"], /histor|oldest|since 1\d|centur|tradition|institution|classic|legendary|old.?school|iconic/],
@@ -3135,13 +3134,39 @@ const QIDEA = (() => {
   ideas.forEach(([ws, f]) => { const g = f instanceof RegExp ? z => f.test(ztxt(z)) : f; ws.forEach(w => (m[w] = g)); });
   return m;
 })();
+/* time words read the saved opening hours (Alex 8 Nov: "late night" should mean open till very late). Today = the place's local day. */
+const ohToday = z => { const D = ohDays(z); return D ? D[ohNow(z).wd] : null; };
+const ohClose = z => { const d = ohToday(z); return d && d.length ? Math.max(...d.map(r => r[1])) : null; };
+const ohOpenAt = z => { const d = ohToday(z); return d && d.length ? Math.min(...d.map(r => r[0])) : null; };
+const QTIME = (() => {
+  const lateTxt = /late.?night|after ?hours|open late|till? late|until late|24.?h|(till?|until) ?(midnight|[1-5] ?am)|night ?owl/;
+  const late = z => { const c = ohClose(z); return c != null ? c >= 1440 : !ohDays(z) && lateTxt.test(ztxt(z)); };  /* open past midnight today */
+  const wk = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+  const m = {
+    latenight: late, late: late, openlate: late, nightowl: late, aftermidnight: z => (ohClose(z) || 0) > 1440, midnight: late,
+    verylate: z => (ohClose(z) || 0) >= 1560 || (!ohDays(z) && /after ?hours|till? ([3-6] ?am|sunrise|morning)/.test(ztxt(z))),
+    allnight: z => { const d = ohToday(z); return !!d && d.some(([a, b]) => b - a >= 1440 || b >= 1740); },
+    "24h": z => { const d = ohToday(z); return (!!d && d.some(([a, b]) => b - a >= 1440)) || (!ohDays(z) && /24.?h|24\/7|open 24/.test(ztxt(z))); },
+    opennow: z => { const o = ohStat(z); return !!o && o.open; },
+    early: z => { const a = ohOpenAt(z); return a != null && a <= 480; },
+    earlybird: z => { const a = ohOpenAt(z); return a != null && a <= 480; },
+  };
+  wk.forEach((d, i) => { m[d] = z => { const D = ohDays(z); return !!D && !!D[i] && D[i].length > 0; }; });
+  return m;
+})();
+/* phrases become one word first so "late night bars" = late night + bars */
+const QPHR = [[/\blate[\s-]*nights?\b/g, "latenight"], [/\bopen(ed)? (now|right now)\b/g, "opennow"], [/\bopen (late|till late|until late)\b/g, "openlate"], [/\bafter[\s-]*midnight\b/g, "aftermidnight"],
+  [/\bvery late\b/g, "verylate"], [/\ball[\s-]*night(er)?\b/g, "allnight"], [/\b24[\s/]*(hours?|hrs?|h|\/7|7)\b/g, "24h"], [/\bnight ?owls?\b/g, "nightowl"], [/\bearly ?birds?\b/g, "earlybird"],
+  [/\bopen (on )?(sunday|monday|tuesday|wednesday|thursday|friday|saturday)s?\b/g, "$2"], [/\b(sunday|monday|tuesday|wednesday|thursday|friday|saturday)s\b/g, "$1"], [/\bopen\b/g, "opennow"]];
+const qPhr = q => QPHR.reduce((t, [r, w]) => t.replace(r, w), q);
 const qStem = w => w.length > 5 && /(ing|ers)$/.test(w) ? w.slice(0, -3) : w.length > 4 && /(ed|er|es)$/.test(w) ? w.slice(0, -2) : w.length > 3 && w.endsWith("s") ? w.slice(0, -1) : w;
 function qHit(z, q) {
-  const t = qn(ztxt(z) + " " + (MAPLAB[mk(z)] || "")), raw = qn(q).trim(); if (!raw) return true;
+  const t = qn(ztxt(z) + " " + (MAPLAB[mk(z)] || "")), raw = qPhr(qn(q).trim()); if (!raw) return true;
   if (QKW[raw] && QKW[raw](z)) return true;  /* two-word keywords like "ice cream" */
   const at = w => new RegExp("(^|[^a-z0-9])" + w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).test(t);  /* from the start of a word: "burger" not "Brandenburger" */
   if (QIDEA[raw.replace(/\s+/g, "")] && QIDEA[raw.replace(/\s+/g, "")](z)) return true;  /* "late night", "date night" */
   return raw.split(/\s+/).every(w => { const st = w.length > 3 && w.endsWith("s") ? w.slice(0, -1) : w, f = QKW[w] || QKW[st], id = QIDEA[w] || QIDEA[st];
+    if (QTIME[w]) return QTIME[w](z);  /* time words go by the hours only */
     return at(st) || at(qStem(w)) || (f ? f(z) : false) || (id ? id(z) : false); });
 }
 let MSUB = "";
