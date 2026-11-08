@@ -213,7 +213,7 @@ They sit in free time and play as whole-day ideas ("scenes").
 
 ## Known gaps / open items
 - **Safari bottom bar:** Alex wants page content to run under Safari's floating toolbar. The scrim fix is pushed but wasn't confirmed on device. If the grey band persists, look for any other fixed element touching the bottom edge.
-- **UK rental addresses:** none supplied for Glasgow, Edinburgh or London ("Address in the booking").
+- **UK rental addresses:** Glasgow (Alex, 8 Nov): "Glasgow city centre, G2 4JR, United Kingdom"; pin at the postcode centre 55.86546,-4.26894 (Bath Street, near Charing Cross). Edinburgh is 221 Granton Road. London still "Address in the booking" (pin approximate: Kensington High Street station).
 - **LNER Edinburgh→London:** not booked. Times are guesses.
 - **Sunset dinner:** restaurant name and end time unknown.
 - **Day-trip drives:** estimated from distance, not routed.
