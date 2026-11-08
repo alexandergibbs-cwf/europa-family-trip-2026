@@ -138,7 +138,7 @@ They sit in free time and play as whole-day ideas ("scenes").
     - Street, ≥ `Z_STREET` 14.5: up to 14 labelled pins with one-liners, 14 bare bubbles, the rest dots (as before).
     - Neighbourhood, 13–14.5: up to 6 labels, one-liners hidden (`.mapv.zmid`).
     - City, < `Z_CITY` 13: no names; up to 16 bare icons where they fit, every other place a small dot in its category colour (`.mapv.zfar .mp.s-d`, scale .22) so you can still see what's where. Count bubbles were tried and dropped on 5 Nov in favour of dots, at Alex's request. The hotel shows as 🏠 only.
-    - Picking a place from the cards or list while zoomed out brings the map down to street level (`mapAim` zooms to at least 14.5).
+    - Picking a place from the cards or list while zoomed out brings the map down to street level (`mapAim` zooms to at least `Z_PICK` 13.9; was 14.5 until 8 Nov, Alex: "zooms in a tad too much" from the suggestion cards).
     - `window.__tripMap()` returns the MapLibre map, for tests only.
   - The rail's "all" icon is 🗺️ (not 📍, which looked like a place pin).
   - **Opens on you (5 Nov):** every time the Map tab opens it jumps to your location at zoom 15 (`mapHere()`: a fix under 30 min old within 40 km of the day's hotel, on any day), else the day's hotel at zoom 14. It also takes a fresh fix on each open and eases to it, unless you've already dragged or zoomed (`MUSER`, set by `dragstart`/`zoomstart` with an original event) or picked a pin.

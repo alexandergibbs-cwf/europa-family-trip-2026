@@ -3696,7 +3696,7 @@ mpl.addEventListener("click", e => { if (!e.target.closest(".ph-top h3")) return
 let MPICK = null, MCARL = [], MCST = 0, MCLOCK = 0;
 function mapAim(z, frac) { const sz = mSize();
   if (SEEN) { const p = mPt(z); if (p.x > 24 && p.x < sz.x - 24 && p.y > 80 && p.y < sz.y - 370) return layoutPins(); return MAP.easeTo({ center: [z.lng, z.lat], offset: [0, -sz.y * 0.12], duration: reduce() ? 0 : 700, easing: ease }); }
-  MAP.easeTo({ center: [z.lng, z.lat], zoom: Math.max(MAP.getZoom(), Z_STREET), offset: [0, -sz.y * (0.5 - (frac || 0.38))], duration: reduce() ? 0 : 950, easing: ease }); }
+  MAP.easeTo({ center: [z.lng, z.lat], zoom: Math.max(MAP.getZoom(), Z_PICK), offset: [0, -sz.y * (0.5 - (frac || 0.38))], duration: reduce() ? 0 : 950, easing: ease }); }
 /* glide to you like picking a place does; far away = a gentle zoom-out-and-in. Fixed durations, so it never skips (flyTo's maxDuration made long trips jump, Alex 5 Nov) */
 function mapFlyHere() { if (reduce()) return MAP.jumpTo({ center: [HERE.lng, HERE.lat], zoom: 15 });
   const sz = mSize(), p = MAP.project([HERE.lng, HERE.lat]), far = Math.hypot(p.x - sz.x / 2, p.y - sz.y / 2) / Math.max(sz.x, sz.y), z = Math.max(MAP.getZoom(), 15);
@@ -3795,7 +3795,7 @@ function pinSet(o, st, left, zi, delay) {
   if (st === "h") pinAttach(o, false);
 }
 /* zoom tiers: street = names + one-liners; neighbourhood = a few names; city = no names, a few icons where there's room, every other place a small dot in its colour */
-const Z_CITY = 13, Z_STREET = 14.5;
+const Z_CITY = 13, Z_STREET = 14.5, Z_PICK = 13.9 /* picking a card zooms to here, a bit wider than street level (Alex 8 Nov: was a tad too close) */;
 window.__tripMap = () => MAP;  /* for tests only */
 /* nothing picked: the card row rests on the places nearest you (Alex, 5 Nov); no pin is picked and the map stays put.
    Swipe the row down to hide it (MCHID) until the map is opened again */
