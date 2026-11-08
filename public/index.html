@@ -907,6 +907,13 @@ body .mapv .mme { top: max(12px, env(safe-area-inset-top, 0px)); bottom: auto !i
 .mlist.pm .mpl { display: block; }
 .mpl-h { position: sticky; top: 0; z-index: 3; margin: 0 -16px 2px; padding: 7px 16px 6px; min-height: 30px; background: var(--panel); touch-action: none; cursor: grab; display: flex; align-items: flex-start; }
 .mpl-h i { position: absolute; left: 50%; top: 7px; width: 36px; height: 5px; margin-left: -18px; border-radius: 3px; background: color-mix(in srgb, var(--sub) 45%, transparent); }
+.xcl { flex: none; width: 30px; height: 30px; border-radius: 50%; border: 0; padding: 0; margin: 4px 0 0 auto; display: grid; place-items: center; cursor: pointer; color: var(--sub); background: color-mix(in srgb, var(--sub) 16%, transparent); -webkit-tap-highlight-color: transparent; transition: transform 160ms var(--glide, ease); }
+.xcl svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; }
+.xcl:active { transform: scale(.9); }
+.sx { position: sticky; top: 0; height: 0; z-index: 6; display: flex; justify-content: flex-end; pointer-events: none; }
+.sx { top: 22px; } #sheet-body { padding-top: 10px; }
+.sx .xcl { pointer-events: auto; margin: -22px 0 0; background: var(--glass); -webkit-backdrop-filter: saturate(1.8) blur(20px); backdrop-filter: saturate(1.8) blur(20px); box-shadow: 0 1px 4px rgba(0, 0, 0, .12); color: var(--ink); }
+.mlist-h { position: relative; } .mlist-h .xcl { position: absolute; right: 16px; top: 12px; margin: 0; }
 .mpb { border: 0; background: none; padding: 10px 6px 4px 0; margin: 0; color: var(--blue); font: 500 16px/1 var(--font); cursor: pointer; max-width: 70%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mpl h3 { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin: 0; line-height: 1.15; text-wrap: pretty; }
 .mpl .nt { font-size: 14px; color: var(--sub); margin: 8px 4px 0; line-height: 1.4; }
@@ -1100,6 +1107,9 @@ body .mapv .mcar { bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
 .mlist.pm.pfull.nx { top: max(calc(env(safe-area-inset-top, 0px) + 62px), calc(100% - 10px - env(safe-area-inset-bottom, 0px) - var(--pf, 100vh)), 42%); }
 /* the places you came through (a trail): ringed, labelled, a step below the picked one */
 .mp.org .b { box-shadow: 0 0 0 2.4px #007aff, 0 3px 9px rgba(0,0,0,.26); }
+/* the hotel stands out from the saves: an orange ring, the app icon's colour (Alex, 8 Nov) */
+.mp.home .b { box-shadow: 0 0 0 2.6px #ff9500, 0 2px 8px rgba(0,0,0,.24); }
+.mp.home.sel .b { box-shadow: 0 0 0 2.6px #ff9500, 0 6px 16px rgba(0,0,0,.3); }
 .mp.org .t b { color: #007aff; }
 .safe-probe { position: fixed; top: 0; left: 0; width: 0; height: 0; visibility: hidden; pointer-events: none; padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); }
 .mlist.pm .mpl, .mlist.pm:not(.pfull) .mpl { display: flex; flex-direction: column; gap: 8px; padding: 0; overflow: visible; height: 100%; touch-action: pan-x; }
@@ -1183,9 +1193,9 @@ body.mapopen #pills, body.xpon #pills { visibility: hidden; }
 <div class="a2bg" id="locbg" hidden></div>
 <div class="a2hs" id="locq" role="dialog" aria-modal="true" aria-label="Use your location" hidden><div class="locic"><svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true"><path fill="#fff" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg></div><b>Use your location?</b><span class="a2sub">The map opens where you are, and walk times are worked out from you.</span><button class="btn blue press a2go" id="locgo">Allow</button><button class="a2x press" id="locno">Not now</button></div>
 <div class="a2hs" id="a2hs" role="dialog" aria-modal="true" aria-label="Add to Home Screen" hidden><img src="/apple-touch-icon.png" alt="" width="76" height="76"><b>Add Europe Trip to your Home Screen</b><span id="a2how"></span><button class="btn blue press a2go" id="a2go" hidden>Install</button><button class="a2x press" data-a2x>Not now</button></div>
-<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden><div class="grab"></div><div id="sheet-body"></div></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden><div class="grab"></div><div class="sx"><button class="xcl" id="sheetx" type="button" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg></button></div><div id="sheet-body"></div></div>
 <div class="show" id="show" role="dialog" aria-modal="true" hidden></div>
-<div class="mapv" id="mapv" role="dialog" aria-modal="true" aria-label="Map" hidden><div id="mapc"></div><div class="mtop"><div class="xp-top"><button class="pill glass press mselx" id="mselx"><span></span><i aria-hidden="true">✕</i></button><button class="pill glass press mtt" data-trip><span id="mtt"></span><i class="chr"></i></button><span class="sp"></span></div><div class="xp-row xcats mchips" id="mchips"></div><span class="mcity" id="mcity" hidden></span></div><div class="mfoot" aria-hidden="true"></div><div class="mdock" id="mdock" role="toolbar" aria-label="Categories"></div><div class="mqnone glass" id="mqnone" hidden></div><label class="mqbar glass" id="mqbar" for="mqi"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><button class="mqf" id="mqf" type="button" hidden aria-label="Stop searching near this place"><span></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg></button><input id="mqi" type="search" placeholder="burger, brunch, an address…" enterkeyhint="search" autocomplete="off" aria-label="Search saved places or an address"><button id="mqx" type="button">Cancel</button></label><div class="mqgeo glass" id="mqgeo" hidden></div><div class="mlist" id="mlist" aria-label="All places"><div class="mlist-h" id="mlisth"><i></i><b id="mlistt"></b><div class="mlsubs" id="mlsubs"></div></div><div class="mlist-l" id="mlistl"></div><div class="mpl" id="mpl"></div></div><div class="mhdr" id="mhdr"><button class="mhd glass press" id="mhd"><b id="mhdt"></b><span id="mhdn"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></button><span id="msubs" style="display:contents"></span></div><button class="mgrab" id="mgrab" aria-label="List"></button><div class="mtool" id="mtool"><button class="mtb" data-mdk="q" id="mtq" aria-label="Search" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button><button class="mtb" data-mdk="home" id="mth" aria-label="Back to the hotel"><span aria-hidden="true">🏠</span></button></div><div class="mcar" id="mcar"></div><button class="pill glass press ib mme" id="mme" aria-label="Where am I"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg></button><div class="mcard" id="mcard" hidden></div></div>
+<div class="mapv" id="mapv" role="dialog" aria-modal="true" aria-label="Map" hidden><div id="mapc"></div><div class="mtop"><div class="xp-top"><button class="pill glass press mselx" id="mselx"><span></span><i aria-hidden="true">✕</i></button><button class="pill glass press mtt" data-trip><span id="mtt"></span><i class="chr"></i></button><span class="sp"></span></div><div class="xp-row xcats mchips" id="mchips"></div><span class="mcity" id="mcity" hidden></span></div><div class="mfoot" aria-hidden="true"></div><div class="mdock" id="mdock" role="toolbar" aria-label="Categories"></div><div class="mqnone glass" id="mqnone" hidden></div><label class="mqbar glass" id="mqbar" for="mqi"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><button class="mqf" id="mqf" type="button" hidden aria-label="Stop searching near this place"><span></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg></button><input id="mqi" type="search" placeholder="burger, brunch, an address…" enterkeyhint="search" autocomplete="off" aria-label="Search saved places or an address"><button id="mqx" type="button">Cancel</button></label><div class="mqgeo glass" id="mqgeo" hidden></div><div class="mlist" id="mlist" aria-label="All places"><div class="mlist-h" id="mlisth"><i></i><button class="xcl" type="button" aria-label="Close list"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg></button><b id="mlistt"></b><div class="mlsubs" id="mlsubs"></div></div><div class="mlist-l" id="mlistl"></div><div class="mpl" id="mpl"></div></div><div class="mhdr" id="mhdr"><button class="mhd glass press" id="mhd"><b id="mhdt"></b><span id="mhdn"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></button><span id="msubs" style="display:contents"></span></div><button class="mgrab" id="mgrab" aria-label="List"></button><div class="mtool" id="mtool"><button class="mtb" data-mdk="q" id="mtq" aria-label="Search" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button><button class="mtb" data-mdk="home" id="mth" aria-label="Back to the hotel"><span aria-hidden="true">🏠</span></button></div><div class="mcar" id="mcar"></div><button class="pill glass press ib mme" id="mme" aria-label="Where am I"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M21 3 3 10.5l7.4 2.1L12.5 20z"/></svg></button><div class="mcard" id="mcard" hidden></div></div>
 <nav class="tabs glass" id="tabs" role="tablist" aria-label="Views"><button role="tab" data-tab="xp" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg><span>Explore</span></button><button role="tab" data-tab="map" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6z"/><path d="M9 4v14M15 6v14"/></svg><span>Map</span></button><button role="tab" data-tab="cal" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Schedule</span></button></nav>
 <div class="sr" aria-live="polite" id="live"></div>
 
@@ -2202,6 +2212,7 @@ function closeSheet(from = 0) {
 }
 const page = document.getElementById("page");
 scrim.onclick = () => { closeSheet(); };
+document.getElementById("sheetx").onclick = e => { e.stopPropagation(); haptic(); closeSheet(); };
 scrim.addEventListener("touchmove", e => { if (e.cancelable) e.preventDefault(); }, { passive: false });
 let drag = null;
 sheet.addEventListener("touchstart", e => { drag = { y: e.touches[0].clientY, x: e.touches[0].clientX, t: Date.now(), dy: 0, mode: null, top: sheet.scrollTop }; }, { passive: true });
@@ -3523,13 +3534,13 @@ function plRender(dir) {
   const it = MPS[MPS.length - 1], prev = MPS[MPS.length - 2];
   if (PVID && (it.stay || PVID.id !== it.id)) PVID = null;
   if (PVID) { SBACK = []; REFRESH = null; mlist.classList.remove("pfull", "nx");
-    mpl.innerHTML = `<div class="pdet pvd"><div class="mpl-h" id="mplh"><i></i><button class="mpb" data-mpb>‹ ${esc(it.name)}</button></div>${vidBody(PVID.u, it)}</div>`;
+    mpl.innerHTML = `<div class="pdet pvd"><div class="mpl-h" id="mplh"><i></i><button class="mpb" data-mpb>‹ ${esc(it.name)}</button><button class="xcl" data-mpx type="button" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg></button></div>${vidBody(PVID.u, it)}</div>`;
     mpl.scrollTop = 0; panelFit(); nearSync();
     if (dir && !reduce()) mpl.animate([{ transform: `translateX(${dir * 32}px)`, opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 380, easing: "cubic-bezier(.22,.8,.24,1)" });
     return; }
   const back = prev ? (prev.stay ? prev.stay.hotel : prev.name) : MLOPEN ? document.getElementById("mlistt").textContent.replace(/ nearby$/, "") : "";
   SBACK = []; REFRESH = null;
-  const hd = `<div class="mpl-h" id="mplh"><i></i>${back ? `<button class="mpb" data-mpb>‹ ${esc(back)}</button>` : ""}</div>`, nr = nextNear(it.stay ? stayZ(it.stay) : it, it.nk);
+  const hd = `<div class="mpl-h" id="mplh"><i></i>${back ? `<button class="mpb" data-mpb>‹ ${esc(back)}</button>` : ""}<button class="xcl" data-mpx type="button" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg></button></div>`, nr = nextNear(it.stay ? stayZ(it.stay) : it, it.nk);
   mlist.classList.remove("pfull"); mlist.classList.toggle("nx", !!nr);
   mpl.innerHTML = `<div class="pdet${it.stay && !nr ? " pst" : ""}">${hd}${it.stay ? staySheet(it.stay, !!nr, prev) : placeSheet(it, true, prev)}</div>` + (nr ? `<div class="pnear">${nr}</div>` : "");
   mpl.scrollTop = 0; loadGalleries(mpl); panelFit();
@@ -3691,7 +3702,8 @@ function nearSync() {
   requestAnimationFrame(() => { frameBand(pts); setTimeout(layoutPins, 950); });
 }
 new MutationObserver(() => { if (MPS.length || NSIG) nearSync(); }).observe(mlist, { attributes: true, attributeFilter: ["class"] });
-mpl.addEventListener("click", e => { if (e.target.closest("[data-mpb]")) { e.stopPropagation(); haptic(); panelBack(); return; }
+mpl.addEventListener("click", e => { if (e.target.closest("[data-mpx]")) { e.stopPropagation(); haptic(); panelClose(); return; }
+  if (e.target.closest("[data-mpb]")) { e.stopPropagation(); haptic(); panelBack(); return; }
   if (e.target.closest("[data-nxo]")) { haptic(); mlist.classList.toggle("pfull"); return; }
   if (mlist.classList.contains("pfull") && e.target.closest(".pdet") && !e.target.closest("a, button, .gal, iframe, .ph-top h3")) { haptic(); mlist.classList.remove("pfull"); } });
 /* tap the name on a place card: the map glides back to that place (Alex, 5 Nov) */
@@ -3706,7 +3718,7 @@ mpl.addEventListener("click", e => { if (!e.target.closest(".ph-top h3")) return
   const end = y => { if (!d) return; const g = d; d = null; mlist.classList.remove("drag"); if (!g.moved) { mlist.style.transform = ""; return; }
     const dy = y - g.y, v = dy / Math.max(1, performance.now() - g.t); mlist.style.transform = "";
     if (dy < -40 || v < -0.5) { if (!PVID) { haptic(); mlist.classList.add("pfull"); } } else if (dy > 90 || v > 0.5) { haptic(); if (mlist.classList.contains("pfull")) mlist.classList.remove("pfull"); else panelClose(); } };
-  mpl.addEventListener("pointerdown", e => { if (!e.target.closest(".mpl-h") || e.target.closest("[data-mpb]")) return; start(e.clientY); e.target.setPointerCapture?.(e.pointerId); });
+  mpl.addEventListener("pointerdown", e => { if (!e.target.closest(".mpl-h") || e.target.closest("[data-mpb], [data-mpx]")) return; start(e.clientY); e.target.setPointerCapture?.(e.pointerId); });
   mpl.addEventListener("pointermove", e => { if (d && !d.touch) move(e.clientY); });
   mpl.addEventListener("pointerup", e => { if (d && !d.touch) end(e.clientY); });
   let lt = null;
