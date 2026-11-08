@@ -213,7 +213,7 @@ They sit in free time and play as whole-day ideas ("scenes").
 
 ## Known gaps / open items
 - **Safari bottom bar:** Alex wants page content to run under Safari's floating toolbar. The scrim fix is pushed but wasn't confirmed on device. If the grey band persists, look for any other fixed element touching the bottom edge.
-- **UK rental addresses:** none supplied for Glasgow, Edinburgh or London ("Address in the booking").
+- **UK rental addresses:** Edinburgh is 221 Granton Road. Glasgow has no real address; on 8 Nov Alex asked to use the approximate pin, so STAYS shows "Near George Square, Glasgow G2 1DU (approximate)" (HOTELC glasgow 55.8611,-4.2502). London still "Address in the booking" (pin approximate: Kensington High Street station).
 - **LNER Edinburgh→London:** not booked. Times are guesses.
 - **Sunset dinner:** restaurant name and end time unknown.
 - **Day-trip drives:** estimated from distance, not routed.
