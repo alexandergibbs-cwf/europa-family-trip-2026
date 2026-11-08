@@ -2246,7 +2246,8 @@ function staySheet(s, split, from) {
   return `<div class="ph-top"><div class="ph-t"><h3 id="sheet-title">${esc(s.hotel)}</h3><span class="pmeta">${n ? `Night ${n} of ${nights(s)}` : `${dRange(s.in, s.out)}`}${sh ? ` · ${esc(sh)}` : ""}</span></div>`
     + (s.q || sh ? (o => `<a class="pgo press" href="${o ? o.href : dirs(s.q || s.hotel + " " + sh)}" target="_blank" rel="noopener" aria-label="Directions${o ? " from " + esc(o.name) : ""}">${pI("go")}<span>${esc(o ? o.d : d)}</span></a>`)(from && dirFrom(from, { stay: s })) : "") + `</div>`
     + f(`<div class="stio"><div><small>Check in</small><b>${s12(s.ci)}${s.ciEnd ? `–${s12(s.ciEnd)}` : ""}</b><span>${day(s.in)}</span></div><div><small>Check out</small><b>${s12(s.co)}</b><span>${day(s.out)}</span></div></div>`
-    + (s.note ? `<p class="stnt">${esc(s.note)}</p>` : ""));
+    + (s.note ? `<p class="stnt">${esc(s.note)}</p>` : "")
+    + (split && s.lat != null ? `<div class="pmini"><button class="pchip press" data-qstay="${STAYS.indexOf(s)}">${pI("near")}Search from here</button></div>` : ""));
 }
 const stayZ = s => s && s.lat != null ? { id: s.pin ? "pin:" + s.lat + "," + s.lng : "stay:" + s.in, name: s.hotel, city: s.city, lat: s.lat, lng: s.lng, kind: "stay", stay: true, pin: !!s.pin } : null;  /* the hotel as an anchor for Nearby */
 
@@ -3331,6 +3332,8 @@ function mqFrom(z) {
   MAP.easeTo({ center: [z.lng, z.lat], zoom: Math.max(MAP.getZoom(), 15), offset: [0, -mSize().y * 0.18], duration: reduce() ? 0 : 900, easing: ease });
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-qfrom]"); if (!b) return; e.stopPropagation(); haptic(); mqFrom(SAVE_BY[b.dataset.qfrom]); });
+/* the hotel gets the same "Search from here" (Alex 8 Nov) */
+document.addEventListener("click", e => { const b = e.target.closest("[data-qstay]"); if (!b) return; e.stopPropagation(); haptic(); mqFrom(stayZ(STAYS[+b.dataset.qstay])); });
 document.getElementById("mqf").addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); haptic(); QFROM = null; mqTok(); mqRefresh(); mqi.focus({ preventScroll: true }); });
 function mqRefresh() { if (!MPS.length) DPIN = null; clearPick(); drawMap(); const none = document.getElementById("mqnone"), city = (mapStay() || {}).city || cityOn(view); none.hidden = !MQ || MPTS.length > 0; if (!none.hidden) none.textContent = `Nothing saved in ${city} for “${MQ}”`; if (MQ) carShow(railList()); else listClose(); geoRender(); geoFetch(MQ); }
 mqi.addEventListener("input", () => { clearTimeout(MQT); MQT = setTimeout(() => { MQ = mqi.value.trim(); mqRefresh(); }, 180); });
