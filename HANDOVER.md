@@ -194,7 +194,7 @@ They sit in free time and play as whole-day ideas ("scenes").
   - The landing sheet no longer shows sunset.
   - The dimming scrim is `hidden` (out of layout) when closed. A full-height fixed layer made Safari 26 paint a solid grey bottom bar.
 
-- **Distances (6 Nov, Alex):** `distTxt` gives walk time only ("10 min walk"; no metres or km, no "from here"); over ~3.5 km "~N min by metro or taxi"; day trips keep km. Distance text is secondary grey (`--sub`, weight 500), no longer green.
+- **Distances (10 Nov, Alex: over a 20 min walk, go by metro or car):** `distTxt` = "N min walk" up to `WALK_MAX` 20 min, then "~N min metro, N min car" (`rideMin`); day trips keep km. Directions pills use `goTxt` (walk, else the quicker ride). Every place sheet and the hotel now show the walk / metro / car row (`modesFor`: from the previous place, else you, else the hotel); walk is never the highlighted pick over 20 min. `modesFill` redraws every `.pmodes` via `MODES`. Distance text is secondary grey (`--sub`, weight 500), no longer green.
 - **Map list title (6 Nov):** "97 places to eat in Paris" (city from `mapStay()`), not "nearby", because the count is the whole city.
 - **Dark map pins (6 Nov):** bubbles are #3a3a3c instead of white; dots keep their colour with a #1c1c1e ring. Selection rings unchanged.
 
