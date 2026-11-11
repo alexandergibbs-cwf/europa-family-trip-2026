@@ -1565,6 +1565,8 @@ function anchorFor(iso) { const s = stayOn(iso) || (iso === "2026-11-19" ? STAYS
 let HERE = null, hereAsked = 0;
 function liveFrom(iso) { const a = anchorFor(iso); return iso === today && a && HERE && Date.now() - HERE.t < 15 * 6e4 && km(a.lat, a.lng, HERE.lat, HERE.lng) < 40 ? HERE : null; }
 /* the stay the map is about: tonight's (on a travel day, the city you're heading to: Alex, 5 Nov, "forget Zürich, open on Berlin") */
+/* on a travel day, the stay you're leaving (null otherwise) */
+function leaveStay() { const a = mapStay(), b = STAYS.find(st => st.out === view && st.lat != null); return a && b && b !== a && b.city !== a.city ? b : null; }
 function mapStay() { return anchorFor(view) || STAYS.find(st => st.out === view && st.lat != null); }
 let HERE_FRESH = 0, hereWatch = null, hereDrawn = null, hereDrawT = 0, hereDrawQ = 0;
 function stopWatch() { if (hereWatch != null) { try { navigator.geolocation.clearWatch(hereWatch); } catch (e) {} hereWatch = null; } }
@@ -2830,7 +2832,7 @@ function ohStat(z) {
   for (const [a, b] of y || []) if (b > 1440 && m < b - 1440) return { open: true, a: a - 1440, b: b - 1440 };
   if (td === null) return null;
   for (const [a, b] of td) if (m >= a && m < b) return { open: true, a, b };
-  for (let i = 0; i < 7; i++) { const dd = D[(wd + i) % 7]; if (!dd) continue; for (const [a] of dd) if (i > 0 || a > m) return { open: false, at: a, day: i === 0 ? "" : i === 1 ? "tomorrow" : OHD[(wd + i) % 7] }; }
+  for (let i = 0; i < 7; i++) { const dd = D[(wd + i) % 7]; if (!dd) continue; for (const [a, b] of dd) if (i > 0 || a > m) return { open: false, at: a, to: b, day: i === 0 ? "" : i === 1 ? "tomorrow" : OHD[(wd + i) % 7] }; }
   return { open: false };
 }
 /* the selected day's weekday, if it isn't today */
@@ -2842,7 +2844,7 @@ function ohLine(z) {
   const st = ohStat(z); if (!st) return "";
   if (st.open) { const { m } = ohNow(z), left = st.b - m;
     return `<span class="ohl" data-ohw>${st.a <= 0 && st.b >= 1440 && (D[(ohNow(z).wd + 1) % 7] || [])[0]?.[0] === 0 ? '<b class="oh-o">Open 24 hours</b>' : left <= 60 ? `<b class="oh-s">Closes ${ohT(st.b)}</b>` : `<b class="oh-o">Open</b> until ${ohT(st.b)}`}</span>`; }
-  return `<span class="ohl" data-ohw><b class="oh-c">Closed</b>${st.at != null ? ` · opens ${st.day ? st.day + " " : ""}${ohT(st.at)}` : ""}</span>`;
+  return `<span class="ohl" data-ohw><b class="oh-c">Closed</b>${st.at != null ? ` · ${st.day ? (st.day === "tomorrow" ? "Tomorrow" : st.day) + " " : ""}${ohR([st.at, st.to])}` : ""}</span>`;  /* 11 Nov, Alex: closing times too */
 }
 /* hours for the small cards (7 Nov, Alex: show the times there too): today = live status with the time, another day = that day's hours */
 function ohCard(z) {
@@ -2851,7 +2853,7 @@ function ohCard(z) {
   if (od != null) { const d = D[od]; return d === null ? "" : d.length ? d.map(ohR).join(", ") : `<i class="oh-c">Closed</i> ${OHD[od]}`; }
   const st = ohStat(z); if (!st) return "";
   if (st.open) { if (st.a <= 0 && st.b >= 1440) return `<i class="oh-o">Open 24 hours</i>`; return st.b - ohNow(z).m <= 60 ? `<i class="oh-s">Closes ${ohT(st.b)}</i>` : `<i class="oh-o">Open</i> until ${ohT(st.b)}`; }
-  return `<i class="oh-c">Closed</i>${st.at != null ? ` · opens ${st.day ? (st.day === "tomorrow" ? OHD[(ohNow(z).wd + 1) % 7] : st.day) + " " : ""}${ohT(st.at)}` : ""}`;
+  return `<i class="oh-c">Closed</i>${st.at != null ? ` · ${st.day ? (st.day === "tomorrow" ? OHD[(ohNow(z).wd + 1) % 7] : st.day) + " " : ""}${ohR([st.at, st.to])}` : ""}`;  /* 11 Nov, Alex: closing times too */
 }
 /* one word, today only */
 function ohShort(z) {
@@ -3198,7 +3200,9 @@ let MQ = "", MQON = false, MQT = 0;
 /* search near a place (7 Nov, Alex): QFROM is the place the search measures from. It stays on the map ringed in blue,
    results are nearest to it with walk times from it, and opening a result stacks it on top (Directions + line from QFROM) */
 let QFROM = null;
-const QO = () => (MQON && QFROM) || mapHere() || mapStay();
+/* searching on a travel day while still in the city you're leaving: measure from you there */
+const hereLeaving = () => { const b = MQON && leaveStay(); return b && HERE && Date.now() - HERE.t < 30 * 6e4 && km(b.lat, b.lng, HERE.lat, HERE.lng) < 40 ? HERE : null; };
+const QO = () => (MQON && QFROM) || mapHere() || hereLeaving() || mapStay();
 function mapFilter(z) {
   if (MQ && !DPIN && !MPS.length) return (!QFROM || z.id !== QFROM.id) && qHit(z, MQ);  /* a dropped pin, or a place opened from the results, shows every saved place around it (Alex, 6 Nov) */
   if (MCAT === "all") return true;
@@ -3302,7 +3306,7 @@ function overview(list) {
     MAP.easeTo({ center: [c.lng, c.lat], zoom: zm, duration: reduce() ? 0 : 1000, easing: ease });
     return; }
   const wide = MCAT === "all" && !MQ, src = wide ? fullList() : list, R = wide ? 8 : 5;
-  const o = QO(), near = src.filter(z => !o || km(o.lat, o.lng, z.lat, z.lng) <= R), use = (near.length >= 3 ? near : src.slice(0, 5)).concat(o ? [o] : []);
+  const o = QO(), near = src.filter(z => !o || km(o.lat, o.lng, z.lat, z.lng) <= R), use = (near.length >= 3 ? near : src.slice(0, 5).filter((z, i, l) => km(l[0].lat, l[0].lng, z.lat, z.lng) < 60)).concat(o && (near.length || !MQ) ? [o] : []);  /* one city at a time */
   const b = use.reduce((r, z) => [Math.min(r[0], z.lng), Math.min(r[1], z.lat), Math.max(r[2], z.lng), Math.max(r[3], z.lat)], [180, 90, -180, -90]);
   MUSER = true; mhdSet();
   MAP.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: { top: 90, bottom: (MPICK ? 250 : 120) + KB(), left: 40, right: 40 }, maxZoom: 14.2, duration: reduce() ? 0 : 1000, easing: ease });
@@ -3358,8 +3362,10 @@ document.getElementById("mqgeo").addEventListener("click", e => { const b = e.ta
 document.getElementById("mqgeo").addEventListener("pointerdown", e => e.stopPropagation());
 function mqOpen() { QFROM = null; mqTok(); MQON = true; listClose(); mapv.classList.add("qon"); clearPick(); layoutPins(); dockRender(); mqi.value = ""; mqi.focus({ preventScroll: true }); }
 function mqClose(quiet) {
-  const had = !!MQ || !!QFROM; QFROM = null; mqTok(); MQON = false; MQ = ""; document.getElementById("mqnone").hidden = true; ADDR = []; GEOQ = ""; clearTimeout(GEOT); DPIN = null; geoRender(); mqi.value = ""; mqi.blur(); mapv.classList.remove("qon"); clearTimeout(MQT);
+  const had = !!MQ || !!QFROM, away = !!leaveStay(); QFROM = null; mqTok(); MQON = false; MQ = ""; document.getElementById("mqnone").hidden = true; ADDR = []; GEOQ = ""; clearTimeout(GEOT); DPIN = null; geoRender(); mqi.value = ""; mqi.blur(); mapv.classList.remove("qon"); clearTimeout(MQT);
   if (quiet) return; clearPick(); if (had) drawMap(); else { layoutPins(); dockRender(); }
+  /* searched the city you're leaving: come back to tonight's city, not an empty map */
+  const a = mapStay(); if (away && a && MAP) { const c = MAP.getCenter(); if (km(a.lat, a.lng, c.lat, c.lng) > 40) MAP.easeTo({ center: [a.lng, a.lat], zoom: 14, duration: reduce() ? 0 : 1000, easing: ease }); }
 }
 function mqTok() { const t = document.getElementById("mqf"); t.hidden = !QFROM; if (QFROM) t.firstElementChild.textContent = QFROM.name; mqi.placeholder = QFROM ? "Search" : "burger, brunch, an address…"; }
 /* from a place card: the card steps aside, the field comes up empty with the place as a token, the map settles on the place */
@@ -3375,7 +3381,7 @@ document.addEventListener("click", e => { const b = e.target.closest("[data-qfro
 /* the hotel gets the same "Search from here" (Alex 8 Nov) */
 document.addEventListener("click", e => { const b = e.target.closest("[data-qstay]"); if (!b) return; e.stopPropagation(); haptic(); mqFrom(stayZ(STAYS[+b.dataset.qstay])); });
 document.getElementById("mqf").addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); haptic(); QFROM = null; mqTok(); mqRefresh(); mqi.focus({ preventScroll: true }); });
-function mqRefresh() { if (!MPS.length) DPIN = null; clearPick(); drawMap(); const none = document.getElementById("mqnone"), city = (mapStay() || {}).city || cityOn(view); none.hidden = !MQ || MPTS.length > 0; if (!none.hidden) none.textContent = `Nothing saved in ${city} for “${MQ}”`; if (MQ) carShow(railList()); else listClose(); geoRender(); geoFetch(MQ); }
+function mqRefresh() { if (!MPS.length) DPIN = null; clearPick(); drawMap(); const none = document.getElementById("mqnone"), city = (mapStay() || {}).city || cityOn(view); none.hidden = !MQ || MPTS.length > 0; if (!none.hidden) none.textContent = `Nothing saved in ${(st => st ? st.city + " or " : "")(leaveStay())}${city} for “${MQ}”`; if (MQ) carShow(railList()); else listClose(); geoRender(); geoFetch(MQ); }
 mqi.addEventListener("input", () => { clearTimeout(MQT); MQT = setTimeout(() => { MQ = mqi.value.trim(); mqRefresh(); }, 180); });
 
 mqi.addEventListener("keydown", e => { if (e.key !== "Enter") return; const q = mqi.value.trim(); if (ADDR.length && GEOQ === q && (!MPTS.length || /\d/.test(q))) return geoPick(ADDR[0]); mqi.blur(); });
@@ -3494,8 +3500,10 @@ let MTAP = 0, MRAF = 0, MLAST = 0;
 let MPC = { k: "", r: null };
 function mapPlaces() {
   const a = mapStay(); if (!a) return { a: null, list: [] };
-  const k = a.in + "|" + a.lat + "," + a.lng + "|" + SAVES.length; if (MPC.k === k) return MPC.r;
-  const list = SAVES.filter(z => z.lat != null && MAPCOL[z.kind] && (z.city === a.city || km(a.lat, a.lng, z.lat, z.lng) < 15));
+  /* on a travel day the search also covers the city you're leaving (Alex, 11 Nov: "Alain" in Paris on the morning of the Glasgow flight) */
+  const b = MQON ? leaveStay() : null, inS = (st, z) => z.city === st.city || km(st.lat, st.lng, z.lat, z.lng) < 15;
+  const k = a.in + "|" + a.lat + "," + a.lng + "|" + SAVES.length + "|" + (b ? b.in : ""); if (MPC.k === k) return MPC.r;
+  const list = SAVES.filter(z => z.lat != null && MAPCOL[z.kind] && (inS(a, z) || (b && inS(b, z))));
   MPC = { k, r: { a, list, ids: new Set(list.map(z => z.id)) } }; return MPC.r;
 }
 function openMap(focusId, quiet) {
