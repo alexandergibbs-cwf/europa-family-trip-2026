@@ -3583,7 +3583,7 @@ addEventListener("resize", () => { if (MPS.length) panelFit(); });
 function panelPlace(it, push) { if (MQON) mqi.blur(); PVID = null;
   if (!push) { MPS = []; mlist.classList.remove("pfull"); }
   else { const pr = MPS[MPS.length - 1]; if (pr) { const c = mpl.querySelector(".pnear [data-nxk][aria-pressed=true]"); pr.nk = c ? c.dataset.nxk : pr.nk; pr.back = mlist.classList.contains("pfull"); } }
-  if (!MPS.length && MQON && QFROM && !it.stay && it.id !== QFROM.id) MPS.push(QFROM);  /* a result from "search near here": back, Directions and the line go to that place */
+  if (!MPS.length && MQON && QFROM && !it.stay && it.id !== QFROM.id) { const qs = QFROM.stay && !QFROM.pin && STAYS.find(s => "stay:" + s.in === QFROM.id); MPS.push(qs ? { stay: qs } : QFROM); }  /* a result from "search near here": back, Directions and the line go to that place (the hotel goes in as a real stay item, 11 Nov) */
   MPS.push(it); panelSync(); plRender(MPS.length > 1 || MLOPEN ? 1 : 0); }
 function mapPlace(z) { panelPlace(z, false); }
 /* back to a place you came through: same Nearby category, same height as you left it */
@@ -3688,8 +3688,8 @@ function modesFor(from, to) { if (from) return modesHTML(from, to);
   const o = fromFor(dirPt(to)); if (o === HERE && HERE) return modesHTML({ lat: HERE.lat, lng: HERE.lng, me: true }, to);
   if (to.stay) return ""; const a = o || mapStay(); return a ? modesHTML({ stay: a }, to) : ""; }
 function routeOrigin() { const h = mapHere(); if (h) return { lat: h.lat, lng: h.lng, me: true }; const a = mapStay(); return a && a.lat != null ? { lat: a.lat, lng: a.lng } : null; }
-function routeSync(place) {
-  const o = place && routeOrigin(), k = o ? `${o.lat.toFixed(4)},${o.lng.toFixed(4)}>${place.id}` : "";
+function routeSync(place, from) {
+  const o = place && (from ? { lat: from.lat, lng: from.lng } : routeOrigin()), k = o ? `${o.lat.toFixed(4)},${o.lng.toFixed(4)}>${place.id}` : "";
   if (!o || km(o.lat, o.lng, place.lat, place.lng) > 3.2 || km(o.lat, o.lng, place.lat, place.lng) < 0.05) { if (ROUTE) { ROUTE = null; ROUTEK = ""; nxDraw(true); } return null; }
   if (k === ROUTEK) return o; ROUTEK = k; ROUTE = null;
   fetch(`/api/route?o=${o.lat.toFixed(5)},${o.lng.toFixed(5)}&d=${place.lat.toFixed(5)},${place.lng.toFixed(5)}`).then(r => r.ok ? r.json() : null).then(j => {
@@ -3720,7 +3720,7 @@ function nearSync() {
   if (!MAP || mapv.hidden) { NSIG = ""; return; }
   if (sig === NSIG) return; NSIG = sig; nearCycle();
   if (place) { MPICK = place; mapv.classList.add("picked"); }
-  const ro = routeSync(place && !NEAR && !TRAIL.length ? place : null);
+  const pv = MPS[MPS.length - 2], ro = routeSync(place && !NEAR && !TRAIL.length ? place : null, pv && pv.stay && pv.stay.lat != null ? pv.stay : null);  /* opened from the hotel: the line runs from the hotel (Alex, 11 Nov) */
   nxLayers(); nxDraw(); layoutPins();
   if (!MPS.length) { PTOP = 0; return layoutPins(); }
   /* frame: Nearby open = the place and everything listed; otherwise the place with the one you came from, or just the place */
