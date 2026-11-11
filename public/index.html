@@ -1590,7 +1590,7 @@ function hereRedraw(force) {
   const wait = 15000 - (Date.now() - hereDrawT); if (!force && !sharper && wait > 0) { clearTimeout(hereDrawQ); hereDrawQ = setTimeout(() => hereRedraw(), wait); return; }
   hereDrawT = Date.now(); const big = !hereDrawn || km(hereDrawn.lat, hereDrawn.lng, HERE.lat, HERE.lng) > 0.12; hereDrawn = { lat: HERE.lat, lng: HERE.lng, acc: HERE.acc };
   /* Near me now always follows you, whatever day you're looking at */
-  if (!liveFrom(view)) { if (!sheet.hidden && document.getElementById("nearS")) refreshSheetDist(); return; }
+  if (!liveFrom(view)) { if (!sheet.hidden && (document.getElementById("nearS") || document.querySelector("#sheet-body .pmeta[data-pid]"))) refreshSheetDist(); return; }
   if (!pd && (big || force)) { SCN_CACHE.clear(); gCache.clear(); content.innerHTML = renderContent(view); }
   refreshSheetDist();
   if (!mapv.hidden && MAP) drawMap();
@@ -2767,7 +2767,7 @@ function walkFetch(o, zs) {
 function sheetWalk() {
   if (sheet.hidden) return; const body = document.getElementById("sheet-body");
   const ids = [...body.querySelectorAll("[data-sid], .pmeta[data-pid]")].map(e => SAVE_BY[e.dataset.sid || e.dataset.pid]).filter(Boolean);
-  if (ids.length) walkFetch(body.querySelector("#nearS") ? HERE : liveFrom(view) || anchorFor(view), ids);
+  if (ids.length) walkFetch(body.querySelector("#nearS") ? HERE : fromFor(ids[0]), ids);
 }
 function refreshSheetDist() {
   if (sheet.hidden || (drag && drag.mode === "pull")) return;
@@ -2870,10 +2870,18 @@ function placeMeta(z) {
   const o = liveFrom(view) || anchorFor(view), k = o ? km(o.lat, o.lng, z.lat, z.lng) : null, far = k != null && k >= 8 && z.city !== (anchorFor(view) || {}).city;
   return [MAPLAB[mk(z)] || "", z.rating ? `★ ${z.rating}` : ""].filter(Boolean).join(" · ") + ohLine(z);
 }
+/* where a place's distance starts (11 Nov, Alex: "19 min by car" for a 6 min walk in the Marais, timed from the Paris hotel
+   because the day on screen wasn't today, and "898 km" on the travel day, timed from Glasgow): you, whenever you're within
+   25 km of the place, whatever day is showing; else the hotel in that place's city (the one you're leaving on a travel day); else the day's hotel */
+function fromFor(z) {
+  if (HERE && Date.now() - HERE.t < 30 * 6e4 && z && z.lat != null && km(HERE.lat, HERE.lng, z.lat, z.lng) < 25) return HERE;
+  const a = liveFrom(view) || anchorFor(view), lv = typeof leaveStay === "function" ? leaveStay() : null;
+  return z && lv && lv.city === z.city && (!a || a.city !== z.city) ? lv : a || lv;
+}
 /* how far, short enough to sit under "Directions" */
 function placeDist(z) {
-  const o = liveFrom(view) || anchorFor(view); if (!o || z.lat == null) return "";
-  const k = km(o.lat, o.lng, z.lat, z.lng); if (k >= 8 && z.city !== (anchorFor(view) || {}).city) return `${Math.round(k)} km away`;
+  const o = fromFor(z); if (!o || z.lat == null) return "";
+  const k = km(o.lat, o.lng, z.lat, z.lng); if (k >= 25) return `${Math.round(k)} km away`;
   return goTxt(k, walkKm(o, z));
 }
 /* what people usually do next after a place like this, from the saves within a short walk of it */
@@ -3677,8 +3685,8 @@ function modesFill() { document.querySelectorAll(".pmodes[data-modes]").forEach(
   const h = modesHTML(m[0], m[1]); if (h && el.outerHTML !== h) el.outerHTML = h; }); }
 /* every place shows walk / metro / car (Alex, 10 Nov): from the place you came from, else from you, else from the hotel */
 function modesFor(from, to) { if (from) return modesHTML(from, to);
-  const h = liveFrom(view) || (!mapv.hidden ? mapHere() : null); if (h) return modesHTML({ lat: h.lat, lng: h.lng, me: true }, to);
-  if (to.stay) return ""; const a = anchorFor(view) || mapStay(); return a ? modesHTML({ stay: a }, to) : ""; }
+  const o = fromFor(dirPt(to)); if (o === HERE && HERE) return modesHTML({ lat: HERE.lat, lng: HERE.lng, me: true }, to);
+  if (to.stay) return ""; const a = o || mapStay(); return a ? modesHTML({ stay: a }, to) : ""; }
 function routeOrigin() { const h = mapHere(); if (h) return { lat: h.lat, lng: h.lng, me: true }; const a = mapStay(); return a && a.lat != null ? { lat: a.lat, lng: a.lng } : null; }
 function routeSync(place) {
   const o = place && routeOrigin(), k = o ? `${o.lat.toFixed(4)},${o.lng.toFixed(4)}>${place.id}` : "";
@@ -3915,7 +3923,7 @@ function mapCard(z) {
   if (!z) { c.hidden = true; return; }
   c.hidden = false;
   if (z.hotel) { const st = z.hotel; c.className = "mcard noph"; c.innerHTML = `<button class="mx" data-mx aria-label="Close">✕</button><span class="a">${esc(st.hotel)}</span><span class="m">Where you're staying · check in ${s12(st.ci)}, out ${s12(st.co)}</span>${st.addr ? `<span class="h">${esc(st.addr)}</span>` : ""}<div class="acts">${st.q ? `<a class="btn blue press" href="${dirs(st.q)}" target="_blank" rel="noopener">Directions</a>` : ""}</div>`; return; }
-  const o = liveFrom(view) || anchorFor(view), k = o ? km(o.lat, o.lng, z.lat, z.lng) : null, on = getPlan(view).some(p => p.id === z.id);
+  const o = fromFor(z), k = o ? km(o.lat, o.lng, z.lat, z.lng) : null, on = getPlan(view).some(p => p.id === z.id);
   c.className = "mcard";
   c.innerHTML = `<button class="mx" data-mx aria-label="Close">✕</button><img class="mph" alt="" src="${esc(photoUrl(z))}" onerror="this.parentNode.classList.add('noph');this.remove()"><span class="a">${esc(z.name)}</span><span class="m">${MAPLAB[z.kind] || ""}${z.rating ? ` · ★ ${z.rating}` : ""}${k != null ? ` · <b>${distTxt(k, walkKm(o, z))}</b>` : ""}</span><span class="h">${esc(hookOf(z))}</span>
     <div class="acts"><a class="btn blue press" href="${dirs(z.name + " " + (z.address || z.city))}" target="_blank" rel="noopener">Directions</a>${z.url && embedOf(z.url) ? `<a class="btn card press" href="${esc(z.url)}">Video</a>` : `<a class="btn card press" href="${gq(z.name, z.city)}" target="_blank" rel="noopener">Google</a>`}${view >= START && view <= END ? `<button class="btn card press" data-madd="${z.id}">${on ? "✓ Added" : "Add"}</button>` : ""}</div>`;
