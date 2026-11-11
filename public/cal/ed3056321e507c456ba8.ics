@@ -996,7 +996,8 @@ DTSTAMP:20261025T000000Z
 DTSTART:20261111T163500Z
 DTEND:20261111T172500Z
 SUMMARY:Glasgow Airport → 4-bed flat\, central Glasgow
-LOCATION:4-bed flat\, central Glasgow\, Glasgow
+LOCATION:4-bed flat\, central Glasgow\, Glasgow city centre\, G2 4JR\, Uni
+ ted Kingdom\, Glasgow
 DESCRIPTION:4:35 pm UK time
 END:VEVENT
 BEGIN:VEVENT
@@ -1005,7 +1006,8 @@ DTSTAMP:20261025T000000Z
 DTSTART:20261111T172500Z
 DTEND:20261111T175500Z
 SUMMARY:4-bed flat\, central Glasgow · Check in
-LOCATION:4-bed flat\, central Glasgow\, Glasgow
+LOCATION:4-bed flat\, central Glasgow\, Glasgow city centre\, G2 4JR\, Uni
+ ted Kingdom\, Glasgow
 DESCRIPTION:5:25 pm UK time\nCheck in from 3:00 pm
 END:VEVENT
 BEGIN:VEVENT
@@ -1014,7 +1016,8 @@ DTSTAMP:20261025T000000Z
 DTSTART:20261113T091500Z
 DTEND:20261113T100000Z
 SUMMARY:4-bed flat\, central Glasgow · Pack suitcases
-LOCATION:4-bed flat\, central Glasgow\, Glasgow
+LOCATION:4-bed flat\, central Glasgow\, Glasgow city centre\, G2 4JR\, Uni
+ ted Kingdom\, Glasgow
 DESCRIPTION:9:15 am UK time
 BEGIN:VALARM
 ACTION:DISPLAY
@@ -1028,7 +1031,8 @@ DTSTAMP:20261025T000000Z
 DTSTART:20261113T100000Z
 DTEND:20261113T103000Z
 SUMMARY:4-bed flat\, central Glasgow · Check out\, leave bags
-LOCATION:4-bed flat\, central Glasgow\, Glasgow
+LOCATION:4-bed flat\, central Glasgow\, Glasgow city centre\, G2 4JR\, Uni
+ ted Kingdom\, Glasgow
 DESCRIPTION:10:00 am UK time
 BEGIN:VALARM
 ACTION:DISPLAY
@@ -1042,7 +1046,8 @@ DTSTAMP:20261025T000000Z
 DTSTART:20261113T110000Z
 DTEND:20261113T113000Z
 SUMMARY:4-bed flat\, central Glasgow · Collect bags
-LOCATION:4-bed flat\, central Glasgow\, Glasgow
+LOCATION:4-bed flat\, central Glasgow\, Glasgow city centre\, G2 4JR\, Uni
+ ted Kingdom\, Glasgow
 DESCRIPTION:11:00 am UK time
 BEGIN:VALARM
 ACTION:DISPLAY
@@ -1056,7 +1061,8 @@ DTSTAMP:20261025T000000Z
 DTSTART:20261113T113000Z
 DTEND:20261113T114500Z
 SUMMARY:4-bed flat\, central Glasgow → Glasgow Queen Street
-LOCATION:4-bed flat\, central Glasgow\, Glasgow
+LOCATION:4-bed flat\, central Glasgow\, Glasgow city centre\, G2 4JR\, Uni
+ ted Kingdom\, Glasgow
 DESCRIPTION:11:30 am UK time
 END:VEVENT
 BEGIN:VEVENT
@@ -1069,58 +1075,61 @@ LOCATION:Glasgow Queen Street station
 DESCRIPTION:11:45 am UK time
 END:VEVENT
 BEGIN:VEVENT
-UID:2026-11-13-get-770-EdinburghWaverleyLuxuryW@europe-family-trip.app
+UID:2026-11-13-get-770-EdinburghWaverleyFlat2F1@europe-family-trip.app
 DTSTAMP:20261025T000000Z
 DTSTART:20261113T125000Z
-DTEND:20261113T131500Z
-SUMMARY:Edinburgh Waverley → Luxury Waterfront Retreat for Groups
-LOCATION:Luxury Waterfront Retreat for Groups\, 221 Granton Road\, Edinbur
- gh EH5 1HD\, Edinburgh
+DTEND:20261113T130500Z
+SUMMARY:Edinburgh Waverley → Flat 2F1\, 16 Chapel Street
+LOCATION:Flat 2F1\, 16 Chapel Street\, 16 Chapel Street\, Flat 2F1\, Edinb
+ urgh EH8 9AY\, Edinburgh
 DESCRIPTION:12:50 pm UK time
 END:VEVENT
 BEGIN:VEVENT
-UID:2026-11-13-get-795-LuxuryWaterfrontRetreatf@europe-family-trip.app
+UID:2026-11-13-get-785-Flat2F116ChapelStreetDro@europe-family-trip.app
 DTSTAMP:20261025T000000Z
-DTSTART:20261113T131500Z
-DTEND:20261113T134500Z
-SUMMARY:Luxury Waterfront Retreat for Groups · Drop bags
-LOCATION:Luxury Waterfront Retreat for Groups\, 221 Granton Road\, Edinbur
- gh EH5 1HD\, Edinburgh
-DESCRIPTION:1:15 pm UK time\nCheck in from 3:00 pm
+DTSTART:20261113T130500Z
+DTEND:20261113T133500Z
+SUMMARY:Flat 2F1\, 16 Chapel Street · Drop bags
+LOCATION:Flat 2F1\, 16 Chapel Street\, 16 Chapel Street\, Flat 2F1\, Edinb
+ urgh EH8 9AY\, Edinburgh
+DESCRIPTION:1:05 pm UK time\nCheck in from 3:00 pm\nCollect keys first fro
+ m the bottom black Master Lock lockbox at 49 West Nicolson Street (code i
+ n the Airbnb messages). Black door; 2F1 = second floor\, third buzzer. Pu
+ rple key: building door (turn anti-clockwise). Yellow key: flat door.
 END:VEVENT
 BEGIN:VEVENT
-UID:2026-11-16-get-590-LuxuryWaterfrontRetreatf@europe-family-trip.app
+UID:2026-11-16-get-590-Flat2F116ChapelStreetChe@europe-family-trip.app
 DTSTAMP:20261025T000000Z
 DTSTART:20261116T095000Z
 DTEND:20261116T102000Z
-SUMMARY:Luxury Waterfront Retreat for Groups · Check out
-LOCATION:Luxury Waterfront Retreat for Groups\, 221 Granton Road\, Edinbur
- gh EH5 1HD\, Edinburgh
+SUMMARY:Flat 2F1\, 16 Chapel Street · Check out
+LOCATION:Flat 2F1\, 16 Chapel Street\, 16 Chapel Street\, Flat 2F1\, Edinb
+ urgh EH8 9AY\, Edinburgh
 DESCRIPTION:9:50 am UK time
 BEGIN:VALARM
 ACTION:DISPLAY
-DESCRIPTION:Luxury Waterfront Retreat for Groups · Check out
+DESCRIPTION:Flat 2F1\, 16 Chapel Street · Check out
 TRIGGER:-PT30M
 END:VALARM
 END:VEVENT
 BEGIN:VEVENT
-UID:2026-11-16-get-620-LuxuryWaterfrontRetreatf@europe-family-trip.app
+UID:2026-11-16-get-620-Flat2F116ChapelStreetEdi@europe-family-trip.app
 DTSTAMP:20261025T000000Z
 DTSTART:20261116T102000Z
-DTEND:20261116T104500Z
-SUMMARY:Luxury Waterfront Retreat for Groups → Edinburgh Waverley
-LOCATION:Luxury Waterfront Retreat for Groups\, 221 Granton Road\, Edinbur
- gh EH5 1HD\, Edinburgh
+DTEND:20261116T103500Z
+SUMMARY:Flat 2F1\, 16 Chapel Street → Edinburgh Waverley
+LOCATION:Flat 2F1\, 16 Chapel Street\, 16 Chapel Street\, Flat 2F1\, Edinb
+ urgh EH8 9AY\, Edinburgh
 DESCRIPTION:10:20 am UK time
 END:VEVENT
 BEGIN:VEVENT
-UID:2026-11-16-change-645-EdinburghWaverleyFindthe@europe-family-trip.app
+UID:2026-11-16-change-635-EdinburghWaverleyFindthe@europe-family-trip.app
 DTSTAMP:20261025T000000Z
-DTSTART:20261116T104500Z
+DTSTART:20261116T103500Z
 DTEND:20261116T110000Z
 SUMMARY:Edinburgh Waverley · Find the platform\, board
 LOCATION:Edinburgh Waverley station
-DESCRIPTION:10:45 am UK time
+DESCRIPTION:10:35 am UK time
 END:VEVENT
 BEGIN:VEVENT
 UID:2026-11-16-get-920-LondonKingsCross4bedtown@europe-family-trip.app

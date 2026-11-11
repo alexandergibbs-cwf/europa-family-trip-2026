@@ -223,7 +223,7 @@ They sit in free time and play as whole-day ideas ("scenes").
 
 ## Known gaps / open items
 - **Safari bottom bar:** Alex wants page content to run under Safari's floating toolbar. The scrim fix is pushed but wasn't confirmed on device. If the grey band persists, look for any other fixed element touching the bottom edge.
-- **UK rental addresses:** Glasgow (Alex, 8 Nov): "Glasgow city centre, G2 4JR, United Kingdom"; pin at the postcode centre 55.86546,-4.26894 (Bath Street, near Charing Cross). Edinburgh is 221 Granton Road. London still "Address in the booking" (pin approximate: Kensington High Street station).
+- **UK rental addresses:** Glasgow (Alex, 8 Nov): "Glasgow city centre, G2 4JR, United Kingdom"; pin at the postcode centre 55.86546,-4.26894 (Bath Street, near Charing Cross). Edinburgh (Alex, 11 Nov, host Airbnb message): Flat 2F1, 16 Chapel Street EH8 9AY (Southside, by West Nicolson St), was 221 Granton Road; pin 55.9447,-3.1859. Keys from the lockbox at 49 West Nicolson St; the lockbox code is deliberately NOT in the app (public site). Waverley↔flat set to 15 min (g1 xfer, g2 ride). London still "Address in the booking" (pin approximate: Kensington High Street station).
 - **LNER Edinburgh→London:** not booked. Times are guesses.
 - **Sunset dinner:** restaurant name and end time unknown.
 - **Day-trip drives:** estimated from distance, not routed.
