@@ -2719,6 +2719,21 @@ const URLN = {}; SAVES.forEach(z => { if (z.url) URLN[z.url] = (URLN[z.url] || 0
 const photoQ = z => new URLSearchParams({ v: 3, id: z.id, n: z.name, c: z.city || "", co: z.country || "", lat: z.lat, lng: z.lng });
 const photoUrl = (z, i) => "/api/photo?" + new URLSearchParams({ v: 4, ...(i ? { i } : {}), id: z.id, n: z.name, c: z.city || "", co: z.country || "", lat: z.lat, lng: z.lng, ...(z.url && /tiktok\.com/.test(z.url) && URLN[z.url] <= 2 ? { u: z.url } : {}) });
 const vidAttr = z => z && z.url && /tiktok\.com|instagram\.com/.test(z.url) ? ` data-vid="${esc(z.url)}" data-vsid="${esc(z.id)}"` : "";
+/* fetch this city's photos quietly in the background, three at a time, nearest the hotel first (Alex, 16 Nov: half of London had no photo).
+   Before, a photo was only looked up the first time its card scrolled into view. Each place is asked once per phone (ids kept in localStorage). */
+function photoWarm() {
+  const st = mapStay(); if (!st || st.lat == null) return;
+  let done; try { done = new Set((localStorage.getItem("phw") || "").match(/.{8}/g) || []); } catch (e) { return; }
+  const todo = SAVES.filter(z => z.lat != null && z.kind !== "skip" && z.city === st.city && !done.has(z.id.slice(0, 8)))
+    .map(z => [km(st.lat, st.lng, z.lat, z.lng), z]).sort((x, y) => x[0] - y[0]).map(x => x[1]);
+  let fails = 0;
+  const next = () => { const z = todo.shift(); if (!z || fails > 8) return;
+    if (document.hidden) return setTimeout(next, 5000) && todo.unshift(z);
+    fetch(photoUrl(z)).then(r => { if (r.ok || r.headers.get("cache-control") !== "no-store") { done.add(z.id.slice(0, 8)); try { localStorage.setItem("phw", [...done].join("")); } catch (e) {} } else fails++; return r.blob(); })
+      .catch(() => { fails++; }).then(() => setTimeout(next, 120)); };
+  for (let i = 0; i < 3; i++) setTimeout(next, i * 300);
+}
+setTimeout(photoWarm, 5000);
 const ph = z => z ? `<span class="ph" style="--c:${MAPCOL[mk(z)] || "#8e8e93"}">${svgI(icoOf(z))}${z.lat != null ? `<img loading="lazy" decoding="async" alt="" src="${esc(photoUrl(z))}" onload="this.classList.add('ld')" onerror="this.remove()">` : ""}</span>` : "";
 const PI = {
   go: '<path d="M6.5 19v-5.5a3.5 3.5 0 0 1 3.5-3.5h9"/><path d="m15 6 4 4-4 4"/>',
