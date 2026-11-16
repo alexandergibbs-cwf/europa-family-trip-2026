@@ -67,7 +67,7 @@ async function googleNames(env, id, name, city, lat, lng) {
   const r = await fetch("https://places.googleapis.com/v1/places:searchText", { method: "POST",
     headers: { "content-type": "application/json", "X-Goog-Api-Key": env.GOOGLE_PLACES_KEY, "X-Goog-FieldMask": "places.displayName,places.location,places.photos" },
     body: JSON.stringify({ textQuery: `${name} ${city}`.trim(), maxResultCount: 3, locationBias: { circle: { center: { latitude: lat, longitude: lng }, radius: 800 } } }) });
-  if (!r.ok) return [];
+  if (!r.ok) return null;  /* rate limit or outage: not an answer, so nothing is remembered */
   const places = ((await r.json()).places || []).filter(p => p.photos && p.photos.length && p.location)
     .map(p => ({ p, d: kmBetween(lat, lng, p.location.latitude, p.location.longitude) })).filter(x => x.d < 1.2).sort((a, b) => a.d - b.d);
   const names = places.length ? places[0].p.photos.slice(0, 8).map(x => x.name) : [];
@@ -148,16 +148,18 @@ async function photo(url, env, ctx) {
   if (!/^[\w-]{8,60}$/.test(id)) return new Response("bad id", { status: 400 });
   const { value: hit, metadata } = await env.SHARED.getWithMetadata(key, "arrayBuffer"), meta = metadata || {};
   if (hit) {
-    if (meta.none) return new Response("no photo", { status: 404, headers: { "cache-control": "public, max-age=86400" } });
+    /* "no photo" saved before 16 Nov could be a rate-limit failure: those (no v) get looked up once more */
+    if (meta.none && meta.v === 2) return new Response("no photo", { status: 404, headers: { "cache-control": "public, max-age=86400" } });
     if (meta.redirect) return Response.redirect(meta.redirect, 302);
-    return new Response(hit, { headers: { "content-type": meta.type || "image/jpeg", "cache-control": "public, max-age=2592000" } });
+    if (!meta.none) return new Response(hit, { headers: { "content-type": meta.type || "image/jpeg", "cache-control": "public, max-age=2592000" } });
   }
   const name = url.searchParams.get("n") || "", city = url.searchParams.get("c") || "", country = url.searchParams.get("co") || "";
   const lat = +url.searchParams.get("lat"), lng = +url.searchParams.get("lng"), tt = url.searchParams.get("u") || "";
+  let soft = false;  /* a lookup failed for a reason that may pass (rate limit, timeout): don't remember "no photo" */
   const keep = got => { ctx.waitUntil(env.SHARED.put(key, got.buf, { metadata: { type: got.type } })); return new Response(got.buf, { headers: { "content-type": got.type, "cache-control": "public, max-age=2592000" } }); };
   /* 0. Google Places, when the key is set (the only source for photos after the first) */
-  try { const names = await googleNames(env, id, name, city === "Other" ? "" : city, lat, lng); const g = names[idx] && await googleMedia(env, names[idx]); const got = g && await grab(g); if (got) return keep(got); } catch (e) {}
-  if (idx) return new Response("no photo", { status: 404 });
+  try { const names = await googleNames(env, id, name, city === "Other" ? "" : city, lat, lng); if (!names) soft = true; else if (names[idx]) { const g = await googleMedia(env, names[idx]); const got = g && await grab(g); if (got) return keep(got); soft = true; } } catch (e) { soft = true; }
+  if (idx) return new Response("no photo", { status: 404, headers: { "cache-control": "no-store" } });
   /* 1. the post it was saved from, when that post is about this one place */
   if (/^https:\/\/www\.tiktok\.com\//.test(tt)) { try { const cover = await tiktokCover(tt); const got = cover && await grab(cover); if (got) return keep(got); } catch (e) {} }
   /* 2. Wikipedia, for landmarks */
@@ -166,7 +168,8 @@ async function photo(url, env, ctx) {
   } catch (e) {}
   /* 3. the place's own website */
   try { const site = await osmWebsite(name, lat, lng); const img = site && await siteImage(site); const got = img && await grab(img); if (got) return keep(got); } catch (e) {}
-  ctx.waitUntil(env.SHARED.put(key, "0", { metadata: { none: 1 }, expirationTtl: 7 * 86400 }));
+  if (soft) return new Response("no photo yet", { status: 404, headers: { "cache-control": "no-store" } });
+  ctx.waitUntil(env.SHARED.put(key, "0", { metadata: { none: 1, v: 2 }, expirationTtl: 7 * 86400 }));
   return new Response("no photo", { status: 404, headers: { "cache-control": "public, max-age=3600" } });
 }
 
@@ -195,8 +198,8 @@ export default {
     if (url.pathname === "/api/photo") return photo(url, env, ctx);
     if (url.pathname === "/api/photos") {
       const id = (url.searchParams.get("id") || "").slice(0, 60); if (!/^[\w-]{8,60}$/.test(id)) return json({ count: 0 }, 400);
-      let names = []; try { names = await googleNames(env, id, url.searchParams.get("n") || "", (c => c === "Other" ? "" : c)(url.searchParams.get("c") || ""), +url.searchParams.get("lat"), +url.searchParams.get("lng")); } catch (e) {}
-      return new Response(JSON.stringify({ count: names.length }), { headers: { "content-type": "application/json", "cache-control": "public, max-age=86400" } });
+      let names = []; try { names = (await googleNames(env, id, url.searchParams.get("n") || "", (c => c === "Other" ? "" : c)(url.searchParams.get("c") || ""), +url.searchParams.get("lat"), +url.searchParams.get("lng"))) || null; } catch (e) { names = null; }
+      return new Response(JSON.stringify({ count: names ? names.length : 0 }), { headers: { "content-type": "application/json", "cache-control": names ? "public, max-age=86400" : "no-store" } });
     }
     if (url.pathname === FEED) {
       /* the trip feed, plus the stops people have added */

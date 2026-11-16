@@ -2716,7 +2716,7 @@ function planItemSheet(ev) {
    post is about just this place, else Wikipedia for landmarks, else the share image of the place's own website. */
 const URLN = {}; SAVES.forEach(z => { if (z.url) URLN[z.url] = (URLN[z.url] || 0) + 1; });
 const photoQ = z => new URLSearchParams({ v: 3, id: z.id, n: z.name, c: z.city || "", co: z.country || "", lat: z.lat, lng: z.lng });
-const photoUrl = (z, i) => "/api/photo?" + new URLSearchParams({ v: 3, ...(i ? { i } : {}), id: z.id, n: z.name, c: z.city || "", co: z.country || "", lat: z.lat, lng: z.lng, ...(z.url && /tiktok\.com/.test(z.url) && URLN[z.url] <= 2 ? { u: z.url } : {}) });
+const photoUrl = (z, i) => "/api/photo?" + new URLSearchParams({ v: 4, ...(i ? { i } : {}), id: z.id, n: z.name, c: z.city || "", co: z.country || "", lat: z.lat, lng: z.lng, ...(z.url && /tiktok\.com/.test(z.url) && URLN[z.url] <= 2 ? { u: z.url } : {}) });
 const vidAttr = z => z && z.url && /tiktok\.com|instagram\.com/.test(z.url) ? ` data-vid="${esc(z.url)}" data-vsid="${esc(z.id)}"` : "";
 const ph = z => z ? `<span class="ph" style="--c:${MAPCOL[mk(z)] || "#8e8e93"}">${svgI(icoOf(z))}${z.lat != null ? `<img loading="lazy" decoding="async" alt="" src="${esc(photoUrl(z))}" onload="this.classList.add('ld')" onerror="this.remove()">` : ""}</span>` : "";
 const PI = {
