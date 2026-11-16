@@ -1534,18 +1534,19 @@ const KIND_FIX = {
 /* the saved description was about a graveyard; the place itself is a farm park on the west edge of the city */
 const HOOK_FIX = { "Buttercup Farm Park": "farm park on the west edge of edinburgh" };
 /* shops split into clothes (fashion, vintage, menswear, jackets) and everything else (markets, books, scent, food, homeware) */
-const CLO_RE = /cloth|fashion|vintage|boutique|apparel|menswear|womenswear|streetwear|\bwear\b|jeans|denim|sneaker|shoe|jacket|knit|tailor|designer|thrift|second.?hand|dress|coat|cashmere|outfit|pyjama|prada|gucci|versace|barbour|aimé|archive/i;
-const CLO_YES = ["Clutch Cafe", "Our Legacy Workshop", "The Store X Berlin"];
+const CLO_RE = /cloth|fashion|vintage|boutique|apparel|menswear|womenswear|streetwear|\bwear\b|jeans|denim|sneaker|shoe|jacket|knit|tailor|designer|thrift|second.?hand|dress|coat|cashmere|outfit|pyjama|prada|gucci|versace|barbour|aimé|archive|uniqlo|zara\b|h&m|weekday|abercrombie|colorful standard/i;
+const CLO_YES = ["Clutch Cafe", "Our Legacy Workshop", "The Store X Berlin", "COS", "SCRT®", "John Simons", "Eastman Camp"];
 const CLO_NO = ["do you read me?!", "Breathe Fresh Cosmetics", "Officine Universelle Buly 1803", "Brupbacherplatz", "Helvetiaplatz Farmers' Market", "Markthalle Neun", "Mauerpark", "RAW-Gelände", "Tron Kirk Market", "The Gently Mad Book Shop & Bookbinder", "Seven Dials Market", "Leadenhall Market", "Camden Town", "Camden Passage, Islington", "Officine Universelle Buly 1803", "Stadthausanlage Market", "Baa Baa Sheep Shop", "Testaccio Market", "Porta Portese", "Flea Market", "Nowkölln Flowmarkt", "Kranoldplatz", "Santo Spirito Market", "il Mercato Centrale Firenze", "Mercato di Sant’Ambrogio", "Scuola del Cuoio S.r.l.", "Brilli Pet Boutique", "Dott. A. Bizzarri", "Maestri di fabbrica", "Liberty London", "King's Rd", "Merci", "Saint Laurent Babylone", "Hirono Store", "Kurfürstendamm", "Bahnhofstrasse", "KaDeWe - Kaufhaus des Westens", "Adrianou Street"];
 const KIND_BY_NAME = {}; Object.entries(KIND_FIX).forEach(([k, ns]) => ns.forEach(n => (KIND_BY_NAME[n] = k)));
-{ const seen = new Set(); SAVES.forEach(s => {
-  const key = s.name + "|" + s.city;
-  s.kind = seen.has(key) ? "skip" : KIND_BY_NAME[s.name] || (s.cat === "restaurant" ? "dinner" : s.cat === "bar" ? "drinks" : s.cat === "cafe" ? "coffee" : s.cat === "sweets" ? "sweet" : s.cat === "accommodation" ? "skip"
+/* the same name twice in a city is only a duplicate when it's the same spot; branches (COS, Zara, H&M…) are separate places (Alex, 16 Nov: the list was missing shops) */
+{ const seen = new Map(); SAVES.forEach(s => {
+  const key = s.name + "|" + s.city, prev = seen.get(key) || [], dup = prev.some(q => s.lat == null || q.lat == null || km(s.lat, s.lng, q.lat, q.lng) < 0.1);
+  s.kind = dup ? "skip" : KIND_BY_NAME[s.name] || (s.cat === "restaurant" ? "dinner" : s.cat === "bar" ? "drinks" : s.cat === "cafe" ? "coffee" : s.cat === "sweets" ? "sweet" : s.cat === "accommodation" ? "skip"
     : CULT.test(s.name) ? "culture" : s.cat === "shop" ? "shop" : "see");
   if (HOOK_FIX[s.name]) s.hook = HOOK_FIX[s.name];
   if (s.kind === "shop") s.clo = CLO_YES.includes(s.name) || (!CLO_NO.includes(s.name) && CLO_RE.test(s.name + " " + (s.hook || "") + " " + (s.vibe || "")));
   s.name = s.name.replace(/\s*\|\s*/g, " – "); /* "|" separates ideas internally */
-  seen.add(key); }); }
+  prev.push(s); seen.set(key, prev); }); }
 const CATS = [
   { k: "dinner", l: "Eat", m: s => s.kind === "dinner", dur: 90 },
   { k: "drinks", l: "Wine", m: s => s.kind === "drinks", dur: 75 },
