@@ -3176,7 +3176,8 @@ function xpRender(keepScroll) {
   if (!o) body = `<p class="xp-empty">No hotel for this day, so there's nothing to show nearby.</p>`;
   else if (!pool.length) body = `<p class="xp-empty">Nothing saved in ${esc(city)} yet.</p>`;
   else {
-    XVIDS = cityVids(city, o); XVC = city;
+    /* shuffled (Alex, 17 Nov: don't always start on the same video); the order holds while you're on Explore, so the row doesn't jump, and is new each time you come back */
+    const ro = XVORD[city] || (XVORD[city] = {}); XVIDS = cityVids(city, o).map(v => [v, ro[v.u] ?? (ro[v.u] = Math.random())]).sort((x, y) => x[1] - y[1]).map(x => x[0]); XVC = city;
     if (XVIDS.length) body += `<div class="xp-sec"><h2>Videos</h2>${XVIDS.length > 3 ? `<button data-rl="0">See all ${XVIDS.length}</button>` : ""}</div><div class="xs xvs">${XVIDS.slice(0, 12).map(xvCard).join("")}</div>`;
     body += xpThemes(iso).map(key => { const th = XTH[key], all = pool.filter(x => th.f(x.z)); if (all.length < (key === "parks" ? 3 : 1)) return "";
       return `<div class="xp-sec"><h2>${th.t}</h2>${all.length > 3 ? `<button data-xall="${key}">See all ${all.length}</button>` : ""}</div><div class="xs">${all.slice(0, 10).map(x => xcCard(x.z, x.k, o)).join("")}</div>`; }).join("");
@@ -3202,7 +3203,7 @@ function xpRender(keepScroll) {
 xp.addEventListener("scroll", () => { const w = xp.querySelector(".xp-wk") || xp.querySelector(".xp-h"), n = xp.querySelector(".xp-nt"); if (!w || !n) return; xp.classList.toggle("sc", xp.scrollTop > w.offsetTop + w.offsetHeight - n.offsetHeight); }, { passive: true });
 function xpSoon() { clearTimeout(XRT); XRT = setTimeout(() => xpRender(), 200); }
 function showXP(on, keep) {
-  if (on) { xp.hidden = false; document.body.classList.add("xpon"); if (!keep && view !== today && today >= START && today <= END) xpDay(today); xp.scrollTop = 0; xpRender(false);
+  if (on) { if (xp.hidden) XVORD = {}; xp.hidden = false; document.body.classList.add("xpon"); if (!keep && view !== today && today >= START && today <= END) xpDay(today); xp.scrollTop = 0; xpRender(false);
     if (view === today && !HERE) { hereAsked = 0; askHere(() => xpRender()); }
     if (!reduce()) xp.animate([{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], { duration: 260, easing: "cubic-bezier(0.16, 1, 0.3, 1)" }); }
   else { xp.hidden = true; document.body.classList.remove("xpon"); content.innerHTML = renderContent(view); scrollToDay(true); }
@@ -4161,7 +4162,7 @@ document.addEventListener("click", e => {
 /* ---------- videos (17 Nov, Alex): every TikTok and Instagram video a place in this city was saved from, full screen, swipe up for the next.
    One slide per video (a list video with 60 places is one slide with 60 name chips). Only the slide on screen has a player. ---------- */
 const rl = document.getElementById("rl"), rlt = document.getElementById("rlt");
-let RL = [], RLI = -1, RLT = 0, RLSND = false, RLST = {}, XVIDS = [], XVC = "";
+let RL = [], RLI = -1, RLT = 0, RLSND = false, RLST = {}, XVIDS = [], XVC = "", XVORD = {};
 const ttId = u => ((u || "").match(/tiktok\.com\/@[^/]+\/(?:video|photo)\/(\d+)/) || [])[1];
 /* the video's own cover (worker, from TikTok's free oEmbed), else the place's photo; Instagram has no free cover, so the photo */
 const vidCover = v => ttId(v.u) ? "/api/cover?u=" + encodeURIComponent(v.u) : v.zs[0].lat != null ? photoUrl(v.zs[0]) : "";
