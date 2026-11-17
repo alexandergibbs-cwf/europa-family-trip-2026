@@ -82,6 +82,17 @@ async function tiktokCover(u) {
   const r = await fetch(`https://www.tiktok.com/oembed?url=${encodeURIComponent(u)}`, { headers: UA }); if (!r.ok) return null;
   const j = await r.json(); return j.thumbnail_url || null;
 }
+/* a TikTok's cover for the Videos row (TikTok's free oEmbed, no key). Cover links expire, so the image itself is kept in the edge cache */
+async function cover(url, ctx) {
+  const u = url.searchParams.get("u") || "", m = /^https:\/\/www\.tiktok\.com\/@[\w.-]+\/(?:video|photo)\/(\d{6,25})/.exec(u);
+  if (!m) return new Response("bad", { status: 400 });
+  const cache = caches.default, key = new Request("https://cover.cache/" + m[1]);
+  const hit = await cache.match(key); if (hit) return hit;
+  let got = null; try { const c = await tiktokCover(u); got = c && await grab(c); } catch (e) {}
+  if (!got) return new Response("no cover", { status: 404, headers: { "cache-control": "no-store" } });
+  const res = new Response(got.buf, { headers: { "content-type": got.type, "cache-control": "public, max-age=2592000" } });
+  ctx.waitUntil(cache.put(key, res.clone())); return res;
+}
 /* one walking route with its line (OpenStreetMap foot routing, FOSSGIS; free, no key), cached a week */
 async function route(url, ctx) {
   const ll = v => { const m = /^(-?\d{1,2}\.\d{1,6}),(-?\d{1,3}\.\d{1,6})$/.exec(v || ""); return m ? [+m[1], +m[2]] : null; };
@@ -196,6 +207,7 @@ export default {
     if (url.pathname === "/api/route") return route(url, ctx);
     if (url.pathname === "/api/geo") return geo(url, ctx);
     if (url.pathname === "/api/photo") return photo(url, env, ctx);
+    if (url.pathname === "/api/cover") return cover(url, ctx);
     if (url.pathname === "/api/photos") {
       const id = (url.searchParams.get("id") || "").slice(0, 60); if (!/^[\w-]{8,60}$/.test(id)) return json({ count: 0 }, 400);
       let names = []; try { names = (await googleNames(env, id, url.searchParams.get("n") || "", (c => c === "Other" ? "" : c)(url.searchParams.get("c") || ""), +url.searchParams.get("lat"), +url.searchParams.get("lng"))) || null; } catch (e) { names = null; }

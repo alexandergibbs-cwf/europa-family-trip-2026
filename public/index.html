@@ -1180,6 +1180,62 @@ body.mapopen #pills, body.xpon #pills { visibility: hidden; }
 .pvn { position: absolute; top: calc(max(12px, env(safe-area-inset-top, 0px)) + 18px); left: 0; right: 0; text-align: center; color: rgba(255,255,255,.85); font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; pointer-events: none; }
 .pvname { position: absolute; bottom: calc(max(16px, env(safe-area-inset-bottom, 0px)) + 10px); left: 20px; right: 20px; text-align: center; color: #fff; font-size: 17px; font-weight: 600; pointer-events: none; text-shadow: 0 1px 8px rgba(0,0,0,.6); }
 .gal .gtrack img { cursor: zoom-in; }
+/* videos (17 Nov, Alex: a TikTok-style feed of the videos places were saved from, per city, on Explore; Instagram too) */
+.xv { flex: none; border: 0; background: none; padding: 0; margin: 0; font: inherit; color: inherit; scroll-snap-align: start; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.xv-p { position: relative; display: grid; place-items: center; width: 116px; height: 206px; border-radius: 14px; overflow: hidden; color: var(--c); background: color-mix(in srgb, var(--c) 14%, var(--card)); transition: transform 160ms var(--glide); }
+.xv:active .xv-p { transform: scale(.97); }
+.xv-p svg { width: 30px; height: 30px; }
+.xv-p img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 240ms ease; }
+.xv-p img.ld { opacity: 1; }
+.xv-p::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 60%; background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,.62)); pointer-events: none; }
+.xv-g { position: absolute; z-index: 1; top: 8px; right: 8px; width: 24px; height: 24px; border-radius: 12px; display: grid; place-items: center; color: #fff; background: rgba(0,0,0,.38); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.xv-g svg { width: 10px; height: 10px; margin-left: 1px; }
+.xv-n { position: absolute; z-index: 1; left: 9px; right: 9px; bottom: 9px; text-align: left; color: #fff; font-size: 13px; font-weight: 600; line-height: 1.22; text-wrap: pretty; }
+.xv-n b { font-weight: 600; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.xv-n small { display: block; font-size: 12px; font-weight: 500; opacity: .8; }
+.rl { position: fixed; inset: 0; z-index: 8000; background: #000; color: #fff; opacity: 0; transition: opacity 260ms var(--glide); }
+.rl.on { opacity: 1; }
+.rl[hidden] { display: none; }
+body.reelon .scrim { z-index: 8100; } body.reelon .sheet { z-index: 8101; }
+.rlt { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; scroll-snap-type: y mandatory; overscroll-behavior: contain; scrollbar-width: none; }
+.rlt::-webkit-scrollbar { display: none; }
+.rs { position: relative; height: 100%; overflow: hidden; scroll-snap-align: start; scroll-snap-stop: always; background: #000; }
+.rs-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.rs-v { position: absolute; z-index: 1; top: 0; left: 0; right: 0; bottom: env(safe-area-inset-bottom, 0px); }
+.rs-v iframe { width: 100%; height: 100%; border: 0; display: block; background: #000; }
+.rs.ig .rs-v { top: calc(env(safe-area-inset-top, 0px) + 60px); bottom: calc(env(safe-area-inset-bottom, 0px) + 150px); left: 8px; right: 8px; border-radius: 14px; overflow: hidden; }
+.rs.ig .rs-v iframe { background: #fff; }
+.rs::after { content: ""; position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; height: 300px; background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,.6)); pointer-events: none; }
+.rs.ig::after { display: none; }
+/* a see-through layer over the video catches the swipes (the player would keep them); taps on it play, pause and unmute */
+.rs-hit { position: absolute; z-index: 3; left: 0; right: 0; top: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 56px); }
+.rs.ig .rs-hit { top: auto; bottom: 0; height: calc(env(safe-area-inset-bottom, 0px) + 150px); }
+.rs-st { position: absolute; z-index: 4; left: 50%; top: 50%; width: 76px; height: 76px; margin: -38px 0 0 -38px; border-radius: 38px; display: grid; place-items: center; background: rgba(0,0,0,.42); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); opacity: 0; transform: scale(.8); pointer-events: none; transition: opacity 200ms ease, transform 280ms var(--glide); }
+.rs-st.on { opacity: 1; transform: none; }
+.rs-st svg { width: 30px; height: 30px; }
+.rs-info { position: absolute; z-index: 4; left: 16px; right: 86px; bottom: calc(env(safe-area-inset-bottom, 0px) + 66px); display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-shadow: 0 1px 6px rgba(0,0,0,.45); pointer-events: none; }
+.rs.ig .rs-info { bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); }
+.rs-info button, .rs-info .rs-ch { pointer-events: auto; }
+.rs-n { border: 0; background: none; padding: 0; margin: 0; color: #fff; font-family: inherit; font-size: 20px; font-weight: 700; line-height: 1.2; text-align: left; letter-spacing: -.01em; text-wrap: pretty; cursor: pointer; }
+.rs-m { font-size: 14px; font-weight: 500; color: rgba(255,255,255,.85); }
+.rs-h { font-size: 15px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.rs-c { font-size: 14px; font-weight: 600; color: rgba(255,255,255,.85); }
+.rs-ch { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; max-width: calc(100vw - 32px); margin-right: -70px; padding: 4px 0 2px; touch-action: pan-x; }
+.rs-ch::-webkit-scrollbar { display: none; }
+.rs-ch button { flex: none; border: 0; border-radius: 17px; height: 34px; padding: 0 14px; color: #fff; font-family: inherit; font-size: 14px; font-weight: 600; background: rgba(255,255,255,.2); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); white-space: nowrap; text-shadow: none; cursor: pointer; }
+.rs-act { position: absolute; z-index: 4; right: 10px; bottom: calc(env(safe-area-inset-bottom, 0px) + 66px); display: flex; flex-direction: column; gap: 14px; align-items: center; }
+.rs.mul .rs-act { bottom: calc(env(safe-area-inset-bottom, 0px) + 150px); }
+.rs.mul .rs-info { right: 16px; }
+.rs-ch { margin-right: -16px !important; }
+.rs.ig .rs-act { bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); flex-direction: row; }
+.rs-act a, .rs-act button { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 64px; border: 0; background: none; padding: 0; color: #fff; text-decoration: none; font-family: inherit; font-size: 11px; font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,.5); cursor: pointer; }
+.rs-act i { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 24px; background: rgba(255,255,255,.18); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+.rs-act svg { width: 24px; height: 24px; }
+.rs-act small { font-size: 11px; max-width: 64px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rlh { position: absolute; z-index: 5; top: calc(max(12px, env(safe-area-inset-top, 0px)) + 8px); left: 70px; right: 70px; text-align: center; pointer-events: none; text-shadow: 0 1px 6px rgba(0,0,0,.5); }
+.rlh b { display: block; font-size: 17px; font-weight: 700; }
+.rlh small { display: block; font-size: 12px; font-weight: 600; color: rgba(255,255,255,.8); font-variant-numeric: tabular-nums; }
+.rl .pvx { z-index: 5; }
 @media (prefers-reduced-motion: reduce) { .pv, .pvtrack img, .pvtrack { transition: none; } }
 </style>
 
@@ -1207,6 +1263,7 @@ body.mapopen #pills, body.xpon #pills { visibility: hidden; }
 <nav class="tabs glass" id="tabs" role="tablist" aria-label="Views"><button role="tab" data-tab="xp" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg><span>Explore</span></button><button role="tab" data-tab="map" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6z"/><path d="M9 4v14M15 6v14"/></svg><span>Map</span></button><button role="tab" data-tab="cal" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Schedule</span></button></nav>
 <div class="sr" aria-live="polite" id="live"></div>
 
+<div class="rl" id="rl" hidden role="dialog" aria-modal="true" aria-label="Videos"><div class="rlt" id="rlt"></div><div class="rlh"><b id="rlc"></b><small id="rln"></small></div><button class="pvx" id="rlx" type="button" aria-label="Close videos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
 <div class="pv" id="pv" hidden role="dialog" aria-modal="true" aria-label="Photos"><div class="pvtrack" id="pvt"></div><div class="pvn" id="pvn"></div><div class="pvname" id="pvname"></div><button class="pvx" id="pvx" type="button" aria-label="Close photos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
 <script>
 (() => {
@@ -3119,6 +3176,8 @@ function xpRender(keepScroll) {
   if (!o) body = `<p class="xp-empty">No hotel for this day, so there's nothing to show nearby.</p>`;
   else if (!pool.length) body = `<p class="xp-empty">Nothing saved in ${esc(city)} yet.</p>`;
   else {
+    XVIDS = cityVids(city, o); XVC = city;
+    if (XVIDS.length) body += `<div class="xp-sec"><h2>Videos</h2>${XVIDS.length > 3 ? `<button data-rl="0">See all ${XVIDS.length}</button>` : ""}</div><div class="xs xvs">${XVIDS.slice(0, 12).map(xvCard).join("")}</div>`;
     body += xpThemes(iso).map(key => { const th = XTH[key], all = pool.filter(x => th.f(x.z)); if (all.length < (key === "parks" ? 3 : 1)) return "";
       return `<div class="xp-sec"><h2>${th.t}</h2>${all.length > 3 ? `<button data-xall="${key}">See all ${all.length}</button>` : ""}</div><div class="xs">${all.slice(0, 10).map(x => xcCard(x.z, x.k, o)).join("")}</div>`; }).join("");
   }
@@ -3156,6 +3215,7 @@ xp.addEventListener("click", e => {
   if (t.closest("[data-xcal]")) { haptic(); return showXP(false); }
   const d = t.closest("[data-xday]"); if (d) { haptic(); XMORE = {}; xpDay(d.dataset.xday); if (view === today && !HERE) { hereAsked = 0; askHere(() => xpRender()); } xpRender(false); xp.scrollTop = 0; return; }
   const c = t.closest("[data-xcat]"); if (c) { haptic(); XCAT = c.dataset.xcat; return xpRender(false); }
+  const rv = t.closest("[data-rl]"); if (rv) return rlOpen(XVIDS, +rv.dataset.rl, XVC);
   const xc = t.closest(".xc[data-sid]"); if (xc) { const z = SAVE_BY[xc.dataset.sid]; if (z) openPlace(z); return; }
   const al = t.closest("[data-xall]"); if (al) { haptic(); const [cat, sub] = XTH[al.dataset.xall].map; XCAT = cat;
     MAPNEXT = () => { MSUB = sub || ""; drawMap(); carShow(railList()); listOpen(); }; return openMap(null, true); }
@@ -4098,6 +4158,79 @@ document.addEventListener("click", e => {
   const l = e.target.closest && e.target.closest("a[href]"); if (!l || l.hasAttribute("data-out") || !embedOf(l.href)) return;
   e.preventDefault(); e.stopPropagation(); const rw = l.closest("[data-sid]"); openVid(l.href, rw && SAVE_BY[rw.dataset.sid]);
 }, true);
+/* ---------- videos (17 Nov, Alex): every TikTok and Instagram video a place in this city was saved from, full screen, swipe up for the next.
+   One slide per video (a list video with 60 places is one slide with 60 name chips). Only the slide on screen has a player. ---------- */
+const rl = document.getElementById("rl"), rlt = document.getElementById("rlt");
+let RL = [], RLI = -1, RLT = 0, RLSND = false, RLST = {}, XVIDS = [], XVC = "";
+const ttId = u => ((u || "").match(/tiktok\.com\/@[^/]+\/(?:video|photo)\/(\d+)/) || [])[1];
+/* the video's own cover (worker, from TikTok's free oEmbed), else the place's photo; Instagram has no free cover, so the photo */
+const vidCover = v => ttId(v.u) ? "/api/cover?u=" + encodeURIComponent(v.u) : v.zs[0].lat != null ? photoUrl(v.zs[0]) : "";
+function cityVids(city, o) {
+  const by = new Map();
+  SAVES.forEach(z => { if (!z.url || z.kind === "skip" || !embedOf(z.url)) return;
+    if (z.city !== city && !(o && z.lat != null && km(o.lat, o.lng, z.lat, z.lng) < 15)) return;
+    if (!by.has(z.url)) by.set(z.url, { u: z.url, zs: [] }); by.get(z.url).zs.push(z); });
+  return [...by.values()];
+}
+function xvCard(v, i) {
+  const z = v.zs[0], c = vidCover(v), fb = z.lat != null ? photoUrl(z) : "", n = v.zs.length;
+  const err = fb && c !== fb ? `this.onerror=()=>this.remove();this.src='${esc(fb)}'` : "this.remove()";
+  return `<button class="xv" data-rl="${i}" aria-label="Video: ${esc(z.name)}"><span class="xv-p" style="--c:${pinCol(z) || "#8e8e93"}">${svgI(icoOf(z))}${c ? `<img loading="lazy" decoding="async" alt="" src="${esc(c)}" onload="this.classList.add('ld')" onerror="${err}">` : ""}<i class="xv-g">${PLAY}</i>`
+    + `<span class="xv-n"><b>${esc(z.name)}</b>${n > 1 ? `<small>+${n - 1} more</small>` : ""}</span></span></button>`;
+}
+function rlSrc(u) { const id = ttId(u); return id ? `https://www.tiktok.com/player/v1/${id}?autoplay=1&loop=1&rel=0&description=0&music_info=0&controls=1&progress_bar=1&play_button=1&volume_control=1&fullscreen_button=0&timestamp=0&native_context_menu=0&closed_caption=0` : embedOf(u); }
+function rlSlide(v, i) {
+  const z = v.zs[0], c = vidCover(v), one = v.zs.length === 1, ig = !ttId(v.u), d = one && z.lat != null ? placeDist(z) : "";
+  return `<section class="rs${ig ? " ig" : ""}${one ? "" : " mul"}" data-ri="${i}">` + (c ? `<img class="rs-bg" loading="lazy" decoding="async" alt="" src="${esc(c)}" onerror="this.remove()">` : "")
+    + `<div class="rs-v"></div><div class="rs-hit"></div><i class="rs-st"></i><div class="rs-info">`
+    + (one ? `<button class="rs-n" data-rsid="${z.id}">${esc(z.name)}</button><span class="rs-m">${placeMeta(z)}</span>${z.hook ? `<span class="rs-h">${esc(hookOf(z))}</span>` : ""}`
+      : `<span class="rs-c">${v.zs.length} places</span><div class="rs-ch">${v.zs.map(x => `<button data-rsid="${x.id}">${esc(x.name)}</button>`).join("")}</div>`)
+    + `</div><div class="rs-act">` + (one && z.lat != null ? `<a href="${dirs(z.name + " " + (z.address || z.city))}" target="_blank" rel="noopener" aria-label="Directions"><i>${pI("go")}</i><small>${esc(d || "Go")}</small></a>` : "")
+    + (one ? `<button data-pshare="${z.id}" aria-label="Share"><i>${pI("share")}</i><small>Share</small></button>` : "")
+    + `<a data-out href="${esc(v.u)}" target="_blank" rel="noopener" aria-label="Open in ${ig ? "Instagram" : "TikTok"}"><i>${pI(ig ? "ig" : "vid")}</i><small>${ig ? "Instagram" : "TikTok"}</small></a></div></section>`;
+}
+function rlCount() { const k = Math.round(rlt.scrollTop / Math.max(1, rlt.clientHeight)); document.getElementById("rln").textContent = RL.length > 1 ? `${Math.min(k, RL.length - 1) + 1} of ${RL.length}` : ""; }
+function rlAct(i) {
+  if (i === RLI || !RL[i]) return; RLI = i; RLST = { muted: true, playing: true };
+  rlt.querySelectorAll(".rs").forEach(s => { const on = +s.dataset.ri === i, v = s.querySelector(".rs-v"); s.classList.toggle("on", on);
+    if (!on && v.firstChild) v.innerHTML = "";
+    if (on && !v.firstChild) { const f = document.createElement("iframe"); f.src = rlSrc(RL[i].u); f.title = "Video"; f.allow = "autoplay; encrypted-media; fullscreen; picture-in-picture"; f.setAttribute("allowfullscreen", ""); v.appendChild(f); } });
+}
+/* TikTok's player takes play / pause / mute / unMute by postMessage and reports its state back */
+function rlSend(type) { const f = rlt.querySelector(".rs.on iframe"); if (f && f.contentWindow && RL[RLI] && ttId(RL[RLI].u)) try { f.contentWindow.postMessage({ "x-tiktok-player": true, type, value: null }, "https://www.tiktok.com"); } catch (e) {} }
+window.addEventListener("message", e => {
+  if (rl.hidden || e.origin !== "https://www.tiktok.com") return;
+  let d = e.data; if (typeof d === "string") { try { d = JSON.parse(d); } catch (x) { return; } }
+  const f = rlt.querySelector(".rs.on iframe"); if (!d || !d["x-tiktok-player"] || !f || e.source !== f.contentWindow) return;
+  if (d.type === "onPlayerReady") { if (RLSND) rlSend("unMute"); rlSend("play"); }
+  else if (d.type === "onStateChange") RLST.playing = d.value === 1 || d.value === 3;
+  else if (d.type === "onMute") RLST.muted = !!d.value;
+});
+function rlOpen(list, at, title) {
+  if (!list.length) return; RL = list; RLI = -1; at = Math.max(0, Math.min(at || 0, list.length - 1));
+  rlt.innerHTML = list.map(rlSlide).join(""); document.getElementById("rlc").textContent = title || "";
+  rl.hidden = false; document.body.classList.add("reelon"); haptic();
+  requestAnimationFrame(() => { rlt.scrollTop = at * rlt.clientHeight; rlCount(); rlAct(at); rl.classList.add("on"); });
+}
+function rlClose() {
+  if (rl.hidden) return; rl.classList.remove("on"); RLI = -1; clearTimeout(RLT);
+  rlt.querySelectorAll(".rs-v").forEach(v => { v.innerHTML = ""; });
+  setTimeout(() => { rl.hidden = true; rlt.innerHTML = ""; document.body.classList.remove("reelon"); }, reduce() ? 0 : 260);
+}
+rlt.addEventListener("scroll", () => { rlCount(); clearTimeout(RLT); RLT = setTimeout(() => rlAct(Math.round(rlt.scrollTop / Math.max(1, rlt.clientHeight))), 120); }, { passive: true });
+rlt.addEventListener("click", e => {
+  if (!e.target.closest("[data-pshare], a[href]")) e.stopPropagation();
+  const n = e.target.closest("[data-rsid]"); if (n) { const z = SAVE_BY[n.dataset.rsid]; if (z) { rlSend("pause"); RLST.playing = false; openPlace(z); } return; }
+  const h = e.target.closest(".rs-hit"), s = h && h.closest(".rs"); if (!s || !s.classList.contains("on") || s.classList.contains("ig")) return;
+  haptic(); let ic;
+  if (RLST.muted) { RLSND = true; rlSend("unMute"); rlSend("play"); RLST.muted = false; RLST.playing = true; ic = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4.5 4.5 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11"/></svg>'; }
+  else if (RLST.playing) { rlSend("pause"); RLST.playing = false; ic = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>'; }
+  else { rlSend("play"); RLST.playing = true; ic = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>'; }
+  const st = s.querySelector(".rs-st"); st.innerHTML = ic; st.classList.add("on"); clearTimeout(st._t); st._t = setTimeout(() => st.classList.remove("on"), 650);
+});
+document.getElementById("rlx").addEventListener("click", e => { e.stopPropagation(); haptic(); rlClose(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !rl.hidden && sheet.hidden) { e.stopPropagation(); rlClose(); } }, true);
+document.addEventListener("visibilitychange", () => { if (document.hidden && !rl.hidden) rlSend("pause"); });
 function copyText(q) {
   const old = () => { const ta = document.createElement("textarea"); ta.value = q; ta.setAttribute("readonly", ""); ta.style.cssText = "position:fixed;top:0;opacity:0;font-size:16px"; document.body.appendChild(ta); ta.focus(); ta.setSelectionRange(0, q.length); let ok = false; try { ok = document.execCommand("copy"); } catch (y) {} ta.remove(); return ok; };
   try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(q).catch(old); return true; } } catch (x) {}
