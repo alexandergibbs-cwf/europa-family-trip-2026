@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8">
+<!doctype html><html lang="en"><head><meta charset="utf-8"><link rel="preconnect" href="https://www.tiktok.com"><link rel="preconnect" href="https://www.instagram.com">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Europe Trip"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -4191,17 +4191,23 @@ function rlSlide(v, i) {
 }
 function rlCount() { const k = Math.round(rlt.scrollTop / Math.max(1, rlt.clientHeight)); document.getElementById("rln").textContent = RL.length > 1 ? `${Math.min(k, RL.length - 1) + 1} of ${RL.length}` : ""; }
 function rlAct(i) {
-  if (i === RLI || !RL[i]) return; RLI = i; RLST = { muted: true, playing: true };
-  rlt.querySelectorAll(".rs").forEach(s => { const on = +s.dataset.ri === i, v = s.querySelector(".rs-v"); s.classList.toggle("on", on);
-    if (!on && v.firstChild) v.innerHTML = "";
-    if (on && !v.firstChild) { const f = document.createElement("iframe"); f.src = rlSrc(RL[i].u); f.title = "Video"; f.allow = "autoplay; encrypted-media; fullscreen; picture-in-picture"; f.setAttribute("allowfullscreen", ""); v.appendChild(f); } });
+  if (i === RLI || !RL[i]) return; RLI = i; RLST = { muted: !RLSND, playing: true };
+  rlt.querySelectorAll(".rs").forEach(s => { const j = +s.dataset.ri, on = j === i, v = s.querySelector(".rs-v"), f = v.firstChild; s.classList.toggle("on", on);
+    if (Math.abs(j - i) > 1) { if (f) v.innerHTML = ""; return; }
+    if (!f && (on || j === i + 1)) { const n = document.createElement("iframe"); n.src = rlSrc(RL[j].u); n.title = "Video"; n.allow = "autoplay; encrypted-media; fullscreen; picture-in-picture"; n.setAttribute("allowfullscreen", ""); v.appendChild(n); }
+    else if (f && on) { rlPost(f, "seekTo", 0); if (RLSND) rlPost(f, "unMute"); rlPost(f, "play"); }
+    else if (f) rlPost(f, "pause"); });
 }
 /* TikTok's player takes play / pause / mute / unMute by postMessage and reports its state back */
-function rlSend(type) { const f = rlt.querySelector(".rs.on iframe"); if (f && f.contentWindow && RL[RLI] && ttId(RL[RLI].u)) try { f.contentWindow.postMessage({ "x-tiktok-player": true, type, value: null }, "https://www.tiktok.com"); } catch (e) {} }
+function rlPost(f, type, value) { if (f && f.contentWindow && /tiktok\.com\/player/.test(f.src)) try { f.contentWindow.postMessage({ "x-tiktok-player": true, type, value: value == null ? null : value }, "https://www.tiktok.com"); } catch (e) {} }
+function rlSend(type) { rlPost(rlt.querySelector(".rs.on iframe"), type); }
 window.addEventListener("message", e => {
   if (rl.hidden || e.origin !== "https://www.tiktok.com") return;
   let d = e.data; if (typeof d === "string") { try { d = JSON.parse(d); } catch (x) { return; } }
-  const f = rlt.querySelector(".rs.on iframe"); if (!d || !d["x-tiktok-player"] || !f || e.source !== f.contentWindow) return;
+  if (!d || !d["x-tiktok-player"]) return;
+  const f = rlt.querySelector(".rs.on iframe"), pre = [...rlt.querySelectorAll("iframe")].find(x => x.contentWindow === e.source);
+  if (pre && pre !== f && d.type === "onPlayerReady") return rlPost(pre, "pause");  /* the next one, loaded ahead: hold it until it's swiped to */
+  if (!f || e.source !== f.contentWindow) return;
   if (d.type === "onPlayerReady") { if (RLSND) rlSend("unMute"); rlSend("play"); }
   else if (d.type === "onStateChange") RLST.playing = d.value === 1 || d.value === 3;
   else if (d.type === "onMute") RLST.muted = !!d.value;
@@ -4217,7 +4223,9 @@ function rlClose() {
   rlt.querySelectorAll(".rs-v").forEach(v => { v.innerHTML = ""; });
   setTimeout(() => { rl.hidden = true; rlt.innerHTML = ""; document.body.classList.remove("reelon"); }, reduce() ? 0 : 260);
 }
-rlt.addEventListener("scroll", () => { rlCount(); clearTimeout(RLT); RLT = setTimeout(() => rlAct(Math.round(rlt.scrollTop / Math.max(1, rlt.clientHeight))), 120); }, { passive: true });
+const rlLand = () => { clearTimeout(RLT); rlAct(Math.round(rlt.scrollTop / Math.max(1, rlt.clientHeight))); };
+rlt.addEventListener("scroll", () => { rlCount(); clearTimeout(RLT); RLT = setTimeout(rlLand, "onscrollend" in window ? 400 : 90); }, { passive: true });
+rlt.addEventListener("scrollend", rlLand, { passive: true });
 rlt.addEventListener("click", e => {
   if (!e.target.closest("[data-pshare], a[href]")) e.stopPropagation();
   const n = e.target.closest("[data-rsid]"); if (n) { const z = SAVE_BY[n.dataset.rsid]; if (z) { rlSend("pause"); RLST.playing = false; openPlace(z); } return; }
